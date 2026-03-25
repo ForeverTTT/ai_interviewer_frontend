@@ -1,0 +1,415 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom shadows — defined here so @apply in @layer components can resolve them
+   (theme.extend.boxShadow alone is not always visible to @apply in this pipeline). */
+@layer utilities {
+  .shadow-soft {
+    box-shadow:
+      0 2px 8px -2px rgba(15, 23, 42, 0.06),
+      0 8px 24px -4px rgba(15, 23, 42, 0.08);
+  }
+  .shadow-card {
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.04),
+      0 12px 40px -12px rgba(15, 23, 42, 0.12);
+  }
+  .shadow-card-hover {
+    box-shadow:
+      0 4px 12px rgba(15, 23, 42, 0.06),
+      0 20px 48px -16px rgba(15, 23, 42, 0.14);
+  }
+  .shadow-nav {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.6) inset,
+      0 8px 32px -8px rgba(15, 23, 42, 0.08);
+  }
+  .shadow-glow-primary {
+    box-shadow:
+      0 0 0 1px rgba(37, 99, 235, 0.06),
+      0 16px 48px -12px rgba(37, 99, 235, 0.18);
+  }
+
+  /* Ambient mesh — use under hero / auth / setup (pointer-events-none layer) */
+  .bg-mesh-light {
+    background-image:
+      radial-gradient(ellipse 100% 70% at 50% -25%, rgba(37, 99, 235, 0.09), transparent 52%),
+      radial-gradient(ellipse 70% 50% at 95% 15%, rgba(139, 92, 246, 0.06), transparent 48%),
+      radial-gradient(ellipse 55% 45% at 5% 85%, rgba(16, 185, 129, 0.045), transparent 45%);
+  }
+
+  .bg-mesh-subtle {
+    background-image:
+      radial-gradient(ellipse 80% 60% at 70% 0%, rgba(37, 99, 235, 0.05), transparent 50%),
+      radial-gradient(ellipse 60% 50% at 0% 100%, rgba(124, 58, 237, 0.04), transparent 48%);
+  }
+
+  /* Fine dot grid — light sections */
+  .bg-dot-grid {
+    background-image: radial-gradient(rgba(148, 163, 184, 0.2) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Section title accent bar */
+  .title-accent-bar {
+    @apply mx-auto h-1 w-14 rounded-full bg-gradient-to-r from-primary-500 via-violet-500 to-primary-600 opacity-90;
+  }
+
+  .title-accent-bar-left {
+    @apply h-1 w-12 rounded-full bg-gradient-to-r from-primary-500 to-violet-600 opacity-90;
+  }
+
+  /* 面试数字人：口型 / 声波动画 */
+  @keyframes dh-mouth {
+    0%, 100% { transform: scaleY(0.35); }
+    50% { transform: scaleY(1.12); }
+  }
+  @keyframes dh-wave {
+    0%, 100% { transform: scaleY(1); opacity: 0.45; }
+    50% { transform: scaleY(2.35); opacity: 1; }
+  }
+  @keyframes dh-breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.035); }
+  }
+  @keyframes dh-thinking-halo {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.32);
+    }
+    50% {
+      box-shadow: 0 0 32px 8px rgba(129, 140, 248, 0.22);
+    }
+  }
+  .animate-dh-mouth {
+    transform-origin: center;
+    animation: dh-mouth 0.19s ease-in-out infinite;
+  }
+  .animate-dh-wave {
+    animation: dh-wave 0.55s ease-in-out infinite;
+  }
+  .animate-dh-breathe {
+    animation: dh-breathe 4s ease-in-out infinite;
+  }
+  .animate-dh-thinking-halo {
+    animation: dh-thinking-halo 1.85s ease-in-out infinite;
+  }
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-b from-primary-600 to-primary-700 text-white font-semibold rounded-xl border border-primary-700/20 shadow-soft hover:shadow-glow-primary hover:from-primary-500 hover:to-primary-600 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2;
+  }
+  
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-primary-700 font-semibold rounded-xl border border-slate-200/90 shadow-soft hover:border-primary-200 hover:bg-primary-50/80 hover:shadow-card transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/40 focus-visible:ring-offset-2;
+  }
+  
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-slate-600 font-medium rounded-xl hover:bg-slate-100/90 hover:text-slate-900 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2;
+  }
+  
+  .card {
+    @apply bg-white rounded-2xl border border-slate-200/90 shadow-soft ring-1 ring-slate-900/[0.03] transition-all duration-300 hover:shadow-card hover:ring-slate-900/[0.05];
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3.5 bg-slate-50/50 border border-slate-200/90 rounded-xl text-slate-900 placeholder-slate-400 shadow-inner shadow-slate-900/[0.02] focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary-500/25 focus:border-primary-300 transition-all duration-200;
+  }
+  
+  .textarea-field {
+    @apply w-full px-4 py-3.5 bg-slate-50/50 border border-slate-200/90 rounded-xl text-slate-900 placeholder-slate-400 shadow-inner shadow-slate-900/[0.02] focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary-500/25 focus:border-primary-300 transition-all duration-200 resize-none;
+  }
+  
+  .select-field {
+    @apply w-full px-4 py-3.5 bg-slate-50/50 border border-slate-200/90 rounded-xl text-slate-900 shadow-inner shadow-slate-900/[0.02] focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary-500/25 focus:border-primary-300 transition-all duration-200 cursor-pointer;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-600 via-primary-600 to-violet-600 bg-clip-text text-transparent;
+  }
+
+  .dark .gradient-text {
+    @apply bg-gradient-to-r from-primary-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent;
+  }
+  
+  .section-badge {
+    @apply inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-b from-primary-50 to-primary-100/80 text-primary-700 text-sm font-semibold rounded-full border border-primary-200/90 shadow-soft backdrop-blur-sm ring-1 ring-primary-500/5;
+  }
+
+  /* Feature / marketing cards — top gradient hairline */
+  .card-feature {
+    @apply relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-soft ring-1 ring-slate-900/[0.03] transition-all duration-300;
+  }
+  .card-feature::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    border-radius: 1rem 1rem 0 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(37, 99, 235, 0.35),
+      rgba(124, 58, 237, 0.4),
+      transparent
+    );
+    opacity: 0.65;
+    transition: opacity 0.3s ease;
+  }
+  .card-feature:hover::before {
+    opacity: 1;
+  }
+  .card-feature:hover {
+    @apply border-primary-200/70 shadow-card-hover ring-slate-900/[0.05] -translate-y-1;
+  }
+
+  /* How-it-works mini cards — slim top spectrum */
+  .card-how-mini {
+    position: relative;
+    overflow: hidden;
+  }
+  .card-how-mini::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    z-index: 1;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(37, 99, 235, 0.35),
+      rgba(124, 58, 237, 0.45),
+      transparent
+    );
+    opacity: 0.75;
+    transition: opacity 0.25s ease;
+  }
+  .card-how-mini:hover::before {
+    opacity: 1;
+  }
+
+  .dark .btn-secondary {
+    @apply bg-slate-800 text-primary-300 border-slate-600 shadow-none hover:bg-slate-700 hover:border-primary-500/40;
+  }
+
+  .dark .btn-ghost {
+    @apply text-slate-300 hover:bg-slate-800 hover:text-white;
+  }
+
+  .dark .card {
+    @apply bg-slate-900 border-slate-700 ring-white/[0.06] hover:ring-white/10;
+  }
+
+  .dark .input-field,
+  .dark .textarea-field,
+  .dark .select-field {
+    @apply bg-slate-900/60 border-slate-600 text-slate-100 placeholder-slate-500 focus:bg-slate-900 focus:border-primary-500;
+  }
+
+  .dark .section-badge {
+    @apply from-slate-800 to-slate-800/90 text-primary-200 border-slate-500/80 ring-primary-400/20;
+  }
+
+  .dark .card-feature {
+    @apply border-slate-600 bg-slate-900 ring-white/[0.08];
+  }
+
+  .dark .card-feature:hover {
+    @apply border-primary-400/50 shadow-card-hover ring-primary-400/15;
+  }
+
+  .dark .card-how-mini {
+    @apply border-slate-700 bg-slate-900 ring-white/[0.05];
+  }
+
+  .dark .card-how-mini:hover {
+    @apply border-primary-500/40 shadow-card-hover;
+  }
+}
+
+/* Dify chatbot overrides */
+#dify-chatbot-bubble-button {
+  background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4) !important;
+}
+
+#dify-chatbot-bubble-window {
+  width: 420px !important;
+  height: 600px !important;
+  border-radius: 20px !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Interview page full-screen dify */
+.interview-dify-container #dify-chatbot-bubble-button {
+  display: none !important;
+}
+
+/* Typewriter cursor */
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.typing-cursor::after {
+  content: '▋';
+  display: inline-block;
+  margin-left: 1px;
+  animation: cursorBlink 0.7s infinite;
+  color: #60a5fa;
+  font-size: 0.85em;
+}
+
+/* Recording pulse ring */
+@keyframes pingOnce {
+  0%   { transform: scale(1);   opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.mic-recording-ring {
+  animation: pingOnce 1s ease-out infinite;
+}
+
+/* Smooth text appear */
+@keyframes textFadeIn {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.text-stream-chunk {
+  animation: textFadeIn 0.15s ease-out;
+}
+
+/* Landing: infinite logo marquee — translate3d + linear loop */
+@keyframes offer-marquee-scroll {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+.offer-marquee-track {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: max-content;
+  animation: offer-marquee-scroll 32s linear infinite;
+  will-change: transform;
+}
+
+.offer-marquee-section:hover .offer-marquee-track {
+  animation-play-state: paused;
+}
+
+/* Landing: logo marquee — respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .offer-marquee-duplicate {
+    display: none;
+  }
+  .offer-marquee-track {
+    animation: none !important;
+    width: 100% !important;
+    max-width: 56rem;
+    margin-left: auto;
+    margin-right: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 1rem;
+    column-gap: 1.5rem;
+    padding: 0 1rem;
+    will-change: auto;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Glassmorphism — nav / floating chrome */
+.glass {
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.94) 0%,
+    rgba(248, 250, 252, 0.9) 100%
+  );
+  backdrop-filter: blur(16px) saturate(1.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset, 0 4px 24px -8px rgba(15, 23, 42, 0.06);
+}
+
+.glass::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(37, 99, 235, 0.22) 22%,
+    rgba(124, 58, 237, 0.18) 50%,
+    rgba(37, 99, 235, 0.22) 78%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.dark .glass {
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.94) 0%,
+    rgba(15, 23, 42, 0.9) 100%
+  );
+  border-bottom-color: rgba(51, 65, 85, 0.45);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 4px 24px -8px rgba(0, 0, 0, 0.45);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* LanguageSwitcher：深色顶栏上 select 用浅色字，但系统原生下拉多为白底，需强制 option 对比度 */
+.language-switcher-select option {
+  color: rgb(15 23 42);
+  background-color: #fff;
+}
