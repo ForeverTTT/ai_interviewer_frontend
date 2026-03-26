@@ -21,18 +21,77 @@ function fileToBase64Data(file) {
   })
 }
 
-const examplePositions = [
-  'Werkstudent Frontend Developer',
-  'Praktikum Data Scientist',
-  'Working Student UX Design',
-  'Praktikum Marketing',
-  'Werkstudent Maschinenbau',
-  'Praktikant Unternehmensberatung',
-]
+function buildRoleCatalog(lang) {
+  if (lang === 'zh') {
+    return {
+      school: {
+        cs_ai: { label: '计算机 / AI', roles: ['计算机硕士面试', '计算机本科面试', '数据科学硕士面试', '人工智能/机器学习项目面试'] },
+        engineering: { label: '工程类', roles: ['机械工程项目面试', '电气工程项目面试', '工业工程项目面试', '汽车工程项目面试'] },
+        business: { label: '商科 / 管理', roles: ['工商管理项目面试', '金融项目面试', '市场项目面试', '国际管理项目面试'] },
+        design_media: { label: '设计 / 媒体', roles: ['交互设计项目面试', '视觉传达项目面试', '媒体信息学项目面试', '人机交互项目面试'] },
+        science_math: { label: '理学 / 数学', roles: ['数学项目面试', '统计学项目面试', '物理项目面试', '化学项目面试'] },
+        social_law: { label: '社科 / 法学', roles: ['经济学项目面试', '心理学项目面试', '法学项目面试', '公共政策项目面试'] },
+      },
+      work: {
+        software_data: { label: '软件 / 数据', roles: ['Werkstudent 前端开发', 'Werkstudent 后端开发', '数据科学实习', '产品分析学生工'] },
+        ai_research: { label: 'AI / 算法', roles: ['机器学习实习', 'LLM 应用实习', '计算机视觉实习', '算法工程学生工'] },
+        product_design: { label: '产品 / 设计', roles: ['UX 设计学生工', '产品经理实习', 'UI 设计实习', '用户研究学生工'] },
+        marketing_sales: { label: '市场 / 销售', roles: ['市场实习', '增长营销学生工', 'CRM 学生工', '销售运营实习'] },
+        consulting_ops: { label: '咨询 / 运营', roles: ['咨询实习', '运营实习', '商业发展学生工', '战略 / PMO 学生工'] },
+        finance_hr: { label: '财务 / 人力', roles: ['财务实习', '审计实习', '人力资源实习', '招聘运营学生工'] },
+        engineering_industry: { label: '工程 / 制造', roles: ['机械工程学生工', '电气工程实习', '汽车工程实习', '生产与供应链实习'] },
+      },
+    }
+  }
+
+  if (lang === 'de') {
+    return {
+      school: {
+        cs_ai: { label: 'Informatik / KI', roles: ['Master-Interview Informatik', 'Bachelor-Interview Informatik', 'Master-Interview Data Science', 'Interview KI/ML-Studiengang'] },
+        engineering: { label: 'Ingenieurwesen', roles: ['Interview Maschinenbau-Studiengang', 'Interview Elektrotechnik-Studiengang', 'Interview Wirtschaftsingenieurwesen', 'Interview Fahrzeugtechnik-Studiengang'] },
+        business: { label: 'Wirtschaft / Management', roles: ['Interview BWL-Studiengang', 'Interview Finance-Studiengang', 'Interview Marketing-Studiengang', 'Interview International Management'] },
+        design_media: { label: 'Design / Medien', roles: ['Interview UX/Interaction Design', 'Interview Kommunikationsdesign', 'Interview Medieninformatik', 'Interview Human-Computer Interaction'] },
+        science_math: { label: 'Naturwissenschaften / Mathematik', roles: ['Interview Mathematik-Studiengang', 'Interview Statistik-Studiengang', 'Interview Physik-Studiengang', 'Interview Chemie-Studiengang'] },
+        social_law: { label: 'Sozialwissenschaften / Recht', roles: ['Interview VWL-Studiengang', 'Interview Psychologie-Studiengang', 'Interview Jura-Studiengang', 'Interview Public Policy'] },
+      },
+      work: {
+        software_data: { label: 'Software / Data', roles: ['Werkstudent Frontend Developer', 'Werkstudent Backend Developer', 'Praktikum Data Scientist', 'Working Student Product Analyst'] },
+        ai_research: { label: 'KI / Forschung', roles: ['Praktikum Machine Learning', 'Praktikum LLM Applications', 'Praktikum Computer Vision', 'Werkstudent Algorithm Engineer'] },
+        product_design: { label: 'Produkt / Design', roles: ['Working Student UX Design', 'Praktikum Product Management', 'Praktikum UI Design', 'Working Student User Research'] },
+        marketing_sales: { label: 'Marketing / Sales', roles: ['Praktikum Marketing', 'Working Student Performance Marketing', 'Working Student CRM', 'Praktikum Sales Operations'] },
+        consulting_ops: { label: 'Consulting / Operations', roles: ['Praktikant Unternehmensberatung', 'Praktikum Operations', 'Working Student Business Development', 'Working Student Strategy & PMO'] },
+        finance_hr: { label: 'Finance / HR', roles: ['Praktikum Finance', 'Praktikum Audit', 'Praktikum Human Resources', 'Working Student Recruiting Operations'] },
+        engineering_industry: { label: 'Engineering / Industrie', roles: ['Werkstudent Maschinenbau', 'Praktikum Elektrotechnik', 'Praktikum Automotive Engineering', 'Praktikum Produktion & Supply Chain'] },
+      },
+    }
+  }
+
+  return {
+    school: {
+      cs_ai: { label: 'Computer Science / AI', roles: ['Computer Science Master Interview', 'Computer Science Bachelor Interview', 'Data Science Master Interview', 'AI / Machine Learning Program Interview'] },
+      engineering: { label: 'Engineering', roles: ['Mechanical Engineering Program Interview', 'Electrical Engineering Program Interview', 'Industrial Engineering Program Interview', 'Automotive Engineering Program Interview'] },
+      business: { label: 'Business / Management', roles: ['Business Administration Program Interview', 'Finance Program Interview', 'Marketing Program Interview', 'International Management Program Interview'] },
+      design_media: { label: 'Design / Media', roles: ['UX / Interaction Design Program Interview', 'Communication Design Program Interview', 'Media Informatics Program Interview', 'Human-Computer Interaction Program Interview'] },
+      science_math: { label: 'Science / Mathematics', roles: ['Mathematics Program Interview', 'Statistics Program Interview', 'Physics Program Interview', 'Chemistry Program Interview'] },
+      social_law: { label: 'Social Science / Law', roles: ['Economics Program Interview', 'Psychology Program Interview', 'Law Program Interview', 'Public Policy Program Interview'] },
+    },
+    work: {
+      software_data: { label: 'Software / Data', roles: ['Werkstudent Frontend Developer', 'Werkstudent Backend Developer', 'Praktikum Data Scientist', 'Working Student Product Analyst'] },
+      ai_research: { label: 'AI / Research', roles: ['Machine Learning Internship', 'LLM Applications Internship', 'Computer Vision Internship', 'Working Student Algorithm Engineer'] },
+      product_design: { label: 'Product / Design', roles: ['Working Student UX Design', 'Praktikum Product Management', 'Praktikum UI Design', 'Working Student User Research'] },
+      marketing_sales: { label: 'Marketing / Sales', roles: ['Praktikum Marketing', 'Working Student Performance Marketing', 'Working Student CRM', 'Praktikum Sales Operations'] },
+      consulting_ops: { label: 'Consulting / Operations', roles: ['Praktikant Unternehmensberatung', 'Praktikum Operations', 'Working Student Business Development', 'Working Student Strategy & PMO'] },
+      finance_hr: { label: 'Finance / HR', roles: ['Finance Internship', 'Audit Internship', 'Human Resources Internship', 'Working Student Recruiting Operations'] },
+      engineering_industry: { label: 'Engineering / Industry', roles: ['Werkstudent Mechanical Engineering', 'Electrical Engineering Internship', 'Automotive Engineering Internship', 'Production & Supply Chain Internship'] },
+    },
+  }
+}
 
 export default function SetupPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const [roleTrack, setRoleTrack] = useState('work')
+  const [selectedCategory, setSelectedCategory] = useState('')
   const [form, setForm] = useState({
     position: '',
     jobDescription: '',
@@ -83,6 +142,28 @@ export default function SetupPage() {
     { value: 15, label: t('setup.dur15'), desc: t('setup.dur15d') },
     { value: 20, label: t('setup.dur20'), desc: t('setup.dur20d') },
   ], [t])
+
+  const trackTabs = useMemo(
+    () => [
+      { value: 'school', label: t('setup.trackSchool') },
+      { value: 'work', label: t('setup.trackWork') },
+    ],
+    [t],
+  )
+
+  const uiLang = useMemo(() => {
+    const c = String(i18n.resolvedLanguage || i18n.language || 'en').toLowerCase()
+    if (c.startsWith('zh')) return 'zh'
+    if (c.startsWith('de')) return 'de'
+    return 'en'
+  }, [i18n.language, i18n.resolvedLanguage])
+
+  const roleCatalog = useMemo(() => buildRoleCatalog(uiLang), [uiLang])
+  const categories = roleCatalog[roleTrack] || {}
+  const categoryEntries = Object.entries(categories)
+  const selectedRoles = selectedCategory && categories[selectedCategory]
+    ? categories[selectedCategory].roles
+    : []
 
   const validate = () => {
     const newErrors = {}
@@ -249,6 +330,48 @@ export default function SetupPage() {
                 <Briefcase className="w-4 h-4 text-primary-600 dark:text-primary-400 shrink-0" aria-hidden />
                 {t('setup.position')} <span className="text-red-500">*</span>
               </label>
+              <div className="mb-3 space-y-3">
+                <div>
+                  <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    {t('setup.trackLabel')}
+                  </p>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {trackTabs.map((tab) => (
+                      <button
+                        key={tab.value}
+                        type="button"
+                        onClick={() => {
+                          setRoleTrack(tab.value)
+                          setSelectedCategory('')
+                        }}
+                        className={`rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${
+                          roleTrack === tab.value
+                            ? 'border-primary-500 bg-primary-50 text-primary-800 dark:border-primary-400 dark:bg-primary-900/40 dark:text-primary-200'
+                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700/80'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    {t('setup.categoryLabel')}
+                  </p>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="input-field !min-h-[44px]"
+                  >
+                    <option value="">{t('setup.categoryPlaceholder')}</option>
+                    {categoryEntries.map(([key, item]) => (
+                      <option key={key} value={key}>{item.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               <input
                 type="text"
                 value={form.position}
@@ -265,17 +388,25 @@ export default function SetupPage() {
                   <Info className="w-3 h-3" /> {errors.position}
                 </p>
               )}
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {examplePositions.map((pos) => (
-                  <button
-                    key={pos}
-                    type="button"
-                    onClick={() => setForm({ ...form, position: pos })}
-                    className="rounded-xl border border-slate-200/90 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-soft transition-all duration-200 hover:border-primary-200/80 hover:bg-primary-50 hover:text-primary-800 hover:shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-primary-800/50 dark:hover:bg-primary-950/50 dark:hover:text-primary-300"
-                  >
-                    {pos}
-                  </button>
-                ))}
+              <div className="mt-2">
+                <p className="mb-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                  {selectedRoles.length > 0 ? t('setup.subRoleHint') : t('setup.subRoleHintEmpty')}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedRoles.map((pos) => (
+                    <button
+                      key={pos}
+                      type="button"
+                      onClick={() => {
+                        setForm({ ...form, position: pos })
+                        setErrors({ ...errors, position: '' })
+                      }}
+                      className="rounded-xl border border-slate-200/90 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-soft transition-all duration-200 hover:border-primary-200/80 hover:bg-primary-50 hover:text-primary-800 hover:shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-primary-800/50 dark:hover:bg-primary-950/50 dark:hover:text-primary-300"
+                    >
+                      {pos}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 

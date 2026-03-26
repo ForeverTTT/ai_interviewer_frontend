@@ -55,8 +55,15 @@ export default function LanguageSwitcher({ className = '', variant = 'light' }) 
     ? 'absolute left-0 right-0 top-[calc(100%+0.375rem)] z-[100] flex flex-col gap-0.5 rounded-2xl border border-slate-600/90 bg-slate-900 p-1.5 text-slate-100 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.5)] ring-1 ring-slate-700/80 backdrop-blur-md animate-fade-in'
     : 'absolute left-0 right-0 top-[calc(100%+0.375rem)] z-[100] flex flex-col gap-0.5 rounded-2xl border border-slate-200/90 bg-white p-1.5 text-slate-900 shadow-[0_16px_48px_-12px_rgba(15,23,42,0.22)] ring-1 ring-slate-900/[0.05] backdrop-blur-md animate-fade-in'
 
-  const pickLanguage = (code) => {
-    void i18n.changeLanguage(code)
+  const pickLanguage = async (code) => {
+    const scrollX = window.scrollX
+    const scrollY = window.scrollY
+    await i18n.changeLanguage(code)
+    // Keep viewport position stable after language-driven re-render.
+    requestAnimationFrame(() => {
+      window.scrollTo(scrollX, scrollY)
+      requestAnimationFrame(() => window.scrollTo(scrollX, scrollY))
+    })
     setOpen(false)
   }
 

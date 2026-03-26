@@ -64,15 +64,16 @@ function splitMarkdownH2(md) {
 }
 
 /** 渲染含 **粗体** 标记的文本，其余内容原样输出 */
-function RichText({ text, className }) {
+function RichText({ text, className, strongClassName }) {
   if (!text) return null
   const parts = String(text).split(/(\*\*[^*\n]+\*\*)/g)
   if (parts.length === 1) return <span className={className}>{text}</span>
+  const strongCls = strongClassName || 'font-semibold text-slate-900 dark:text-white'
   return (
     <span className={className}>
       {parts.map((part, i) => {
         const m = part.match(/^\*\*([^*\n]+)\*\*$/)
-        if (m) return <strong key={i} className="font-semibold text-slate-900 dark:text-white">{m[1]}</strong>
+        if (m) return <strong key={i} className={strongCls}>{m[1]}</strong>
         return part || null
       })}
     </span>
@@ -361,7 +362,10 @@ function StructuredReportBody({ report, t }) {
                       {t('report.referenceExampleLabel')}
                     </div>
                     <p className="text-[15px] leading-relaxed text-slate-800 dark:text-slate-100 whitespace-pre-wrap">
-                      <RichText text={qa.referenceExample || '—'} />
+                      <RichText
+                        text={qa.referenceExample || '—'}
+                        strongClassName="font-bold text-slate-950 dark:text-white"
+                      />
                     </p>
                   </div>
                 </div>
@@ -376,7 +380,10 @@ function StructuredReportBody({ report, t }) {
                           {qa.gaps.map((g, j) => (
                             <li key={j} className="flex gap-2 text-[14px] leading-relaxed text-slate-800 dark:text-slate-200">
                               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" aria-hidden />
-                              <RichText text={g} />
+                              <RichText
+                                text={g}
+                                strongClassName="font-bold text-slate-950 dark:text-white"
+                              />
                             </li>
                           ))}
                         </ul>
@@ -385,7 +392,10 @@ function StructuredReportBody({ report, t }) {
                     {qa.howToImprove ? (
                       <p className="text-[14px] leading-relaxed text-slate-800 dark:text-slate-200">
                         <span className="font-bold text-amber-900 dark:text-amber-300">{t('report.improveTipLabel')}</span>
-                        <RichText text={qa.howToImprove} />
+                        <RichText
+                          text={qa.howToImprove}
+                          strongClassName="font-bold text-slate-950 dark:text-white"
+                        />
                       </p>
                     ) : null}
                   </div>
@@ -737,7 +747,10 @@ export default function InterviewReportPage() {
                                   {t('report.lineParse')}
                                 </div>
                                 <p className="text-[14px] leading-relaxed text-slate-700 dark:text-slate-200 whitespace-pre-wrap">
-                                  <RichText text={coach.parse} />
+                                  <RichText
+                                    text={coach.parse}
+                                    strongClassName="font-bold text-slate-950 dark:text-white"
+                                  />
                                 </p>
                               </div>
                             ) : null}
@@ -750,7 +763,10 @@ export default function InterviewReportPage() {
                                   {coach.improvements.map((g, j) => (
                                     <li key={j} className="flex gap-2 text-[14px] leading-relaxed text-slate-700 dark:text-slate-200">
                                       <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" aria-hidden />
-                                      <RichText text={g} />
+                                      <RichText
+                                        text={g}
+                                        strongClassName="font-bold text-slate-950 dark:text-white"
+                                      />
                                     </li>
                                   ))}
                                 </ul>
@@ -762,7 +778,10 @@ export default function InterviewReportPage() {
                                   {t('report.lineModelAnswer')}
                                 </div>
                                 <p className="text-[14px] leading-relaxed text-slate-800 dark:text-slate-100 whitespace-pre-wrap">
-                                  <RichText text={coach.modelAnswer} />
+                                  <RichText
+                                    text={coach.modelAnswer}
+                                    strongClassName="font-bold text-slate-950 dark:text-white"
+                                  />
                                 </p>
                               </div>
                             ) : null}

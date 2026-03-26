@@ -299,6 +299,51 @@ function genderDisplay(key, t) {
   return k ? t(`profile.cv.${k}`) : t('profile.cv.genderEmpty')
 }
 
+function parseBullets(raw) {
+  const s = String(raw || '').trim()
+  if (!s) return []
+
+  // Normalize line breaks first
+  const normalized = s.replace(/\r\n/g, '\n').replace(/\n{2,}/g, '\n').trim()
+  const lines = normalized.split('\n').map(l => l.trim()).filter(Boolean)
+  const isLikelyBullet = (line) =>
+    /^([-*•]|\d+[\).])\s+/.test(line)
+
+  // Only convert to list form when lines look like bullets
+  if (lines.length >= 2 && lines.filter(isLikelyBullet).length >= 2) {
+    return lines.map((l) => l.replace(/^([-*•]|\d+[\).])\s+/, '').trim()).filter(Boolean)
+  }
+
+  // Single-line fallback: split by common bullet separators
+  if (s.includes('•')) {
+    return s.split('•').map(x => x.trim()).filter(Boolean)
+  }
+
+  // Keep as one item if we can't confidently split
+  return [s]
+}
+
+function parseTechnologyTokens(raw) {
+  const s = String(raw || '').trim()
+  if (!s) return []
+
+  const normalized = s.replace(/\r\n/g, '\n').trim()
+  const parts = normalized
+    .split(/[\n,;·•|/]+/g)
+    .map(x => x.trim())
+    .filter(Boolean)
+
+  // De-dup while preserving order
+  const seen = new Set()
+  const out = []
+  for (const p of parts) {
+    if (seen.has(p)) continue
+    seen.add(p)
+    out.push(p)
+  }
+  return out
+}
+
 function profileHasVisibleData(cvProfile, resumeText, resumeNotes) {
   const p = cvProfile
   if ([p.fullName, p.gender, p.email, p.phone, p.location, p.linkedIn, p.website, p.summary].some((x) => String(x || '').trim())) {
@@ -341,12 +386,23 @@ function DisplayCell({ label, value, t, asLink, mailto }) {
   )
 }
 
-function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, coach, t, timeStr }) {
+function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, coach, t, timeStr, showFloatingEditButton }) {
   const hasData = profileHasVisibleData(cvProfile, resumeText, resumeNotes)
   const tr = String(targetRole || '').trim()
 
   return (
     <>
+      {showFloatingEditButton ? (
+        <Link
+          to="/profile/edit"
+          aria-label={t('profile.editProfile')}
+          className="fixed bottom-5 right-5 z-40 inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-primary-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_12px_28px_-10px_rgba(79,70,229,0.65)] transition hover:from-violet-700 hover:to-primary-700"
+        >
+          <Pencil className="h-4 w-4" aria-hidden />
+          {t('profile.editProfile')}
+        </Link>
+      ) : null}
+
       <header className="mb-8 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 shadow-card ring-1 ring-slate-900/[0.04] dark:border-slate-700/80 dark:bg-slate-900/60 dark:ring-white/[0.06] sm:mb-10">
         <div className="relative border-b border-slate-100 bg-gradient-to-br from-primary-600/[0.08] via-white to-violet-600/[0.07] px-5 py-6 dark:border-slate-800 dark:from-primary-500/10 dark:via-slate-900 dark:to-violet-600/10 sm:px-8 sm:py-7">
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary-400/25 to-transparent dark:via-primary-500/15" aria-hidden />
@@ -487,7 +543,18 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
                     <p className="mt-1 text-sm font-medium text-primary-700 dark:text-primary-300">{w.company}</p>
                     {w.location ? <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-400">{w.location}</p> : null}
                     {w.highlights ? (
-                      <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{w.highlights}</p>
+                      (() => {
+                        const bullets = parseBullets(w.highlights)
+                        return bullets.length > 1 ? (
+                          <ul className="mt-3 list-disc pl-5 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                            {bullets.map((b, idx) => (
+                              <li key={idx} className="whitespace-pre-wrap">{b}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{w.highlights}</p>
+                        )
+                      })()
                     ) : null}
                   </div>
                 ))
@@ -519,13 +586,40 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
                     </div>
                     {pr.role ? <p className="mt-1 text-sm font-medium text-primary-700 dark:text-primary-300">{pr.role}</p> : null}
                     {pr.description ? (
-                      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{pr.description}</p>
+                      (() => {
+                        const bullets = parseBullets(pr.description)
+                        return bullets.length > 1 ? (
+                          <ul className="mt-2 list-disc pl-5 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                            {bullets.map((b, idx) => (
+                              <li key={idx} className="whitespace-pre-wrap">{b}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{pr.description}</p>
+                        )
+                      })()
                     ) : null}
                     {pr.technologies ? (
-                      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                        <span className="font-semibold text-slate-700 dark:text-slate-300">{t('profile.cv.phTech')}: </span>
-                        {pr.technologies}
-                      </p>
+                      (() => {
+                        const tokens = parseTechnologyTokens(pr.technologies)
+                        return tokens.length > 0 ? (
+                          <div className="mt-2">
+                            <div className="text-sm text-slate-600 dark:text-slate-400">
+                              <span className="font-semibold text-slate-700 dark:text-slate-300">{t('profile.cv.phTech')}: </span>
+                            </div>
+                            <ul className="mt-1 flex flex-wrap gap-2">
+                              {tokens.map((tok, idx) => (
+                                <li
+                                  key={idx}
+                                  className="rounded-lg border border-slate-200/90 bg-slate-50 px-3 py-1 text-sm font-medium text-slate-800 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-100"
+                                >
+                                  {tok}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : null
+                      })()
                     ) : null}
                   </div>
                 ))
@@ -691,15 +785,21 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
               </p>
             </div>
           ) : null}
-          <div className="border-b border-slate-100 px-5 py-3 dark:border-slate-800 sm:px-8">
-            <p className="text-sm text-slate-600 dark:text-slate-400">{t('profile.coachEditHint')}</p>
-            <Link
-              to="/profile/edit"
-              className="mt-2 inline-flex items-center gap-1.5 text-sm font-bold text-primary-600 hover:underline dark:text-primary-400"
-            >
-              <Pencil className="h-3.5 w-3.5" aria-hidden />
-              {t('profile.editProfile')}
-            </Link>
+          <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:px-8">
+            <div className="rounded-xl border border-amber-200/90 bg-amber-50/70 p-3.5 dark:border-amber-800/50 dark:bg-amber-950/20">
+              <p className="flex items-start gap-2 text-sm font-medium leading-relaxed text-slate-800 dark:text-slate-100">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400" aria-hidden />
+                {t('profile.coachEditHint')}
+              </p>
+              <Link
+                to="/profile/edit"
+                state={{ scrollTo: 'coach' }}
+                className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary-700 hover:underline dark:text-primary-300"
+              >
+                <Pencil className="h-3.5 w-3.5" aria-hidden />
+                {t('profile.editProfile')}
+              </Link>
+            </div>
           </div>
           <div className="p-6 sm:p-8 lg:p-10">
             <CoachReport coach={coach} t={t} />
@@ -717,6 +817,10 @@ export default function ProfilePage() {
   const { t, i18n } = useTranslation()
   const location = useLocation()
   const isEdit = location.pathname === '/profile/edit'
+  const coachSectionRef = useRef(null)
+  const tRef = useRef(t)
+  const coachLangRef = useRef('')
+  const [showFloatingQuickSwitch, setShowFloatingQuickSwitch] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [resumeText, setResumeText] = useState('')
@@ -736,6 +840,10 @@ export default function ProfilePage() {
   const fileRef = useRef(null)
 
   const backendUrl = getBackendBaseUrl()
+
+  useEffect(() => {
+    tRef.current = t
+  }, [t])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -760,13 +868,32 @@ export default function ProfilePage() {
       if (typeof tr === 'string') setTargetRole(tr)
       else if (j.resumeCoach?.targetRole) setTargetRole(j.resumeCoach.targetRole)
     } catch {
-      setNote({ type: 'err', text: t('profile.loadErr') })
+      setNote({ type: 'err', text: tRef.current('profile.loadErr') })
     } finally {
       setLoading(false)
     }
-  }, [backendUrl, t])
+  }, [backendUrl])
 
   useEffect(() => { void load() }, [load])
+
+  useEffect(() => {
+    const onScroll = () => {
+      setShowFloatingQuickSwitch(window.scrollY > 280)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    if (!isEdit) return
+    if (location.state?.scrollTo !== 'coach') return
+    const el = coachSectionRef.current
+    if (!el) return
+    requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }, [isEdit, location.state])
 
   const save = async () => {
     setSaving(true)
@@ -830,6 +957,7 @@ export default function ProfilePage() {
         return
       }
       setCoach(j.coach)
+      coachLangRef.current = i18n.language
       if (j.coach?.generatedAt) {
         setUpdatedAt(j.coach.generatedAt)
       }
@@ -930,6 +1058,41 @@ export default function ProfilePage() {
     ? new Date(persistTime).toLocaleString(i18n.language === 'zh' ? 'zh-CN' : i18n.language === 'de' ? 'de-DE' : 'en-US')
     : null
 
+  useEffect(() => {
+    if (!coach) return
+    if (coachGenerating) return
+    if (coachLangRef.current === i18n.language) return
+
+    let cancelled = false
+    ;(async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const token = session?.access_token
+        if (!token) return
+        const res = await fetch(`${backendUrl}/api/profile/resume-coach/translate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            coach,
+            coachUiLanguage: i18n.language,
+          }),
+        })
+        const j = await res.json().catch(() => ({}))
+        if (!res.ok || cancelled) return
+        if (j.coach) {
+          setCoach(j.coach)
+          coachLangRef.current = i18n.language
+        }
+      } catch {
+        // ignore translation failure; keep existing coach text
+      }
+    })()
+    return () => { cancelled = true }
+  }, [i18n.language, coach, coachGenerating, backendUrl])
+
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gradient-to-b from-slate-50 via-white to-slate-100/90 px-4 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
@@ -951,6 +1114,7 @@ export default function ProfilePage() {
             coach={coach}
             t={t}
             timeStr={timeStr}
+            showFloatingEditButton={showFloatingQuickSwitch}
           />
         </div>
       </div>
@@ -959,6 +1123,17 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50/80 to-white pt-24 pb-12 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 sm:pb-16 px-3 sm:px-6 lg:px-10">
+      {showFloatingQuickSwitch ? (
+        <Link
+          to="/profile"
+          aria-label={t('profile.backToView')}
+          className="fixed bottom-5 right-5 z-40 inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 shadow-[0_10px_24px_-12px_rgba(15,23,42,0.35)] transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700/80"
+        >
+          <Eye className="h-4 w-4" aria-hidden />
+          {t('profile.backToView')}
+        </Link>
+      ) : null}
+
       <div className="mx-auto w-full max-w-7xl">
         <header className="mb-8 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 shadow-card ring-1 ring-slate-900/[0.04] dark:border-slate-700/80 dark:bg-slate-900/60 dark:ring-white/[0.06] sm:mb-10">
           <div className="relative border-b border-slate-100 bg-gradient-to-br from-primary-600/[0.08] via-white to-violet-600/[0.07] px-5 py-6 dark:border-slate-800 dark:from-primary-500/10 dark:via-slate-900 dark:to-violet-600/10 sm:px-8 sm:py-7">
@@ -1518,7 +1693,7 @@ export default function ProfilePage() {
         </div>
 
         {/* AI 简历诊断 */}
-        <div className="mb-8 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-card ring-1 ring-slate-900/[0.04] dark:border-slate-700/90 dark:bg-slate-900 dark:ring-white/[0.06] sm:mb-10">
+        <div ref={coachSectionRef} className="mb-8 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-card ring-1 ring-slate-900/[0.04] dark:border-slate-700/90 dark:bg-slate-900 dark:ring-white/[0.06] sm:mb-10">
           <div className="relative border-b border-slate-200/80 bg-gradient-to-br from-amber-500/[0.12] via-white to-orange-500/[0.08] px-5 py-5 dark:border-slate-700/80 dark:from-amber-500/15 dark:via-slate-900 dark:to-orange-600/10 sm:px-8 sm:py-6">
             <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-amber-400/30 to-transparent dark:via-amber-500/20" aria-hidden />
             <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1558,6 +1733,15 @@ export default function ProfilePage() {
                   {coachGenerating ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Lightbulb className="h-4 w-4" aria-hidden />}
                   {coachGenerating ? t('profile.coachRunning') : t('profile.coachRun')}
                 </button>
+                {coach && !coachGenerating ? (
+                  <Link
+                    to="/profile"
+                    className="inline-flex min-h-[48px] shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700/80 sm:px-7"
+                  >
+                    <Eye className="h-4 w-4" aria-hidden />
+                    {t('profile.backToView')}
+                  </Link>
+                ) : null}
               </div>
             </div>
             {coachErr && (

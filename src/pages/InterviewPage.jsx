@@ -83,6 +83,13 @@ export default function InterviewPage() {
   /* ── Sync stream ref ── */
   useEffect(() => { cameraStreamRef.current = cameraStream }, [cameraStream])
 
+  // In lobby, keep interview camera state aligned with lobby camera choice,
+  // so "enabled in lobby" carries into the interview screen.
+  useEffect(() => {
+    if (chatPhase !== 'idle') return
+    setInterviewCamOn(Boolean(lobbyCameraOn))
+  }, [chatPhase, lobbyCameraOn])
+
   /* ── Cleanup on unmount ── */
   useEffect(() => () => {
     cameraStreamRef.current?.getTracks().forEach(tr => tr.stop())
@@ -173,11 +180,22 @@ export default function InterviewPage() {
   const handleStart = () => {
     stopMicMeter()
     micAnalyserRef.current?._stream?.getTracks().forEach(tr => tr.stop())
-    setInterviewCamOn(true) // Always enable interview camera
+    // Keep the interview camera consistent with lobby selection.
+    setInterviewCamOn(Boolean(lobbyCameraOn))
     setChatPhase('preparing')
   }
 
-  /* ── In-interview camera toggle REMOVED per user request ── */
+  /* ── In-interview camera toggle ── */
+  const toggleInterviewCam = useCallback(() => {
+    setCameraError(null)
+    setInterviewCamOn((prev) => {
+      const next = !prev
+      // If user turns camera on during interview but lobby camera is off,
+      // reopen the same camera stream pipeline used in lobby.
+      if (next && !lobbyCameraOn) setLobbyCameraOn(true)
+      return next
+    })
+  }, [lobbyCameraOn])
 
   const handleInterviewUiReady = useCallback(() => {
     setChatPhase('live'); timer.start()

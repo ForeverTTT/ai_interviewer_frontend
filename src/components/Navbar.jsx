@@ -32,7 +32,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass relative">
+    <nav className="fixed top-0 left-0 right-0 z-50 glass">
       <div
         className="pointer-events-none absolute bottom-0 left-4 right-4 h-px max-w-7xl mx-auto bg-gradient-to-r from-transparent via-primary-400/25 to-transparent sm:left-6 sm:right-6 lg:left-8 lg:right-8"
         aria-hidden

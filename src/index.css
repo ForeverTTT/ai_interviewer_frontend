@@ -354,7 +354,6 @@
 
 /* Glassmorphism — nav / floating chrome */
 .glass {
-  position: relative;
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.94) 0%,

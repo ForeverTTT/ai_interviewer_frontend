@@ -37,6 +37,17 @@ function TypingDots() {
   )
 }
 
+// 模型输出有时会带占位符方括号，如 "[Company Name]"。
+// 用户要求：聊天/语音里不能出现这种 "[]"，所以这里做兜底清理。
+function sanitizeSquareBrackets(text) {
+  const s = String(text || '')
+  return s
+    // common placeholder from the model
+    .replace(/\[\s*Company\s*Name\s*\]/gi, 'the company')
+    // remove any remaining square brackets but keep inner text
+    .replace(/\[([^\]]*)\]/g, '$1')
+}
+
 function AgentBadge({ name, streaming, agentMap }) {
   const c = agentMap[name] || agentMap.opening
   const { Icon } = c
@@ -703,10 +714,11 @@ const ChatInterface = forwardRef(function ChatInterface({
           }
 
           if (evt.type === 'text' && evt.content) {
-            fullText += evt.content
+            const chunk = sanitizeSquareBrackets(evt.content)
+            fullText += chunk
             if (!deferAssistantText) {
               setMessages(prev => prev.map(m =>
-                m.id === aiId ? { ...m, content: m.content + evt.content } : m
+                m.id === aiId ? { ...m, content: m.content + chunk } : m
               ))
             }
           }
@@ -735,7 +747,7 @@ const ChatInterface = forwardRef(function ChatInterface({
 
       if (sseDoneInfo) {
         const { fullText: ft, deferOpen } = sseDoneInfo
-        const body = String(ft || '')
+        const body = sanitizeSquareBrackets(String(ft || ''))
 
         // For feedback agent: TTS only the closing remark before '---', not the report
         let ttsBody = body
@@ -869,7 +881,7 @@ const ChatInterface = forwardRef(function ChatInterface({
               }`}>
                 {msg.streaming && !msg.content
                   ? <TypingDots />
-                  : <p className={`whitespace-pre-wrap ${msg.streaming ? 'typing-cursor' : ''}`}>{msg.content}</p>}
+                  : <p className={`whitespace-pre-wrap ${msg.streaming ? 'typing-cursor' : ''}`}>{sanitizeSquareBrackets(msg.content)}</p>}
               </div>
             </div>
 
@@ -1033,6 +1045,12 @@ const ChatInterface = forwardRef(function ChatInterface({
               initDoneRef.current = false
               isFirstMsg.current  = true
               setMessages([])
+              const controller = new AbortController()
+              const trigger    = language === 'Deutsch'
+                ? t('chat.startTriggerDe')
+                : t('chat.startTriggerEn')
+              // Restart opening generation. Previously this button only cleared UI state.
+              void runGraph([{ role: 'user', content: trigger }], /* isSystem */ true, controller.signal)
             }}
             className="ml-auto flex items-center gap-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 transition-colors"
           >
