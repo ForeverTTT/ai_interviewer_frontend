@@ -1,15 +1,15 @@
 /** Default shape for profile_json.cvProfile (structured CV / 用户资料) */
 
 export function emptyWork() {
-  return { company: '', title: '', location: '', startDate: '', endDate: '', highlights: '' }
+  return { company: '', title: '', location: '', startDate: '', endDate: '', highlights: [] }
 }
 
 export function emptyEducation() {
-  return { institution: '', degree: '', field: '', startDate: '', endDate: '', gpa: '', details: '' }
+  return { institution: '', degree: '', field: '', startDate: '', endDate: '', gpa: '', details: [] }
 }
 
 export function emptyProject() {
-  return { name: '', role: '', startDate: '', endDate: '', description: '', technologies: '' }
+  return { name: '', role: '', startDate: '', endDate: '', description: [], technologies: '' }
 }
 
 export function emptyPublication() {
@@ -48,6 +48,18 @@ function normStr(v) {
   return typeof v === 'string' ? v.trim() : v != null ? String(v).trim() : ''
 }
 
+function normLines(v) {
+  if (Array.isArray(v)) return v.map(normStr).filter(Boolean)
+  if (typeof v === 'string') {
+    // Split by newlines or typical bullet markers
+    return v
+      .split(/\n|[•\-\*]/)
+      .map(s => s.trim())
+      .filter((s) => s && s.length > 1)
+  }
+  return []
+}
+
 function normWork(x) {
   if (!x || typeof x !== 'object') return null
   const o = {
@@ -56,9 +68,9 @@ function normWork(x) {
     location: normStr(x.location),
     startDate: normStr(x.startDate),
     endDate: normStr(x.endDate),
-    highlights: normStr(x.highlights ?? x.description ?? x.bullet),
+    highlights: normLines(x.highlights ?? x.description ?? x.bullet),
   }
-  return Object.values(o).some(Boolean) ? o : null
+  return Object.values(o).some(v => Array.isArray(v) ? v.length > 0 : Boolean(v)) ? o : null
 }
 
 function normEdu(x) {
@@ -70,9 +82,9 @@ function normEdu(x) {
     startDate: normStr(x.startDate),
     endDate: normStr(x.endDate),
     gpa: normStr(x.gpa),
-    details: normStr(x.details),
+    details: normLines(x.details),
   }
-  return Object.values(o).some(Boolean) ? o : null
+  return Object.values(o).some(v => Array.isArray(v) ? v.length > 0 : Boolean(v)) ? o : null
 }
 
 function normProj(x) {
@@ -82,10 +94,10 @@ function normProj(x) {
     role: normStr(x.role),
     startDate: normStr(x.startDate),
     endDate: normStr(x.endDate),
-    description: normStr(x.description),
+    description: normLines(x.description),
     technologies: normStr(x.technologies ?? x.tech),
   }
-  return Object.values(o).some(Boolean) ? o : null
+  return Object.values(o).some(v => Array.isArray(v) ? v.length > 0 : Boolean(v)) ? o : null
 }
 
 function normPub(x) {
@@ -127,7 +139,7 @@ export function mergeCvProfileFromApi(raw) {
   return {
     ...base,
     fullName: normStr(raw.fullName ?? raw.name),
-    gender: normStr(raw.gender),
+    gender: normStr(raw.gender || ''),
     email: normStr(raw.email),
     phone: normStr(raw.phone ?? raw.tel),
     location: normStr(raw.location ?? raw.city),

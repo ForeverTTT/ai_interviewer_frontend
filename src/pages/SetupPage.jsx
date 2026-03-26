@@ -6,7 +6,9 @@ import { getBackendBaseUrl } from '../lib/backendBase'
 import {
   Briefcase, FileText, Globe2, Clock, ArrowRight,
   Info, Sparkles, Upload, Loader2, X, Check, LayoutTemplate,
+  ChevronDown,
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 function fileToBase64Data(file) {
   return new Promise((resolve, reject) => {
@@ -85,6 +87,76 @@ function buildRoleCatalog(lang) {
       engineering_industry: { label: 'Engineering / Industry', roles: ['Werkstudent Mechanical Engineering', 'Electrical Engineering Internship', 'Automotive Engineering Internship', 'Production & Supply Chain Internship'] },
     },
   }
+}
+
+function CategorySelector({ value, options, onChange, placeholder, t }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const selectedOption = options.find((o) => o.value === value)
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`flex w-full items-center justify-between gap-2 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all duration-300 ${
+          isOpen
+            ? 'border-primary-500 bg-white ring-4 ring-primary-500/10 dark:border-primary-400 dark:bg-slate-900/90 dark:ring-primary-400/15'
+            : 'border-slate-200/90 bg-white hover:border-slate-300 hover:bg-slate-50/80 dark:border-slate-600 dark:bg-slate-800/80 dark:hover:border-slate-500 dark:hover:bg-slate-700/60'
+        }`}
+      >
+        <div className="flex items-center gap-2 overflow-hidden">
+          <LayoutTemplate className={`h-4 w-4 shrink-0 ${value ? 'text-primary-600' : 'text-slate-400'}`} />
+          <span className={`truncate ${value ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'}`}>
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+        </div>
+        <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.ul
+            initial={{ opacity: 0, y: 8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            className="absolute left-0 right-0 z-50 mt-2 max-h-[320px] overflow-auto rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-[0_20px_48px_-12px_rgba(15,23,42,0.18)] backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-[0_20px_48px_-12px_rgba(0,0,0,0.5)]"
+          >
+            {options.map((opt) => (
+              <li key={opt.value}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange(opt.value)
+                    setIsOpen(false)
+                  }}
+                  className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-sm font-medium transition-colors ${
+                    value === opt.value
+                      ? 'bg-primary-50 text-primary-700 dark:bg-primary-950/40 dark:text-primary-300'
+                      : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/80'
+                  }`}
+                >
+                  {opt.label}
+                  {value === opt.value && <Check className="h-4 w-4" />}
+                </button>
+              </li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
+  )
 }
 
 export default function SetupPage() {
@@ -360,16 +432,13 @@ export default function SetupPage() {
                   <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                     {t('setup.categoryLabel')}
                   </p>
-                  <select
+                  <CategorySelector
                     value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="input-field !min-h-[44px]"
-                  >
-                    <option value="">{t('setup.categoryPlaceholder')}</option>
-                    {categoryEntries.map(([key, item]) => (
-                      <option key={key} value={key}>{item.label}</option>
-                    ))}
-                  </select>
+                    options={categoryEntries.map(([k, item]) => ({ value: k, label: item.label }))}
+                    onChange={setSelectedCategory}
+                    placeholder={t('setup.categoryPlaceholder')}
+                    t={t}
+                  />
                 </div>
               </div>
               <input

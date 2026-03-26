@@ -35,6 +35,13 @@ function fileToBase64Data(file) {
   })
 }
 
+function normalizeUiLang(lang) {
+  const s = String(lang || '').toLowerCase()
+  if (s.startsWith('zh')) return 'zh'
+  if (s.startsWith('de')) return 'de'
+  return 'en'
+}
+
 /** 渲染含 **粗体** 标记的文本，其余内容原样输出 */
 function RichText({ text, className }) {
   if (!text) return null
@@ -49,6 +56,25 @@ function RichText({ text, className }) {
       })}
     </span>
   )
+}
+
+function SanitizedListText({ text, className }) {
+  if (!text) return null
+  // Replace weird dots with standard dash or nothing. 
+  // Covers wide range: ●•⚫🌑⦿★■◾▪
+  const clean = String(text).replace(/[●•⚫🌑⦿★■◾▪]/g, '').trim()
+  const lines = clean.split('\n').map(l => l.trim().replace(/^- /, '')).filter(Boolean)
+  
+  if (lines.length > 1) {
+    return (
+      <ul className={`mt-2 space-y-2 list-disc pl-5 ${className}`}>
+        {lines.map((line, i) => (
+          <li key={i} className="leading-relaxed"><RichText text={line} /></li>
+        ))}
+      </ul>
+    )
+  }
+  return <RichText text={clean} className={className} />
 }
 
 function SectionTitle({ icon: Icon, iconClass, children }) {
@@ -175,7 +201,7 @@ function CoachReport({ coach, t }) {
                     <div className="mt-4 rounded-lg border border-primary-200/60 bg-primary-50/40 px-3 py-2.5 dark:border-primary-900/40 dark:bg-primary-950/25">
                       <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
                         <span className="font-semibold text-primary-700 dark:text-primary-400">{t('profile.coachExample')}</span>{' '}
-                        <RichText text={p.rewriteExample} />
+                        <SanitizedListText text={p.rewriteExample} />
                       </p>
                     </div>
                   ) : null}
@@ -217,11 +243,11 @@ function CoachReport({ coach, t }) {
                   <div className="grid gap-3 pt-2 sm:grid-cols-2">
                     <div className="rounded-xl border border-slate-200/90 bg-slate-50/80 p-3.5 dark:border-slate-600 dark:bg-slate-800/50">
                       <div className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">{t('profile.coachBefore')}</div>
-                      <p className="text-sm whitespace-pre-wrap text-slate-800 dark:text-slate-100"><RichText text={m.before} /></p>
+                      <div className="text-sm text-slate-800 dark:text-slate-100"><SanitizedListText text={m.before} /></div>
                     </div>
                     <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/60 p-3.5 dark:border-emerald-900/45 dark:bg-emerald-950/25">
                       <div className="mb-1.5 text-xs font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">{t('profile.coachAfter')}</div>
-                      <p className="text-sm whitespace-pre-wrap text-slate-800 dark:text-slate-100"><RichText text={m.after} /></p>
+                      <div className="text-sm text-slate-800 dark:text-slate-100"><SanitizedListText text={m.after} /></div>
                     </div>
                   </div>
                 </div>
@@ -300,6 +326,7 @@ function genderDisplay(key, t) {
 }
 
 function parseBullets(raw) {
+  if (Array.isArray(raw)) return raw.map(s => String(s || '').trim()).filter(Boolean)
   const s = String(raw || '').trim()
   if (!s) return []
 
@@ -389,6 +416,7 @@ function DisplayCell({ label, value, t, asLink, mailto }) {
 function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, coach, t, i18n, timeStr, showFloatingEditButton, coachTranslating }) {
   const hasData = profileHasVisibleData(cvProfile, resumeText, resumeNotes)
   const tr = String(targetRole || '').trim()
+  const coachLangName = t(`profile.langName.${normalizeUiLang(i18n.language)}`)
 
   return (
     <>
@@ -511,7 +539,16 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
                       {[ed.degree, ed.field].filter(Boolean).join(' · ') || null}
                       {ed.gpa ? ` · ${ed.gpa}` : ''}
                     </p>
-                    {ed.details ? <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{ed.details}</p> : null}
+                    {(() => {
+                      const bullets = parseBullets(ed.details)
+                      return bullets.length > 0 ? (
+                        <ul className="mt-3 list-disc pl-5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                          {bullets.map((b, idx) => (
+                            <li key={idx} className="whitespace-pre-wrap">{b}</li>
+                          ))}
+                        </ul>
+                      ) : null
+                    })()}
                   </div>
                 ))
               )}
@@ -540,22 +577,18 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
                         {[w.startDate, w.endDate].filter(Boolean).join(' – ') || null}
                       </span>
                     </div>
-                    <p className="mt-1 text-sm font-medium text-primary-700 dark:text-primary-300">{w.company}</p>
+                    {w.company ? <p className="mt-1 text-sm font-medium text-primary-700 dark:text-primary-300">{w.company}</p> : null}
                     {w.location ? <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-400">{w.location}</p> : null}
-                    {w.highlights ? (
-                      (() => {
-                        const bullets = parseBullets(w.highlights)
-                        return bullets.length > 1 ? (
-                          <ul className="mt-3 list-disc pl-5 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
-                            {bullets.map((b, idx) => (
-                              <li key={idx} className="whitespace-pre-wrap">{b}</li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{w.highlights}</p>
-                        )
-                      })()
-                    ) : null}
+                    {(() => {
+                      const bullets = parseBullets(w.highlights)
+                      return bullets.length > 0 ? (
+                        <ul className="mt-3 list-disc pl-5 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                          {bullets.map((b, idx) => (
+                            <li key={idx} className="whitespace-pre-wrap">{b}</li>
+                          ))}
+                        </ul>
+                      ) : null
+                    })()}
                   </div>
                 ))
               )}
@@ -585,20 +618,16 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
                       </span>
                     </div>
                     {pr.role ? <p className="mt-1 text-sm font-medium text-primary-700 dark:text-primary-300">{pr.role}</p> : null}
-                    {pr.description ? (
-                      (() => {
-                        const bullets = parseBullets(pr.description)
-                        return bullets.length > 1 ? (
-                          <ul className="mt-2 list-disc pl-5 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
-                            {bullets.map((b, idx) => (
-                              <li key={idx} className="whitespace-pre-wrap">{b}</li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{pr.description}</p>
-                        )
-                      })()
-                    ) : null}
+                    {(() => {
+                      const bullets = parseBullets(pr.description)
+                      return bullets.length > 0 ? (
+                        <ul className="mt-2 list-disc pl-5 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                          {bullets.map((b, idx) => (
+                            <li key={idx} className="whitespace-pre-wrap">{b}</li>
+                          ))}
+                        </ul>
+                      ) : null
+                    })()}
                     {pr.technologies ? (
                       (() => {
                         const tokens = parseTechnologyTokens(pr.technologies)
@@ -805,7 +834,7 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
             {coachTranslating ? (
               <div className="flex flex-col items-center justify-center gap-3 py-12">
                 <Loader2 className="h-7 w-7 animate-spin text-primary-600 dark:text-primary-400" aria-hidden />
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('profile.coachTranslating', { lang: t(`profile.langName.${i18n.language}`) })}</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('profile.coachTranslating', { lang: coachLangName })}</p>
               </div>
             ) : (
               <CoachReport coach={coach} t={t} />
@@ -819,6 +848,47 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
 
 const inputClass =
   'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/15 dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-100'
+
+function MultiLineInput({ lines, label, placeholder, onChange, t, inputClass }) {
+  const safeLines = Array.isArray(lines) ? lines : []
+  return (
+    <div className="mt-4 space-y-2.5">
+      <label className="block text-xs font-bold text-slate-600 dark:text-slate-400">{label}</label>
+      <div className="space-y-2">
+        {safeLines.map((line, idx) => (
+          <div key={idx} className="flex gap-2 group">
+            <input
+              className={inputClass}
+              placeholder={placeholder}
+              value={line}
+              onChange={(e) => {
+                const newLines = [...safeLines]
+                newLines[idx] = e.target.value
+                onChange(newLines)
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => onChange(safeLines.filter((_, i) => i !== idx))}
+              className="p-2.5 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
+              title={t('profile.cv.remove')}
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => onChange([...safeLines, ''])}
+        className="inline-flex items-center gap-1.5 rounded-lg border border-primary-100 bg-primary-50/50 px-3 py-1.5 text-xs font-bold text-primary-600 hover:bg-primary-100 dark:border-primary-900/30 dark:bg-primary-950/20 dark:text-primary-400 dark:hover:bg-primary-900/40 transition-colors"
+      >
+        <Plus className="w-3.5 h-3.5" />
+        {t('profile.cv.add')}
+      </button>
+    </div>
+  )
+}
 
 export default function ProfilePage() {
   const { t, i18n } = useTranslation()
@@ -1038,7 +1108,11 @@ export default function ProfilePage() {
       const j = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(j.error || 'parse')
       setPendingRaw(j.text || '')
-      if (j.text) setResumeText(j.text.trim())
+      if (j.text) {
+        // Broadly remove special bullet symbols
+        const clean = j.text.replace(/[●•⚫🌑⦿★■◾▪]/g, '').trim()
+        setResumeText(clean)
+      }
       setPendingPreviewOpen(false)
       setNote({ type: 'ok', text: t('profile.cv.pdfExtractOk', { n: j.charCount ?? 0 }) })
     } catch {
@@ -1050,7 +1124,9 @@ export default function ProfilePage() {
 
   const applyPendingToResume = () => {
     if (!pendingRaw.trim()) return
-    setResumeText(pendingRaw.trim())
+    // Remove special "black dot" characters broadly
+    const clean = pendingRaw.replace(/[●•⚫🌑⦿★■◾▪]/g, '').trim()
+    setResumeText(clean)
     setPendingRaw('')
     setPendingPreviewOpen(false)
     setNote({ type: 'ok', text: t('profile.cv.appliedResumeOk') })
@@ -1066,6 +1142,7 @@ export default function ProfilePage() {
   const timeStr = persistTime
     ? new Date(persistTime).toLocaleString(i18n.language === 'zh' ? 'zh-CN' : i18n.language === 'de' ? 'de-DE' : 'en-US')
     : null
+  const coachLangName = t(`profile.langName.${normalizeUiLang(i18n.language)}`)
 
   useEffect(() => {
     if (!coach) return
@@ -1350,12 +1427,16 @@ export default function ProfilePage() {
                         }} />
                       </div>
                     </div>
-                    <textarea
-                      className={`${inputClass} mt-3 resize-y min-h-[80px]`}
+                    <MultiLineInput
+                      lines={w.highlights}
+                      label={t('profile.cv.phHighlights')}
                       placeholder={t('profile.cv.phHighlights')}
-                      value={w.highlights}
-                      onChange={(e) => {
-                        const v = [...cvProfile.workExperience]; v[i] = { ...v[i], highlights: e.target.value }; setCvProfile((p) => ({ ...p, workExperience: v }))
+                      t={t}
+                      inputClass={inputClass}
+                      onChange={(newLines) => {
+                        const v = [...cvProfile.workExperience]
+                        v[i] = { ...v[i], highlights: newLines }
+                        setCvProfile((p) => ({ ...p, workExperience: v }))
                       }}
                     />
                   </div>
@@ -1415,12 +1496,16 @@ export default function ProfilePage() {
                         const v = [...cvProfile.education]; v[i] = { ...v[i], endDate: e.target.value }; setCvProfile((p) => ({ ...p, education: v }))
                       }} />
                     </div>
-                    <textarea
-                      className={`${inputClass} mt-3 resize-y min-h-[70px]`}
+                    <MultiLineInput
+                      lines={ed.details}
+                      label={t('profile.cv.phEduDetails')}
                       placeholder={t('profile.cv.phEduDetails')}
-                      value={ed.details}
-                      onChange={(e) => {
-                        const v = [...cvProfile.education]; v[i] = { ...v[i], details: e.target.value }; setCvProfile((p) => ({ ...p, education: v }))
+                      t={t}
+                      inputClass={inputClass}
+                      onChange={(newLines) => {
+                        const v = [...cvProfile.education]
+                        v[i] = { ...v[i], details: newLines }
+                        setCvProfile((p) => ({ ...p, education: v }))
                       }}
                     />
                   </div>
@@ -1474,22 +1559,29 @@ export default function ProfilePage() {
                         const v = [...cvProfile.projects]; v[i] = { ...v[i], endDate: e.target.value }; setCvProfile((p) => ({ ...p, projects: v }))
                       }} />
                     </div>
-                    <textarea
-                      className={`${inputClass} mt-3 resize-y min-h-[70px]`}
+                    <MultiLineInput
+                      lines={pr.description}
+                      label={t('profile.cv.phProjDesc')}
                       placeholder={t('profile.cv.phProjDesc')}
-                      value={pr.description}
-                      onChange={(e) => {
-                        const v = [...cvProfile.projects]; v[i] = { ...v[i], description: e.target.value }; setCvProfile((p) => ({ ...p, projects: v }))
+                      t={t}
+                      inputClass={inputClass}
+                      onChange={(newLines) => {
+                        const v = [...cvProfile.projects]
+                        v[i] = { ...v[i], description: newLines }
+                        setCvProfile((p) => ({ ...p, projects: v }))
                       }}
                     />
-                    <input
-                      className={`${inputClass} mt-2`}
-                      placeholder={t('profile.cv.phTech')}
-                      value={pr.technologies}
-                      onChange={(e) => {
-                        const v = [...cvProfile.projects]; v[i] = { ...v[i], technologies: e.target.value }; setCvProfile((p) => ({ ...p, projects: v }))
-                      }}
-                    />
+                    <div className="mt-4">
+                      <label className="mb-1.5 block text-xs font-bold text-slate-600 dark:text-slate-400">{t('profile.cv.phTech')}</label>
+                      <input
+                        className={inputClass}
+                        placeholder={t('profile.cv.phTech')}
+                        value={pr.technologies}
+                        onChange={(e) => {
+                          const v = [...cvProfile.projects]; v[i] = { ...v[i], technologies: e.target.value }; setCvProfile((p) => ({ ...p, projects: v }))
+                        }}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1795,7 +1887,7 @@ export default function ProfilePage() {
               {coachTranslating ? (
                 <div className="flex flex-col items-center justify-center gap-3 py-12">
                   <Loader2 className="h-7 w-7 animate-spin text-primary-600 dark:text-primary-400" aria-hidden />
-                  <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('profile.coachTranslating', { lang: t(`profile.langName.${i18n.language}`) })}</p>
+                  <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('profile.coachTranslating', { lang: coachLangName })}</p>
                 </div>
               ) : (
                 <CoachReport coach={coach} t={t} />

@@ -717,7 +717,7 @@ const ChatInterface = forwardRef(function ChatInterface({
           }
 
           if (evt.type === 'text' && evt.content) {
-            const chunk = sanitizeSquareBrackets(evt.content)
+            const chunk = evt.content
             fullText += chunk
             if (!deferAssistantText) {
               setMessages(prev => prev.map(m =>

@@ -8,6 +8,13 @@ import {
   Sparkles, ListChecks, Target, MessageSquareQuote, GitCompare,
 } from 'lucide-react'
 
+function normalizeUiCode(code) {
+  const c = String(code || '').toLowerCase()
+  if (c.startsWith('zh')) return 'zh'
+  if (c.startsWith('de')) return 'de'
+  return 'en'
+}
+
 
 function parseReportJson(raw) {
   if (raw == null) return null
@@ -511,8 +518,14 @@ export default function InterviewReportPage() {
   const [err, setErr] = useState(null)
   const [interview, setInterview] = useState(null)
   const [retrying, setRetrying] = useState(false)
+  const [reportTranslating, setReportTranslating] = useState(false)
   const finalizeInFlightRef = useRef(false)
   const interviewRef = useRef(null)
+  const reportLangRef = useRef('')
+  const tRef = useRef(t)
+  useEffect(() => {
+    tRef.current = t
+  }, [t])
   useEffect(() => {
     interviewRef.current = interview
   }, [interview])
@@ -526,7 +539,7 @@ export default function InterviewReportPage() {
       const { data: { session } } = await supabase.auth.getSession()
       const token = session?.access_token
       if (!token) {
-        setErr(t('report.finalizeNoAuth'))
+        setErr(tRef.current('report.finalizeNoAuth'))
         setLoading(false)
         return
       }
@@ -540,15 +553,67 @@ export default function InterviewReportPage() {
         return
       }
       const j = await res.json()
+      reportLangRef.current = normalizeUiCode(j?.interview?.report_ui_locale || j?.interview?.language)
       setInterview(j.interview)
     } catch {
-      setErr(t('report.loadError'))
+      setErr(tRef.current('report.loadError'))
     } finally {
       setLoading(false)
     }
-  }, [backendUrl, interviewId, t])
+  }, [backendUrl, interviewId])
 
   useEffect(() => { void fetchInterview() }, [fetchInterview])
+
+  useEffect(() => {
+    const iv = interview
+    const baseReport = parseReportJson(iv?.report_json)
+    if (!iv || !baseReport || !reportJsonHasContent(baseReport)) return
+
+    const targetUiCode = normalizeUiCode(i18n.resolvedLanguage || i18n.language)
+    const currentUiCode = normalizeUiCode(reportLangRef.current || iv?.report_ui_locale || iv?.language)
+    if (targetUiCode === currentUiCode) return
+
+    let cancelled = false
+    const run = async () => {
+      setReportTranslating(true)
+      setErr(null)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const token = session?.access_token
+        if (!token) {
+          if (!cancelled) setErr(tRef.current('report.finalizeNoAuth'))
+          return
+        }
+        const res = await fetch(`${backendUrl}/api/interviews/${interviewId}/report/translate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            reportUiLanguage: targetUiCode,
+            report: baseReport,
+          }),
+        })
+        if (!res.ok) {
+          const j = await res.json().catch(() => ({}))
+          if (!cancelled) setErr(j.error || j.details || tRef.current('report.loadError'))
+          return
+        }
+        const j = await res.json()
+        if (cancelled) return
+        const nextInterview = j?.interview || { ...iv, report_json: j?.report, report_ui_locale: targetUiCode }
+        reportLangRef.current = targetUiCode
+        setInterview(nextInterview)
+      } catch {
+        if (!cancelled) setErr(tRef.current('report.loadError'))
+      } finally {
+        if (!cancelled) setReportTranslating(false)
+      }
+    }
+    void run()
+    return () => { cancelled = true }
+  }, [backendUrl, i18n.language, i18n.resolvedLanguage, interview, interviewId])
 
   const finalizeReport = useCallback(async () => {
     const messages = interviewRef.current?.transcript_json
@@ -567,7 +632,7 @@ export default function InterviewReportPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ messages, reportUiLanguage: interviewRef.current?.language }),
+        body: JSON.stringify({ messages, reportUiLanguage: normalizeUiCode(i18n.resolvedLanguage || i18n.language) }),
       })
       if (!res.ok) {
         const j = await res.json().catch(() => ({}))
@@ -582,7 +647,7 @@ export default function InterviewReportPage() {
       finalizeInFlightRef.current = false
       setRetrying(false)
     }
-  }, [interviewId, backendUrl, t])
+  }, [interviewId, backendUrl, i18n.language, i18n.resolvedLanguage, t])
 
 
   const transcript = Array.isArray(interview?.transcript_json) ? interview.transcript_json : []
@@ -626,12 +691,6 @@ export default function InterviewReportPage() {
           {t('report.backDashboard')}
         </Link>
 
-        {err && (
-          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900/40 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
-            {err}
-          </div>
-        )}
-
         <article className="mb-8 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_24px_48px_-12px_rgba(15,23,42,0.12)] ring-1 ring-slate-900/[0.04] dark:border-slate-700 dark:bg-slate-900 dark:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.45)] dark:ring-white/[0.06]">
           <div className="border-b border-slate-100 bg-gradient-to-br from-primary-50/90 via-white to-violet-50/40 px-6 py-6 sm:px-8 sm:py-8 dark:border-slate-800 dark:from-primary-950/30 dark:via-slate-900 dark:to-violet-950/20">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
@@ -667,7 +726,14 @@ export default function InterviewReportPage() {
           </div>
 
           <div className="px-6 py-8 sm:px-8 sm:py-10">
-            {!hasAnyReport ? (
+            {reportTranslating ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-12">
+                <Loader2 className="h-7 w-7 animate-spin text-primary-600 dark:text-primary-400" aria-hidden />
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  {t('report.translating', { lang: t(`profile.langName.${normalizeUiCode(i18n.resolvedLanguage || i18n.language)}`) })}
+                </p>
+              </div>
+            ) : !hasAnyReport ? (
               <div className="text-center py-6">
                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800">
                   <FileText className="w-7 h-7 text-slate-400" />
@@ -707,7 +773,7 @@ export default function InterviewReportPage() {
               </div>
             )}
 
-            {transcript.length > 0 && (
+            {!reportTranslating && transcript.length > 0 && (
               <div className="mt-10 border-t border-slate-200/90 pt-10 dark:border-slate-800">
                 <div className="mb-5 flex items-center gap-3 border-b border-slate-100 pb-4 dark:border-slate-800">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
