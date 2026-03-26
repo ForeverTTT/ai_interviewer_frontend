@@ -411,7 +411,10 @@ function useSpeechRecognition(language, onFinal, onInterim) {
       listeningRef.current = false
       setActive(false)
     }
-    r.onerror = onDone
+    r.onerror = (evt) => {
+      console.warn('[STT] error:', evt.error, evt.message)
+      onDone()
+    }
     r.onend   = onDone
     recRef.current = r
     r.start()

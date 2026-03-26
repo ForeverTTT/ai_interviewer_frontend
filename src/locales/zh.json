@@ -335,6 +335,12 @@
     "coachChecklist": "按优先级执行清单",
     "coachOutcome": "预期效果",
     "coachPersistNote": "报告已保存到您的账户（{{time}}），刷新页面后仍会显示。",
+    "coachTranslating": "正在加载{{lang}}报告…",
+    "langName": {
+      "en": "英语",
+      "zh": "中文",
+      "de": "德语"
+    },
     "cv": {
       "pageSub": "先填写结构化资料；上传 PDF 后不会直接铺满屏幕，可点击查看提取原文，再用 AI 一键填入表单。折叠区内的「简历原文」会用于模拟面试上下文。",
       "structuredTitle": "结构化用户资料",

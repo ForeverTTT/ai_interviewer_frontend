@@ -386,7 +386,7 @@ function DisplayCell({ label, value, t, asLink, mailto }) {
   )
 }
 
-function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, coach, t, timeStr, showFloatingEditButton }) {
+function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, coach, t, i18n, timeStr, showFloatingEditButton, coachTranslating }) {
   const hasData = profileHasVisibleData(cvProfile, resumeText, resumeNotes)
   const tr = String(targetRole || '').trim()
 
@@ -802,7 +802,14 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
             </div>
           </div>
           <div className="p-6 sm:p-8 lg:p-10">
-            <CoachReport coach={coach} t={t} />
+            {coachTranslating ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-12">
+                <Loader2 className="h-7 w-7 animate-spin text-primary-600 dark:text-primary-400" aria-hidden />
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('profile.coachTranslating', { lang: t(`profile.langName.${i18n.language}`) })}</p>
+              </div>
+            ) : (
+              <CoachReport coach={coach} t={t} />
+            )}
           </div>
         </div>
       ) : null}
@@ -829,6 +836,7 @@ export default function ProfilePage() {
   const [targetRole, setTargetRole] = useState('')
   const [coach, setCoach] = useState(null)
   const [coachGenerating, setCoachGenerating] = useState(false)
+  const [coachTranslating, setCoachTranslating] = useState(false)
   const [coachErr, setCoachErr] = useState(null)
   const [parseBusy, setParseBusy] = useState(false)
   const [extractBusy, setExtractBusy] = useState(false)
@@ -1030,6 +1038,7 @@ export default function ProfilePage() {
       const j = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(j.error || 'parse')
       setPendingRaw(j.text || '')
+      if (j.text) setResumeText(j.text.trim())
       setPendingPreviewOpen(false)
       setNote({ type: 'ok', text: t('profile.cv.pdfExtractOk', { n: j.charCount ?? 0 }) })
     } catch {
@@ -1064,6 +1073,7 @@ export default function ProfilePage() {
     if (coachLangRef.current === i18n.language) return
 
     let cancelled = false
+    setCoachTranslating(true)
     ;(async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
@@ -1088,6 +1098,8 @@ export default function ProfilePage() {
         }
       } catch {
         // ignore translation failure; keep existing coach text
+      } finally {
+        if (!cancelled) setCoachTranslating(false)
       }
     })()
     return () => { cancelled = true }
@@ -1113,8 +1125,10 @@ export default function ProfilePage() {
             targetRole={targetRole}
             coach={coach}
             t={t}
+            i18n={i18n}
             timeStr={timeStr}
             showFloatingEditButton={showFloatingQuickSwitch}
+            coachTranslating={coachTranslating}
           />
         </div>
       </div>
@@ -1642,6 +1656,16 @@ export default function ProfilePage() {
               {rawResumeOpen ? (
                 <div className="space-y-3 border-t border-slate-200/80 p-4 dark:border-slate-600">
                   <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">{t('profile.cv.rawResumeHint')}</p>
+                  {pendingRaw.trim() ? (
+                    <button
+                      type="button"
+                      onClick={applyPendingToResume}
+                      className="inline-flex items-center gap-2 rounded-xl border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-bold text-primary-800 hover:bg-primary-100 dark:border-slate-600 dark:bg-slate-800 dark:text-primary-300 dark:hover:bg-slate-700"
+                    >
+                      <FileText className="h-4 w-4" />
+                      {t('profile.cv.applyToInterviewResume')}
+                    </button>
+                  ) : null}
                   <textarea
                     value={resumeText}
                     onChange={(e) => setResumeText(e.target.value)}
@@ -1768,7 +1792,14 @@ export default function ProfilePage() {
               </div>
             ) : null}
             <div className="p-6 sm:p-8 lg:p-10">
-              <CoachReport coach={coach} t={t} />
+              {coachTranslating ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-12">
+                  <Loader2 className="h-7 w-7 animate-spin text-primary-600 dark:text-primary-400" aria-hidden />
+                  <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('profile.coachTranslating', { lang: t(`profile.langName.${i18n.language}`) })}</p>
+                </div>
+              ) : (
+                <CoachReport coach={coach} t={t} />
+              )}
             </div>
           </div>
         )}

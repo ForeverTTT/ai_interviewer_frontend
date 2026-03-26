@@ -256,6 +256,12 @@
     "coachChecklist": "Priority action checklist",
     "coachOutcome": "Expected outcome:",
     "coachPersistNote": "Report saved to your account ({{time}}); it stays after refresh.",
+    "coachTranslating": "Loading {{lang}} report…",
+    "langName": {
+      "en": "English",
+      "zh": "Chinese",
+      "de": "German"
+    },
     "displayTitle": "Your profile",
     "displaySub": "Saved structured information and resume text. Use Edit profile to upload PDFs, run AI fill, or change anything.",
     "backToView": "View profile",

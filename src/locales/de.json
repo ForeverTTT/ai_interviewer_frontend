@@ -256,6 +256,12 @@
     "coachChecklist": "Priorisierte Massnahmenliste",
     "coachOutcome": "Erwarteter Effekt:",
     "coachPersistNote": "Report im Konto gespeichert ({{time}}); bleibt nach Neuladen.",
+    "coachTranslating": "{{lang}}-Bericht wird geladen…",
+    "langName": {
+      "en": "Englischer",
+      "zh": "Chinesischer",
+      "de": "Deutscher"
+    },
     "displayTitle": "Ihr Profil",
     "displaySub": "Gespeicherte strukturierte Daten und Lebenslauftext. PDF-Upload, KI-Befüllung und Änderungen unter „Profil bearbeiten“.",
     "backToView": "Profil ansehen",
