@@ -656,6 +656,7 @@ const ChatInterface = forwardRef(function ChatInterface({
 
     let fullText = ''   // accumulate for TTS
     let sseDoneInfo = null
+    let lastAgentName = null  // track which agent is responding
 
     try {
       const res = await fetch(`${BACKEND_URL}/api/chat/message`, {
@@ -696,6 +697,7 @@ const ChatInterface = forwardRef(function ChatInterface({
           try { evt = JSON.parse(raw) } catch { continue }
 
           if (evt.type === 'agent') {
+            lastAgentName = evt.name
             setCurrentAgent(evt)
             setMessages(prev => prev.map(m => m.id === aiId ? { ...m, agent: evt.name } : m))
           }
@@ -734,10 +736,18 @@ const ChatInterface = forwardRef(function ChatInterface({
       if (sseDoneInfo) {
         const { fullText: ft, deferOpen } = sseDoneInfo
         const body = String(ft || '')
-        const wantSpeak = ttsEnabledRef.current && body.trim()
+
+        // For feedback agent: TTS only the closing remark before '---', not the report
+        let ttsBody = body
+        if (lastAgentName === 'feedback') {
+          const sepIdx = body.search(/\n---\n|^---$/m)
+          ttsBody = sepIdx !== -1 ? body.slice(0, sepIdx).trim() : ''
+        }
+
+        const wantSpeak = ttsEnabledRef.current && ttsBody.trim()
         if (wantSpeak && deferAssistantText) {
           try {
-            await tts.speakWhenPlaying(body.trim(), token)
+            await tts.speakWhenPlaying(ttsBody, token)
           } catch (e) {
             console.warn('[TTS] speakWhenPlaying failed', e)
           }
@@ -746,7 +756,7 @@ const ChatInterface = forwardRef(function ChatInterface({
           m.id === aiId ? { ...m, content: body, streaming: false } : m
         ))
         if (wantSpeak && !deferAssistantText) {
-          tts.speak(body.trim(), token)
+          tts.speak(ttsBody, token)
         }
         if (deferOpen) {
           onInterviewReadyRef.current?.()
@@ -808,7 +818,7 @@ const ChatInterface = forwardRef(function ChatInterface({
     }
   }
 
-  const displayMessages = messages.filter(m => m.content || m.streaming)
+  const displayMessages = messages.filter(m => (m.content || m.streaming) && m.agent !== 'feedback')
 
   const interviewerThinking = isStreaming || Boolean(currentAgent)
   const digitalStateLabel = stt.active
@@ -897,7 +907,7 @@ const ChatInterface = forwardRef(function ChatInterface({
           </div>
         )}
 
-        {isStreaming && currentAgent && !stt.active && (
+        {isStreaming && currentAgent && currentAgent.name !== 'feedback' && !stt.active && (
           <div className="flex items-center gap-1.5 text-xs text-primary-600 dark:text-primary-400">
             <Loader2 className="w-3 h-3 animate-spin" />
             {agentMap[currentAgent.name]?.emoji} {agentMap[currentAgent.name]?.label ?? currentAgent.label}
@@ -1036,31 +1046,52 @@ const ChatInterface = forwardRef(function ChatInterface({
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
             {/* Zoom 主画面：专业 HR 形象 */}
             <aside
-              className="relative w-full flex-shrink-0 overflow-hidden border-b border-slate-200 bg-slate-950 dark:border-slate-800 lg:w-[min(100%,300px)] xl:w-[min(100%,336px)] lg:min-h-0 lg:border-b-0 lg:border-r aspect-[16/10] max-h-[min(30vh,260px)] lg:max-h-none lg:aspect-[4/5] lg:self-stretch"
+              className="flex flex-col w-full flex-shrink-0 overflow-hidden border-b border-slate-200 bg-slate-950 dark:border-slate-800 lg:w-[min(100%,300px)] xl:w-[min(100%,336px)] lg:min-h-0 lg:border-b-0 lg:border-r lg:self-stretch h-[min(52vh,380px)] lg:h-auto"
               aria-label={t('interview.digitalHuman')}
             >
-              <img
-                src={HR_PORTRAIT_SRC}
-                alt=""
-                className={`absolute inset-0 h-full w-full object-cover object-[center_18%] transition-transform duration-700 ${tts.speaking ? 'animate-dh-breathe' : ''}`}
-                decoding="async"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/25" />
+              {/* 上半部分：面试官画面 */}
+              <div className="relative flex-[3] min-h-0 overflow-hidden">
+                <img
+                  src={HR_PORTRAIT_SRC}
+                  alt=""
+                  className={`absolute inset-0 h-full w-full object-cover object-[center_18%] transition-transform duration-700 ${tts.speaking ? 'animate-dh-breathe' : ''}`}
+                  decoding="async"
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/25" />
 
-              <div className="absolute left-0 right-0 top-0 flex items-center justify-between gap-2 border-b border-white/10 bg-black/40 px-3 py-2 backdrop-blur-md">
-                <span className="truncate text-left text-[11px] font-semibold text-white/95 sm:text-xs">
-                  {t('interview.digitalZoomTitle')}
-                  <span className="mx-1.5 text-white/40">·</span>
-                  <span className="font-medium text-white/80">{position}</span>
-                </span>
-                <span className="flex shrink-0 items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-red-200">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                  {t('interview.digitalZoomLive')}
-                </span>
+                <div className="absolute left-0 right-0 top-0 flex items-center justify-between gap-2 border-b border-white/10 bg-black/40 px-3 py-2 backdrop-blur-md">
+                  <span className="truncate text-left text-[11px] font-semibold text-white/95 sm:text-xs">
+                    {t('interview.digitalZoomTitle')}
+                    <span className="mx-1.5 text-white/40">·</span>
+                    <span className="font-medium text-white/80">{position}</span>
+                  </span>
+                  <span className="flex shrink-0 items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-red-200">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                    {t('interview.digitalZoomLive')}
+                  </span>
+                </div>
+
+                <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3">
+                  <p className="text-base font-black tracking-tight text-white drop-shadow-md sm:text-lg">{t('interview.digitalHuman')}</p>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                    {tts.speaking && (
+                      <span className="inline-flex h-5 items-end gap-0.5 rounded-md bg-emerald-500/25 px-1.5 py-0.5">
+                        {[4, 7, 5, 9, 6].map((h, i) => (
+                          <span
+                            key={i}
+                            className="w-0.5 rounded-full bg-emerald-400 animate-dh-wave"
+                            style={{ height: `${h}px`, animationDelay: `${i * 80}ms` }}
+                          />
+                        ))}
+                      </span>
+                    )}
+                    <p className="text-xs text-white/85">{digitalStateLabel}</p>
+                  </div>
+                </div>
               </div>
 
-              {/* 本地预览小窗（Zoom PiP） */}
-              <div className="absolute right-2 top-11 z-[1] flex w-[32%] max-w-[120px] flex-col overflow-hidden rounded-lg border-2 border-white/50 bg-slate-900 shadow-xl ring-1 ring-black/40 aspect-video sm:right-2.5 sm:top-11 sm:max-w-[132px]">
+              {/* 下半部分：我的画面 */}
+              <div className="relative flex-[2] min-h-0 overflow-hidden border-t border-white/10 bg-slate-900">
                 {userCameraStream?.getVideoTracks?.()?.length ? (
                   <video
                     ref={userPipVideoRef}
@@ -1070,28 +1101,13 @@ const ChatInterface = forwardRef(function ChatInterface({
                     autoPlay
                   />
                 ) : (
-                  <div className="flex flex-1 flex-col items-center justify-center gap-0.5 bg-gradient-to-br from-slate-700 to-slate-900 px-1 py-2 min-h-[72px]">
-                    <span className="text-center text-[10px] font-bold text-white">{t('chat.you')}</span>
-                    <span className="text-center text-[9px] leading-tight text-white/55">{t('interview.digitalYouPip')}</span>
+                  <div className="flex h-full flex-col items-center justify-center gap-1 bg-gradient-to-br from-slate-700 to-slate-900 px-3">
+                    <span className="text-sm font-bold text-white">{t('chat.you')}</span>
+                    <span className="text-center text-xs leading-tight text-white/55">{t('interview.digitalYouPip')}</span>
                   </div>
                 )}
-              </div>
-
-              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-                <p className="text-lg font-black tracking-tight text-white drop-shadow-md sm:text-xl">{t('interview.digitalHuman')}</p>
-                <div className="mt-1 flex flex-wrap items-center gap-2">
-                  {tts.speaking && (
-                    <span className="inline-flex h-5 items-end gap-0.5 rounded-md bg-emerald-500/25 px-1.5 py-0.5">
-                      {[4, 7, 5, 9, 6].map((h, i) => (
-                        <span
-                          key={i}
-                          className="w-0.5 rounded-full bg-emerald-400 animate-dh-wave"
-                          style={{ height: `${h}px`, animationDelay: `${i * 80}ms` }}
-                        />
-                      ))}
-                    </span>
-                  )}
-                  <p className="text-xs text-white/85 sm:text-sm">{digitalStateLabel}</p>
+                <div className="absolute bottom-2 left-2 rounded bg-black/50 px-1.5 py-0.5 text-[10px] font-semibold text-white/80 backdrop-blur-sm">
+                  {t('chat.you')}
                 </div>
               </div>
             </aside>

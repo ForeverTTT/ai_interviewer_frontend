@@ -35,6 +35,22 @@ function fileToBase64Data(file) {
   })
 }
 
+/** 渲染含 **粗体** 标记的文本，其余内容原样输出 */
+function RichText({ text, className }) {
+  if (!text) return null
+  const parts = String(text).split(/(\*\*[^*\n]+\*\*)/g)
+  if (parts.length === 1) return <span className={className}>{text}</span>
+  return (
+    <span className={className}>
+      {parts.map((part, i) => {
+        const m = part.match(/^\*\*([^*\n]+)\*\*$/)
+        if (m) return <strong key={i} className="font-semibold text-slate-900 dark:text-white">{m[1]}</strong>
+        return part || null
+      })}
+    </span>
+  )
+}
+
 function SectionTitle({ icon: Icon, iconClass, children }) {
   return (
     <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -65,7 +81,7 @@ function CoachReport({ coach, t }) {
         </SectionTitle>
         <div className="rounded-xl border border-slate-200/90 bg-slate-50/80 px-5 py-4 dark:border-slate-700 dark:bg-slate-800/40">
           <p className="text-[15px] leading-[1.75] text-slate-800 dark:text-slate-100 whitespace-pre-wrap sm:text-base">
-            {coach.overallEvaluation}
+            <RichText text={coach.overallEvaluation} />
           </p>
         </div>
       </section>
@@ -107,7 +123,7 @@ function CoachReport({ coach, t }) {
                 className="flex gap-3 rounded-xl border border-indigo-200/70 bg-indigo-50/40 px-4 py-3 text-[15px] leading-relaxed text-slate-800 dark:border-indigo-900/40 dark:bg-indigo-950/20 dark:text-slate-100"
               >
                 <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-indigo-500" aria-hidden />
-                <span>{line}</span>
+                <RichText text={line} />
               </li>
             ))}
           </ul>
@@ -126,7 +142,7 @@ function CoachReport({ coach, t }) {
                 className="flex gap-3 rounded-xl border border-emerald-200/70 bg-emerald-50/50 px-4 py-3 text-[15px] leading-relaxed text-slate-800 dark:border-emerald-900/35 dark:bg-emerald-950/20 dark:text-slate-100"
               >
                 <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-emerald-500" aria-hidden />
-                <span>{h}</span>
+                <RichText text={h} />
               </li>
             ))}
           </ul>
@@ -149,17 +165,17 @@ function CoachReport({ coach, t }) {
                   <h3 className="mb-3 text-base font-bold text-slate-900 dark:text-white">{p.title}</h3>
                   <p className="mb-2 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
                     <span className="font-semibold text-amber-800 dark:text-amber-400">{t('profile.coachIssue')}</span>{' '}
-                    {p.problem}
+                    <RichText text={p.problem} />
                   </p>
                   <p className="mb-2 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
                     <span className="font-semibold text-amber-800 dark:text-amber-400">{t('profile.coachAction')}</span>{' '}
-                    {p.suggestedAction}
+                    <RichText text={p.suggestedAction} />
                   </p>
                   {p.rewriteExample ? (
                     <div className="mt-4 rounded-lg border border-primary-200/60 bg-primary-50/40 px-3 py-2.5 dark:border-primary-900/40 dark:bg-primary-950/25">
                       <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
                         <span className="font-semibold text-primary-700 dark:text-primary-400">{t('profile.coachExample')}</span>{' '}
-                        {p.rewriteExample}
+                        <RichText text={p.rewriteExample} />
                       </p>
                     </div>
                   ) : null}
@@ -188,24 +204,24 @@ function CoachReport({ coach, t }) {
                 <div className="space-y-3 p-5 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
                   <p>
                     <span className="font-semibold text-primary-600 dark:text-primary-400">{t('profile.coachFinding')}</span>{' '}
-                    {m.finding}
+                    <RichText text={m.finding} />
                   </p>
                   <p>
                     <span className="font-semibold text-primary-600 dark:text-primary-400">{t('profile.coachWhy')}</span>{' '}
-                    {m.whyImportant}
+                    <RichText text={m.whyImportant} />
                   </p>
                   <p>
                     <span className="font-semibold text-primary-600 dark:text-primary-400">{t('profile.coachSuggest')}</span>{' '}
-                    {m.modificationSuggestion}
+                    <RichText text={m.modificationSuggestion} />
                   </p>
                   <div className="grid gap-3 pt-2 sm:grid-cols-2">
                     <div className="rounded-xl border border-slate-200/90 bg-slate-50/80 p-3.5 dark:border-slate-600 dark:bg-slate-800/50">
                       <div className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">{t('profile.coachBefore')}</div>
-                      <p className="text-sm whitespace-pre-wrap text-slate-800 dark:text-slate-100">{m.before}</p>
+                      <p className="text-sm whitespace-pre-wrap text-slate-800 dark:text-slate-100"><RichText text={m.before} /></p>
                     </div>
                     <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/60 p-3.5 dark:border-emerald-900/45 dark:bg-emerald-950/25">
                       <div className="mb-1.5 text-xs font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">{t('profile.coachAfter')}</div>
-                      <p className="text-sm whitespace-pre-wrap text-slate-800 dark:text-slate-100">{m.after}</p>
+                      <p className="text-sm whitespace-pre-wrap text-slate-800 dark:text-slate-100"><RichText text={m.after} /></p>
                     </div>
                   </div>
                 </div>
@@ -227,7 +243,7 @@ function CoachReport({ coach, t }) {
                 className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm dark:border-slate-600 dark:bg-slate-900/80"
               >
                 <h3 className="mb-2 font-bold text-slate-900 dark:text-white">{p.title}</h3>
-                <p className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-200 whitespace-pre-wrap">{p.content}</p>
+                <p className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-200 whitespace-pre-wrap"><RichText text={p.content} /></p>
               </div>
             ))}
           </div>
@@ -252,7 +268,7 @@ function CoachReport({ coach, t }) {
                   <p className="font-bold text-slate-900 dark:text-white">{a.title}</p>
                   <p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                     <span className="font-semibold text-slate-700 dark:text-slate-300">{t('profile.coachOutcome')}</span>{' '}
-                    {a.expectedOutcome}
+                    <RichText text={a.expectedOutcome} />
                   </p>
                 </div>
               </li>
@@ -798,7 +814,11 @@ export default function ProfilePage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ targetRole, resumeText: resumeText.trim(), coachUiLanguage: i18n.language }),
+        body: JSON.stringify({
+          targetRole,
+          resumeText: resumeText.trim(),
+          coachUiLanguage: i18n.language,
+        }),
       })
       const j = await res.json().catch(() => ({}))
       if (res.status === 503) {

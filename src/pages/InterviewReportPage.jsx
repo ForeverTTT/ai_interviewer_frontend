@@ -8,16 +8,6 @@ import {
   Sparkles, ListChecks, Target, MessageSquareQuote, GitCompare,
 } from 'lucide-react'
 
-/** 与后端 reportUiLanguageLine 一致：用于比较「已存报告语言」和当前界面语言 */
-function normalizeReportUiLang(code) {
-  const s = String(code || '').toLowerCase().replace(/_/g, '-').trim()
-  if (!s) return ''
-  if (s.startsWith('zh')) return 'zh'
-  if (s.startsWith('de')) return 'de'
-  if (s.startsWith('en')) return 'en'
-  const base = s.split('-')[0]
-  return base || 'en'
-}
 
 function parseReportJson(raw) {
   if (raw == null) return null
@@ -71,6 +61,22 @@ function splitMarkdownH2(md) {
       return { title: '', body: c.trim() }
     })
     .filter((x) => x.title || x.body)
+}
+
+/** 渲染含 **粗体** 标记的文本，其余内容原样输出 */
+function RichText({ text, className }) {
+  if (!text) return null
+  const parts = String(text).split(/(\*\*[^*\n]+\*\*)/g)
+  if (parts.length === 1) return <span className={className}>{text}</span>
+  return (
+    <span className={className}>
+      {parts.map((part, i) => {
+        const m = part.match(/^\*\*([^*\n]+)\*\*$/)
+        if (m) return <strong key={i} className="font-semibold text-slate-900 dark:text-white">{m[1]}</strong>
+        return part || null
+      })}
+    </span>
+  )
 }
 
 /** 旧版 Markdown：去掉加粗、反引号等 */
@@ -347,7 +353,7 @@ function StructuredReportBody({ report, t }) {
                       {t('report.yourAnswerLabel')}
                     </div>
                     <p className="text-[15px] leading-relaxed text-slate-800 dark:text-slate-100 whitespace-pre-wrap">
-                      {qa.yourAnswerSummary || '—'}
+                      <RichText text={qa.yourAnswerSummary || '—'} />
                     </p>
                   </div>
                   <div className="p-4 sm:p-5 bg-white/50 dark:bg-slate-900/40">
@@ -355,7 +361,7 @@ function StructuredReportBody({ report, t }) {
                       {t('report.referenceExampleLabel')}
                     </div>
                     <p className="text-[15px] leading-relaxed text-slate-800 dark:text-slate-100 whitespace-pre-wrap">
-                      {qa.referenceExample || '—'}
+                      <RichText text={qa.referenceExample || '—'} />
                     </p>
                   </div>
                 </div>
@@ -370,7 +376,7 @@ function StructuredReportBody({ report, t }) {
                           {qa.gaps.map((g, j) => (
                             <li key={j} className="flex gap-2 text-[14px] leading-relaxed text-slate-800 dark:text-slate-200">
                               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" aria-hidden />
-                              <span>{g}</span>
+                              <RichText text={g} />
                             </li>
                           ))}
                         </ul>
@@ -379,7 +385,7 @@ function StructuredReportBody({ report, t }) {
                     {qa.howToImprove ? (
                       <p className="text-[14px] leading-relaxed text-slate-800 dark:text-slate-200">
                         <span className="font-bold text-amber-900 dark:text-amber-300">{t('report.improveTipLabel')}</span>
-                        {qa.howToImprove}
+                        <RichText text={qa.howToImprove} />
                       </p>
                     ) : null}
                   </div>
@@ -409,7 +415,7 @@ function StructuredReportBody({ report, t }) {
                 <span className="mr-2 inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-md bg-primary-600/10 text-xs font-black text-primary-700 dark:bg-primary-500/20 dark:text-primary-300">
                   {i + 1}
                 </span>
-                {p}
+                <RichText text={p} />
               </div>
             ))}
           </div>
@@ -433,7 +439,7 @@ function StructuredReportBody({ report, t }) {
                 className="flex gap-3 rounded-xl border border-emerald-200/60 bg-emerald-50/40 px-4 py-3 text-[15px] leading-relaxed text-slate-800 dark:border-emerald-900/35 dark:bg-emerald-950/20 dark:text-slate-100"
               >
                 <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500 shadow-sm" aria-hidden />
-                <span>{s}</span>
+                <RichText text={s} />
               </li>
             ))}
           </ul>
@@ -469,13 +475,13 @@ function StructuredReportBody({ report, t }) {
                   {item.why ? (
                     <p className="mb-2 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
                       <span className="font-semibold text-amber-800/90 dark:text-amber-400">{t('report.whyLabel')}</span>
-                      {item.why}
+                      <RichText text={item.why} />
                     </p>
                   ) : null}
                   {item.how ? (
                     <p className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
                       <span className="font-semibold text-amber-800/90 dark:text-amber-400">{t('report.howLabel')}</span>
-                      {item.how}
+                      <RichText text={item.how} />
                     </p>
                   ) : null}
                 </div>
@@ -551,7 +557,7 @@ export default function InterviewReportPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ messages, reportUiLanguage: i18n.language }),
+        body: JSON.stringify({ messages, reportUiLanguage: interviewRef.current?.language }),
       })
       if (!res.ok) {
         const j = await res.json().catch(() => ({}))
@@ -566,24 +572,8 @@ export default function InterviewReportPage() {
       finalizeInFlightRef.current = false
       setRetrying(false)
     }
-  }, [interviewId, backendUrl, i18n.language, t])
+  }, [interviewId, backendUrl, t])
 
-  /** 界面语言与已保存的报告语言不一致时，用当前语言重新生成 report_json */
-  useEffect(() => {
-    if (loading || !interview) return
-    const messages = interview.transcript_json
-    if (!Array.isArray(messages) || !messages.length) return
-    if (!reportJsonHasContent(interview.report_json)) return
-
-    const want = normalizeReportUiLang(i18n.language)
-    const have = normalizeReportUiLang(interview.report_ui_locale ?? '') || 'zh'
-    if (want === have) return
-
-    const id = window.setTimeout(() => {
-      void finalizeReport()
-    }, 400)
-    return () => window.clearTimeout(id)
-  }, [loading, interview, i18n.language, finalizeReport])
 
   const transcript = Array.isArray(interview?.transcript_json) ? interview.transcript_json : []
   const hasStructuredReport = reportJsonHasContent(interview?.report_json)
@@ -625,13 +615,6 @@ export default function InterviewReportPage() {
           <ArrowLeft className="w-4 h-4" />
           {t('report.backDashboard')}
         </Link>
-
-        {retrying && (
-          <div className="mb-6 flex items-center gap-3 rounded-xl border border-primary-200/90 bg-primary-50/90 px-4 py-3 text-sm text-primary-900 dark:border-primary-900/50 dark:bg-primary-950/30 dark:text-primary-200">
-            <Loader2 className="w-4 h-4 shrink-0 animate-spin" aria-hidden />
-            <span>{t('report.localeSyncing')}</span>
-          </div>
-        )}
 
         {err && (
           <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900/40 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
@@ -754,7 +737,7 @@ export default function InterviewReportPage() {
                                   {t('report.lineParse')}
                                 </div>
                                 <p className="text-[14px] leading-relaxed text-slate-700 dark:text-slate-200 whitespace-pre-wrap">
-                                  {coach.parse}
+                                  <RichText text={coach.parse} />
                                 </p>
                               </div>
                             ) : null}
@@ -767,7 +750,7 @@ export default function InterviewReportPage() {
                                   {coach.improvements.map((g, j) => (
                                     <li key={j} className="flex gap-2 text-[14px] leading-relaxed text-slate-700 dark:text-slate-200">
                                       <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" aria-hidden />
-                                      <span>{g}</span>
+                                      <RichText text={g} />
                                     </li>
                                   ))}
                                 </ul>
@@ -779,7 +762,7 @@ export default function InterviewReportPage() {
                                   {t('report.lineModelAnswer')}
                                 </div>
                                 <p className="text-[14px] leading-relaxed text-slate-800 dark:text-slate-100 whitespace-pre-wrap">
-                                  {coach.modelAnswer}
+                                  <RichText text={coach.modelAnswer} />
                                 </p>
                               </div>
                             ) : null}

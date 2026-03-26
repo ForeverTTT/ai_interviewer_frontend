@@ -195,7 +195,7 @@ export default function InterviewPage() {
       const res = await fetch(`${getBackendBaseUrl()}/api/interviews/${interviewId}/finalize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ messages: transcript, reportUiLanguage: i18n.language }),
+        body: JSON.stringify({ messages: transcript, reportUiLanguage: language }),
       })
       if (!res.ok) {
         let detail = t('report.finalizeFailed')
@@ -211,7 +211,7 @@ export default function InterviewPage() {
     } catch (e) {
       console.error('[finalize]', e); setFinalizeError(t('report.finalizeNetwork'))
     } finally { setFinalizing(false) }
-  }, [interviewId, navigate, t, i18n.language])
+  }, [interviewId, navigate, t, language])
 
   if (!position) return null
 
