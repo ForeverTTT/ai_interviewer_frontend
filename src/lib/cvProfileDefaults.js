@@ -138,14 +138,14 @@ export function mergeCvProfileFromApi(raw) {
 
   return {
     ...base,
-    fullName: normStr(raw.fullName ?? raw.name),
-    gender: normStr(raw.gender || ''),
-    email: normStr(raw.email),
-    phone: normStr(raw.phone ?? raw.tel),
-    location: normStr(raw.location ?? raw.city),
-    linkedIn: normStr(raw.linkedIn ?? raw.linkedin),
-    website: normStr(raw.website ?? raw.portfolio),
-    summary: normStr(raw.summary ?? raw.objective),
+    fullName: normStr(raw.fullName ?? raw.name ?? raw.personalInfo?.fullName),
+    gender: normStr(raw.gender || raw.personalInfo?.gender || ''),
+    email: normStr(raw.email ?? raw.personalInfo?.email),
+    phone: normStr(raw.phone ?? raw.tel ?? raw.personalInfo?.phone),
+    location: normStr(raw.location ?? raw.city ?? raw.personalInfo?.location),
+    linkedIn: normStr(raw.linkedIn ?? raw.linkedin ?? raw.personalInfo?.linkedIn),
+    website: normStr(raw.website ?? raw.portfolio ?? raw.personalInfo?.website),
+    summary: normStr(raw.summary ?? raw.objective ?? raw.personalInfo?.summary),
     workExperience: Array.isArray(raw.workExperience)
       ? raw.workExperience.map(normWork).filter(Boolean)
       : [],

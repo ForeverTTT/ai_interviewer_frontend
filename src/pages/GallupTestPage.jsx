@@ -29,7 +29,8 @@ import {
   Rocket,
   ArrowLeft,
   LayoutGrid,
-  Award
+  Award,
+  X
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
@@ -368,9 +369,21 @@ export default function GallupTestPage() {
                   <div className="flex items-center justify-between px-4 mb-6">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center text-white shadow-lg shadow-primary-600/20 shadow-inner"><Dna className="w-5 h-5" /></div>
-                      <span className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tighter">Question {currentIndex + 1} / {questions.length}</span>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tighter">Question {currentIndex + 1} / {questions.length}</span>
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t('gallup.quitHint', 'Click X to exit')}</span>
+                      </div>
                     </div>
-                    <span className="text-xs font-black text-primary-600 dark:text-primary-400">{Math.round(progress)}%</span>
+                    <div className="flex items-center gap-6">
+                      <span className="text-xs font-black text-primary-600 dark:text-primary-400">{Math.round(progress)}%</span>
+                      <button 
+                        onClick={() => navigate('/profile')}
+                        className="p-2 -mr-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all group"
+                        title={t('gallup.exitBtn', 'Exit Test')}
+                      >
+                        <X className="w-5 h-5 transition-transform group-hover:rotate-90" />
+                      </button>
+                    </div>
                   </div>
                   <div className="h-2 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner"><motion.div className="h-full bg-primary-600 rounded-full" animate={{ width: `${progress}%` }} /></div>
                 </div>
