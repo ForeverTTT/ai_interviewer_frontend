@@ -8,7 +8,8 @@
     "login": "Log in",
     "signUpFree": "Start free",
     "signOut": "Log out",
-    "profile": "Profile"
+    "profile": "Profile",
+    "gallup": "Strengths Test"
   },
   "footer": {
     "tagline": "AI-empowered mock interviews for internships and jobs in Germany. Cutting-edge LLMs, premium voice tech, bespoke questions, and real-time feedback—so you show up prepared.",
@@ -526,5 +527,76 @@
     "uiLanguage": "Display language",
     "themeToggle": "Toggle light or dark theme",
     "interviewThemeToggle": "Toggle interview screen light or dark"
+  },
+  "gallup": {
+    "title": "Gallup Strength Test",
+    "subtitle": "Discover your core talents and unlock your professional potential",
+    "domains": "Four Domains of Strength",
+    "startBtn": "Start Test",
+    "nextBtn": "Next",
+    "prevBtn": "Back",
+    "submitBtn": "Submit Test",
+    "retakeBtn": "Retake Test",
+    "loading": "Generating your analysis report...",
+    "progress": "Progress",
+    "questionCount": "Question {{current}} of {{total}}",
+    "options": {
+      "stronglyDisagree": "Strongly Disagree",
+      "disagree": "Disagree",
+      "neutral": "Neutral",
+      "agree": "Agree",
+      "stronglyAgree": "Strongly Agree"
+    },
+    "domains_info": {
+      "executing": {
+        "name": "Executing",
+        "desc": "Know how to make things happen.",
+        "careers": "Project Manager, Operations Lead, Software Engineer, Auditor, Administrator"
+      },
+      "influencing": {
+        "name": "Influencing",
+        "desc": "Know how to take charge, speak up and make sure the team is heard.",
+        "careers": "Sales Director, PR Specialist, Team Lead, Marketing, Public Speaker"
+      },
+      "relationship": {
+        "name": "Relationship Building",
+        "desc": "Know how to build and nurture strong relationships that hold a team together.",
+        "careers": "HR Specialist, Counselor, Customer Success, Teacher, Team Coordinator"
+      },
+      "strategic": {
+        "name": "Strategic Thinking",
+        "desc": "Know how to absorb and analyze information that informs better decisions.",
+        "careers": "Strategic Consultant, Data Analyst, Product Manager, Researcher, Creative Director"
+      }
+    },
+    "report": {
+      "title": "Your Strength Report",
+      "topDomain": "Your Top Domain",
+      "analysis": "Deep Characteristic Analysis",
+      "careerPath": "Recommended Career Paths",
+      "advice": "Career Development Advice"
+    },
+    "questions": [
+      { "id": 1, "text": "I maintain uncompromising standards for the quality of my output and am deeply committed to achieving excellence in execution.", "domain": "executing" },
+      { "id": 2, "text": "I find that I can naturally guide others through a blend of logic and passion, earning their authentic buy-in for my ideas.", "domain": "influencing" },
+      { "id": 3, "text": "I possess a keen emotional acuity that allows me to sense subtle shifts in others' moods and build profound empathy.", "domain": "relationship" },
+      { "id": 4, "text": "I habitually look beyond immediate constraints to systematically explore potential scenarios and long-term strategic blueprints.", "domain": "strategic" },
+      { "id": 5, "text": "Once a goal is set, I demonstrate immense perseverance, refusing to relent until the objective is fully realized.", "domain": "executing" },
+      { "id": 6, "text": "In complex or ambiguous situations, I instinctively take command to provide clarity and direction for the team.", "domain": "influencing" },
+      { "id": 7, "text": "I believe that team cohesion is the cornerstone of success and strive to cultivate an inclusive, highly collaborative environment.", "domain": "relationship" },
+      { "id": 8, "text": "I am energized by deconstructing complex information to uncover the underlying patterns hidden within data.", "domain": "strategic" },
+      { "id": 9, "text": "I excel at architecting efficient workflows, optimizing resource allocation to ensure every component operates at peak performance.", "domain": "executing" },
+      { "id": 10, "text": "In public forums or social interactions, I consistently elevate the atmosphere and transform engagement into tangible opportunity.", "domain": "influencing" },
+      { "id": 11, "text": "I am naturally inclined to invest in others' growth, finding profound fulfillment in seeing their potential unlocked.", "domain": "relationship" },
+      { "id": 12, "text": "When faced with challenges, I frequently propose unconventional ideas and visionary solutions that disrupt traditional thinking.", "domain": "strategic" },
+      { "id": 13, "text": "I view commitment as a core value, upholding my responsibilities with unwavering integrity even under significant external pressure.", "domain": "executing" },
+      { "id": 14, "text": "I am adept at communicating a compelling vision at scale, inspiring broad audiences to take decisive action.", "domain": "influencing" },
+      { "id": 15, "text": "I possess exceptional conflict-resolution skills, finding the equilibrium among diverse interests to drive consensus.", "domain": "relationship" },
+      { "id": 16, "text": "Before initiating action, I conduct comprehensive risk assessments and meticulous planning to ensure a successful outcome.", "domain": "strategic" },
+      { "id": 17, "text": "I am driven by an internal competitive fire to constantly surpass my own limits and reject mediocrity in all forms.", "domain": "executing" },
+      { "id": 18, "text": "I thrive in competitive environments, viewing victory as a vital benchmark for validating my personal capabilities.", "domain": "influencing" },
+      { "id": 19, "text": "I place immense value on long-term partnerships built on deep trust rather than temporary interactions based on short-term gain.", "domain": "relationship" },
+      { "id": 20, "text": "I have an insatiable intellectual curiosity, constantly seeking to integrate knowledge from diverse and unfamiliar domains.", "domain": "strategic" }
+    ]
   }
 }

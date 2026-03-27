@@ -8,7 +8,8 @@
     "login": "Anmelden",
     "signUpFree": "Kostenlos starten",
     "signOut": "Abmelden",
-    "profile": "Profil"
+    "profile": "Profil",
+    "gallup": "Stärkentest"
   },
   "footer": {
     "tagline": "KI-gestütztes Mock-Interview für Praktika und Jobs in Deutschland. Modernste Sprachmodelle, hochwertige Sprachtechnologie, massgeschneiderte Fragen und Echtzeit-Feedback — damit du vorbereitet auftauchst.",
@@ -526,5 +527,76 @@
     "uiLanguage": "Oberflächensprache",
     "themeToggle": "Heller- oder Dunkelmodus",
     "interviewThemeToggle": "Erscheinungsbild im Interview (hell/dunkel)"
+  },
+  "gallup": {
+    "title": "Gallup-Stärkentest",
+    "subtitle": "Entdecken Sie Ihre Kerntalente und entfalten Sie Ihr berufliches Potenzial",
+    "domains": "Vier Bereiche der Stärke",
+    "startBtn": "Test starten",
+    "nextBtn": "Weiter",
+    "prevBtn": "Zurück",
+    "submitBtn": "Test absenden",
+    "retakeBtn": "Test wiederholen",
+    "loading": "Ihr Analysebericht wird erstellt...",
+    "progress": "Fortschritt",
+    "questionCount": "Frage {{current}} von {{total}}",
+    "options": {
+      "stronglyDisagree": "Stimme gar nicht zu",
+      "disagree": "Stimme nicht zu",
+      "neutral": "Neutral",
+      "agree": "Stimme zu",
+      "stronglyAgree": "Stimme voll und ganz zu"
+    },
+    "domains_info": {
+      "executing": {
+        "name": "Durchführung (Executing)",
+        "desc": "Sie wissen, wie man Dinge anpackt und umsetzt.",
+        "careers": "Projektleiter, Betriebsleiter, Software-Ingenieur, Rechnungsprüfer, Administrator"
+      },
+      "influencing": {
+        "name": "Einflussnahme (Influencing)",
+        "desc": "Sie wissen, wie man die Führung übernimmt, sich Gehör verschafft und sicherstellt, dass das Team gehört wird.",
+        "careers": "Vertriebsleiter, PR-Spezialist, Teamleiter, Marketing, Redner"
+      },
+      "relationship": {
+        "name": "Beziehungsaufbau (Relationship Building)",
+        "desc": "Sie wissen, wie man starke Beziehungen aufbaut und pflegt, die ein Team zusammenhalten.",
+        "careers": "HR-Spezialist, Berater, Customer Success, Lehrer, Teamkoordinator"
+      },
+      "strategic": {
+        "name": "Strategisches Denken (Strategic Thinking)",
+        "desc": "Sie wissen, wie man Informationen aufnimmt und analysiert, um bessere Entscheidungen zu treffen.",
+        "careers": "Strategieberater, Datenanalyst, Produktmanager, Forscher, Creative Director"
+      }
+    },
+    "report": {
+      "title": "Ihr Stärkenbericht",
+      "topDomain": "Ihr Hauptbereich",
+      "analysis": "Tiefe Merkmalsanalyse",
+      "careerPath": "Empfohlene Karrierewege",
+      "advice": "Karriereberatung"
+    },
+    "questions": [
+      { "id": 1, "text": "Ich lege kompromisslose Maßstäbe an die Qualität meiner Ergebnisse an und setze mich leidenschaftlich für exzellente Ausführung ein.", "domain": "executing" },
+      { "id": 2, "text": "Ich stelle fest, dass ich andere auf natürliche Weise durch eine Mischung aus Logik und Leidenschaft führen kann und echte Zustimmung für meine Ideen gewinne.", "domain": "influencing" },
+      { "id": 3, "text": "Ich besitze eine ausgeprägte emotionale Schärfe, die es mir ermöglicht, subtile Stimmungsschwankungen bei anderen wahrzunehmen und tiefes Einfühlungsvermögen aufzubauen.", "domain": "relationship" },
+      { "id": 4, "text": "Ich blicke gewohnheitsmäßig über unmittelbare Sachzwänge hinaus, um systematisch potenzielle Szenarien und langfristige strategische Blaupausen zu entwerfen.", "domain": "strategic" },
+      { "id": 5, "text": "Sobald ein Ziel gesetzt ist, beweise ich enorme Beharrlichkeit und lasse nicht locker, bis das Ziel vollständig erreicht ist.", "domain": "executing" },
+      { "id": 6, "text": "In komplexen oder unklaren Situationen übernehme ich instinktiv das Kommando, um dem Team Klarheit und Orientierung zu geben.", "domain": "influencing" },
+      { "id": 7, "text": "Ich bin davon überzeugt, dass der Zusammenhalt des Teams der Grundstein für den Erfolg ist, und bemühe mich um ein integratives, kooperatives Umfeld.", "domain": "relationship" },
+      { "id": 8, "text": "Es motiviert mich, komplexe Informationen zu zerlegen, um die zugrunde liegenden Muster in den Daten aufzudecken.", "domain": "strategic" },
+      { "id": 9, "text": "Ich bin versiert darin, effiziente Arbeitsabläufe zu gestalten und die Ressourcenzuordnung zu optimieren, damit jede Komponente Höchstleistung erbringt.", "domain": "executing" },
+      { "id": 10, "text": "In öffentlichen Foren oder sozialen Interaktionen hebe ich beständig die Atmosphäre und verwandle Engagement in greifbare Chancen.", "domain": "influencing" },
+      { "id": 11, "text": "Ich neige von Natur aus dazu, in das Wachstum anderer zu investieren, und finde tiefe Erfüllung darin, deren Potenzial entfaltet zu sehen.", "domain": "relationship" },
+      { "id": 12, "text": "Bei Herausforderungen schlage ich häufig unkonventionelle Ideen und visionäre Lösungen vor, die traditionelles Denken aufbrechen.", "domain": "strategic" },
+      { "id": 13, "text": "Ich betrachte Verpflichtung als Kernwert und nehme meine Verantwortung mit unerschütterlicher Integrität wahr, selbst unter erheblichem äußerem Druck.", "domain": "executing" },
+      { "id": 14, "text": "Ich verstehe es, eine überzeugende Vision in großem Rahmen zu kommunizieren und ein breites Publikum zu entschlossenem Handeln zu inspirieren.", "domain": "influencing" },
+      { "id": 15, "text": "Ich verfüge über außergewöhnliche Fähigkeiten zur Konfliktlösung und finde das Gleichgewicht zwischen unterschiedlichen Interessen, um einen Konsens herbeizuführen.", "domain": "relationship" },
+      { "id": 16, "text": "Bevor ich Maßnahmen ergreife, führe ich umfassende Risikobewertungen und eine akribische Planung durch, um ein erfolgreiches Ergebnis sicherzustellen.", "domain": "strategic" },
+      { "id": 17, "text": "Ich werde von einem inneren Wettbewerbsfeuer angetrieben, ständig meine eigenen Grenzen zu überschreiten und Mittelmäßigkeit in jeder Form abzulehnen.", "domain": "executing" },
+      { "id": 18, "text": "Ich blühe in Wettbewerbssituationen auf und betrachte den Sieg als wichtigen Maßstab für die Bestätigung meiner persönlichen Fähigkeiten.", "domain": "influencing" },
+      { "id": 19, "text": "Ich lege immensen Wert auf langfristige Partnerschaften, die auf tiefem Vertrauen basieren, anstatt auf temporäre Interaktionen, die auf kurzfristigem Gewinn beruhen.", "domain": "relationship" },
+      { "id": 20, "text": "Ich besitze eine unstillbare intellektuelle Neugier und bestrebe ständig, Wissen aus unterschiedlichen und mir unbekannten Bereichen zu integrieren.", "domain": "strategic" }
+    ]
   }
 }

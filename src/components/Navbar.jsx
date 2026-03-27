@@ -91,6 +91,16 @@ export default function Navbar() {
                 >
                   {t('nav.profile')}
                 </Link>
+                <Link
+                  to="/gallup"
+                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive('/gallup')
+                      ? 'bg-white text-primary-700 shadow-soft ring-1 ring-slate-200/80 dark:bg-slate-800 dark:text-primary-300 dark:ring-slate-600'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/80'
+                  }`}
+                >
+                  {t('nav.gallup')}
+                </Link>
               </>
             )}
           </div>
@@ -175,6 +185,7 @@ export default function Navbar() {
               <Link to="/setup" className="block px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl font-medium transition-colors dark:text-slate-200 dark:hover:bg-slate-800" onClick={() => setMobileOpen(false)}>{t('nav.startInterview')}</Link>
               <Link to="/dashboard" className="block px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl font-medium transition-colors dark:text-slate-200 dark:hover:bg-slate-800" onClick={() => setMobileOpen(false)}>{t('nav.history')}</Link>
               <Link to="/profile" className="block px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl font-medium transition-colors dark:text-slate-200 dark:hover:bg-slate-800" onClick={() => setMobileOpen(false)}>{t('nav.profile')}</Link>
+              <Link to="/gallup" className="block px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl font-medium transition-colors dark:text-slate-200 dark:hover:bg-slate-800" onClick={() => setMobileOpen(false)}>{t('nav.gallup')}</Link>
               <button onClick={handleSignOut} className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium transition-colors dark:hover:bg-red-950/40">{t('nav.signOut')}</button>
             </>
           ) : (

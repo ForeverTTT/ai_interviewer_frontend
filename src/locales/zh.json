@@ -8,7 +8,8 @@
     "login": "登录",
     "signUpFree": "免费开始",
     "signOut": "退出登录",
-    "profile": "个人资料"
+    "profile": "个人资料",
+    "gallup": "优势测试"
   },
   "footer": {
     "tagline": "专为赴德实习与求职打造的 AI 赋能模拟面试平台。最新大模型 + 高保真语音 + 专属题库 + 实时点评，让你在真实面试里稳得住、说得清。",
@@ -612,5 +613,83 @@
     "uiLanguage": "界面语言",
     "themeToggle": "切换浅色或深色主题",
     "interviewThemeToggle": "切换面试界面浅色或深色"
+  },
+  "gallup": {
+    "title": "盖洛普优势测试 (Gallup Strengths Test)",
+    "subtitle": "发现你的核心天赋，开启职场成功之路",
+    "domains": "四大优势领域",
+    "startBtn": "开始优势测评",
+    "resumeBtn": "继续未完成的测评",
+    "viewReport": "查看测评报告",
+    "restartBtn": "重新开始",
+    "confirmRestartTitle": "重置测评确认",
+    "confirmRestart": "确定要重新开始吗？当前的进度将会丢失，无法找回。",
+    "confirmBtn": "确认重置",
+    "cancelBtn": "返回测试",
+    "nextBtn": "下一题",
+    "prevBtn": "上一题",
+    "submitBtn": "提交测试",
+    "retakeBtn": "重新测试",
+    "loading": "正在生成分析报告...",
+    "progress": "测试进度",
+    "questionCount": "第 {{current}} 题 / 共 {{total}} 题",
+    "options": {
+      "stronglyDisagree": "非常不同意",
+      "disagree": "不同意",
+      "neutral": "一般",
+      "agree": "同意",
+      "stronglyAgree": "非常同意"
+    },
+    "domains_info": {
+      "executing": {
+        "name": "执行力 (Executing)",
+        "desc": "擅长将想法付诸实践，让事情真正落地。",
+        "careers": "项目经理, 运营主管, 软件工程师, 财务审计, 行政管理"
+      },
+      "influencing": {
+        "name": "影响力 (Influencing)",
+        "desc": "擅长销售想法，确保团队的声音被听到。",
+        "careers": "销售总监, 公关专家, 团队领导, 市场营销, 演讲家"
+      },
+      "relationship": {
+        "name": "关系建立 (Relationship Building)",
+        "desc": "擅长维系团队，使团队凝聚力更强。",
+        "careers": "HR 专家, 心理咨询师, 客户成功, 教师, 团队协调员"
+      },
+      "strategic": {
+        "name": "战略思维 (Strategic Thinking)",
+        "desc": "擅长分析信息并做出更好的决策。",
+        "careers": "战略顾问, 数据分析师, 产品经理, 研究员, 创意总监"
+      }
+    },
+    "report": {
+      "title": "你的优势报告",
+      "topDomain": "你的首要领域",
+      "analysis": "深度特征分析",
+      "careerPath": "推荐职业路径",
+      "advice": "职场发展建议"
+    },
+    "questions": [
+      { "id": 1, "text": "我对自己产出的工作质量有着近乎严苛的标准，并始终致力于实现卓越的执行结果。", "domain": "executing" },
+      { "id": 2, "text": "我发现自己能够自然地通过逻辑和热情引导他人，使他们认同并支持我的观点。", "domain": "influencing" },
+      { "id": 3, "text": "我具备敏锐的情感触觉，能够洞察他人的微小情绪变化并建立深刻的共鸣。", "domain": "relationship" },
+      { "id": 4, "text": "我习惯于跳出当下的局限，系统性地思考各种潜在的可能性及未来的战略蓝图。", "domain": "strategic" },
+      { "id": 5, "text": "一旦设定目标，我会表现出极强的毅力，不达目的绝不罢休，且享受攻克难关的过程。", "domain": "executing" },
+      { "id": 6, "text": "在复杂或不确定的局势中，我往往会本能地接过指挥权，为团队指明前进方向。", "domain": "influencing" },
+      { "id": 7, "text": "我深信团队的凝聚力是成功的核心，并致力于创造一个包容且高度协作的工作环境。", "domain": "relationship" },
+      { "id": 8, "text": "我热衷于拆解复杂信息，通过严密的逻辑推演发现隐藏在数据背后的底层规律。", "domain": "strategic" },
+      { "id": 9, "text": "我善于构建高效的运作流程，通过优化资源配置确保每一个环节都能发挥最大效能。", "domain": "executing" },
+      { "id": 10, "text": "在公众场合或社交互动中，我总能以积极的状态影响氛围，并将互动转化为机会。", "domain": "influencing" },
+      { "id": 11, "text": "我倾向于投资他人的成长，看到他人潜力的激发会给我带来极大的职业成就感。", "domain": "relationship" },
+      { "id": 12, "text": "面对挑战时，我总能另辟蹊径，提出具有颠覆性的创意或极具远见的解决方案。", "domain": "strategic" },
+      { "id": 13, "text": "我将承诺视为最核心的价值，无论面临多大的外部压力，都会坚守职责的底线。", "domain": "executing" },
+      { "id": 14, "text": "我擅长通过极具感染力的表达方式，在更广阔的层面上传递愿景并激发听众的行动。", "domain": "influencing" },
+      { "id": 15, "text": "我具有卓越的冲突解决能力，能够在多元化的诉求中找到平衡点并驱动共识。", "domain": "relationship" },
+      { "id": 16, "text": "在采取行动之前，我会进行全方位的风险评估和详尽的规划，确胜券在握。", "domain": "strategic" },
+      { "id": 17, "text": "我拥有一种内在的竞争动力，不断追求自我超越，并将‘平庸’视为最大的挑战。", "domain": "executing" },
+      { "id": 18, "text": "我喜欢在竞争环境中验证自己的实力，并将胜利视为衡量个人成就的重要指标。", "domain": "influencing" },
+      { "id": 19, "text": "我极其看重基于深厚信任的长期伙伴关系，而非依赖于短期利益的临时互动。", "domain": "relationship" },
+      { "id": 20, "text": "我拥有一种持续的求知欲，乐于探索未知领域，并能快速整合不同领域的知识。", "domain": "strategic" }
+    ]
   }
 }

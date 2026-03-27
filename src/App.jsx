@@ -11,6 +11,7 @@ import DashboardPage from './pages/DashboardPage'
 import InterviewReportPage from './pages/InterviewReportPage'
 import AuthCallbackPage from './pages/AuthCallbackPage'
 import ProfilePage from './pages/ProfilePage'
+import GallupTestPage from './pages/GallupTestPage'
 
 function Layout({ children, hideFooter = false }) {
   return (
@@ -89,6 +90,14 @@ export default function App() {
             <ProtectedRoute>
               <Layout>
                 <InterviewReportPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/gallup" element={
+            <ProtectedRoute>
+              <Layout>
+                <GallupTestPage />
               </Layout>
             </ProtectedRoute>
           } />
