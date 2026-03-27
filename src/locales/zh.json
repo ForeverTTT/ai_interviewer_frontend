@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "InterviewDE - AI 赋能德国面试训练"
+    "title": "OfferClaw - AI 赋能德国面试训练"
   },
   "lang": {
     "zh": "中文",
@@ -28,7 +28,7 @@
     "loginRegister": "登录/注册",
     "supportLang": "支持德语 & 英语面试",
     "roles": "覆盖 Werkstudent / Praktikum",
-    "copyright": "© 2025 InterviewDE. All rights reserved.",
+    "copyright": "© 2025 OfferClaw. All rights reserved.",
     "powered": "AI 赋能 · 前沿大模型与语音 · 为赴德人才而生"
   },
   "landing": {
@@ -41,7 +41,7 @@
     "ctaSecondary": "了解如何使用",
     "previewSuccess": "全德求职胜率提升",
     "previewMatchRate": "AI 核心大模型精准对齐",
-    "previewTitle": "InterviewDE — 模拟面试进行中",
+    "previewTitle": "OfferClaw — 模拟面试进行中",
     "you": "你",
     "coachBannerKicker": "新功能",
     "coachBannerTitle": "AI 简历深度诊断，已接入个人资料",
@@ -88,7 +88,7 @@
     "featuresTitle": "一切为了你通过面试",
     "featuresSub": "从 JD 智能解析到多角色对谈，再到实时评价与复盘—顶尖 AI 能力与真实面试方法论合二为一。",
     "howBadge": "使用流程",
-    "howTitle": "如何使用 InterviewDE",
+    "howTitle": "如何使用 OfferClaw",
     "howSub": "从粘贴 JD 到语音对练，全流程浏览器内完成：多智能体编排、神经语音、与面试同步的反馈链路。",
     "howCta": "免费开始练习",
     "howMainTitle": "智能面试流程与界面，一目了然",
@@ -148,7 +148,7 @@
     "ctaEndFoot": "✓ 完全免费   ✓ Google 账号一键登录   ✓ 无需安装",
     "advantages": {
       "badge": "我们的优势",
-      "title": "为什么选择 InterviewDE",
+      "title": "为什么选择 OfferClaw",
       "sub": "针对当前 AI 面试工具的局限，提供更深入、更垂直、更具导师意义的闭环体验。",
       "v1t": "深度垂直与个性化定位",
       "v1d": "解决目前 AI 面试缺少垂直化赛道、没有针对性的痛点。我们根据简历和具体职位深度提问，提供高质量、个性化定制的面试体验。",
@@ -821,26 +821,106 @@
       "disclaimer": "* 基于您的首要才干特征及其在德企语境下的映射分析。"
     },
     "questions": [
-      { "id": 1, "text": "我对自己产出的工作质量有着近乎严苛的标准，并始终致力于实现卓越的执行结果。", "domain": "executing" },
-      { "id": 2, "text": "我发现自己能够自然地通过逻辑和热情引导他人，使他们认同并支持我的观点。", "domain": "influencing" },
-      { "id": 3, "text": "我具备敏锐的情感触觉，能够洞察他人的微小情绪变化并建立深刻的共鸣。", "domain": "relationship" },
-      { "id": 4, "text": "我习惯于跳出当下的局限，系统性地思考各种潜在的可能性及未来的战略蓝图。", "domain": "strategic" },
-      { "id": 5, "text": "一旦设定目标，我会表现出极强的毅力，不达目的绝不罢休，且享受攻克难关的过程。", "domain": "executing" },
-      { "id": 6, "text": "在复杂或不确定的局势中，我往往会本能地接过指挥权，为团队指明前进方向。", "domain": "influencing" },
-      { "id": 7, "text": "我深信团队的凝聚力是成功的核心，并致力于创造一个包容且高度协作的工作环境。", "domain": "relationship" },
-      { "id": 8, "text": "我热衷于拆解复杂信息，通过严密的逻辑推演发现隐藏在数据背后的底层规律。", "domain": "strategic" },
-      { "id": 9, "text": "我善于构建高效的运作流程，通过优化资源配置确保每一个环节都能发挥最大效能。", "domain": "executing" },
-      { "id": 10, "text": "在公众场合或社交互动中，我总能以积极的状态影响氛围，并将互动转化为机会。", "domain": "influencing" },
-      { "id": 11, "text": "我倾向于投资他人的成长，看到他人潜力的激发会给我带来极大的职业成就感。", "domain": "relationship" },
-      { "id": 12, "text": "面对挑战时，我总能另辟蹊径，提出具有颠覆性的创意或极具远见的解决方案。", "domain": "strategic" },
-      { "id": 13, "text": "我将承诺视为最核心的价值，无论面临多大的外部压力，都会坚守职责的底线。", "domain": "executing" },
-      { "id": 14, "text": "我擅长通过极具感染力的表达方式，在更广阔的层面上传递愿景并激发听众的行动。", "domain": "influencing" },
-      { "id": 15, "text": "我具有卓越的冲突解决能力，能够在多元化的诉求中找到平衡点并驱动共识。", "domain": "relationship" },
-      { "id": 16, "text": "在采取行动之前，我会进行全方位的风险评估和详尽的规划，确胜券在握。", "domain": "strategic" },
-      { "id": 17, "text": "我拥有一种内在的竞争动力，不断追求自我超越，并将‘平庸’视为最大的挑战。", "domain": "executing" },
-      { "id": 18, "text": "我喜欢在竞争环境中验证自己的实力，并将胜利视为衡量个人成就的重要指标。", "domain": "influencing" },
-      { "id": 19, "text": "我极其看重基于深厚信任的长期伙伴关系，而非依赖于短期利益的临时互动。", "domain": "relationship" },
-      { "id": 20, "text": "我拥有一种持续的求知欲，乐于探索未知领域，并能快速整合不同领域的知识。", "domain": "strategic" }
+      {
+        "id": 1,
+        "text": "我对自己产出的工作质量有着近乎严苛的标准，并始终致力于实现卓越的执行结果。",
+        "domain": "executing"
+      },
+      {
+        "id": 2,
+        "text": "我发现自己能够自然地通过逻辑和热情引导他人，使他们认同并支持我的观点。",
+        "domain": "influencing"
+      },
+      {
+        "id": 3,
+        "text": "我具备敏锐的情感触觉，能够洞察他人的微小情绪变化并建立深刻的共鸣。",
+        "domain": "relationship"
+      },
+      {
+        "id": 4,
+        "text": "我习惯于跳出当下的局限，系统性地思考各种潜在的可能性及未来的战略蓝图。",
+        "domain": "strategic"
+      },
+      {
+        "id": 5,
+        "text": "一旦设定目标，我会表现出极强的毅力，不达目的绝不罢休，且享受攻克难关的过程。",
+        "domain": "executing"
+      },
+      {
+        "id": 6,
+        "text": "在复杂或不确定的局势中，我往往会本能地接过指挥权，为团队指明前进方向。",
+        "domain": "influencing"
+      },
+      {
+        "id": 7,
+        "text": "我深信团队的凝聚力是成功的核心，并致力于创造一个包容且高度协作的工作环境。",
+        "domain": "relationship"
+      },
+      {
+        "id": 8,
+        "text": "我热衷于拆解复杂信息，通过严密的逻辑推演发现隐藏在数据背后的底层规律。",
+        "domain": "strategic"
+      },
+      {
+        "id": 9,
+        "text": "我善于构建高效的运作流程，通过优化资源配置确保每一个环节都能发挥最大效能。",
+        "domain": "executing"
+      },
+      {
+        "id": 10,
+        "text": "在公众场合或社交互动中，我总能以积极的状态影响氛围，并将互动转化为机会。",
+        "domain": "influencing"
+      },
+      {
+        "id": 11,
+        "text": "我倾向于投资他人的成长，看到他人潜力的激发会给我带来极大的职业成就感。",
+        "domain": "relationship"
+      },
+      {
+        "id": 12,
+        "text": "面对挑战时，我总能另辟蹊径，提出具有颠覆性的创意或极具远见的解决方案。",
+        "domain": "strategic"
+      },
+      {
+        "id": 13,
+        "text": "我将承诺视为最核心的价值，无论面临多大的外部压力，都会坚守职责的底线。",
+        "domain": "executing"
+      },
+      {
+        "id": 14,
+        "text": "我擅长通过极具感染力的表达方式，在更广阔的层面上传递愿景并激发听众的行动。",
+        "domain": "influencing"
+      },
+      {
+        "id": 15,
+        "text": "我具有卓越的冲突解决能力，能够在多元化的诉求中找到平衡点并驱动共识。",
+        "domain": "relationship"
+      },
+      {
+        "id": 16,
+        "text": "在采取行动之前，我会进行全方位的风险评估和详尽的规划，确胜券在握。",
+        "domain": "strategic"
+      },
+      {
+        "id": 17,
+        "text": "我拥有一种内在的竞争动力，不断追求自我超越，并将‘平庸’视为最大的挑战。",
+        "domain": "executing"
+      },
+      {
+        "id": 18,
+        "text": "我喜欢在竞争环境中验证自己的实力，并将胜利视为衡量个人成就的重要指标。",
+        "domain": "influencing"
+      },
+      {
+        "id": 19,
+        "text": "我极其看重基于深厚信任的长期伙伴关系，而非依赖于短期利益的临时互动。",
+        "domain": "relationship"
+      },
+      {
+        "id": 20,
+        "text": "我拥有一种持续的求知欲，乐于探索未知领域，并能快速整合不同领域的知识。",
+        "domain": "strategic"
+      }
     ]
   }
 }

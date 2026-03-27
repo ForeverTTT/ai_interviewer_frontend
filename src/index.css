@@ -25,7 +25,7 @@
     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
   }
   .shadow-glow-brand {
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
   }
 
   /* Subtitle Accent */
@@ -119,8 +119,8 @@
   }
   
   ::selection {
-    background-color: #dbeafe; /* brand-100 */
-    color: #1e3a8a; /* brand-900 */
+    background-color: #ffedd5; /* orange-100 */
+    color: #7c2d12; /* orange-900 */
   }
 
   .dark body {
@@ -129,8 +129,8 @@
   
   /* brand-900 with 30% alpha */
   .dark ::selection {
-    background-color: rgba(30, 58, 138, 0.3);
-    color: #dbeafe; /* brand-100 */
+    background-color: rgba(124, 45, 18, 0.3);
+    color: #ffedd5; /* orange-100 */
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -148,8 +148,8 @@
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-3 px-12 py-5 bg-indigo-600 text-white font-black rounded-full shadow-[0_15px_30px_-10px_rgba(79,70,229,0.4)] transition-all duration-500 hover:bg-indigo-500 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-12px_rgba(79,70,229,0.5)] active:scale-[0.96] active:translate-y-0 active:shadow-inner focus:ring-4 focus:ring-indigo-500/20 relative overflow-hidden font-chinese-modern uppercase tracking-wider;
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    @apply inline-flex items-center justify-center gap-3 px-12 py-5 bg-orange-600 text-white font-black rounded-full shadow-[0_15px_30px_-10px_rgba(249,115,22,0.4)] transition-all duration-500 hover:bg-orange-500 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-12px_rgba(249,115,22,0.5)] active:scale-[0.96] active:translate-y-0 active:shadow-inner focus:ring-4 focus:ring-orange-500/20 relative overflow-hidden font-chinese-modern uppercase tracking-wider;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
   }
 
   .btn-primary-dark {
@@ -185,11 +185,11 @@
   }
   
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-primary-600 font-black;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 font-black;
   }
 
   .dark .gradient-text {
-    @apply from-indigo-400 via-violet-400 to-primary-400;
+    @apply from-orange-300 via-orange-400 to-orange-500;
   }
 
   .section-badge {

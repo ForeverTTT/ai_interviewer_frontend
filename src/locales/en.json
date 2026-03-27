@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "InterviewDE - AI-Powered Interview Training for Germany"
+    "title": "OfferClaw - AI-Powered Interview Training for Germany"
   },
   "lang": {
     "zh": "中文",
@@ -28,7 +28,7 @@
     "loginRegister": "Login/Register",
     "supportLang": "German & English Support",
     "roles": "Covers Werkstudent / Praktikum",
-    "copyright": "© 2025 InterviewDE. All rights reserved.",
+    "copyright": "© 2025 OfferClaw. All rights reserved.",
     "powered": "AI Powered · Next-Gen Models & Voice · Built for Talents in Germany"
   },
   "landing": {
@@ -41,7 +41,7 @@
     "ctaSecondary": "Learn How it Works",
     "previewSuccess": "Success Rate Boost",
     "previewMatchRate": "AI Foundation Precision",
-    "previewTitle": "InterviewDE — Mock Interview in Progress",
+    "previewTitle": "OfferClaw — Mock Interview in Progress",
     "you": "You",
     "coachBannerKicker": "NEW",
     "coachBannerTitle": "AI Resume Diagnostic Now Integrated",
@@ -88,7 +88,7 @@
     "featuresTitle": "Everything You Need to Get Hired",
     "featuresSub": "From JD parsing to multi-agent roleplay and real-time feedback—cutting-edge AI meets proven interview methodology.",
     "howBadge": "Our Process",
-    "howTitle": "How InterviewDE Works",
+    "howTitle": "How OfferClaw Works",
     "howSub": "From JD pasting to voice training, all in your browser: Multi-agent orchestration, neural voice, and real-time feedback loops.",
     "howCta": "Start Practice for Free",
     "howMainTitle": "Smart Interview Workflow at a Glance",
@@ -148,7 +148,7 @@
     "ctaEndFoot": "✓ Fully Free   ✓ Google One-Tap Login   ✓ No Install Required",
     "advantages": {
       "badge": "Our Advantages",
-      "title": "Why Choose InterviewDE",
+      "title": "Why Choose OfferClaw",
       "sub": "Addressing the gaps of current AI interview tools with more detailed, vertical, and mentor-led experiences.",
       "v1t": "Vertical and Personalized Customization",
       "v1d": "Solves the current issues of AI mock interviews lacking vertical focus and targeting. We ask deep questions based on your CV and specific role to provide a high-quality, customized interview experience.",
@@ -168,7 +168,7 @@
   },
   "login": {
     "back": "Back Home",
-    "welcome": "Welcome to InterviewDE",
+    "welcome": "Welcome to OfferClaw",
     "subtitle": "Login to unlock AI-powered interview training",
     "google": "Login with Google",
     "linkedin": "Login with LinkedIn",

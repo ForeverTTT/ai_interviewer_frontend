@@ -87,11 +87,11 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-[1.1] group-hover:rotate-3 shadow-lg shadow-indigo-500/20 duration-500">
-              <BrainCircuit className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-orange-500 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-[1.1] group-hover:rotate-3 shadow-lg shadow-orange-500/20 duration-500 overflow-hidden">
+              <img src="/crab_logo.png" alt="OfferClaw Logo" className="w-8 h-8 object-contain" />
             </div>
             <span className="font-black text-xl tracking-tighter text-slate-900 dark:text-white uppercase leading-none">
-              Interview<span className="gradient-text">DE</span>
+              Offer<span className="text-orange-500">Claw</span>
             </span>
           </Link>
 

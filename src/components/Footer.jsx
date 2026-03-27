@@ -13,11 +13,11 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12">
           <div>
             <Link to="/" className="inline-flex items-center gap-2.5 mb-5 group">
-              <div className="w-9 h-9 bg-gradient-to-br from-primary-600 to-violet-600 rounded-xl flex items-center justify-center shadow-lg ring-1 ring-white/10 group-hover:ring-primary-400/30 transition-all">
-                <BrainCircuit className="w-5 h-5 text-white" />
+              <div className="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg ring-1 ring-white/10 group-hover:ring-orange-400/30 transition-all overflow-hidden">
+                <img src="/crab_logo.png" alt="OfferClaw Logo" className="w-7 h-7 object-contain" />
               </div>
               <span className="font-bold text-lg tracking-tight text-slate-900 dark:text-white">
-                Interview<span className="text-primary-600 dark:text-primary-400">DE</span>
+                Offer<span className="text-orange-500">Claw</span>
               </span>
             </Link>
             <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 max-w-sm">
@@ -41,7 +41,7 @@ export default function Footer() {
             <ul className="space-y-2.5 text-sm">
               <li className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
                 <Mail className="w-4 h-4 shrink-0 text-slate-500 dark:text-slate-500" />
-                <span>support@interviewde.app</span>
+                <span>support@offerclaw.com</span>
               </li>
               <li><span className="text-slate-500 dark:text-slate-500">{t('footer.supportLang')}</span></li>
               <li><span className="text-slate-500 dark:text-slate-500">{t('footer.roles')}</span></li>

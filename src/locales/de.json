@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "InterviewDE - KI-gestütztes Interview-Training für Deutschland"
+    "title": "OfferClaw - KI-gestütztes Interview-Training für Deutschland"
   },
   "lang": {
     "zh": "中文",
@@ -28,7 +28,7 @@
     "loginRegister": "Login/Registrierung",
     "supportLang": "Deutsch & Englisch Support",
     "roles": "Für Werkstudenten / Praktika",
-    "copyright": "© 2025 InterviewDE. Alle Rechte vorbehalten.",
+    "copyright": "© 2025 OfferClaw. Alle Rechte vorbehalten.",
     "powered": "KI-getrieben · Modernste Modelle & Stimme · Gebaut für Talente in Deutschland"
   },
   "landing": {
@@ -41,7 +41,7 @@
     "ctaSecondary": "So funktioniert es",
     "previewSuccess": "Erfolgsrate-Boost",
     "previewMatchRate": "KI-Präzisionsabgleich",
-    "previewTitle": "InterviewDE — Mock-Interview läuft",
+    "previewTitle": "OfferClaw — Mock-Interview läuft",
     "you": "Ich",
     "coachBannerKicker": "NEU",
     "coachBannerTitle": "KI-Lebenslauf-Diagnostik integriert",
@@ -88,7 +88,7 @@
     "featuresTitle": "Alles, was Sie für den Job brauchen",
     "featuresSub": "Vom JD-Parsing bis zu Multi-Agenten-Roleplay und Echtzeit-Feedback – modernste KI trifft auf bewährte Methodik.",
     "howBadge": "Unser Prozess",
-    "howTitle": "So funktioniert InterviewDE",
+    "howTitle": "So funktioniert OfferClaw",
     "howSub": "Vom Einstellen des JD zum Sprachtraining – alles im Browser: Multi-Agenten-Orchestrierung und Echtzeit-Schleifen.",
     "howCta": "Kostenlos starten",
     "howMainTitle": "Smart Interview Workflow im Überblick",
@@ -148,7 +148,7 @@
     "ctaEndFoot": "✓ Komplett kostenlos   ✓ Google Login   ✓ Keine Installation",
     "advantages": {
       "badge": "Unsere Vorteile",
-      "title": "Warum InterviewDE wählen",
+      "title": "Warum OfferClaw wählen",
       "sub": "Lösung der Lücken aktueller KI-Interview-Tools durch detailliertere, vertikale und mentorgesteuerte Erfahrungen.",
       "v1t": "Vertikale und personalisierte Anpassung",
       "v1d": "Löst die aktuellen Probleme von KI-Mock-Interviews, denen es an vertikalem Fokus und Zielgenauigkeit mangelt. Wir stellen tiefgehende Fragen basierend auf Ihrem Lebenslauf und Ihrer spezifischen Rolle, um ein hochwertiges, individuelles Interviewerlebnis zu bieten.",
@@ -168,7 +168,7 @@
   },
   "login": {
     "back": "Zurück",
-    "welcome": "Willkommen bei InterviewDE",
+    "welcome": "Willkommen bei OfferClaw",
     "subtitle": "Anmelden für KI-gestütztes Training",
     "google": "Login mit Google",
     "linkedin": "Login mit LinkedIn",
