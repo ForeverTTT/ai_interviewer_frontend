@@ -83,118 +83,140 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass">
-      <div
-        className="pointer-events-none absolute bottom-0 left-4 right-4 h-px max-w-7xl mx-auto bg-gradient-to-r from-transparent via-primary-400/25 to-transparent sm:left-6 sm:right-6 lg:left-8 lg:right-8"
-        aria-hidden
-      />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-[4.25rem]">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 bg-gradient-to-br from-primary-600 to-violet-600 rounded-xl flex items-center justify-center shadow-soft ring-1 ring-white/20 group-hover:shadow-glow-primary group-hover:scale-[1.03] transition-all duration-300">
-              <BrainCircuit className="w-5 h-5 text-white" />
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-100 dark:border-slate-900 transition-all duration-500">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="flex items-center justify-between h-20">
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-[1.1] group-hover:rotate-3 shadow-lg shadow-indigo-500/20 duration-500">
+              <BrainCircuit className="w-6 h-6 text-white" />
             </div>
-            <span className="font-bold text-lg tracking-tight text-slate-900 dark:text-slate-100">
-              Interview<span className="text-primary-600 dark:text-primary-400">DE</span>
+            <span className="font-black text-xl tracking-tighter text-slate-900 dark:text-white uppercase leading-none">
+              Interview<span className="gradient-text">DE</span>
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-0.5 p-1 rounded-2xl bg-slate-900/[0.03] ring-1 ring-slate-900/[0.04] dark:bg-white/[0.05] dark:ring-white/[0.08]">
+          <div className="hidden md:flex items-center gap-2">
             <Link
               to="/"
-              className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
-                isActive('/')
-                  ? 'bg-white text-primary-700 shadow-soft ring-1 ring-slate-200/80 dark:bg-slate-800 dark:text-primary-300 dark:ring-slate-600'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/80'
+              className={`relative px-4 py-2 text-sm font-bold transition-all duration-300 ${
+                isActive('/') 
+                  ? 'text-primary-600 dark:text-primary-400' 
+                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               {t('nav.home')}
+              {isActive('/') && (
+                <span className="absolute -bottom-1 left-4 right-4 h-[3px] bg-primary-600 dark:bg-primary-400 rounded-full" />
+              )}
             </Link>
             {user && (
               <>
                 <Link
                   to="/setup"
-                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
-                    isActive('/setup')
-                      ? 'bg-white text-primary-700 shadow-soft ring-1 ring-slate-200/80 dark:bg-slate-800 dark:text-primary-300 dark:ring-slate-600'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/80'
+                  className={`relative px-4 py-2 text-sm font-bold transition-all duration-300 ${
+                    isActive('/setup') 
+                      ? 'text-primary-600 dark:text-primary-400' 
+                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   {t('nav.startInterview')}
+                  {isActive('/setup') && (
+                    <span className="absolute -bottom-1 left-4 right-4 h-[3px] bg-primary-600 dark:bg-primary-400 rounded-full" />
+                  )}
                 </Link>
                 <Link
                   to="/dashboard"
-                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
-                    isActive('/dashboard')
-                      ? 'bg-white text-primary-700 shadow-soft ring-1 ring-slate-200/80 dark:bg-slate-800 dark:text-primary-300 dark:ring-slate-600'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/80'
+                  className={`relative px-4 py-2 text-sm font-bold transition-all duration-300 ${
+                    isActive('/dashboard') 
+                      ? 'text-primary-600 dark:text-primary-400' 
+                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   {t('nav.history')}
+                  {isActive('/dashboard') && (
+                    <span className="absolute -bottom-1 left-4 right-4 h-[3px] bg-primary-600 dark:bg-primary-400 rounded-full" />
+                  )}
                 </Link>
                 <Link
                   to="/profile"
-                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
-                    isActive('/profile')
-                      ? 'bg-white text-primary-700 shadow-soft ring-1 ring-slate-200/80 dark:bg-slate-800 dark:text-primary-300 dark:ring-slate-600'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/80'
+                  className={`relative px-4 py-2 text-sm font-bold transition-all duration-300 ${
+                    isActive('/profile') 
+                      ? 'text-primary-600 dark:text-primary-400' 
+                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   {t('nav.profile')}
+                  {isActive('/profile') && (
+                    <span className="absolute -bottom-1 left-4 right-4 h-[3px] bg-primary-600 dark:bg-primary-400 rounded-full" />
+                  )}
+                </Link>
+                <Link
+                  to="/gallup"
+                  className={`relative px-4 py-2 text-sm font-bold transition-all duration-300 ${
+                    isActive('/gallup') 
+                      ? 'text-primary-600 dark:text-primary-400' 
+                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  {t('nav.gallup')}
+                  {isActive('/gallup') && (
+                    <span className="absolute -bottom-1 left-4 right-4 h-[3px] bg-primary-600 dark:bg-primary-400 rounded-full" />
+                  )}
                 </Link>
               </>
             )}
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
-            <LanguageSwitcher />
-            <AppThemeToggle />
+          <div className="hidden md:flex items-center gap-6">
+            <div className="flex items-center gap-1">
+              <LanguageSwitcher />
+              <AppThemeToggle />
+            </div>
+            
             {user ? (
               <div className="relative">
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2.5 pl-1 pr-3 py-1 rounded-2xl hover:bg-slate-100/80 transition-all duration-200 ring-1 ring-transparent hover:ring-slate-200/80 dark:hover:bg-slate-800/80 dark:hover:ring-slate-600"
+                  className="flex items-center gap-3 pl-2 pr-4 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 transition-all group"
                 >
-                  <div className="relative group/avatar">
-                    <div className={`w-9 h-9 rounded-full bg-gradient-to-br from-primary-500 to-violet-600 flex items-center justify-center text-white text-sm font-bold shadow-soft ring-2 ring-white dark:ring-slate-700 transition-all duration-300 overflow-hidden ${jobStatus === 'hired' ? 'grayscale-[0.3] opacity-90' : ''}`}>
+                  <div className="relative">
+                    <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-black overflow-hidden">
                       {avatarId ? (
                         <img src={`/avatars/${avatarId}.png`} alt="Avatar" className="w-full h-full object-cover" />
                       ) : (
                         user.user_metadata?.full_name?.[0] || user.email?.[0]?.toUpperCase() || 'U'
                       )}
                     </div>
-                    {/* Status Indicator Badge */}
-                    <div 
-                      className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-900 shadow-sm transition-all duration-300 ${
-                        jobStatus === 'seeking' 
-                          ? 'bg-emerald-500 animate-pulse' 
-                          : 'bg-slate-400'
-                      }`}
-                      title={jobStatus === 'seeking' ? t('profile.statusSeeking') : t('profile.statusHired')}
-                    />
+                    <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-950 ${jobStatus === 'seeking' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
                   </div>
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200 max-w-[120px] truncate">
-                    {user.user_metadata?.full_name || user.email}
+                  <span className="text-sm font-bold text-slate-700 dark:text-slate-200 max-w-[100px] truncate">
+                     {user.user_metadata?.full_name || user.email.split('@')[0]}
                   </span>
-                  <ChevronDown className={`w-4 h-4 text-slate-400 dark:text-slate-500 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-52 bg-white/95 backdrop-blur-md rounded-2xl shadow-card border border-slate-200/90 py-1.5 z-50 ring-1 ring-slate-900/[0.04] overflow-hidden dark:bg-slate-900/95 dark:border-slate-700 dark:ring-slate-800">
+                  <div className="absolute right-0 mt-4 w-64 bg-white dark:bg-slate-950 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-900 py-4 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="px-6 py-4 border-b border-slate-50 dark:border-slate-900 mb-2">
+                       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{t('nav.profile')}</p>
+                       <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                         {user.user_metadata?.full_name || user.email}
+                       </p>
+                    </div>
                     <Link
                       to="/dashboard"
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors dark:text-slate-200 dark:hover:bg-slate-800"
+                      className="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
                       onClick={() => setDropdownOpen(false)}
                     >
-                      <LayoutDashboard className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                      <LayoutDashboard className="w-4 h-4" />
                       {t('nav.history')}
                     </Link>
                     <Link
                       to="/profile"
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors dark:text-slate-200 dark:hover:bg-slate-800"
+                      className="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
                       onClick={() => setDropdownOpen(false)}
                     >
-                      <UserCircle className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                      <UserCircle className="w-4 h-4" />
                       {t('nav.profile')}
                     </Link>
                     <button
@@ -202,24 +224,24 @@ export default function Navbar() {
                         e.stopPropagation()
                         toggleJobStatus()
                       }}
-                      className="flex items-center justify-between w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors dark:text-slate-200 dark:hover:bg-slate-800"
+                      className="flex items-center justify-between w-full px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
                     >
-                      <div className="flex items-center gap-2">
-                        <Briefcase className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                        <span className="truncate">{t('profile.status')}</span>
+                      <div className="flex items-center gap-3">
+                        <Briefcase className="w-4 h-4" />
+                        <span>{t('profile.status')}</span>
                       </div>
-                      <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                        jobStatus === 'seeking' 
-                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
-                          : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                      <span className={`px-2 py-1 rounded-lg ${
+                        jobStatus === 'seeking' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
                       }`}>
                         {jobStatus === 'seeking' ? t('profile.statusSeeking') : t('profile.statusHired')}
-                      </div>
+                      </span>
                     </button>
-                    <hr className="my-1 border-slate-100 dark:border-slate-800" />
+                    <div className="my-2 px-6">
+                      <div className="h-px bg-slate-50 dark:bg-slate-900" />
+                    </div>
                     <button
                       onClick={handleSignOut}
-                      className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors dark:hover:bg-red-950/40"
+                      className="flex items-center gap-3 w-full px-6 py-3 text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all"
                     >
                       <LogOut className="w-4 h-4" />
                       {t('nav.signOut')}
@@ -228,46 +250,48 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <>
-                <Link to="/login" className="btn-ghost text-sm">
+              <div className="flex items-center gap-4">
+                <Link to="/login" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white">
                   {t('nav.login')}
                 </Link>
-                <Link to="/login" className="btn-primary text-sm py-2">
+                <Link to="/login" className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-lg shadow-slate-900/10">
                   {t('nav.signUpFree')}
                 </Link>
-              </>
+              </div>
             )}
           </div>
 
-          <div className="flex items-center gap-2 md:hidden">
-            <LanguageSwitcher className="scale-90" />
-            <AppThemeToggle className="scale-90" />
+          <div className="flex items-center gap-4 md:hidden">
             <button
-              className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="p-2 rounded-xl text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900 transition-all"
               onClick={() => setMobileOpen(!mobileOpen)}
             >
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden bg-white/98 backdrop-blur-md border-t border-slate-200/90 px-4 py-4 space-y-1 shadow-[0_-8px_32px_-8px_rgba(15,23,42,0.08)] dark:bg-slate-900/98 dark:border-slate-700">
-          <Link to="/" className="block px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl font-medium transition-colors dark:text-slate-200 dark:hover:bg-slate-800" onClick={() => setMobileOpen(false)}>{t('nav.home')}</Link>
+        <div className="md:hidden bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900 p-8 space-y-6 animate-in slide-in-from-top-4 duration-500 font-chinese-modern uppercase">
+          <Link to="/" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.home')}</Link>
           {user ? (
             <>
-              <Link to="/setup" className="block px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl font-medium transition-colors dark:text-slate-200 dark:hover:bg-slate-800" onClick={() => setMobileOpen(false)}>{t('nav.startInterview')}</Link>
-              <Link to="/dashboard" className="block px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl font-medium transition-colors dark:text-slate-200 dark:hover:bg-slate-800" onClick={() => setMobileOpen(false)}>{t('nav.history')}</Link>
-              <Link to="/profile" className="block px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl font-medium transition-colors dark:text-slate-200 dark:hover:bg-slate-800" onClick={() => setMobileOpen(false)}>{t('nav.profile')}</Link>
-              <button onClick={handleSignOut} className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium transition-colors dark:hover:bg-red-950/40">{t('nav.signOut')}</button>
+              <Link to="/setup" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.startInterview')}</Link>
+              <Link to="/dashboard" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.history')}</Link>
+              <Link to="/profile" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.profile')}</Link>
+              <button onClick={handleSignOut} className="w-full text-left text-2xl font-black text-red-600 py-4 tracking-tighter">{t('nav.signOut')}</button>
             </>
           ) : (
             <>
-              <Link to="/login" className="block px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl font-medium transition-colors dark:text-slate-200 dark:hover:bg-slate-800" onClick={() => setMobileOpen(false)}>{t('nav.login')}</Link>
-              <Link to="/login" className="btn-primary w-full justify-center mt-2" onClick={() => setMobileOpen(false)}>{t('nav.signUpFree')}</Link>
+              <Link to="/login" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.login')}</Link>
+              <Link to="/login" className="block w-full text-center px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black uppercase tracking-widest rounded-full shadow-xl" onClick={() => setMobileOpen(false)}>{t('nav.signUpFree')}</Link>
             </>
           )}
+          <div className="pt-8 flex items-center justify-between border-t border-slate-100 dark:border-slate-900">
+             <LanguageSwitcher />
+             <AppThemeToggle />
+          </div>
         </div>
       )}
     </nav>

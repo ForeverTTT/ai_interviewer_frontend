@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
@@ -21,9 +22,9 @@ function useLocaleTag(i18nLang) {
 
 function langPillClass(lang) {
   if (lang === 'Deutsch') {
-    return 'border-violet-200/90 bg-violet-50 text-violet-800 dark:border-violet-800/60 dark:bg-violet-950/50 dark:text-violet-200'
+    return 'border-violet-200/90 bg-violet-100 text-violet-800 dark:border-violet-700 dark:bg-violet-950/50 dark:text-violet-200 shadow-sm shadow-violet-500/10'
   }
-  return 'border-sky-200/90 bg-sky-50 text-sky-900 dark:border-sky-800/60 dark:bg-sky-950/50 dark:text-sky-200'
+  return 'border-indigo-200/90 bg-indigo-100 text-indigo-900 dark:border-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-200 shadow-sm shadow-indigo-500/10'
 }
 
 export default function DashboardPage() {
@@ -54,10 +55,9 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!pendingDelete) return
-    const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
-      document.body.style.overflow = prev
+      document.body.style.overflow = ''
     }
   }, [pendingDelete])
 
@@ -177,8 +177,6 @@ export default function DashboardPage() {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
     })
   }
 
@@ -191,345 +189,220 @@ export default function DashboardPage() {
   const firstName = user?.user_metadata?.full_name?.split(' ')[0]
 
   const statCards = [
-    {
-      icon: Target,
-      value: interviews.length,
-      label: t('dashboard.statTotal'),
-      grad: 'from-primary-500 to-violet-600',
-      ring: 'ring-primary-100 dark:ring-primary-900/50',
-      topBar: 'from-transparent via-primary-400/55 to-transparent dark:via-primary-500/35',
-    },
-    {
-      icon: Clock,
-      value: `${totalTime}${t('dashboard.minUnit')}`,
-      label: t('dashboard.statTime'),
-      grad: 'from-emerald-500 to-teal-600',
-      ring: 'ring-emerald-100 dark:ring-emerald-900/50',
-      topBar: 'from-transparent via-emerald-400/55 to-transparent dark:via-emerald-500/35',
-    },
-    {
-      icon: Globe2,
-      value: langCounts.Deutsch || 0,
-      label: t('dashboard.statDe'),
-      grad: 'from-violet-500 to-indigo-600',
-      ring: 'ring-violet-100 dark:ring-violet-900/50',
-      topBar: 'from-transparent via-violet-400/55 to-transparent dark:via-violet-500/35',
-    },
-    {
-      icon: TrendingUp,
-      value: langCounts.English || 0,
-      label: t('dashboard.statEn'),
-      grad: 'from-amber-500 to-orange-600',
-      ring: 'ring-amber-100 dark:ring-amber-900/50',
-      topBar: 'from-transparent via-amber-400/55 to-transparent dark:via-amber-500/35',
-    },
+    { icon: Target, value: interviews.length, label: t('dashboard.statTotal'), color: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/20' },
+    { icon: Clock, value: `${totalTime}${t('dashboard.minUnit')}`, label: t('dashboard.statTime'), color: 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/20' },
+    { icon: Globe2, value: langCounts.Deutsch || 0, label: t('dashboard.statDe'), color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20' },
+    { icon: TrendingUp, value: langCounts.English || 0, label: t('dashboard.statEn'), color: 'text-fuchsia-600 dark:text-fuchsia-400 bg-fuchsia-50 dark:bg-fuchsia-950/20' },
   ]
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-100 via-slate-50/90 to-white pt-24 pb-12 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 sm:pb-16">
-      <div className="pointer-events-none absolute inset-0 bg-mesh-subtle opacity-60 dark:opacity-40" aria-hidden />
-      <div className="pointer-events-none absolute inset-0 bg-dot-grid opacity-[0.12] dark:opacity-[0.08]" aria-hidden />
-      <div
-        className="pointer-events-none absolute -top-20 right-0 h-[min(420px,80vw)] w-[min(420px,80vw)] rounded-full bg-primary-200/25 blur-3xl dark:bg-primary-900/20"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute bottom-0 left-0 h-[min(320px,70vw)] w-[min(320px,70vw)] rounded-full bg-violet-200/20 blur-3xl dark:bg-violet-950/30"
-        aria-hidden
-      />
-
-      <div className="relative mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-10">
-        <header className="mb-8 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 shadow-card ring-1 ring-slate-900/[0.04] dark:border-slate-700/80 dark:bg-slate-900/60 dark:ring-white/[0.06] sm:mb-10">
-          <div className="relative border-b border-slate-100 bg-gradient-to-br from-primary-600/[0.08] via-white to-violet-600/[0.07] px-5 py-6 dark:border-slate-800 dark:from-primary-500/10 dark:via-slate-900 dark:to-violet-600/10 sm:px-8 sm:py-7">
-            <div
-              className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary-400/25 to-transparent dark:via-primary-500/15"
-              aria-hidden
-            />
-            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-600 to-violet-600 text-white shadow-lg shadow-primary-600/25 ring-2 ring-white dark:ring-slate-900">
-                  <LayoutDashboard className="h-7 w-7" aria-hidden />
-                </div>
-                <div className="min-w-0">
-                  <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary-200/80 bg-primary-50/90 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary-800 shadow-soft backdrop-blur-sm dark:border-primary-700/50 dark:bg-primary-900/40 dark:text-primary-100">
-                    <Sparkles className="h-3.5 w-3.5 text-primary-600 dark:text-primary-300" aria-hidden />
-                    {t('dashboard.heroBadge')}
-                  </span>
-                  <h1 className="text-balance text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl lg:text-4xl">
-                    {t('dashboard.hello')}
-                    {firstName || t('dashboard.guest')}
-                    <span className="ml-1" aria-hidden>
-                      👋
-                    </span>
-                  </h1>
-                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400 sm:text-base">
-                    {t('dashboard.sub')}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-                <Link
-                  to="/profile"
-                  className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-primary-200 bg-primary-50 px-5 py-2.5 text-sm font-bold text-primary-800 transition-colors hover:bg-primary-100 dark:border-slate-700 dark:bg-slate-800 dark:text-primary-300 dark:hover:bg-slate-700/80"
-                >
-                  <UserCircle className="h-5 w-5 shrink-0" aria-hidden />
-                  {t('profile.title')}
-                </Link>
-                <Link
-                  to="/setup"
-                  className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-primary-600 px-6 py-2.5 text-sm font-bold text-white shadow-md transition hover:from-violet-700 hover:to-primary-700"
-                >
-                  <PlusCircle className="h-5 w-5 shrink-0" aria-hidden />
-                  {t('dashboard.newInterview')}
-                </Link>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-white dark:bg-slate-950 pt-32 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Header Section */}
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="space-y-4"
+          >
+            <div className="section-badge">{t('dashboard.heroBadge')}</div>
+            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white font-serif tracking-tight">
+              {t('dashboard.hello')}{firstName || t('dashboard.guest')}
+            </h1>
+            <p className="text-lg text-slate-500 dark:text-slate-400 max-w-xl">
+              {t('dashboard.sub')}
+            </p>
+          </motion.div>
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex flex-row flex-nowrap items-center gap-3 shrink-0"
+          >
+            <Link to="/profile" className="btn-secondary px-6 py-3 text-xs whitespace-nowrap">
+              <UserCircle className="w-4 h-4" />
+              <span className="shrink-0">{t('profile.title')}</span>
+            </Link>
+            <Link to="/setup" className="btn-primary px-6 py-3 text-xs whitespace-nowrap">
+              <PlusCircle className="w-4 h-4" />
+              <span className="shrink-0">{t('dashboard.newInterview')}</span>
+            </Link>
+          </motion.div>
         </header>
 
-        {/* Gamification Dashboard */}
-        <GamificationDashboard stats={gameStats} onCheckIn={handleCheckIn} interviews={interviews} />
-
-        <div className="mb-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 sm:mb-10">
-          {statCards.map((stat) => {
-            const Icon = stat.icon
-            return (
-              <div
-                key={stat.label}
-                className="group relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-4 shadow-card ring-1 ring-slate-900/[0.03] transition-shadow duration-300 hover:shadow-lg dark:border-slate-700/90 dark:bg-slate-900 dark:ring-white/[0.05] sm:p-5"
-              >
-                <div
-                  className={`absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r ${stat.topBar}`}
-                  aria-hidden
-                />
-                <div
-                  className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${stat.grad} text-white shadow-md ${stat.ring} ring-2 ring-white dark:ring-slate-900`}
-                >
-                  <Icon className="h-5 w-5" aria-hidden />
-                </div>
-                <div className="text-2xl font-black tabular-nums tracking-tight text-slate-900 dark:text-white sm:text-[1.65rem]">
-                  {stat.value}
-                </div>
-                <div className="mt-1 text-xs font-semibold leading-snug text-slate-600 dark:text-slate-400 sm:text-sm">
-                  {stat.label}
-                </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          {statCards.map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.1 }}
+              className="card-premium p-8"
+            >
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 ${stat.color}`}>
+                <stat.icon className="w-6 h-6" />
               </div>
-            )
-          })}
+              <div className="text-3xl font-black text-slate-900 dark:text-white mb-1 tracking-tighter">{stat.value}</div>
+              <div className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{stat.label}</div>
+            </motion.div>
+          ))}
         </div>
 
-        <div className="mb-8 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-card ring-1 ring-slate-900/[0.04] dark:border-slate-700/90 dark:bg-slate-900 dark:ring-white/[0.06] sm:mb-10">
-          <div className="relative border-b border-slate-200/80 bg-gradient-to-br from-primary-600/[0.07] via-white to-violet-600/[0.06] px-5 py-5 dark:border-slate-700/80 dark:from-primary-500/10 dark:via-slate-900 dark:to-violet-600/10 sm:px-8 sm:py-6">
-            <div
-              className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary-400/30 to-transparent dark:via-primary-500/20"
-              aria-hidden
-            />
-            <div className="relative flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div className="flex items-start gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-600 to-violet-600 text-white shadow-md">
-                  <History className="h-5 w-5" aria-hidden />
-                </span>
-                <div>
-                  <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl">
-                    {t('dashboard.history')}
-                  </h2>
-                  <p className="mt-1 max-w-2xl text-sm text-slate-600 dark:text-slate-400">{t('dashboard.historySub')}</p>
-                </div>
-              </div>
-              {interviews.length > 0 ? (
-                <span className="inline-flex w-fit items-center rounded-full border border-slate-200/90 bg-white/80 px-3 py-1 text-xs font-bold text-slate-600 backdrop-blur-sm dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
-                  {interviews.length} {t('dashboard.records')}
-                </span>
-              ) : null}
-            </div>
+        {/* Gamification Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mb-16"
+        >
+          <GamificationDashboard stats={gameStats} onCheckIn={handleCheckIn} interviews={interviews} />
+        </motion.div>
+
+        {/* History Section */}
+        <section className="space-y-8">
+          <div className="flex items-end justify-between">
+            <h2 className="text-3xl font-black text-slate-900 dark:text-white font-serif tracking-tight">
+              {t('dashboard.history')}
+            </h2>
+            {interviews.length > 0 && (
+              <span className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                {interviews.length} {t('dashboard.records')}
+              </span>
+            )}
           </div>
 
           {loading ? (
-            <div className="flex flex-col items-center justify-center gap-4 py-24">
-              <Loader2 className="h-10 w-10 animate-spin text-primary-600 dark:text-primary-400" aria-hidden />
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('dashboard.loading')}</p>
+            <div className="py-20 flex flex-col items-center justify-center gap-4 text-slate-400">
+              <Loader2 className="w-8 h-8 animate-spin" />
+              <p className="text-sm font-medium">{t('dashboard.loading')}</p>
             </div>
           ) : interviews.length === 0 ? (
-            <div className="flex flex-col items-center px-6 py-20 text-center sm:py-24">
-              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500/15 to-violet-600/15 ring-1 ring-primary-200/50 dark:from-primary-500/10 dark:to-violet-600/10 dark:ring-primary-900/40">
-                <Target className="h-10 w-10 text-primary-600 dark:text-primary-400" aria-hidden />
+            <div className="py-32 card-premium border-2 border-dashed flex flex-col items-center text-center space-y-8">
+              <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/20 rounded-[2rem] flex items-center justify-center mx-auto shadow-inner">
+                <Target className="w-10 h-10 text-indigo-500" />
               </div>
-              <h3 className="text-lg font-black tracking-tight text-slate-900 dark:text-white">{t('dashboard.emptyTitle')}</h3>
-              <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                {t('dashboard.emptySub')}
-              </p>
-              <Link
-                to="/setup"
-                className="mt-8 inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-primary-600 px-8 py-3 text-sm font-bold text-white shadow-md transition hover:from-violet-700 hover:to-primary-700"
-              >
-                <Zap className="h-4 w-4 shrink-0" aria-hidden />
+              <div className="space-y-2 px-8">
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white font-serif">{t('dashboard.emptyTitle')}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">{t('dashboard.emptySub')}</p>
+              </div>
+              <Link to="/setup" className="btn-primary">
+                <Zap className="w-4 h-4" />
                 {t('dashboard.emptyCta')}
               </Link>
             </div>
           ) : (
-            <div className="space-y-3 p-4 sm:space-y-4 sm:p-6 lg:p-8">
-              {interviews.map((interview) => (
-                <article
+            <div className="grid gap-4">
+              {interviews.map((interview, i) => (
+                <motion.article
                   key={interview.id}
-                  className="rounded-xl border border-slate-200/90 bg-slate-50/50 p-4 transition-all duration-200 hover:border-primary-200/70 hover:bg-white hover:shadow-md dark:border-slate-600/90 dark:bg-slate-800/30 dark:hover:border-primary-900/50 dark:hover:bg-slate-800/60 sm:p-5"
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  className="card-premium group p-8 flex flex-col md:flex-row md:items-center justify-between gap-8"
                 >
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex min-w-0 flex-1 gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-violet-600 text-white shadow-md ring-2 ring-white dark:ring-slate-900">
-                        <Briefcase className="h-5 w-5" aria-hidden />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                          <h3 className="text-base font-bold text-slate-900 dark:text-white sm:text-lg">{interview.position}</h3>
-                          <time
-                            className="text-xs font-medium text-slate-400 dark:text-slate-500"
-                            dateTime={interview.created_at}
-                          >
-                            {formatDate(interview.created_at)}
-                          </time>
-                        </div>
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                          <span
-                            className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-bold ${langPillClass(interview.language)}`}
-                          >
-                            <Globe2 className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
-                            {interview.language}
-                          </span>
-                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-2.5 py-1 text-xs font-bold text-slate-600 dark:border-slate-600 dark:bg-slate-900/80 dark:text-slate-300">
-                            <Clock className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
-                            {interview.duration} {t('dashboard.durMin')}
-                          </span>
-                        </div>
-                      </div>
+                  <div className="flex items-center gap-6">
+                    <div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-blue-500 transition-colors">
+                      <Briefcase className="w-6 h-6" />
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 border-t border-slate-200/80 pt-4 dark:border-slate-600/80 lg:border-t-0 lg:pt-0">
-                      <Link
-                        to={`/interview/${interview.id}/report`}
-                        className="inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border-2 border-emerald-200/90 bg-emerald-50/90 px-4 py-2 text-xs font-bold text-emerald-800 transition-colors hover:bg-emerald-100 dark:border-emerald-400 dark:bg-emerald-900/40 dark:text-emerald-100 dark:hover:bg-emerald-900/60 sm:flex-none sm:min-w-[7.5rem]"
-                      >
-                        <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                        {t('report.viewReport')}
-                      </Link>
-                      <Link
-                        to="/setup"
-                        className="inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-primary-200/90 bg-primary-50/90 px-4 py-2 text-xs font-bold text-primary-800 transition-colors hover:bg-primary-100 dark:border-slate-700 dark:bg-slate-800 dark:text-primary-300 dark:hover:bg-slate-700 sm:flex-none sm:min-w-[6.5rem]"
-                      >
-                        {t('dashboard.again')}
-                        <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                      </Link>
-                      <button
-                        type="button"
-                        disabled={deletingId === interview.id}
-                        onClick={() => requestDeleteInterview(interview.id, interview.position)}
-                        className="inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl border-2 border-red-200/90 bg-red-50/80 px-4 py-2 text-xs font-bold text-red-700 transition-colors hover:bg-red-100 disabled:opacity-50 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/50"
-                      >
-                        {deletingId === interview.id ? (
-                          <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" aria-hidden />
-                        ) : (
-                          <Trash2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                        )}
-                        {t('dashboard.delete')}
-                      </button>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{interview.position}</h3>
+                      <div className="flex items-center gap-4 text-sm text-slate-500">
+                        <span className="flex items-center gap-1.5"><History className="w-3.5 h-3.5" />{formatDate(interview.created_at)}</span>
+                        <span className="flex items-center gap-1.5"><Globe2 className="w-3.5 h-3.5" />{interview.language}</span>
+                        <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{interview.duration} {t('dashboard.durMin')}</span>
+                      </div>
                     </div>
                   </div>
-                </article>
+                  <div className="flex items-center gap-3">
+                    <Link to={`/interview/${interview.id}/report`} className="btn-secondary px-6 py-2.5 text-xs">
+                      <FileText className="w-4 h-4 mr-2" />
+                      {t('report.viewReport')}
+                    </Link>
+                    <button
+                      onClick={() => requestDeleteInterview(interview.id, interview.position)}
+                      className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </motion.article>
               ))}
             </div>
           )}
-        </div>
+        </section>
 
-        {interviews.length > 0 ? (
-          <div className="relative overflow-hidden rounded-2xl p-[1px] bg-gradient-to-br from-primary-400/50 via-violet-500/40 to-violet-700/50 shadow-glow-primary">
-            <div className="relative rounded-2xl bg-gradient-to-br from-primary-600 via-primary-700 to-violet-800 p-6 text-white ring-1 ring-white/10 sm:p-7">
-              <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:40px_40px]" />
-              <div className="relative z-[1] flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-center">
-                <div>
-                  <h3 className="text-lg font-black tracking-tight">{t('dashboard.bannerTitle')}</h3>
-                  <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-primary-100/95">{t('dashboard.bannerSub')}</p>
-                </div>
-                <Link
-                  to="/setup"
-                  className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-primary-700 shadow-lg ring-1 ring-white/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-50 hover:shadow-xl dark:bg-slate-100 dark:hover:bg-white"
-                >
-                  {t('dashboard.bannerBtn')}
-                  <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
-                </Link>
+        {/* Promotional Banner */}
+        {interviews.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mt-20 p-10 bg-slate-900 dark:bg-slate-900 rounded-[2.5rem] relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500 opacity-10 blur-[100px] pointer-events-none" />
+            <div className="relative z-[1] flex flex-col md:flex-row items-center justify-between gap-10">
+              <div className="space-y-4">
+                <h3 className="text-3xl font-black text-white font-serif">{t('dashboard.bannerTitle')}</h3>
+                <p className="text-lg text-slate-400 max-w-xl">{t('dashboard.bannerSub')}</p>
               </div>
+              <Link to="/setup" className="btn-primary-white px-10 py-5 text-lg">
+                {t('dashboard.bannerBtn')}
+                <ArrowRight className="w-6 h-6 ml-2" />
+              </Link>
             </div>
-          </div>
-        ) : null}
+          </motion.div>
+        )}
       </div>
 
-      {pendingDelete ? (
-        <div
-          className="fixed inset-0 z-[100] flex items-end justify-center p-4 sm:items-center sm:p-6"
-          role="presentation"
-        >
-          <button
-            type="button"
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity dark:bg-black/70"
-            aria-label={t('dashboard.deleteModalCancel')}
-            onClick={closeDeleteModal}
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="dashboard-delete-modal-title"
-            className="relative z-[1] w-full max-w-[min(100%,26rem)] overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_25px_50px_-12px_rgba(15,23,42,0.35)] ring-1 ring-slate-900/[0.06] dark:border-slate-600 dark:bg-slate-900 dark:ring-white/[0.08]"
-          >
-            <div className="border-b border-red-100 bg-gradient-to-br from-red-50/90 via-white to-orange-50/40 px-5 py-4 dark:border-red-900/30 dark:from-red-950/40 dark:via-slate-900 dark:to-orange-950/20 sm:px-6">
-              <div className="flex gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-orange-600 text-white shadow-md shadow-red-500/25">
-                  <AlertTriangle className="h-5 w-5" aria-hidden />
-                </span>
-                <div className="min-w-0 pt-0.5">
-                  <h2 id="dashboard-delete-modal-title" className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
-                    {t('dashboard.deleteModalTitle')}
-                  </h2>
-                  {pendingDelete.position ? (
-                    <p
-                      className="mt-1 truncate text-sm font-semibold text-slate-600 dark:text-slate-300"
-                      title={pendingDelete.position}
-                    >
-                      {pendingDelete.position}
-                    </p>
-                  ) : null}
+      <AnimatePresence>
+        {pendingDelete && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeDeleteModal}
+              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-red-500" />
+              <div className="space-y-6">
+                <div className="w-14 h-14 bg-red-50 dark:bg-red-950/30 rounded-2xl flex items-center justify-center text-red-500">
+                  <AlertTriangle className="w-8 h-8" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black text-slate-900 dark:text-white font-serif mb-2">{t('dashboard.deleteModalTitle')}</h2>
+                  <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+                    {t('dashboard.deleteConfirm')}
+                    {pendingDelete.position && <span className="block mt-2 font-bold text-slate-900 dark:text-white">"{pendingDelete.position}"</span>}
+                  </p>
+                </div>
+                {deleteModalError && (
+                  <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/50 rounded-xl text-sm text-red-600 dark:text-red-400 font-bold">
+                    {deleteModalError}
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-4 pt-4">
+                  <button onClick={closeDeleteModal} className="btn-secondary py-4 font-bold">{t('dashboard.deleteModalCancel')}</button>
+                  <button 
+                    onClick={() => void confirmDeleteInterview()} 
+                    disabled={deletingId === pendingDelete.id}
+                    className="btn-primary bg-red-600 hover:bg-red-700 py-4 font-bold disabled:opacity-50"
+                  >
+                    {deletingId === pendingDelete.id ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : t('dashboard.deleteModalConfirm')}
+                  </button>
                 </div>
               </div>
-            </div>
-            <div className="px-5 py-4 sm:px-6 sm:py-5">
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{t('dashboard.deleteConfirm')}</p>
-              {deleteModalError ? (
-                <p
-                  className="mt-3 rounded-xl border border-red-200 bg-red-50/90 px-3 py-2.5 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
-                  role="alert"
-                >
-                  {deleteModalError}
-                </p>
-              ) : null}
-            </div>
-            <div className="flex flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50/80 px-5 py-4 dark:border-slate-700 dark:bg-slate-800/50 sm:flex-row sm:justify-end sm:gap-3 sm:px-6">
-              <button
-                type="button"
-                disabled={deletingId === pendingDelete.id}
-                onClick={closeDeleteModal}
-                className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 sm:w-auto"
-              >
-                {t('dashboard.deleteModalCancel')}
-              </button>
-              <button
-                type="button"
-                disabled={deletingId === pendingDelete.id}
-                onClick={() => void confirmDeleteInterview()}
-                className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:from-red-700 hover:to-orange-700 disabled:opacity-50 sm:w-auto"
-              >
-                {deletingId === pendingDelete.id ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
-                {t('dashboard.deleteModalConfirm')}
-              </button>
-            </div>
+            </motion.div>
           </div>
-        </div>
-      ) : null}
+        )}
+      </AnimatePresence>
     </div>
   )
 }

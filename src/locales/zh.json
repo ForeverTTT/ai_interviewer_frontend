@@ -15,7 +15,8 @@
     "signUpFree": "免费开始",
     "signOut": "退出登录",
     "profile": "个人资料",
-    "gallup": "优势测试"
+    "gallup": "优势测试",
+    "chooseAvatar": "选择个人头像"
   },
   "footer": {
     "tagline": "专为赴德实习与求职打造的 AI 赋能模拟面试平台。最新大模型 + 高保真语音 + 专属题库 + 实时点评，让你在真实面试里稳得住、说得清。",
@@ -31,10 +32,11 @@
     "powered": "AI 赋能 · 前沿大模型与语音 · 为赴德人才而生"
   },
   "landing": {
-    "badge": "专为赴德实习生 & Werkstudent 设计",
+    "badgePremium": "下一代 AI 驱动的德国求职进化",
     "headline1": "德国面试，",
     "headline2": "AI 赋能，练到满分",
-    "sub": "基于最新一代大语言模型与先进语音技术：按你的岗位与 JD 深度定制面试路径，神经级语音对练还原真实压力，对话过程中即可实时评价与纠偏。德语/英语双语，助你在 Bewerbungsgespräch 中自信输出。",
+    "sub": "基于最新一代大语言模型与先进语音技术：按你的岗位与 JD 深度定制面试路径，神经级语音对练还原真实压力。",
+    "subNextGen": "深层神经模型精准对齐德国求职语境，实时多模态交互反馈，助你在每一场 Bewerbungen 中掌控全局。",
     "ctaPrimary": "免费开始练习",
     "ctaSecondary": "了解如何使用",
     "previewTitle": "InterviewDE — 模拟面试进行中",
@@ -153,7 +155,7 @@
     "badge": "配置你的模拟面试",
     "backHistory": "返回练习记录",
     "panelTitle": "填写本场参数",
-    "panelSub": "职位与 JD 必填；简历可选，解析后将用于本轮深度追问。",
+    "panelSub": "职位与 JD必填；简历可选，解析后将用于本轮深度追问。",
     "sectionRole": "职位与描述",
     "sectionMeta": "语言与时长",
     "trackLabel": "面试方向",
@@ -389,7 +391,7 @@
     "coachTargetPh": "例如：德国 Werkstudent 后端 · 应届生算法岗",
     "coachRun": "生成诊断报告",
     "coachRunning": "分析中…",
-    "coachFallbackHint": "生成诊断时优先使用「面试用简历原文」中的当前内容（至少约 80 字）；不足时则使用上次保存的正文。请先将 PDF 提取结果「导入至面试用简历原文」或粘贴后再运行诊断。",
+    "coachFallbackHint": "生成诊断时优先使用「面试用简历原文」中的当前内容（至少约 80 字）；不足时则使用上次保存的正文向。请先将 PDF 提取结果「导入至面试用简历原文」或粘贴后再运行诊断。",
     "coachErr": "诊断失败，请稍后重试。",
     "coach503": "服务器未配置 GEMINI_API_KEY，无法使用简历诊断。",
     "coachSummary": "总体评价",
@@ -423,6 +425,18 @@
       "zh": "中文",
       "de": "德语"
     },
+    "displayTitle": "个人资料",
+    "displaySub": "以下为账户内已保存的结构化信息与简历摘要。上传 PDF、AI 解析与修改内容请进入「编辑资料」。",
+    "backToView": "查看资料",
+    "coachEditHint": "要重新生成诊断或修改目标岗位，请前往编辑页。",
+    "editProfile": "编辑资料",
+    "editHint": "更新您的结构化资料与简历文本 — 保存后的数据将用于模拟面试。",
+    "cancelEdit": "取消编辑",
+    "viewBadge": "展示",
+    "viewImportHint": "上传 PDF、提取文字与 AI 解析请在「编辑资料」模式下进行。",
+    "viewSectionEmpty": "暂未填写",
+    "viewEmptyTitle": "资料还是空的",
+    "viewEmptySub": "点击「编辑资料」填写或导入简历；保存后会在模拟面试中作为简历上下文使用。",
     "cv": {
       "pageSub": "先填写结构化资料；上传 PDF 后不会直接铺满屏幕，可点击查看提取原文，再用 AI 一键填入表单。折叠区内的「简历原文」会用于模拟面试上下文。",
       "structuredTitle": "结构化用户资料",
@@ -438,6 +452,11 @@
       "extractedPreviewLabel": "本次 PDF 提取的纯文本（未自动写入资料）",
       "appliedResumeOk": "已将提取正文写入「面试用简历原文」，记得保存。",
       "basic": "基本信息",
+      "experience": "经历",
+      "work": "工作经历",
+      "education": "教育经历",
+      "projects": "项目经历",
+      "other": "其他",
       "fullName": "姓名",
       "gender": "性别",
       "genderEmpty": "未填写",
@@ -452,9 +471,6 @@
       "linkedIn": "LinkedIn",
       "website": "个人网站 / 作品集",
       "summary": "个人摘要",
-      "work": "工作经历",
-      "education": "教育经历",
-      "projects": "项目经历",
       "publications": "论文与发表",
       "skills": "技能",
       "skillsHint": "每行一项技能，便于阅读与检索。",
@@ -491,22 +507,7 @@
       "rawResumeTitle": "面试用简历原文（折叠）",
       "rawResumeHint": "模拟面试与简历诊断会优先使用此处的纯文本。上传 PDF 后请先「导入至面试用简历原文」再保存，或在此粘贴全文。",
       "saveFooter": "保存后结构化资料写入账户；面试用原文用于 AI 提问上下文。"
-    },
-    "displayTitle": "个人资料",
-    "displaySub": "以下为账户内已保存的结构化信息与简历摘要。上传 PDF、AI 解析与修改内容请进入「编辑资料」。",
-    "backToView": "查看资料",
-    "coachEditHint": "要重新生成诊断或修改目标岗位，请前往编辑页。",
-    "editProfile": "编辑资料",
-    "cancelEdit": "取消编辑",
-    "viewBadge": "展示",
-    "viewImportHint": "上传 PDF、提取文字与 AI 解析请在「编辑资料」模式下进行。",
-    "viewSectionEmpty": "暂未填写",
-    "viewEmptyTitle": "资料还是空的",
-    "viewEmptySub": "点击「编辑资料」填写或导入简历；保存后会在模拟面试中作为简历上下文使用。",
-    "resumeText": "简历正文（可编辑）",
-    "placeholder": "粘贴简历全文，或上传 PDF 后在此校对…",
-    "saved": "已保存。",
-    "hint": "扫描版 PDF 可能无法提取文字，请改用文本型 PDF 或手动粘贴。保存的内容会用于后续模拟面试中的提问（与职位、JD 结合）。"
+    }
   },
   "dashboard": {
     "hello": "你好，",
@@ -575,8 +576,11 @@
     "lobbyMicLevel": "麦克风音量",
     "lobbyCameraOn": "开启摄像头",
     "lobbyCameraOff": "关闭摄像头",
-    "joinInterviewBtn": "进入面试",
-    "loadingTitle": "正在准备面试",
+    "joinInterviewBtn": "进入面试间",
+    "instructionTitle": "模拟面试：{{position}}",
+    "instructionSub": "面试官已就绪。进入面试间后将直接开始模拟面试。",
+    "readyToStart": "准备就绪",
+    "loadingTitle": "正在准备会话",
     "loadingSub": "正在加载语音，就绪后将自动进入面试间并播放。",
     "readyFoot": "AI 将自动发送开场白并开始第一个问题",
     "timeUp": "时间到！",
@@ -596,12 +600,18 @@
     "digitalStateSpeaking": "正在发言",
     "digitalStateListening": "聆听中",
     "digitalChatTitle": "会议聊天",
-    "digitalYouPip": "你的画面"
+    "digitalYouPip": "你的画面",
+    "audio": "音频",
+    "video": "视频",
+    "meetingTime": "通话时长",
+    "leaveRoom": "离开面试间",
+    "exitDirectly": "直接退出",
+    "digitalParticipantYou": "你"
   },
   "report": {
     "title": "面试报告",
     "docLabel": "评估摘要",
-    "subtitle": "由 AI 根据本轮对话生成，仅供参考",
+    "subtitle": "由最新AI大模型技术分析得出",
     "analysisLabel": "结构化分析",
     "analysisHint": "含问答参考",
     "viewReport": "查看面试报告",
@@ -694,17 +704,30 @@
   "common": {
     "uiLanguage": "界面语言",
     "themeToggle": "切换浅色或深色主题",
-    "interviewThemeToggle": "切换面试界面浅色或深色"
+    "interviewThemeToggle": "切换面试界面浅色或深色",
+    "back": "返回",
+    "save": "保存",
+    "saving": "保存中...",
+    "show": "显示",
+    "hide": "隐藏"
   },
   "gallup": {
     "title": "盖洛普优势测试 (Gallup Strengths Test)",
     "subtitle": "发现你的核心天赋，开启职场成功之路",
-    "domains": "四大优势领域",
+    "domains": {
+      "executing": "执行力 (Executing)",
+      "influencing": "影响力 (Influencing)",
+      "relationship": "关系建立 (Relationship)",
+      "strategic": "战略思维 (Strategic)"
+    },
     "startBtn": "开始优势测评",
-    "resumeBtn": "继续未完成的测评",
-    "viewReport": "查看测评报告",
+    "resumeBtn": "继续测试",
+    "viewReport": "查看报告",
     "restartBtn": "重新开始",
-    "confirmRestartTitle": "重置测评确认",
+    "phase": "题目 {{current}} / {{total}}",
+    "completion": "完成度",
+    "quitHint": "进度已实时保存",
+    "confirmRestartTitle": "重置测试",
     "confirmRestart": "确定要重新开始吗？当前的进度将会丢失，无法找回。",
     "confirmBtn": "确认重置",
     "cancelBtn": "返回测试",
@@ -725,133 +748,72 @@
     "domains_info": {
       "executing": {
         "name": "执行力 (Executing)",
-        "desc": "擅长将想法付诸实践，让事情真正落地。",
-        "careers": "项目经理, 运营主管, 软件工程师, 财务审计, 行政管理"
+        "desc": "你擅长将想法付诸实践，是团队中不可或缺的“引擎”。你的严谨和对结果的执着确保了任务能够高质量落地，你是天生的实干家。",
+        "careers": "项目经理, 运营主管, 软件工程师, 财务审计, 行政管理",
+        "detail": "作为一名具有极强执行力的人才，你不仅关注目标的达成，更关注过程的精确性。你能够将复杂的战略拆解为可操作的步骤。在德企文化中，这种对“Ordnung”（秩序）和“Gründlichkeit”（彻底性）的追求是你巨大的职业优势。",
+        "advice": "建议在需要高精度和流程管控的项目中担任核心角色。利用你的可靠性建立职业口碑。在面试中，重点突出你是如何通过优化流程或严谨执行解决具体问题的。"
       },
       "influencing": {
         "name": "影响力 (Influencing)",
-        "desc": "擅长销售想法，确保团队的声音被听到。",
-        "careers": "销售总监, 公关专家, 团队领导, 市场营销, 演讲家"
+        "desc": "你天生具备销售想法的才干，能够确保团队的声音被外界听到。你擅长接管局面并激励他人采取行动。",
+        "careers": "销售总监, 公关专家, 团队领导, 市场营销, 演讲家",
+        "detail": "你拥有将愿景转化为行动的非凡魅力。你不惧怕竞争和挑战，甚至在压力下表现得更好。你擅长在社交场合快速建立联系，并引导他人达成共识。你的能量是团队活力的源泉。",
+        "advice": "寻求需要公开表达、领导力或商务谈判的岗位。你的说服力是推动组织变革的核心引擎。在面试中，展示你是如何通过个人影响力调动资源并达成挑战性目标的。"
       },
       "relationship": {
         "name": "关系建立 (Relationship Building)",
-        "desc": "擅长维系团队，使团队凝聚力更强。",
-        "careers": "HR 专家, 心理咨询师, 客户成功, 教师, 团队协调员"
+        "desc": "你是团队的“粘合剂”，擅长维系人际关系并创造和谐的协作氛围。你注重人的感受，能够激发团队的最大潜能。",
+        "careers": "HR 专家, 心理咨询师, 客户成功, 教师, 团队协调员",
+        "detail": "你具备极高的人际敏锐度，能够洞察他人的微小情绪变化。你更倾向于建立深厚、持久的信任关系而非持久的社交。你擅长化解冲突，让每位成员都感到被尊重和包容。",
+        "advice": "适合从事人力资源、客户关系管理或团队协调工作。你的共共情能力是构建高效团队的核心。在面试中，重点展示你如何通过改善团队氛围或解决人际冲突来提升整体效率。"
       },
       "strategic": {
         "name": "战略思维 (Strategic Thinking)",
-        "desc": "擅长分析信息并做出更好的决策。",
-        "careers": "战略顾问, 数据分析师, 产品经理, 研究员, 创意总监"
+        "desc": "你是深谋远虑的思考者，能在混乱中发现规律。你总是比别人多看五步，能够通过分析信息做出更明智的长远决策。",
+        "careers": "战略顾问, 数据分析师, 产品经理, 研究员, 创意总监",
+        "detail": "你的大脑从未停止运转。你对新知识充满渴望，并能迅速将碎片化的信息串联成完整的愿景。你习惯于系统性地思考潜在风险与机遇，确保在行动之前已经制定了最佳路径。",
+        "advice": "战略规划、数据研发或产品架构岗位是你的舞台。不要害怕提出那些“打破常规”的想法。在面试中，清晰地阐述你分析问题、制定策略并最终验证策略有效性的逻辑链条。"
       }
     },
     "report": {
       "title": "你的优势报告",
-      "topDomain": "你的首要领域",
-      "analysis": "深度特征分析",
+      "badge": "才干解析报告",
+      "subtitle": "基于盖洛普 34 项核心才干模型的职业竞争力诊断",
+      "retake": "重测一次",
+      "topDomain": "您的首要领域",
+      "analysis": "深度特征解析",
       "careerPath": "推荐职业路径",
-      "advice": "职场发展建议"
+      "advice": "职场发展建议",
+      "careerTitle": "推荐职业方向",
+      "topTalentDomain": "首要才干领域",
+      "efficiency": "效能水平",
+      "growthTrajectory": "成长空间/轨迹",
+      "potentialMapping": "天赋潜能图谱",
+      "presenceIndex": "显现指数",
+      "roadmapBtn": "查看完整发展规划",
+      "disclaimer": "* 基于您的首要才干特征及其在德企语境下的映射分析。"
     },
     "questions": [
-      {
-        "id": 1,
-        "text": "我对自己产出的工作质量有着近乎严苛的标准，并始终致力于实现卓越的执行结果。",
-        "domain": "executing"
-      },
-      {
-        "id": 2,
-        "text": "我发现自己能够自然地通过逻辑和热情引导他人，使他们认同并支持我的观点。",
-        "domain": "influencing"
-      },
-      {
-        "id": 3,
-        "text": "我具备敏锐的情感触觉，能够洞察他人的微小情绪变化并建立深刻的共鸣。",
-        "domain": "relationship"
-      },
-      {
-        "id": 4,
-        "text": "我习惯于跳出当下的局限，系统性地思考各种潜在的可能性及未来的战略蓝图。",
-        "domain": "strategic"
-      },
-      {
-        "id": 5,
-        "text": "一旦设定目标，我会表现出极强的毅力，不达目的绝不罢休，且享受攻克难关的过程。",
-        "domain": "executing"
-      },
-      {
-        "id": 6,
-        "text": "在复杂或不确定的局势中，我往往会本能地接过指挥权，为团队指明前进方向。",
-        "domain": "influencing"
-      },
-      {
-        "id": 7,
-        "text": "我深信团队的凝聚力是成功的核心，并致力于创造一个包容且高度协作的工作环境。",
-        "domain": "relationship"
-      },
-      {
-        "id": 8,
-        "text": "我热衷于拆解复杂信息，通过严密的逻辑推演发现隐藏在数据背后的底层规律。",
-        "domain": "strategic"
-      },
-      {
-        "id": 9,
-        "text": "我善于构建高效的运作流程，通过优化资源配置确保每一个环节都能发挥最大效能。",
-        "domain": "executing"
-      },
-      {
-        "id": 10,
-        "text": "在公众场合或社交互动中，我总能以积极的状态影响氛围，并将互动转化为机会。",
-        "domain": "influencing"
-      },
-      {
-        "id": 11,
-        "text": "我倾向于投资他人的成长，看到他人潜力的激发会给我带来极大的职业成就感。",
-        "domain": "relationship"
-      },
-      {
-        "id": 12,
-        "text": "面对挑战时，我总能另辟蹊径，提出具有颠覆性的创意或极具远见的解决方案。",
-        "domain": "strategic"
-      },
-      {
-        "id": 13,
-        "text": "我将承诺视为最核心的价值，无论面临多大的外部压力，都会坚守职责的底线。",
-        "domain": "executing"
-      },
-      {
-        "id": 14,
-        "text": "我擅长通过极具感染力的表达方式，在更广阔的层面上传递愿景并激发听众的行动。",
-        "domain": "influencing"
-      },
-      {
-        "id": 15,
-        "text": "我具有卓越的冲突解决能力，能够在多元化的诉求中找到平衡点并驱动共识。",
-        "domain": "relationship"
-      },
-      {
-        "id": 16,
-        "text": "在采取行动之前，我会进行全方位的风险评估和详尽的规划，确胜券在握。",
-        "domain": "strategic"
-      },
-      {
-        "id": 17,
-        "text": "我拥有一种内在的竞争动力，不断追求自我超越，并将‘平庸’视为最大的挑战。",
-        "domain": "executing"
-      },
-      {
-        "id": 18,
-        "text": "我喜欢在竞争环境中验证自己的实力，并将胜利视为衡量个人成就的重要指标。",
-        "domain": "influencing"
-      },
-      {
-        "id": 19,
-        "text": "我极其看重基于深厚信任的长期伙伴关系，而非依赖于短期利益的临时互动。",
-        "domain": "relationship"
-      },
-      {
-        "id": 20,
-        "text": "我拥有一种持续的求知欲，乐于探索未知领域，并能快速整合不同领域的知识。",
-        "domain": "strategic"
-      }
+      { "id": 1, "text": "我对自己产出的工作质量有着近乎严苛的标准，并始终致力于实现卓越的执行结果。", "domain": "executing" },
+      { "id": 2, "text": "我发现自己能够自然地通过逻辑和热情引导他人，使他们认同并支持我的观点。", "domain": "influencing" },
+      { "id": 3, "text": "我具备敏锐的情感触觉，能够洞察他人的微小情绪变化并建立深刻的共鸣。", "domain": "relationship" },
+      { "id": 4, "text": "我习惯于跳出当下的局限，系统性地思考各种潜在的可能性及未来的战略蓝图。", "domain": "strategic" },
+      { "id": 5, "text": "一旦设定目标，我会表现出极强的毅力，不达目的绝不罢休，且享受攻克难关的过程。", "domain": "executing" },
+      { "id": 6, "text": "在复杂或不确定的局势中，我往往会本能地接过指挥权，为团队指明前进方向。", "domain": "influencing" },
+      { "id": 7, "text": "我深信团队的凝聚力是成功的核心，并致力于创造一个包容且高度协作的工作环境。", "domain": "relationship" },
+      { "id": 8, "text": "我热衷于拆解复杂信息，通过严密的逻辑推演发现隐藏在数据背后的底层规律。", "domain": "strategic" },
+      { "id": 9, "text": "我善于构建高效的运作流程，通过优化资源配置确保每一个环节都能发挥最大效能。", "domain": "executing" },
+      { "id": 10, "text": "在公众场合或社交互动中，我总能以积极的状态影响氛围，并将互动转化为机会。", "domain": "influencing" },
+      { "id": 11, "text": "我倾向于投资他人的成长，看到他人潜力的激发会给我带来极大的职业成就感。", "domain": "relationship" },
+      { "id": 12, "text": "面对挑战时，我总能另辟蹊径，提出具有颠覆性的创意或极具远见的解决方案。", "domain": "strategic" },
+      { "id": 13, "text": "我将承诺视为最核心的价值，无论面临多大的外部压力，都会坚守职责的底线。", "domain": "executing" },
+      { "id": 14, "text": "我擅长通过极具感染力的表达方式，在更广阔的层面上传递愿景并激发听众的行动。", "domain": "influencing" },
+      { "id": 15, "text": "我具有卓越的冲突解决能力，能够在多元化的诉求中找到平衡点并驱动共识。", "domain": "relationship" },
+      { "id": 16, "text": "在采取行动之前，我会进行全方位的风险评估和详尽的规划，确胜券在握。", "domain": "strategic" },
+      { "id": 17, "text": "我拥有一种内在的竞争动力，不断追求自我超越，并将‘平庸’视为最大的挑战。", "domain": "executing" },
+      { "id": 18, "text": "我喜欢在竞争环境中验证自己的实力，并将胜利视为衡量个人成就的重要指标。", "domain": "influencing" },
+      { "id": 19, "text": "我极其看重基于深厚信任的长期伙伴关系，而非依赖于短期利益的临时互动。", "domain": "relationship" },
+      { "id": 20, "text": "我拥有一种持续的求知欲，乐于探索未知领域，并能快速整合不同领域的知识。", "domain": "strategic" }
     ]
   }
 }

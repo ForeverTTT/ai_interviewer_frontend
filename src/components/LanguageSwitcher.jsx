@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useId } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, Check, Languages } from 'lucide-react'
+import { ChevronDown, Check, Globe2 } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 
 const OPTIONS = [
@@ -10,7 +10,7 @@ const OPTIONS = [
 ]
 
 /**
- * UI language (中文 / English / Deutsch) — custom menu so styling matches the app (no native OS dropdown).
+ * UI language (中文 / English / Deutsch) — custom menu so styling matches the app.
  */
 export default function LanguageSwitcher({ className = '', variant = 'light' }) {
   const { t, i18n } = useTranslation()
@@ -38,32 +38,13 @@ export default function LanguageSwitcher({ className = '', variant = 'light' }) 
     }
   }, [open])
 
-  const shell =
-    variant === 'dark'
-      ? 'border-slate-600/90 bg-slate-800/95 shadow-inner shadow-black/20'
-      : 'border-slate-200/90 bg-white/95 shadow-soft ring-1 ring-slate-900/[0.04] dark:border-slate-600 dark:bg-slate-800/95 dark:ring-slate-700'
-
-  const textMain =
-    variant === 'dark' ? 'text-slate-200' : 'text-slate-700 dark:text-slate-200'
-  const textCode =
-    variant === 'dark' ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'
-  const iconClass =
-    variant === 'dark' ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'
-
-  /** 用 isDark 显式配色，避免面试页根节点 dark:text-white 继承到浅底面板上 */
+  /** Dark/Light panel styling */
   const panel = isDark
-    ? 'absolute left-0 right-0 top-[calc(100%+0.375rem)] z-[100] flex flex-col gap-0.5 rounded-2xl border border-slate-600/90 bg-slate-900 p-1.5 text-slate-100 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.5)] ring-1 ring-slate-700/80 backdrop-blur-md animate-fade-in'
-    : 'absolute left-0 right-0 top-[calc(100%+0.375rem)] z-[100] flex flex-col gap-0.5 rounded-2xl border border-slate-200/90 bg-white p-1.5 text-slate-900 shadow-[0_16px_48px_-12px_rgba(15,23,42,0.22)] ring-1 ring-slate-900/[0.05] backdrop-blur-md animate-fade-in'
+    ? 'absolute right-0 top-[calc(100%+0.5rem)] z-[100] flex flex-col gap-1 rounded-2xl border border-slate-800 bg-slate-950 p-2 text-slate-100 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-300 min-w-[120px]'
+    : 'absolute right-0 top-[calc(100%+0.5rem)] z-[100] flex flex-col gap-1 rounded-2xl border border-slate-100 bg-white p-2 text-slate-900 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-300 min-w-[120px]'
 
   const pickLanguage = async (code) => {
-    const scrollX = window.scrollX
-    const scrollY = window.scrollY
     await i18n.changeLanguage(code)
-    // Keep viewport position stable after language-driven re-render.
-    requestAnimationFrame(() => {
-      window.scrollTo(scrollX, scrollY)
-      requestAnimationFrame(() => window.scrollTo(scrollX, scrollY))
-    })
     setOpen(false)
   }
 
@@ -76,21 +57,17 @@ export default function LanguageSwitcher({ className = '', variant = 'light' }) 
         aria-expanded={open}
         aria-controls={listId}
         onClick={() => setOpen((v) => !v)}
-        className={`flex min-h-[2.25rem] w-full min-w-[7.25rem] cursor-pointer items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-left text-sm font-medium backdrop-blur-sm transition-all duration-200 hover:shadow-card focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 ${shell} ${textMain} ${open ? 'shadow-card ring-primary-400/25 dark:ring-primary-500/30' : ''}`}
+        className={`flex h-10 items-center gap-2 rounded-full border px-4 py-2 text-left text-xs font-bold transition-all duration-300 focus:outline-none ${
+          open 
+            ? 'bg-primary-600 text-white border-primary-600' 
+            : 'bg-slate-50 text-slate-500 border-slate-100 hover:border-slate-200 dark:bg-slate-900 dark:border-slate-800 dark:hover:border-slate-700 dark:text-slate-400'
+        }`}
       >
-        <Languages
-          className={`h-3.5 w-3.5 shrink-0 opacity-80 ${textCode}`}
-          aria-hidden
-        />
-        <span
-          className={`font-mono text-[11px] font-bold tracking-wide tabular-nums ${textCode}`}
-          aria-hidden
-        >
-          {cur.regionCode}
-        </span>
+        <Globe2 className="h-4 w-4 shrink-0" aria-hidden />
+        <span className="hidden sm:inline-block opacity-60 text-[10px] font-mono tracking-tighter mr-1">{cur.regionCode}</span>
         <span className="flex-1 truncate">{t(cur.labelKey)}</span>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 transition-transform duration-200 ${iconClass} ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
           aria-hidden
         />
       </button>

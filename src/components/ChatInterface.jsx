@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import {
-  Send, Volume2, VolumeX, Loader2,
-  Mic, StopCircle, RefreshCw, BrainCircuit,
+  Send, Volume2, VolumeX, Loader2, Video, VideoOff,
+  Mic, StopCircle, RefreshCw, BrainCircuit, Clock,
   FlaskConical, Users, ClipboardList, Search, FolderOpen,
 } from 'lucide-react'
 
@@ -16,22 +16,25 @@ const BACKEND_URL = getBackendBaseUrl()
 /* ── Agent display config ─────────────────────────────────────── */
 
 const AGENT_STYLE = {
-  opening:    { emoji: '👔', color: 'from-primary-600 to-violet-600',  Icon: BrainCircuit },
-  explore:    { emoji: '📎', color: 'from-indigo-600 to-violet-500',   Icon: FolderOpen },
-  technical:  { emoji: '💡', color: 'from-blue-600   to-cyan-500',     Icon: FlaskConical },
-  behavioral: { emoji: '🤝', color: 'from-emerald-600 to-teal-500',    Icon: Users },
-  feedback:   { emoji: '📋', color: 'from-amber-500  to-orange-500',   Icon: ClipboardList },
-  analyzer:   { emoji: '🔍', color: 'from-slate-600  to-slate-500',    Icon: Search },
+  opening: { emoji: '👔', color: 'bg-slate-900 dark:bg-white text-white dark:text-slate-900', Icon: BrainCircuit },
+  explore: { emoji: '📎', color: 'bg-indigo-600 text-white', Icon: FolderOpen },
+  technical: { emoji: '💡', color: 'bg-blue-600 text-white', Icon: FlaskConical },
+  behavioral: { emoji: '🤝', color: 'bg-emerald-600 text-white', Icon: Users },
+  feedback: { emoji: '📋', color: 'bg-primary-600 text-white', Icon: ClipboardList },
+  analyzer: { emoji: '🔍', color: 'bg-slate-500 text-white', Icon: Search },
 }
 
 /* ── Tiny helpers ─────────────────────────────────────────────── */
 
 function TypingDots() {
   return (
-    <div className="flex items-center gap-1 py-0.5">
+    <div className="flex items-center gap-1.5 py-2">
       {[0, 150, 300].map(d => (
-        <div key={d} className="w-2 h-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce"
-          style={{ animationDelay: `${d}ms` }} />
+        <div
+          key={d}
+          className="w-1.5 h-1.5 bg-slate-900 dark:bg-white rounded-full animate-bounce"
+          style={{ animationDelay: `${d}ms`, animationDuration: '0.6s' }}
+        />
       ))}
     </div>
   )
@@ -43,7 +46,7 @@ function sanitizeSquareBrackets(text) {
   const s = String(text || '')
   return s
     // common placeholder from the model
-    .replace(/\[\s*Company\s*Name\s*\]/gi, 'the company')
+    .replace(/\[\s*Company\s*N\s*me\s*\]/gi, 'the company')
     // remove any remaining square brackets but keep inner text
     .replace(/\[([^\]]*)\]/g, '$1')
 }
@@ -52,22 +55,23 @@ function AgentBadge({ name, streaming, agentMap }) {
   const c = agentMap[name] || agentMap.opening
   const { Icon } = c
   return (
-    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
-      bg-gradient-to-r ${c.color} text-white shadow-md mb-1.5`}>
+    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${c.color} shadow-sm mb-3`}>
       <Icon className="w-3 h-3" />
-      {c.emoji} {c.label}
-      {streaming && <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse ml-0.5" />}
+      <span>{c.label}</span>
+      {streaming && <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse ml-1" />}
     </div>
   )
 }
 
 function WaveIcon({ active }) {
   return (
-    <div className={`flex items-end gap-[2px] h-4 transition-opacity ${active ? 'opacity-100' : 'opacity-25'}`}>
+    <div className={`flex items-end gap-[3px] h-4 transition-opacity ${active ? 'opacity-100' : 'opacity-25'}`}>
       {[3, 6, 4, 7, 5, 3, 6].map((h, i) => (
-        <div key={i} className={`w-[3px] rounded-full ${active ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-slate-400 dark:bg-slate-500'}`}
-          style={{ height: `${h * 2}px`,
-            animation: active ? `wavebar 0.5s ${i * 0.07}s infinite alternate ease-in-out` : 'none' }} />
+        <div key={i} className={`w-[2.5px] rounded-full ${active ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-500'}`}
+          style={{
+            height: `${h * 2}px`,
+            animation: active ? `wavebar 0.5s ${i * 0.07}s infinite alternate ease-in-out` : 'none'
+          }} />
       ))}
       <style>{`@keyframes wavebar{from{height:4px}to{height:14px}}`}</style>
     </div>
@@ -95,12 +99,12 @@ function waitForSpeechVoices(timeoutMs = 2500) {
 }
 
 function useGeminiTTS(language, enabled) {
-  const audioRef   = useRef(null)   // current HTMLAudioElement
+  const audioRef = useRef(null)   // current HTMLAudioElement
   const enabledRef = useRef(enabled)
   /** 每次 stop() +1；异步 TTS 在 play 前比对，避免已离开页面仍开播 */
   const playGenRef = useRef(0)
   const [speaking, setSpeaking] = useState(false)
-  const langCode   = language === 'Deutsch' ? 'de-DE' : 'en-US'
+  const langCode = language === 'Deutsch' ? 'de-DE' : 'en-US'
 
   useLayoutEffect(() => {
     enabledRef.current = enabled
@@ -122,6 +126,7 @@ function useGeminiTTS(language, enabled) {
     }
     try {
       window.speechSynthesis?.cancel()
+      window.speechSynthesis?.resume() // Force unblock
     } catch { /* ignore */ }
     setSpeaking(false)
   }, [])
@@ -140,9 +145,9 @@ function useGeminiTTS(language, enabled) {
     // ── Try Gemini TTS first ─────────────────────────────────
     try {
       const res = await fetch(`${BACKEND_URL}/api/chat/tts`, {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-        body:    JSON.stringify({ text, language }),
+        body: JSON.stringify({ text, language }),
       })
 
       if (!enabledRef.current || playGenRef.current !== genAfterStop) {
@@ -165,13 +170,13 @@ function useGeminiTTS(language, enabled) {
         throw new Error(`TTS HTTP ${res.status}${msg ? ` — ${msg}` : ''}`)
       }
 
-      const blob  = await res.blob()
+      const blob = await res.blob()
       if (!enabledRef.current || playGenRef.current !== genAfterStop) {
         setSpeaking(false)
         return
       }
 
-      const url   = URL.createObjectURL(blob)
+      const url = URL.createObjectURL(blob)
       const audio = new Audio(url)
       audioRef.current = audio
 
@@ -229,23 +234,23 @@ function useGeminiTTS(language, enabled) {
         return
       }
 
-      const voices  = synth.getVoices()
-      const pre     = langCode.split('-')[0]
+      const voices = synth.getVoices()
+      const pre = langCode.split('-')[0]
       // Prefer OS neural / premium voices; slightly slower rate reads less "robotic"
-      const voice   =
+      const voice =
         voices.find(v => v.lang.startsWith(langCode) && /neural|premium|natural|online natural/i.test(v.name)) ||
         voices.find(v => v.lang.startsWith(langCode) && /microsoft.*(hedda|katja|conrad|ingrid|stefan)/i.test(v.name)) ||
         voices.find(v => v.lang.startsWith(langCode) && /google|samantha|daniel|karen|moira|fiona|serena/i.test(v.name)) ||
         voices.find(v => v.lang.startsWith(langCode) && /natural|online/i.test(v.name)) ||
-        voices.find(v => v.lang.startsWith(langCode) && /google/i.test(v.name))         ||
-        voices.find(v => v.lang.startsWith(langCode))                                    ||
-        voices.find(v => v.lang.startsWith(pre))                                         ||
+        voices.find(v => v.lang.startsWith(langCode) && /google/i.test(v.name)) ||
+        voices.find(v => v.lang.startsWith(langCode)) ||
+        voices.find(v => v.lang.startsWith(pre)) ||
         null
 
-      const utt     = new SpeechSynthesisUtterance(text)
-      utt.lang      = langCode
-      utt.rate      = langCode.startsWith('de') ? 0.9 : 0.92
-      utt.pitch     = 0.98
+      const utt = new SpeechSynthesisUtterance(text)
+      utt.lang = langCode
+      utt.rate = langCode.startsWith('de') ? 0.9 : 0.92
+      utt.pitch = 0.98
       if (voice) utt.voice = voice
 
       utt.onend = utt.onerror = () => setSpeaking(false)
@@ -254,6 +259,7 @@ function useGeminiTTS(language, enabled) {
         return
       }
       setSpeaking(true)
+      window.speechSynthesis?.resume() // Safety wake
       synth.speak(utt)
     } catch {
       setSpeaking(false)
@@ -271,9 +277,9 @@ function useGeminiTTS(language, enabled) {
 
     try {
       const res = await fetch(`${BACKEND_URL}/api/chat/tts`, {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-        body:    JSON.stringify({ text, language }),
+        body: JSON.stringify({ text, language }),
       })
       if (playGenRef.current !== genAfterStop) {
         setSpeaking(false)
@@ -302,8 +308,15 @@ function useGeminiTTS(language, enabled) {
           audio.removeEventListener('playing', onPlaying)
           resolve()
         }
+        // Safety timeout: if it doesn't start playing in 5 seconds, proceed anyway
+        const tmr = setTimeout(() => {
+          audio.removeEventListener('playing', onPlaying)
+          resolve()
+        }, 5000)
+
         audio.addEventListener('playing', onPlaying, { once: true })
         audio.play().catch((err) => {
+          clearTimeout(tmr)
           audio.removeEventListener('playing', onPlaying)
           revokeAndClear()
           reject(err)
@@ -367,9 +380,9 @@ function useGeminiTTS(language, enabled) {
 /* ── Web Speech API (STT) ────────────────────────────────────── */
 
 function useSpeechRecognition(language, onFinal, onInterim) {
-  const recRef       = useRef(null)
-  const accRef       = useRef('')
-  const interimRef   = useRef('')
+  const recRef = useRef(null)
+  const accRef = useRef('')
+  const interimRef = useRef('')
   /** Sync ref — false immediately on stop, before React re-renders.
    *  Fixes: onChange still sees stt.active===true for one frame and ignores typing. */
   const listeningRef = useRef(false)
@@ -388,9 +401,9 @@ function useSpeechRecognition(language, onFinal, onInterim) {
   const start = useCallback((existing = '') => {
     if (!supported) return
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    const r  = new SR()
+    const r = new SR()
     r.continuous = true; r.interimResults = true
-    r.lang       = language === 'Deutsch' ? 'de-DE' : 'en-US'
+    r.lang = language === 'Deutsch' ? 'de-DE' : 'en-US'
     accRef.current = existing
     interimRef.current = ''
     listeningRef.current = true
@@ -415,7 +428,7 @@ function useSpeechRecognition(language, onFinal, onInterim) {
       console.warn('[STT] error:', evt.error, evt.message)
       onDone()
     }
-    r.onend   = onDone
+    r.onend = onDone
     recRef.current = r
     r.start()
     setActive(true)
@@ -460,16 +473,22 @@ const ChatInterface = forwardRef(function ChatInterface({
   digitalHuman = false,
   /** 会前开启的本地摄像头 MediaStream，显示在画中画 */
   userCameraStream = null,
+  /** 用户摄像头开启状态 with toggle callback */
+  isCameraOn = false,
+  onToggleCamera,
+  /** 倒计时显示文本与状态（由父级提供，更精确同步） */
+  timerDisplay = '00:00',
+  timerStatus = 'normal',
 }, ref) {
   const { t, i18n } = useTranslation()
   const agentMap = useMemo(
     () => ({
-      opening:    { ...AGENT_STYLE.opening,    label: t('chat.agent.opening') },
-      explore:    { ...AGENT_STYLE.explore,    label: t('chat.agent.explore') },
-      technical:  { ...AGENT_STYLE.technical,  label: t('chat.agent.technical') },
+      opening: { ...AGENT_STYLE.opening, label: t('chat.agent.opening') },
+      explore: { ...AGENT_STYLE.explore, label: t('chat.agent.explore') },
+      technical: { ...AGENT_STYLE.technical, label: t('chat.agent.technical') },
       behavioral: { ...AGENT_STYLE.behavioral, label: t('chat.agent.behavioral') },
-      feedback:   { ...AGENT_STYLE.feedback,   label: t('chat.agent.feedback') },
-      analyzer:   { ...AGENT_STYLE.analyzer,   label: t('chat.agent.analyzer') },
+      feedback: { ...AGENT_STYLE.feedback, label: t('chat.agent.feedback') },
+      analyzer: { ...AGENT_STYLE.analyzer, label: t('chat.agent.analyzer') },
     }),
     [t, i18n.language],
   )
@@ -479,7 +498,7 @@ const ChatInterface = forwardRef(function ChatInterface({
     [resumeContext],
   )
 
-  const [messages,    setMessages]    = useState([])
+  const [messages, setMessages] = useState([])
   const messagesRef = useRef(messages)
   useEffect(() => { messagesRef.current = messages }, [messages])
 
@@ -527,12 +546,12 @@ const ChatInterface = forwardRef(function ChatInterface({
       })),
   }), [])
 
-  const [input,       setInput]       = useState('')
+  const [input, setInput] = useState('')
   const [interimText, setInterimText] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
-  const [ttsEnabled,  setTtsEnabled]  = useState(true)
+  const [ttsEnabled, setTtsEnabled] = useState(true)
   const [currentAgent, setCurrentAgent] = useState(null)
-  const [initError,   setInitError]   = useState(null)
+  const [initError, setInitError] = useState(null)
 
   const messagesEndRef = useRef(null)
   const userPipVideoRef = useRef(null)
@@ -543,23 +562,23 @@ const ChatInterface = forwardRef(function ChatInterface({
     const stream = userCameraStream && userCameraStream.getVideoTracks?.().length ? userCameraStream : null
     el.srcObject = stream || null
     if (stream) {
-      el.play().catch(() => {})
+      el.play().catch(() => { })
     }
   }, [userCameraStream])
   // ── BUGFIX: useRef instead of useState prevents React StrictMode
   //   double-invocation from triggering the opening twice.
   //   React 18 Strict Mode runs effect cleanup + re-setup, but ref.current
   //   is preserved between those two cycles (state is restored).
-  const initDoneRef    = useRef(false)
-  const isFirstMsg     = useRef(true)
+  const initDoneRef = useRef(false)
+  const isFirstMsg = useRef(true)
   const openingLatchRef = useRef(true)
 
   useLayoutEffect(() => {
     openingLatchRef.current = true
   }, [position])
-  const deferGateRef     = useRef(deferFirstAudioGate)
+  const deferGateRef = useRef(deferFirstAudioGate)
   const onInterviewReadyRef = useRef(onInterviewUiReady)
-  const ttsEnabledRef    = useRef(ttsEnabled)
+  const ttsEnabledRef = useRef(ttsEnabled)
 
   useLayoutEffect(() => {
     deferGateRef.current = deferFirstAudioGate
@@ -579,10 +598,10 @@ const ChatInterface = forwardRef(function ChatInterface({
   )
 
   const ttsStopRef = useRef(tts.stop)
-  const sttRef     = useRef(stt)
+  const sttRef = useRef(stt)
   useLayoutEffect(() => {
     ttsStopRef.current = tts.stop
-    sttRef.current     = stt
+    sttRef.current = stt
   }, [tts, stt])
 
   // ── 离开面试页：立刻停神经语音、浏览器朗读与麦克风（须用 ref，避免 effect 闭包拿到旧的 stop）──
@@ -619,20 +638,20 @@ const ChatInterface = forwardRef(function ChatInterface({
     if (!position) return
 
     const controller = new AbortController()
-    const trigger    = language === 'Deutsch'
+    const trigger = language === 'Deutsch'
       ? t('chat.startTriggerDe')
       : t('chat.startTriggerEn')
 
     runGraph([{ role: 'user', content: trigger }], /* isSystem */ true, controller.signal)
 
     return () => controller.abort()   // cancel if StrictMode re-runs or component unmounts
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [position])
 
   // ── Core: call backend LangGraph via SSE ──────────────────────
   const runGraph = useCallback(async (messageHistory, isSystem = false, signal = null) => {
-    const session  = await supabase.auth.getSession()
-    const token    = session.data.session?.access_token
+    const session = await supabase.auth.getSession()
+    const token = session.data.session?.access_token
     if (!token) return
     if (signal?.aborted) return   // already cancelled before we even started
 
@@ -645,9 +664,9 @@ const ChatInterface = forwardRef(function ChatInterface({
       isFirstMsg.current = false
       try {
         await fetch(`${BACKEND_URL}/api/chat/reset`, {
-          method:  'POST',
+          method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body:    JSON.stringify({
+          body: JSON.stringify({
             position,
             jobDescription,
             language,
@@ -674,10 +693,10 @@ const ChatInterface = forwardRef(function ChatInterface({
 
     try {
       const res = await fetch(`${BACKEND_URL}/api/chat/message`, {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body:    JSON.stringify({
-          messages:      messageHistory,
+        body: JSON.stringify({
+          messages: messageHistory,
           position,
           jobDescription,
           language,
@@ -690,10 +709,10 @@ const ChatInterface = forwardRef(function ChatInterface({
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
-      const reader  = res.body.getReader()
+      const reader = res.body.getReader()
       const decoder = new TextDecoder()
-      let   buf     = ''
-      let   streamHadError = false
+      let buf = ''
+      let streamHadError = false
 
       sse: while (true) {
         const { done, value } = await reader.read()
@@ -864,32 +883,31 @@ const ChatInterface = forwardRef(function ChatInterface({
         return (
           <div
             key={msg.id}
-            className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             {msg.role === 'assistant' && !digitalHuman && (
-              <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${cfg.color} flex items-center justify-center flex-shrink-0 mt-5 shadow-lg`}>
-                <Icon className="w-4 h-4 text-white" />
+              <div className={`w-10 h-10 rounded-2xl ${cfg.color} flex items-center justify-center flex-shrink-0 mt-8 shadow-sm`}>
+                <Icon className="w-5 h-5" />
               </div>
             )}
 
-            <div className={`flex flex-col gap-0.5 ${digitalHuman ? 'max-w-[min(100%,36rem)]' : 'max-w-[78%]'} ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+            <div className={`flex flex-col gap-1 ${digitalHuman ? 'max-w-full' : 'max-w-[85%]'} ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               {msg.role === 'assistant' && msg.agent && (
                 <AgentBadge name={msg.agent} streaming={msg.streaming} agentMap={agentMap} />
               )}
 
-              <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                msg.role === 'user'
-                  ? 'bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-tr-sm shadow-lg shadow-primary-900/25 border border-primary-500/20'
-                  : 'bg-white text-slate-800 rounded-tl-sm border border-slate-200 shadow-md shadow-slate-900/5 dark:bg-slate-800/95 dark:text-slate-100 dark:border-slate-600/50 dark:shadow-black/20 dark:ring-1 dark:ring-white/[0.04]'
-              }`}>
+              <div className={`px-6 py-4 text-sm leading-relaxed tracking-tight ${msg.role === 'user'
+                  ? 'bg-slate-900 text-white rounded-[2rem] rounded-tr-none shadow-lg shadow-slate-900/10'
+                  : 'bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 border border-slate-100 dark:border-slate-800 rounded-[2rem] rounded-tl-none font-serif'
+                }`}>
                 {msg.streaming && !msg.content
                   ? <TypingDots />
-                  : <p className={`whitespace-pre-wrap ${msg.streaming ? 'typing-cursor' : ''}`}>{sanitizeSquareBrackets(msg.content)}</p>}
+                  : <div className={`whitespace-pre-wrap ${msg.streaming ? 'typing-cursor' : ''}`}>{sanitizeSquareBrackets(msg.content)}</div>}
               </div>
             </div>
 
             {msg.role === 'user' && !digitalHuman && (
-              <div className="w-9 h-9 rounded-full bg-slate-300 text-slate-800 dark:bg-slate-600 dark:text-white flex items-center justify-center flex-shrink-0 mt-1 text-xs font-bold">
+              <div className="w-10 h-10 rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800 flex items-center justify-center flex-shrink-0 mt-8 text-[10px] font-black uppercase tracking-widest border border-slate-200 dark:border-slate-700">
                 {t('chat.you')}
               </div>
             )}
@@ -902,108 +920,82 @@ const ChatInterface = forwardRef(function ChatInterface({
   )
 
   const inputBarSection = (
-    <div className="relative z-[1] flex-shrink-0 border-t border-slate-200/90 bg-white/95 backdrop-blur-md px-4 py-3 space-y-2 shadow-[0_-8px_32px_-8px_rgba(15,23,42,0.12)] dark:border-slate-800/80 dark:bg-slate-900/95 dark:shadow-[0_-8px_32px_-8px_rgba(0,0,0,0.35)]">
+    <div className="relative z-10 flex-shrink-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl px-6 py-4 space-y-4 border-t border-slate-200 dark:border-slate-900">
 
-      {/* Status row */}
-      <div className="flex items-center gap-3 min-h-[20px]">
-
-        {stt.active && (
-          <div className="flex items-center gap-2">
-            <div className="relative w-3 h-3">
-              <span className="absolute inset-0 rounded-full bg-red-500 opacity-75 animate-ping" />
-              <span className="w-3 h-3 rounded-full bg-red-500 block" />
+      {/* Status Indicators */}
+      <div className="flex items-center justify-between gap-4 h-6">
+        <div className="flex items-center gap-4">
+          {stt.active && (
+            <div className="flex items-center gap-2 px-3 py-1 bg-red-50 dark:bg-red-950/20 rounded-full border border-red-100 dark:border-red-900/30">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">{t('chat.recording')}</span>
             </div>
-            <span className="text-xs text-red-600 dark:text-red-400 font-semibold">{t('chat.recording')}</span>
-            {interimText && (
-              <span className="text-xs text-slate-500 dark:text-slate-500 italic truncate max-w-[180px]">
-                &quot;{interimText}&quot;
+          )}
+
+          {isStreaming && (
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-3 h-3 animate-spin text-slate-400" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                {currentAgent ? (agentMap[currentAgent.name]?.label ?? currentAgent.label) : t('chat.analyzing')}
               </span>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
-        {isStreaming && currentAgent && currentAgent.name !== 'feedback' && !stt.active && (
-          <div className="flex items-center gap-1.5 text-xs text-primary-600 dark:text-primary-400">
-            <Loader2 className="w-3 h-3 animate-spin" />
-            {agentMap[currentAgent.name]?.emoji} {agentMap[currentAgent.name]?.label ?? currentAgent.label}
-          </div>
-        )}
-
-        {isStreaming && !currentAgent && !stt.active && (
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-500">
-            <Search className="w-3 h-3 animate-pulse" />
-            {t('chat.analyzing')}
-          </div>
-        )}
-
-        {tts.speaking && !stt.active && (
-          <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
-            <WaveIcon active />
-            <span>{t('chat.ttsPlaying')}</span>
-          </div>
-        )}
+          {tts.speaking && !stt.active && (
+            <div className="flex items-center gap-3">
+              <WaveIcon active />
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('chat.ttsPlaying')}</span>
+            </div>
+          )}
+        </div>
 
         <button
-          type="button"
           onClick={() => { setTtsEnabled(v => !v); tts.stop() }}
-          title={ttsEnabled ? t('chat.voiceOn') : t('chat.voiceOff')}
-          className={`ml-auto flex shrink-0 items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-            ttsEnabled
-              ? 'border-emerald-500/60 bg-emerald-500/15 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-400'
-              : 'border-slate-400 bg-slate-100 text-slate-700 hover:border-primary-400 hover:bg-primary-50 hover:text-primary-800 dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:bg-slate-800'
-          }`}
+          className={`group flex items-center gap-2 px-3 py-1 rounded-lg transition-all ${ttsEnabled ? 'text-slate-900 dark:text-white' : 'text-slate-400'
+            }`}
         >
-          {ttsEnabled ? <Volume2 className="w-3 h-3" /> : <VolumeX className="w-3 h-3" />}
-          {ttsEnabled ? t('chat.voiceOn') : t('chat.voiceOff')}
+          {ttsEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+          <span className="text-[10px] font-black uppercase tracking-widest">{ttsEnabled ? t('chat.voiceOn') : t('chat.voiceOff')}</span>
         </button>
       </div>
 
-      <div className="flex gap-2 items-end">
+      <div className="flex gap-4 items-end max-w-5xl mx-auto w-full">
         <button
           onClick={() => stt.active ? stt.stop() : stt.start(input)}
           disabled={!stt.supported || isStreaming}
-          title={!stt.supported ? t('chat.micTitleNo') : stt.active ? t('chat.micStop') : t('chat.micStart')}
-          className={`relative flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
-            stt.active
-              ? 'bg-red-600 hover:bg-red-700 shadow-lg shadow-red-900/50'
-              : stt.supported && !isStreaming
-                ? 'bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-300'
-                : 'bg-slate-100 text-slate-400 cursor-not-allowed dark:bg-slate-800 dark:text-slate-600'
-          }`}
+          className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${stt.active
+              ? 'bg-red-600 text-white shadow-xl shadow-red-600/20'
+              : 'bg-slate-100 dark:bg-slate-900 text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'
+            } disabled:opacity-50`}
         >
-          {stt.active && (
-            <span className="absolute inset-0 rounded-xl bg-red-500 opacity-50 animate-ping" />
-          )}
-          {stt.active
-            ? <StopCircle className="w-5 h-5 text-white relative z-10" />
-            : <Mic className="w-5 h-5 relative z-10" />
-          }
+          {stt.active ? <StopCircle className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
         </button>
 
-        <textarea
-          value={stt.active ? input + interimText : input}
-          onChange={e => {
-            const v = e.target.value
-            if (stt.listeningRef.current) {
-              stt.syncAccumulatedFromUser(v)
-              setInterimText('')
+        <div className="flex-1 relative group">
+          <textarea
+            value={stt.active ? input + interimText : input}
+            onChange={e => {
+              const v = e.target.value
+              if (stt.listeningRef.current) {
+                stt.syncAccumulatedFromUser(v)
+                setInterimText('')
+                setInput(v)
+                return
+              }
               setInput(v)
-              return
-            }
-            setInput(v)
-          }}
-          onKeyDown={handleKeyDown}
-          placeholder={stt.active ? t('chat.listening') : t('chat.placeholder', { lang: language || 'English' })}
-          rows={2}
-          disabled={isStreaming}
-          className={`flex-1 bg-white dark:bg-slate-800 border text-slate-900 placeholder-slate-400 dark:text-slate-100 dark:placeholder-slate-500 text-sm
-            rounded-xl px-4 py-2.5 resize-none focus:outline-none focus:ring-1 transition-colors
-            disabled:opacity-50 ${
-            stt.active
-              ? 'border-red-500/50 focus:ring-red-500/30'
-              : 'border-slate-300 focus:border-primary-500 focus:ring-primary-500 dark:border-slate-700'
-          }`}
-        />
+            }}
+            onKeyDown={handleKeyDown}
+            placeholder={stt.active ? t('chat.listening') : t('chat.placeholder', { lang: language || 'English' })}
+            rows={1}
+            disabled={isStreaming}
+            className="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 text-sm font-medium rounded-2xl px-6 py-4.5 min-h-[56px] max-h-32 resize-none focus:outline-none border border-slate-100 dark:border-slate-800 focus:border-slate-900 dark:focus:border-white transition-all disabled:opacity-50"
+          />
+          {interimText && stt.active && (
+            <div className="absolute left-6 bottom-4 text-[10px] font-medium text-slate-400 italic pointer-events-none">
+              {interimText}
+            </div>
+          )}
+        </div>
 
         <button
           onClick={() => {
@@ -1012,17 +1004,13 @@ const ChatInterface = forwardRef(function ChatInterface({
             sendMessage(text)
           }}
           disabled={!inputDraft.trim() || isStreaming}
-          className="flex-shrink-0 w-11 h-11 bg-primary-600 rounded-xl flex items-center justify-center
-            hover:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-lg"
+          className="flex-shrink-0 w-14 h-14 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl flex items-center justify-center hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-xl shadow-slate-900/10 disabled:opacity-50"
         >
-          {isStreaming
-            ? <Loader2 className="w-4 h-4 text-white animate-spin" />
-            : <Send className="w-4 h-4 text-white" />
-          }
+          {isStreaming ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
         </button>
       </div>
 
-      <p className="text-center text-xs text-slate-500 dark:text-slate-600">
+      <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-400">
         {stt.supported ? t('chat.hintFull') : t('chat.hintType')}
       </p>
     </div>
@@ -1030,11 +1018,10 @@ const ChatInterface = forwardRef(function ChatInterface({
 
   return (
     <div
-      className={`flex min-h-0 flex-1 flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white ${
-        interviewUiVisible
+      className={`flex min-h-0 flex-1 flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white ${interviewUiVisible
           ? ''
           : 'absolute inset-0 z-0 opacity-0 pointer-events-none overflow-hidden min-h-0'
-      }`}
+        }`}
       aria-hidden={!interviewUiVisible}
     >
 
@@ -1046,10 +1033,10 @@ const ChatInterface = forwardRef(function ChatInterface({
             onClick={() => {
               setInitError(null)
               initDoneRef.current = false
-              isFirstMsg.current  = true
+              isFirstMsg.current = true
               setMessages([])
               const controller = new AbortController()
-              const trigger    = language === 'Deutsch'
+              const trigger = language === 'Deutsch'
                 ? t('chat.startTriggerDe')
                 : t('chat.startTriggerEn')
               // Restart opening generation. Previously this button only cleared UI state.
@@ -1063,56 +1050,53 @@ const ChatInterface = forwardRef(function ChatInterface({
       )}
 
       {digitalHuman ? (
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
-            {/* Zoom 主画面：专业 HR 形象 */}
-            <aside
-              className="flex flex-col w-full flex-shrink-0 overflow-hidden border-b border-slate-200 bg-slate-950 dark:border-slate-800 lg:w-[min(100%,300px)] xl:w-[min(100%,336px)] lg:min-h-0 lg:border-b-0 lg:border-r lg:self-stretch h-[min(52vh,380px)] lg:h-auto"
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-slate-950">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row relative">
+            {/* Zoom 主画面：专业 HR 形象 (30% Width) */}
+            <main
+              className="relative lg:flex-[3] flex-shrink-0 flex flex-col items-center justify-center bg-black overflow-hidden"
               aria-label={t('interview.digitalHuman')}
             >
-              {/* 上半部分：面试官画面 */}
-              <div className="relative flex-[3] min-h-0 overflow-hidden">
-                <img
-                  src={HR_PORTRAIT_SRC}
-                  alt=""
-                  className={`absolute inset-0 h-full w-full object-cover object-[center_18%] transition-transform duration-700 ${tts.speaking ? 'animate-dh-breathe' : ''}`}
-                  decoding="async"
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/25" />
+              <img
+                src={HR_PORTRAIT_SRC}
+                alt=""
+                className={`absolute inset-0 h-full w-full object-cover object-[center_20%] transition-all duration-700 ${tts.speaking ? 'scale-[1.02] opacity-100' : 'opacity-80'}`}
+                decoding="async"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
 
-                <div className="absolute left-0 right-0 top-0 flex items-center justify-between gap-2 border-b border-white/10 bg-black/40 px-3 py-2 backdrop-blur-md">
-                  <span className="truncate text-left text-[11px] font-semibold text-white/95 sm:text-xs">
-                    {t('interview.digitalZoomTitle')}
-                    <span className="mx-1.5 text-white/40">·</span>
-                    <span className="font-medium text-white/80">{position}</span>
-                  </span>
-                  <span className="flex shrink-0 items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-red-200">
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                    {t('interview.digitalZoomLive')}
-                  </span>
-                </div>
-
-                <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3">
-                  <p className="text-base font-black tracking-tight text-white drop-shadow-md sm:text-lg">{t('interview.digitalHuman')}</p>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                    {tts.speaking && (
-                      <span className="inline-flex h-5 items-end gap-0.5 rounded-md bg-emerald-500/25 px-1.5 py-0.5">
-                        {[4, 7, 5, 9, 6].map((h, i) => (
-                          <span
-                            key={i}
-                            className="w-0.5 rounded-full bg-emerald-400 animate-dh-wave"
-                            style={{ height: `${h}px`, animationDelay: `${i * 80}ms` }}
-                          />
-                        ))}
-                      </span>
-                    )}
-                    <p className="text-xs text-white/85">{digitalStateLabel}</p>
+              {/* Status Header */}
+              <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-6 pointer-events-none">
+                <div className="flex items-center gap-4">
+                  <div className="px-4 py-2 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 flex items-center gap-3">
+                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                    <span className="text-xs font-black uppercase tracking-widest text-white/90">{t('interview.digitalZoomLive')}</span>
+                  </div>
+                  <div className="px-4 py-2 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 text-xs font-bold text-white/70">
+                    {t('interview.digitalZoomTitle')}: {position}
                   </div>
                 </div>
               </div>
 
-              {/* 下半部分：我的画面 */}
-              <div className="relative flex-[2] min-h-0 overflow-hidden border-t border-white/10 bg-slate-900">
+              {/* AI Name Label - Lowered slightly */}
+              <div className="absolute bottom-4 left-8 flex flex-col gap-2 pointer-events-none z-20">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-2xl font-black text-white uppercase tracking-tight drop-shadow-lg">{t('interview.digitalHuman')}</h3>
+                  {tts.speaking && (
+                    <div className="flex items-end gap-1 h-6">
+                      {[4, 7, 5, 9, 6, 8, 4].map((h, i) => (
+                        <div key={i} className="w-1 rounded-full bg-primary-400 animate-dh-wave" style={{ height: `${h * 2}px`, animationDelay: `${i * 100}ms` }} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="px-3 py-1 bg-black/20 backdrop-blur-sm rounded-lg self-start border border-white/5">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-primary-400">{digitalStateLabel}</span>
+                </div>
+              </div>
+
+              {/* User PiP - Lowered slightly while maintaining clearance */}
+              <div className="absolute bottom-24 right-4 w-72 aspect-video rounded-3xl overflow-hidden bg-slate-900 border-2 border-white/20 shadow-2xl group transition-all hover:scale-105 hover:border-white/40">
                 {userCameraStream?.getVideoTracks?.()?.length ? (
                   <video
                     ref={userPipVideoRef}
@@ -1122,27 +1106,125 @@ const ChatInterface = forwardRef(function ChatInterface({
                     autoPlay
                   />
                 ) : (
-                  <div className="flex h-full flex-col items-center justify-center gap-1 bg-gradient-to-br from-slate-700 to-slate-900 px-3">
-                    <span className="text-sm font-bold text-white">{t('chat.you')}</span>
-                    <span className="text-center text-xs leading-tight text-white/55">{t('interview.digitalYouPip')}</span>
+                  <div className="flex h-full flex-col items-center justify-center gap-1 bg-slate-800">
+                    <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{t('chat.you')}</span>
                   </div>
                 )}
-                <div className="absolute bottom-2 left-2 rounded bg-black/50 px-1.5 py-0.5 text-[10px] font-semibold text-white/80 backdrop-blur-sm">
-                  {t('chat.you')}
+                <div className="absolute bottom-2 left-2 rounded bg-black/50 px-2 py-0.5 text-[10px] font-bold text-white/90 backdrop-blur-sm">
+                  {t('digitalParticipantYou', { defaultValue: 'You' })}
+                </div>
+              </div>
+            </main>
+
+            {/* Chat Sidebar - Professional Zoom Style (70% Width) - Glassmorphic */}
+            <aside className="w-full lg:flex-[7] flex flex-col bg-white/70 dark:bg-slate-900/60 backdrop-blur-3xl border-l border-slate-200/50 dark:border-white/5 transition-all duration-300">
+              <div className="flex-shrink-0 px-6 py-5 border-b border-slate-200/50 dark:border-white/5 flex items-center justify-between bg-white/40 dark:bg-black/20 backdrop-blur-md relative z-20">
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">{t('interview.digitalChatTitle')}</h3>
+                
+                {/* Embedded Countdown in Sidebar Header */}
+                <div className="flex items-center gap-3 px-3 py-1.5 bg-slate-50 dark:bg-black/40 rounded-lg border border-slate-100 dark:border-white/5 transition-all">
+                  <Clock className={`w-3.5 h-3.5 ${timerStatus === 'critical' ? 'text-red-500 animate-pulse' : timerStatus === 'warning' ? 'text-amber-500' : 'text-slate-400'}`} />
+                  <span className={`text-sm font-mono font-bold tabular-nums ${timerStatus === 'critical' ? 'text-red-600 dark:text-red-400' : timerStatus === 'warning' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'}`}>
+                    {timerDisplay}
+                  </span>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+                {messageItems}
+              </div>
+
+              <div className="p-6 border-t border-slate-200/50 dark:border-white/5 space-y-4 bg-white/40 dark:bg-black/30 backdrop-blur-md">
+                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <span>{stt.active ? t('chat.recording') : isStreaming ? t('chat.analyzing') : t('chat.ready')}</span>
+                  {tts.speaking && <WaveIcon active />}
+                </div>
+
+                <div className="flex gap-3">
+                  <div className="flex-1 relative">
+                    <textarea
+                      value={stt.active ? input + interimText : input}
+                      onChange={e => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder={t('chat.placeholder', { lang: language })}
+                      className="w-full bg-white dark:bg-slate-800 text-sm font-medium rounded-xl px-4 py-3 min-h-[48px] max-h-32 resize-none focus:outline-none border border-slate-200 dark:border-slate-700 transition-all disabled:opacity-50"
+                      disabled={isStreaming}
+                    />
+                  </div>
+                  <button
+                    onClick={() => sendMessage(inputDraft)}
+                    disabled={!inputDraft.trim() || isStreaming}
+                    className="w-12 h-12 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 shadow-lg shadow-slate-900/10"
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
             </aside>
+          </div>
 
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-slate-50 dark:bg-slate-950">
-              <div className="flex-shrink-0 border-b border-slate-200/90 bg-white/95 px-3 py-2 backdrop-blur-sm dark:border-slate-800/90 dark:bg-slate-900/95">
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{t('interview.digitalChatTitle')}</span>
+          {/* Bottom Control Bar - High-End Digital Meeting Style */}
+          <div className="h-20 bg-black/95 backdrop-blur-2xl border-t border-white/10 flex items-center justify-between px-10 flex-shrink-0">
+            <div className="flex items-center gap-8">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1.5">{t('interview.audio')}</span>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => stt.active ? stt.stop() : stt.start(input)}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${stt.active ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'}`}
+                  >
+                    {stt.active ? <Mic className="w-5 h-5 shadow-inner" /> : <Mic className="w-5 h-5" />}
+                  </button>
+                  <button
+                    onClick={() => {
+                      const next = !ttsEnabled
+                      setTtsEnabled(next)
+                      if (!next) tts.stop()
+                      else window.speechSynthesis?.resume()
+                    }}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${ttsEnabled ? 'bg-white/5 text-white' : 'bg-red-500/10 text-red-400'}`}
+                  >
+                    {ttsEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
-              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-3 py-4">
-                {messageItems}
+
+              <div className="h-10 w-px bg-white/10" />
+
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1.5">{t('interview.video')}</span>
+                <button
+                  onClick={() => onToggleCamera?.()}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isCameraOn ? 'bg-white/5 text-white' : 'bg-red-500/10 text-red-400'}`}
+                >
+                  {isCameraOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
+                </button>
               </div>
             </div>
+
+            <div className="flex items-center gap-6">
+              <div className="flex flex-col items-center">
+                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1.5">{t('interview.meetingTime')}</span>
+                <div className="px-4 py-1.5 bg-white/5 rounded-lg border border-white/10 text-xs font-mono font-bold text-white tabular-nums">
+                  LIVE
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => window.location.href = '/setup'}
+                className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white/50 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-white/5 hover:border-white/20 backdrop-blur-sm"
+              >
+                {t('interview.exitDirectly', { defaultValue: 'Exit' })}
+              </button>
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('interview-end-request'))}
+                className="px-8 py-3 bg-red-600/90 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-xl shadow-red-600/20 backdrop-blur-sm"
+              >
+                {t('interview.leaveRoom', { defaultValue: 'Leave' })}
+              </button>
+            </div>
           </div>
-          {inputBarSection}
         </div>
       ) : (
         <>

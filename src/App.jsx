@@ -13,13 +13,16 @@ import AuthCallbackPage from './pages/AuthCallbackPage'
 import ProfilePage from './pages/ProfilePage'
 import GallupTestPage from './pages/GallupTestPage'
 
+import BackgroundAurora from './components/BackgroundAurora'
+
 function Layout({ children, hideFooter = false }) {
   return (
-    <>
+    <div className="relative min-h-screen bg-sky-50/50 dark:bg-[#020617] transition-colors duration-500">
       <Navbar />
-      <main className="relative min-h-[calc(100dvh-4.25rem)]">{children}</main>
+      <BackgroundAurora />
+      <main className="relative z-10 min-h-[calc(100dvh-4.25rem)]">{children}</main>
       {!hideFooter && <Footer />}
-    </>
+    </div>
   )
 }
 
