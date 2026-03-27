@@ -196,7 +196,21 @@
     "resumeNone": "No resume in use: the interviewer will not target CV-specific content.",
     "resumePdfOnly": "Please choose a PDF file.",
     "resumeParsed": "Extracted about {{n}} characters.",
-    "resumeParseErr": "Could not parse this PDF—try another file or paste text on your profile."
+    "resumeParseErr": "Could not parse this PDF—try another file or paste text on your profile.",
+    "aiAssistantTitle": "AI Assistant",
+    "mlTitle": "AI Motivation Letter Master",
+    "mlDesc": "Craft a highly persuasive cover letter tailored to your resume and this job description. ✨",
+    "mlLength": "Target Length",
+    "mlLang": "Output Language",
+    "mlBtn": "Generate Motivation Letter",
+    "mlBtnNew": "Regenerate",
+    "mlGenerating": "Master is composing...",
+    "mlCopy": "Copy to Clipboard",
+    "mlCopied": "Copied!",
+    "mlLength100": "~100 words (Concise)",
+    "mlLength200": "~200 words (Standard)",
+    "mlLength300": "~300 words (In-depth)",
+    "mlPlaceholder": "Click the button above and our AI expert will write for you..."
   },
   "profile": {
     "title": "Profile & resume",

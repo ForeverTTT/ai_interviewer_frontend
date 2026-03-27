@@ -6,7 +6,7 @@ import { getBackendBaseUrl } from '../lib/backendBase'
 import {
   Briefcase, FileText, Globe2, Clock, ArrowRight,
   Info, Sparkles, Upload, Loader2, X, Check, LayoutTemplate,
-  ChevronDown,
+  ChevronDown, Copy, RotateCcw,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -176,6 +176,14 @@ export default function SetupPage() {
   const [sessionResumeText, setSessionResumeText] = useState('')
   const [resumeParsing, setResumeParsing] = useState(false)
   const [resumeNote, setResumeNote] = useState(null)
+  const [mlForm, setMlForm] = useState({
+    length: 200,
+    language: 'English',
+  })
+  const [mlResult, setMlResult] = useState('')
+  const [mlLoading, setMlLoading] = useState(false)
+  const [mlCopied, setMlCopied] = useState(false)
+
   const resumeFileRef = useRef(null)
 
   const effectiveResume = (sessionResumeText.trim() || profileResumeText.trim())
@@ -329,6 +337,53 @@ export default function SetupPage() {
     } finally {
       setResumeParsing(false)
     }
+  }
+
+  const handleGenerateML = async () => {
+    if (!form.position.trim() || !form.jobDescription.trim()) {
+      setErrors({
+        position: !form.position.trim() ? t('setup.errPos') : '',
+        jobDescription: !form.jobDescription.trim() ? t('setup.errDesc') : '',
+      })
+      // Scroll to top to show errors if needed
+      window.scrollTo({ top: 300, behavior: 'smooth' })
+      return
+    }
+    setMlLoading(true)
+    setMlResult('')
+    try {
+      const backendUrl = getBackendBaseUrl()
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      const res = await fetch(`${backendUrl}/api/ai-assistant/generate-motivation-letter`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          position: form.position,
+          jobDescription: form.jobDescription,
+          resumeText: effectiveResume,
+          targetLength: mlForm.length,
+          language: mlForm.language,
+        }),
+      })
+      const j = await res.json()
+      if (res.ok) setMlResult(j.text)
+      else throw new Error(j.error)
+    } catch (err) {
+      setMlResult('Error: ' + err.message)
+    } finally {
+      setMlLoading(false)
+    }
+  }
+
+  const handleCopyML = () => {
+    if (!mlResult) return
+    navigator.clipboard.writeText(mlResult)
+    setMlCopied(true)
+    setTimeout(() => setMlCopied(false), 2000)
   }
 
   return (
@@ -577,6 +632,103 @@ export default function SetupPage() {
                   ) : (
                     <p className="text-sm font-medium leading-relaxed text-slate-800 dark:text-slate-200">{t('setup.resumeNone')}</p>
                   )}
+                </div>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-50/40 ring-1 ring-slate-900/[0.03] dark:border-slate-600 dark:bg-slate-800/25 dark:ring-white/[0.05]">
+              <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/80 bg-gradient-to-r from-primary-600/[0.07] to-violet-600/[0.06] px-4 py-3.5 dark:border-slate-600 dark:from-primary-500/12 dark:to-violet-600/10 sm:px-5">
+                <Sparkles className="h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400" aria-hidden />
+                <span className="text-sm font-black text-slate-900 dark:text-white">{t('setup.aiAssistantTitle')}</span>
+              </div>
+              <div className="p-5 sm:p-6 space-y-6">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">{t('setup.mlTitle')}</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{t('setup.mlDesc')}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      {t('setup.mlLength')}
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {[100, 200, 300].map(len => (
+                        <button
+                          key={len}
+                          type="button"
+                          onClick={() => setMlForm({ ...mlForm, length: len })}
+                          className={`px-3 py-2 rounded-xl text-xs font-bold border transition ${
+                            mlForm.length === len
+                              ? 'bg-primary-50 border-primary-500 text-primary-700 dark:bg-primary-950/40 dark:border-primary-400 dark:text-primary-300'
+                              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-400'
+                          }`}
+                        >
+                          {t(`setup.mlLength${len}`)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      {t('setup.mlLang')}
+                    </label>
+                    <div className="flex gap-2">
+                      {['English', 'Deutsch'].map(lang => (
+                        <button
+                          key={lang}
+                          type="button"
+                          onClick={() => setMlForm({ ...mlForm, language: lang })}
+                          className={`flex-1 px-3 py-2 rounded-xl text-xs font-bold border transition ${
+                            mlForm.language === lang
+                              ? 'bg-primary-50 border-primary-500 text-primary-700 dark:bg-primary-950/40 dark:border-primary-400 dark:text-primary-300'
+                              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-400'
+                          }`}
+                        >
+                          {lang === 'English' ? '🇬🇧 English' : '🇩🇪 Deutsch'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    disabled={mlLoading}
+                    onClick={handleGenerateML}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-700 text-white text-sm font-bold hover:bg-slate-800 transition disabled:opacity-50"
+                  >
+                    {mlLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      mlResult ? <RotateCcw className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />
+                    )}
+                    {mlLoading ? t('setup.mlGenerating') : (mlResult ? t('setup.mlBtnNew') : t('setup.mlBtn'))}
+                  </button>
+
+                  <div className="relative group">
+                    <textarea
+                      readOnly
+                      value={mlResult}
+                      placeholder={t('setup.mlPlaceholder')}
+                      className={`w-full p-4 rounded-2xl border bg-white/50 dark:bg-slate-900/50 text-sm leading-relaxed focus:outline-none transition resize-y overflow-auto ${
+                        mlResult ? 'min-h-[400px] border-primary-200 dark:border-primary-800/50' : 'min-h-[160px] border-slate-200 dark:border-slate-700'
+                      }`}
+                    />
+                    {mlResult && (
+                      <button
+                        type="button"
+                        onClick={handleCopyML}
+                        className="absolute top-3 right-3 p-2 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-primary-50 dark:hover:bg-primary-950 transition-all text-slate-600 dark:text-slate-400"
+                        title={t('setup.mlCopy')}
+                      >
+                        {mlCopied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                        {mlCopied && <span className="absolute -top-8 right-0 text-[10px] font-bold bg-emerald-600 text-white px-1.5 py-0.5 rounded">{t('setup.mlCopied')}</span>}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

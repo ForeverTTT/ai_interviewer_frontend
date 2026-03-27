@@ -202,7 +202,21 @@
     "resumeNone": "当前未使用简历：面试官不会主动围绕 CV 追问。",
     "resumePdfOnly": "请选择 PDF 文件。",
     "resumeParsed": "已解析约 {{n}} 个字符。",
-    "resumeParseErr": "无法解析该 PDF，请换文件或到个人页粘贴正文。"
+    "resumeParseErr": "无法解析该 PDF，请换文件或到个人页粘贴正文。",
+    "aiAssistantTitle": "AI 助手",
+    "mlTitle": "AI 求职信大师 (Motivation Letter)",
+    "mlDesc": "结合你的简历与职位描述，为你量身定制一份高说服力的求职信。✨",
+    "mlLength": "建议篇幅",
+    "mlLang": "生成语言",
+    "mlBtn": "立即生成求职信",
+    "mlBtnNew": "重新生成",
+    "mlGenerating": "大师正在构思中...",
+    "mlCopy": "复制到剪贴板",
+    "mlCopied": "已复制！",
+    "mlLength100": "100词 (精简)",
+    "mlLength200": "200词 (标准)",
+    "mlLength300": "300词 (深度)",
+    "mlPlaceholder": "点击上方按钮，AI 专家将为您撰写..."
   },
   "profile": {
     "title": "个人资料与简历",

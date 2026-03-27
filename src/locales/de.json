@@ -196,7 +196,21 @@
     "resumeNone": "Kein Lebenslauf: keine gezielten CV-Fragen.",
     "resumePdfOnly": "Bitte eine PDF-Datei wählen.",
     "resumeParsed": "Etwa {{n}} Zeichen extrahiert.",
-    "resumeParseErr": "PDF konnte nicht gelesen werden – andere Datei oder Text im Profil einfügen."
+    "resumeParseErr": "PDF konnte nicht gelesen werden – andere Datei oder Text im Profil einfügen.",
+    "aiAssistantTitle": "AI Assistent",
+    "mlTitle": "AI Motivation Letter Master",
+    "mlDesc": "Erstelle ein überzeugendes Anschreiben, das perfekt auf deinen Lebenslauf und diese Stellenbeschreibung zugeschnitten ist. ✨",
+    "mlLength": "Gewünschte Länge",
+    "mlLang": "Ausgabesprache",
+    "mlBtn": "Anschreiben generieren",
+    "mlBtnNew": "Neu generieren",
+    "mlGenerating": "Master verfasst das Schreiben...",
+    "mlCopy": "In Zwischenablage kopieren",
+    "mlCopied": "Kopiert!",
+    "mlLength100": "~100 Wörter (Kompakt)",
+    "mlLength200": "~200 Wörter (Standard)",
+    "mlLength300": "~300 Wörter (Ausführlich)",
+    "mlPlaceholder": "Klick auf den Button oben und unser KI-Experte schreibt für dich..."
   },
   "profile": {
     "title": "Profil & Lebenslauf",
