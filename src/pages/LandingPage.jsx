@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import OfferLogosMarquee from '../components/OfferLogosMarquee'
 import HowItWorksShowcase from '../components/HowItWorksShowcase'
 import AdvantagesShowcase from '../components/AdvantagesShowcase'
+import TechnologyShowcase from '../components/TechnologyShowcase'
 import TestimonialsMarquee from '../components/TestimonialsMarquee'
 import {
   ArrowRight, Mic, Globe2, Clock,
@@ -263,6 +264,8 @@ export default function LandingPage() {
       <HowItWorksShowcase ctaLink={ctaLink} />
 
       <AdvantagesShowcase />
+
+      <TechnologyShowcase />
 
       <TestimonialsMarquee />
 

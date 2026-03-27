@@ -158,6 +158,20 @@
       "v3d": "Bietet personalisierte Lernpfade und Karrierebewertungen. Fungiert als Mentor, um den Nutzern zu helfen, reibungslos vom Studium in den Beruf zu wechseln und sich frühzeitig an das Umfeld anzupassen.",
       "v4t": "Modernster LLM-gestützter Lebenslauf",
       "v4d": "Nutzt modernste LLMs, um Lebensläufe zu analysieren und Daten automatisch auszufüllen, und bietet eine personalisierte Lebenslaufanpassung und Steigerung der Wettbewerbsfähigkeit über die STAR-Methode."
+    },
+    "tech": {
+      "badge": "Kerntechnologie",
+      "title": "Elite-Hintergrund trifft auf Spitzen-KI",
+      "teamT": "Elite-Kernteam",
+      "teamD": "Unsere technischen Kernmitglieder verfügen über Hintergründe von Spitzenuniversitäten wie Oxford, der TUM und dem KIT und haben Schlüsselpositionen bei deutschen Industriegiganten wie Infineon, Siemens und BMW besetzt. Wir haben diese Vorstellungsgespräche nicht nur bestanden – wir haben die zugrunde liegende Logik der deutschen Unternehmenskultur analysiert und in KI-Algorithmen überführt, die OfferClaw seine Seele verleihen.",
+      "agentT": "Multi-Agenten-Architektur",
+      "agentD": "Unser eigenentwickeltes Multi-Agenten-System kann innerhalb einer Sitzung dynamisch zwischen Rollen wie „Strenger technischer Leiter“ und „Scharfsinniger HR-Experte“ wechseln. Die KI agiert nicht mehr mechanisch, sondern hakt bei jeder Ihrer Antworten mit logisch präzisen Stress-Tests (Stress Test) nach, um die Hochdruckatmosphäre deutscher Vorstellungsgespräche authentisch nachzustellen.",
+      "fineTuneT": "大模型监督微调 (SFT)",
+      "fineTuneD": "Wir beherrschen modernste LLM-Fine-Tuning-Methoden und haben über 10.000 Iterationen speziell für den deutschen Bewerbungskontext durchgeführt. Ob es um die Nuancen eines deutschen Vorstellungsgesprächs oder die präzise technische Prüfung geht, OfferClaw liefert Antworten, die exakt den Anforderungen entsprechen.",
+      "voiceT": "Absolute Sprachpräsenz",
+      "voiceD": "Durch High-Fidelity Neural Voice Synthesis simulieren wir Sprechgeschwindigkeit, Pausen und Akzente echter Interviewpartner. Durch hunderte Voice-Stress-Trainings verwandeln wir Prüfungsangst in „Muscle Memory“.",
+      "privacyT": "Datenschutz nach deutschem Standard",
+      "privacyD": "Wir verstehen die Bedeutung Ihrer Privatsphäre. Alle Daten werden nach GDPR-Vorgaben anonymisiert verarbeitet. Ihr Training bleibt absolut vertraulich – Sicherheit, die Ihren Fortschritt ermutigt."
     }
   },
   "offerMarquee": {
