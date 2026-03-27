@@ -1180,16 +1180,48 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[#FAF9F6] dark:bg-slate-950">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-900 dark:text-white" />
-        <p className="text-[10px] uppercase font-black tracking-widest text-slate-400">{t('profile.title')}</p>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-[#FAF9F6] dark:bg-slate-950">
+        <div className="relative">
+          <Loader2 className="h-10 w-10 animate-spin text-slate-900 dark:text-white" />
+          <div className="absolute inset-0 bg-primary-500/10 blur-xl animate-pulse rounded-full" />
+        </div>
+        <div className="space-y-1 text-center">
+          <p className="text-[10px] uppercase font-black tracking-widest text-slate-400 animate-pulse">{t('profile.title')}</p>
+          <div className="h-0.5 w-12 bg-slate-200 dark:bg-slate-800 mx-auto rounded-full overflow-hidden">
+            <motion.div 
+               className="h-full bg-primary-600"
+               initial={{ x: "-100%" }}
+               animate={{ x: "100%" }}
+               transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+            />
+          </div>
+        </div>
       </div>
     )
   }
 
+  const pageExitVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { 
+        duration: 0.8, 
+        ease: [0.16, 1, 0.3, 1],
+        staggerChildren: 0.1 
+      } 
+    }
+  }
+
   if (!isEdit) {
     return (
-      <div className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-24">
+      <motion.div 
+        key="profile-display"
+        variants={pageExitVariants}
+        initial="initial"
+        animate="animate"
+        className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-24"
+      >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ProfileDisplayView
             cvProfile={cvProfile}
@@ -1208,12 +1240,18 @@ export default function ProfilePage() {
             runCoach={runCoach}
           />
         </div>
-      </div>
+      </motion.div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-24">
+    <motion.div 
+      key="profile-edit"
+      variants={pageExitVariants}
+      initial="initial"
+      animate="animate"
+      className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-24"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ProfileEditView
           cvProfile={cvProfile} setCvProfile={setCvProfile} resumeText={resumeText} setResumeText={setResumeText}
@@ -1225,7 +1263,7 @@ export default function ProfilePage() {
           avatarId={avatarId} setAvatarId={setAvatarId} t={t}
         />
       </div>
-    </div>
+    </motion.div>
   )
 }
 
