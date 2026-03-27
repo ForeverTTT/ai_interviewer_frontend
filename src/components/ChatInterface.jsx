@@ -855,6 +855,10 @@ const ChatInterface = forwardRef(function ChatInterface({
   const displayMessages = messages.filter(m => (m.content || m.streaming) && m.agent !== 'feedback')
 
   const interviewerThinking = isStreaming || Boolean(currentAgent)
+  const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant')
+  const activeAgentName = currentAgent?.name || lastAssistantMsg?.agent
+  const activeAgentLabel = activeAgentName ? (agentMap[activeAgentName]?.label || activeAgentName) : 'Interviewer'
+
   const digitalStateLabel = stt.active
     ? t('interview.digitalStateListening')
     : tts.speaking
@@ -891,26 +895,16 @@ const ChatInterface = forwardRef(function ChatInterface({
               </div>
             )}
 
-            <div className={`flex flex-col gap-1 ${digitalHuman ? 'max-w-full' : 'max-w-[85%]'} ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-              {msg.role === 'assistant' && msg.agent && (
-                <AgentBadge name={msg.agent} streaming={msg.streaming} agentMap={agentMap} />
-              )}
-
-              <div className={`px-6 py-4 text-sm leading-relaxed tracking-tight ${msg.role === 'user'
-                  ? 'bg-slate-900 text-white rounded-[2rem] rounded-tr-none shadow-lg shadow-slate-900/10'
-                  : 'bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 border border-slate-100 dark:border-slate-800 rounded-[2rem] rounded-tl-none font-serif'
+            <div className={`flex flex-col gap-2 ${digitalHuman ? 'max-w-full' : 'max-w-[85%]'} ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+              <div className={`px-4 py-3 text-[0.8rem] leading-snug tracking-tight shadow-sm ${msg.role === 'user'
+                  ? 'bg-slate-900 text-white rounded-2xl rounded-tr-none dark:bg-white dark:text-slate-900 font-bold'
+                  : 'bg-white/60 dark:bg-white/10 backdrop-blur-md text-slate-800 dark:text-slate-100 border border-slate-200/50 dark:border-white/10 rounded-2xl rounded-tl-none font-serif'
                 }`}>
                 {msg.streaming && !msg.content
                   ? <TypingDots />
                   : <div className={`whitespace-pre-wrap ${msg.streaming ? 'typing-cursor' : ''}`}>{sanitizeSquareBrackets(msg.content)}</div>}
               </div>
             </div>
-
-            {msg.role === 'user' && !digitalHuman && (
-              <div className="w-10 h-10 rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800 flex items-center justify-center flex-shrink-0 mt-8 text-[10px] font-black uppercase tracking-widest border border-slate-200 dark:border-slate-700">
-                {t('chat.you')}
-              </div>
-            )}
           </div>
         )
       })}
@@ -1018,13 +1012,12 @@ const ChatInterface = forwardRef(function ChatInterface({
 
   return (
     <div
-      className={`flex min-h-0 flex-1 flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white ${interviewUiVisible
+      className={`flex min-h-0 flex-1 flex-col bg-transparent text-slate-900 dark:text-white ${interviewUiVisible
           ? ''
           : 'absolute inset-0 z-0 opacity-0 pointer-events-none overflow-hidden min-h-0'
         }`}
       aria-hidden={!interviewUiVisible}
     >
-
       {/* Error banner */}
       {initError && (
         <div className="flex items-center gap-2 px-4 py-2 bg-red-100 border-b border-red-200 text-red-800 dark:bg-red-900/40 dark:border-red-700/40 dark:text-red-300 text-xs flex-shrink-0">
@@ -1050,54 +1043,54 @@ const ChatInterface = forwardRef(function ChatInterface({
       )}
 
       {digitalHuman ? (
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-slate-950">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent">
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row relative">
-            {/* Zoom 主画面：专业 HR 形象 (30% Width) */}
+            {/* Stage 1: AI Interviewer (40% Width) */}
             <main
-              className="relative lg:flex-[3] flex-shrink-0 flex flex-col items-center justify-center bg-black overflow-hidden"
+              className="relative lg:flex-[4] flex-shrink-0 flex flex-col items-center justify-center bg-black overflow-hidden m-4 rounded-[2.5rem] border border-white/5 shadow-2xl"
               aria-label={t('interview.digitalHuman')}
             >
               <img
                 src={HR_PORTRAIT_SRC}
                 alt=""
-                className={`absolute inset-0 h-full w-full object-cover object-[center_20%] transition-all duration-700 ${tts.speaking ? 'scale-[1.02] opacity-100' : 'opacity-80'}`}
+                className={`absolute inset-0 h-full w-full object-cover object-[center_20%] transition-all duration-1000 ${tts.speaking ? 'scale-[1.05] opacity-100 blur-[0.5px]' : 'opacity-90'}`}
                 decoding="async"
               />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
 
-              {/* Status Header */}
-              <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-6 pointer-events-none">
-                <div className="flex items-center gap-4">
-                  <div className="px-4 py-2 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 flex items-center gap-3">
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-                    <span className="text-xs font-black uppercase tracking-widest text-white/90">{t('interview.digitalZoomLive')}</span>
-                  </div>
-                  <div className="px-4 py-2 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 text-xs font-bold text-white/70">
-                    {t('interview.digitalZoomTitle')}: {position}
-                  </div>
+              {/* AI Status Header */}
+              <div className="absolute top-8 left-8 flex items-center gap-3 pointer-events-none z-20">
+                <div className="px-4 py-2 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/10 flex items-center gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.6)]" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white">{t('interview.digitalZoomLive')}</span>
+                </div>
+                <div className="px-4 py-2 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest text-white/50">
+                   {activeAgentLabel}
                 </div>
               </div>
 
-              {/* AI Name Label - Lowered slightly */}
-              <div className="absolute bottom-4 left-8 flex flex-col gap-2 pointer-events-none z-20">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tight drop-shadow-lg">{t('interview.digitalHuman')}</h3>
+              {/* AI Name & Visualizer */}
+              <div className="absolute bottom-10 left-10 flex flex-col gap-3 pointer-events-none z-20">
+                <div className="flex items-center gap-4">
+                  <h3 className="text-3xl font-black text-white uppercase tracking-tighter drop-shadow-2xl font-serif leading-none">{t('interview.digitalHuman')}</h3>
                   {tts.speaking && (
-                    <div className="flex items-end gap-1 h-6">
-                      {[4, 7, 5, 9, 6, 8, 4].map((h, i) => (
+                    <div className="flex items-end gap-1.5 h-6 bg-primary-600/20 px-3 py-1 rounded-full backdrop-blur-md border border-primary-500/30">
+                      {[4, 7, 5, 9, 6].map((h, i) => (
                         <div key={i} className="w-1 rounded-full bg-primary-400 animate-dh-wave" style={{ height: `${h * 2}px`, animationDelay: `${i * 100}ms` }} />
                       ))}
                     </div>
                   )}
                 </div>
-                <div className="px-3 py-1 bg-black/20 backdrop-blur-sm rounded-lg self-start border border-white/5">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-primary-400">{digitalStateLabel}</span>
+                <div className="flex items-center gap-2">
+                   <div className="w-1.5 h-1.5 rounded-full bg-primary-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+                   <span className="text-[10px] font-black uppercase tracking-widest text-primary-400 drop-shadow-md">{digitalStateLabel}</span>
                 </div>
               </div>
+            </main>
 
-              {/* User PiP - Lowered slightly while maintaining clearance */}
-              <div className="absolute bottom-24 right-4 w-72 aspect-video rounded-3xl overflow-hidden bg-slate-900 border-2 border-white/20 shadow-2xl group transition-all hover:scale-105 hover:border-white/40">
-                {userCameraStream?.getVideoTracks?.()?.length ? (
+            {/* Stage 2: Candidate (User) (40% Width) */}
+            <div className="relative lg:flex-[4] flex-shrink-0 flex flex-col items-center justify-center bg-slate-900 overflow-hidden m-4 rounded-[2.5rem] border border-white/5 shadow-2xl group transition-all duration-500">
+               {userCameraStream?.getVideoTracks?.()?.length ? (
                   <video
                     ref={userPipVideoRef}
                     className="h-full w-full object-cover"
@@ -1106,54 +1099,71 @@ const ChatInterface = forwardRef(function ChatInterface({
                     autoPlay
                   />
                 ) : (
-                  <div className="flex h-full flex-col items-center justify-center gap-1 bg-slate-800">
-                    <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{t('chat.you')}</span>
+                  <div className="flex h-full flex-col items-center justify-center gap-4 bg-slate-900 p-12 text-center">
+                    <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center border border-white/10 shadow-inner">
+                       <VideoOff className="w-8 h-8 text-white/20" />
+                    </div>
+                    <span className="text-xs font-black text-white/40 uppercase tracking-widest leading-relaxed">Camera Off</span>
                   </div>
                 )}
-                <div className="absolute bottom-2 left-2 rounded bg-black/50 px-2 py-0.5 text-[10px] font-bold text-white/90 backdrop-blur-sm">
-                  {t('digitalParticipantYou', { defaultValue: 'You' })}
-                </div>
-              </div>
-            </main>
-
-            {/* Chat Sidebar - Professional Zoom Style (70% Width) - Glassmorphic */}
-            <aside className="w-full lg:flex-[7] flex flex-col bg-white/70 dark:bg-slate-900/60 backdrop-blur-3xl border-l border-slate-200/50 dark:border-white/5 transition-all duration-300">
-              <div className="flex-shrink-0 px-6 py-5 border-b border-slate-200/50 dark:border-white/5 flex items-center justify-between bg-white/40 dark:bg-black/20 backdrop-blur-md relative z-20">
-                <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">{t('interview.digitalChatTitle')}</h3>
                 
-                {/* Embedded Countdown in Sidebar Header */}
-                <div className="flex items-center gap-3 px-3 py-1.5 bg-slate-50 dark:bg-black/40 rounded-lg border border-slate-100 dark:border-white/5 transition-all">
-                  <Clock className={`w-3.5 h-3.5 ${timerStatus === 'critical' ? 'text-red-500 animate-pulse' : timerStatus === 'warning' ? 'text-amber-500' : 'text-slate-400'}`} />
-                  <span className={`text-sm font-mono font-bold tabular-nums ${timerStatus === 'critical' ? 'text-red-600 dark:text-red-400' : timerStatus === 'warning' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'}`}>
-                    {timerDisplay}
-                  </span>
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
+
+                {/* Candidate Label */}
+                <div className="absolute top-8 left-8 flex items-center gap-3 pointer-events-none z-20">
+                  <div className="px-4 py-2 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/10 flex items-center gap-3">
+                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white">{t('interview.candidateLabel', { defaultValue: 'Candidate' })}</span>
+                  </div>
+                </div>
+
+                <div className="absolute bottom-10 left-10 flex flex-col gap-2 pointer-events-none z-20">
+                   <h3 className="text-3xl font-black text-white uppercase tracking-tighter drop-shadow-2xl font-serif leading-none">{t('chat.you')}</h3>
+                   <div className="flex items-center gap-2">
+                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                     <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 drop-shadow-md">On-Screen</span>
+                   </div>
+                </div>
+            </div>
+
+            {/* Chat Sidebar: Meeting Transcript (20% Width) */}
+            <aside className="w-full lg:flex-[2] flex flex-col bg-transparent lg:my-4 lg:mr-4 rounded-[2.5rem] border border-slate-200/50 dark:border-white/5 overflow-hidden transition-all duration-300 relative">
+              {/* Glass background for sidebar */}
+              <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/40 backdrop-blur-3xl -z-10" />
+              
+              <div className="flex-shrink-0 px-6 py-5 border-b border-slate-200/50 dark:border-white/10 flex flex-col gap-4 relative z-20">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Transcript</h3>
+                  {/* Timer: Compact style */}
+                  <div className="flex items-center gap-2 px-3 py-1 bg-white/50 dark:bg-black/40 rounded-xl border border-slate-200/50 dark:border-white/10 shadow-sm transition-all animate-in slide-in-from-top duration-500">
+                    <Clock className={`w-3.5 h-3.5 ${timerStatus === 'critical' ? 'text-red-500 animate-pulse' : timerStatus === 'warning' ? 'text-amber-500' : 'text-primary-500'}`} />
+                    <span className={`text-sm font-mono font-bold tabular-nums tracking-tight ${timerStatus === 'critical' ? 'text-red-600 dark:text-red-400' : timerStatus === 'warning' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}`}>
+                      {timerDisplay}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 scroll-smooth scrollbar-hide">
                 {messageItems}
               </div>
 
-              <div className="p-6 border-t border-slate-200/50 dark:border-white/5 space-y-4 bg-white/40 dark:bg-black/30 backdrop-blur-md">
-                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  <span>{stt.active ? t('chat.recording') : isStreaming ? t('chat.analyzing') : t('chat.ready')}</span>
-                  {tts.speaking && <WaveIcon active />}
-                </div>
-
-                <div className="flex gap-3">
+              <div className="p-6 border-t border-slate-200/50 dark:border-white/10 space-y-4">
+                <div className="flex gap-3 items-end">
                   <div className="flex-1 relative">
                     <textarea
                       value={stt.active ? input + interimText : input}
                       onChange={e => setInput(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      placeholder={t('chat.placeholder', { lang: language })}
-                      className="w-full bg-white dark:bg-slate-800 text-sm font-medium rounded-xl px-4 py-3 min-h-[48px] max-h-32 resize-none focus:outline-none border border-slate-200 dark:border-slate-700 transition-all disabled:opacity-50"
+                      placeholder="..."
+                      className="w-full bg-white dark:bg-black/40 text-slate-900 dark:text-white text-[0.85rem] font-medium rounded-2xl px-4 py-3 min-h-[48px] max-h-32 resize-none focus:outline-none border border-slate-200 dark:border-white/5 transition-all disabled:opacity-50"
                       disabled={isStreaming}
                     />
                   </div>
                   <button
-                    onClick={() => sendMessage(inputDraft)}
-                    disabled={!inputDraft.trim() || isStreaming}
-                    className="w-12 h-12 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 shadow-lg shadow-slate-900/10"
+                    onClick={() => sendMessage(input)}
+                    disabled={!input.trim() || isStreaming}
+                    className="w-12 h-12 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[1.5rem] flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-50 shadow-xl"
                   >
                     <Send className="w-5 h-5" />
                   </button>
@@ -1162,67 +1172,69 @@ const ChatInterface = forwardRef(function ChatInterface({
             </aside>
           </div>
 
-          {/* Bottom Control Bar - High-End Digital Meeting Style */}
-          <div className="h-20 bg-black/95 backdrop-blur-2xl border-t border-white/10 flex items-center justify-between px-10 flex-shrink-0">
-            <div className="flex items-center gap-8">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1.5">{t('interview.audio')}</span>
-                <div className="flex items-center gap-4">
+          <div className="h-24 px-10 flex-shrink-0 relative z-50 mt-auto">
+            <div className="h-full flex items-center justify-between px-10 bg-white/80 dark:bg-slate-900/40 backdrop-blur-3xl rounded-t-[3.5rem] border-t border-x border-slate-200/50 dark:border-white/10 shadow-[0_-15px_60px_rgba(0,0,0,0.15)] dark:shadow-[0_-20px_50px_rgba(0,0,0,0.4)]">
+              <div className="flex items-center gap-12">
+                <div className="flex flex-col gap-2">
+                  <span className="text-[10px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest leading-none">Audio Controls</span>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => stt.active ? stt.stop() : stt.start(input)}
+                      className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center transition-all ${stt.active ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.5)] scale-110' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/60 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10 hover:border-slate-300 dark:hover:border-white/10 border border-transparent'}`}
+                    >
+                      {stt.active ? <Mic className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+                    </button>
+                    <button
+                      onClick={() => {
+                        const next = !ttsEnabled
+                        setTtsEnabled(next)
+                        if (!next) tts.stop()
+                        else window.speechSynthesis?.resume()
+                      }}
+                      className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center transition-all ${ttsEnabled ? 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/80' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}
+                    >
+                      {ttsEnabled ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="w-px h-10 bg-slate-200 dark:bg-white/10" />
+
+                <div className="flex flex-col gap-2">
+                  <span className="text-[10px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest leading-none">Video Camera</span>
                   <button
-                    onClick={() => stt.active ? stt.stop() : stt.start(input)}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${stt.active ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'}`}
+                    onClick={() => onToggleCamera?.()}
+                    className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center transition-all ${isCameraOn ? 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/80' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}
                   >
-                    {stt.active ? <Mic className="w-5 h-5 shadow-inner" /> : <Mic className="w-5 h-5" />}
-                  </button>
-                  <button
-                    onClick={() => {
-                      const next = !ttsEnabled
-                      setTtsEnabled(next)
-                      if (!next) tts.stop()
-                      else window.speechSynthesis?.resume()
-                    }}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${ttsEnabled ? 'bg-white/5 text-white' : 'bg-red-500/10 text-red-400'}`}
-                  >
-                    {ttsEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                    {isCameraOn ? <Video className="w-6 h-6" /> : <VideoOff className="w-6 h-6" />}
                   </button>
                 </div>
               </div>
 
-              <div className="h-10 w-px bg-white/10" />
+              <div className="hidden xl:flex items-center gap-10">
+                <div className="flex flex-col items-center gap-2">
+                   <span className="text-[10px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest leading-none">Interview Status</span>
+                   <div className="px-5 py-2 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full border border-emerald-500/10 flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Connection: Stable</span>
+                   </div>
+                </div>
+              </div>
 
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1.5">{t('interview.video')}</span>
+              <div className="flex items-center gap-4">
                 <button
-                  onClick={() => onToggleCamera?.()}
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isCameraOn ? 'bg-white/5 text-white' : 'bg-red-500/10 text-red-400'}`}
+                  onClick={() => window.location.href = '/setup'}
+                  className="px-8 py-3.5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-slate-200 dark:border-white/10"
                 >
-                  {isCameraOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
+                  {t('interview.exitDirectly', { defaultValue: 'Exit Without Saving' })}
+                </button>
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('interview-end-request'))}
+                  className="px-10 py-3.5 bg-red-600 hover:bg-red-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-red-600/30 font-bold"
+                >
+                  {t('interview.leaveRoom', { defaultValue: 'End Session' })}
                 </button>
               </div>
-            </div>
-
-            <div className="flex items-center gap-6">
-              <div className="flex flex-col items-center">
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1.5">{t('interview.meetingTime')}</span>
-                <div className="px-4 py-1.5 bg-white/5 rounded-lg border border-white/10 text-xs font-mono font-bold text-white tabular-nums">
-                  LIVE
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => window.location.href = '/setup'}
-                className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white/50 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-white/5 hover:border-white/20 backdrop-blur-sm"
-              >
-                {t('interview.exitDirectly', { defaultValue: 'Exit' })}
-              </button>
-              <button
-                onClick={() => window.dispatchEvent(new CustomEvent('interview-end-request'))}
-                className="px-8 py-3 bg-red-600/90 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-xl shadow-red-600/20 backdrop-blur-sm"
-              >
-                {t('interview.leaveRoom', { defaultValue: 'Leave' })}
-              </button>
             </div>
           </div>
         </div>

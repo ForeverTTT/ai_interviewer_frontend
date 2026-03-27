@@ -384,26 +384,32 @@ export default function InterviewPage() {
               </div>
             </div>
 
-            <div className="p-8 rounded-3xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 space-y-6">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-primary-400 dark:text-primary-600" />
-                <span className="text-[10px] font-black uppercase tracking-widest">{t('interview.tipsTitle')}</span>
+            <div className="p-8 rounded-[2.5rem] bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 space-y-8 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                   <div className="w-1.5 h-6 bg-primary-500 rounded-full" />
+                   <span className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">{t('interview.tipsTitle')}</span>
+                </div>
+                <div className="p-2 bg-primary-50 dark:bg-primary-950/20 rounded-xl">
+                  <AlertCircle className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                </div>
               </div>
-              <ul className="space-y-4 text-xs font-medium tracking-tight opacity-80 leading-relaxed">
-                <li className="flex gap-3">
-                  <span className="text-primary-400 dark:text-primary-600 font-bold">01</span>
-                  {t('interview.tip1')}
+
+              <ul className="space-y-6 text-[0.85rem] font-bold text-slate-700 dark:text-slate-300 leading-relaxed">
+                <li className="flex gap-4 items-start group">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 text-[10px] flex items-center justify-center border border-primary-200/50">01</span>
+                  <span>{t('interview.tip1')}</span>
                 </li>
-                <li className="flex gap-3">
-                  <span className="text-primary-400 dark:text-primary-600 font-bold">02</span>
-                  {t('interview.tip2')}
+                <li className="flex gap-4 items-start group">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 text-[10px] flex items-center justify-center border border-primary-200/50">02</span>
+                  <span>{t('interview.tip2')}</span>
                 </li>
-                <li className="flex gap-3">
-                  <span className="text-primary-400 dark:text-primary-600 font-bold">03</span>
-                  {t('interview.tip3')}
+                <li className="flex gap-4 items-start group">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 text-[10px] flex items-center justify-center border border-primary-200/50">03</span>
+                  <span>{t('interview.tip3')}</span>
                 </li>
               </ul>
-          </div>
+            </div>
         </div>
       </aside>
       )}
@@ -482,33 +488,38 @@ export default function InterviewPage() {
 
                   <div className="space-y-12">
                     <div className="space-y-6">
-                      <div className="p-8 rounded-3xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 space-y-4">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('meta.title')}</p>
-                        <h3 className="text-2xl font-black font-serif text-slate-900 dark:text-white leading-tight">
-                          {t('interview.instructionTitle', { position })}
-                        </h3>
+                      <div className="p-10 rounded-[2.5rem] bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border border-slate-200 dark:border-white/5 space-y-6 shadow-xl">
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-primary-500">{t('meta.title')}</p>
+                          <h3 className="text-2xl font-black font-serif text-slate-900 dark:text-white leading-tight">
+                            {t('interview.instructionTitle', { position })}
+                          </h3>
+                        </div>
                         <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                           {t('interview.instructionSub')}
                         </p>
-                      </div>
-                    </div>
+                        
+                        <button
+                          onClick={handleStart}
+                          className="w-full flex items-center justify-between p-8 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 dark:from-white dark:via-slate-50 dark:to-indigo-50 text-white dark:text-slate-900 rounded-[2.5rem] hover:scale-[1.03] active:scale-[0.97] transition-all shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(79,70,229,0.1)] group relative overflow-hidden border border-white/10 dark:border-slate-200"
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                          <div className="text-left space-y-1 relative z-10">
+                            <span className="text-[10px] font-black uppercase tracking-widest opacity-60 flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              {t('interview.readyToStart')}
+                            </span>
+                            <p className="text-2xl font-black font-serif leading-none tracking-tight">{t('interview.joinInterviewBtn')}</p>
+                          </div>
+                          <div className="w-16 h-16 rounded-2xl bg-white/10 dark:bg-slate-900/5 flex items-center justify-center transition-all group-hover:bg-white/20 dark:group-hover:bg-slate-900/10 group-hover:scale-110 relative z-10">
+                            <Play className="w-6 h-6 fill-current translate-x-0.5" />
+                          </div>
+                        </button>
 
-                    <div className="space-y-6">
-                      <button
-                        onClick={handleStart}
-                        className="group w-full flex items-center justify-between p-8 rounded-[2rem] bg-slate-900 dark:bg-white text-white dark:text-slate-900 transition-all hover:scale-[1.02] active:scale-95 shadow-2xl"
-                      >
-                        <div className="text-left space-y-1">
-                          <span className="text-[10px] font-black uppercase tracking-widest opacity-60 leading-none">{t('interview.readyToStart')}</span>
-                          <p className="text-2xl font-black font-serif leading-none">{t('interview.joinInterviewBtn')}</p>
-                        </div>
-                        <div className="w-16 h-16 rounded-2xl bg-white/10 dark:bg-slate-900/10 flex items-center justify-center transition-transform group-hover:translate-x-1">
-                          <Play className="w-6 h-6 fill-current" />
-                        </div>
-                      </button>
-                      <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        {t('interview.readyFoot')}
-                      </p>
+                        <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-400 pt-2">
+                          {t('interview.readyFoot')}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
