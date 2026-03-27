@@ -200,6 +200,9 @@
   },
   "profile": {
     "title": "个人资料与简历",
+    "status": "求职状态",
+    "statusSeeking": "求职中",
+    "statusHired": "找到工作",
     "heroKicker": "Professional profile",
     "sub": "结构化填写经历与技能；保存后会自动生成面试可用的简历正文。也可上传 PDF 后用 AI 解析到表单。配置面试页仍可临时上传覆盖。",
     "backDash": "返回仪表盘",

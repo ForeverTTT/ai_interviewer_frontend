@@ -106,9 +106,9 @@ function CoachReport({ coach, t }) {
           {t('profile.coachSummary')}
         </SectionTitle>
         <div className="rounded-xl border border-slate-200/90 bg-slate-50/80 px-5 py-4 dark:border-slate-700 dark:bg-slate-800/40">
-          <p className="text-[15px] leading-[1.75] text-slate-800 dark:text-slate-100 whitespace-pre-wrap sm:text-base">
+          <div className="text-[15px] leading-[1.75] text-slate-800 dark:text-slate-100 whitespace-pre-wrap sm:text-base">
             <RichText text={coach.overallEvaluation} />
-          </p>
+          </div>
         </div>
       </section>
 
@@ -189,20 +189,20 @@ function CoachReport({ coach, t }) {
                 <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-amber-500 to-orange-500" aria-hidden />
                 <div className="pl-3">
                   <h3 className="mb-3 text-base font-bold text-slate-900 dark:text-white">{p.title}</h3>
-                  <p className="mb-2 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
+                  <div className="mb-2 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
                     <span className="font-semibold text-amber-800 dark:text-amber-400">{t('profile.coachIssue')}</span>{' '}
                     <RichText text={p.problem} />
-                  </p>
-                  <p className="mb-2 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
+                  </div>
+                  <div className="mb-2 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
                     <span className="font-semibold text-amber-800 dark:text-amber-400">{t('profile.coachAction')}</span>{' '}
                     <RichText text={p.suggestedAction} />
-                  </p>
+                  </div>
                   {p.rewriteExample ? (
                     <div className="mt-4 rounded-lg border border-primary-200/60 bg-primary-50/40 px-3 py-2.5 dark:border-primary-900/40 dark:bg-primary-950/25">
-                      <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                      <div className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
                         <span className="font-semibold text-primary-700 dark:text-primary-400">{t('profile.coachExample')}</span>{' '}
                         <SanitizedListText text={p.rewriteExample} />
-                      </p>
+                      </div>
                     </div>
                   ) : null}
                 </div>
@@ -228,18 +228,18 @@ function CoachReport({ coach, t }) {
                   {m.moduleTitle}
                 </div>
                 <div className="space-y-3 p-5 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
-                  <p>
+                  <div>
                     <span className="font-semibold text-primary-600 dark:text-primary-400">{t('profile.coachFinding')}</span>{' '}
                     <RichText text={m.finding} />
-                  </p>
-                  <p>
+                  </div>
+                  <div>
                     <span className="font-semibold text-primary-600 dark:text-primary-400">{t('profile.coachWhy')}</span>{' '}
                     <RichText text={m.whyImportant} />
-                  </p>
-                  <p>
+                  </div>
+                  <div>
                     <span className="font-semibold text-primary-600 dark:text-primary-400">{t('profile.coachSuggest')}</span>{' '}
                     <RichText text={m.modificationSuggestion} />
-                  </p>
+                  </div>
                   <div className="grid gap-3 pt-2 sm:grid-cols-2">
                     <div className="rounded-xl border border-slate-200/90 bg-slate-50/80 p-3.5 dark:border-slate-600 dark:bg-slate-800/50">
                       <div className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">{t('profile.coachBefore')}</div>
@@ -292,10 +292,10 @@ function CoachReport({ coach, t }) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-bold text-slate-900 dark:text-white">{a.title}</p>
-                  <p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                  <div className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                     <span className="font-semibold text-slate-700 dark:text-slate-300">{t('profile.coachOutcome')}</span>{' '}
                     <RichText text={a.expectedOutcome} />
-                  </p>
+                  </div>
                 </div>
               </li>
             ))}
@@ -413,7 +413,10 @@ function DisplayCell({ label, value, t, asLink, mailto }) {
   )
 }
 
-function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, coach, t, i18n, timeStr, showFloatingEditButton, coachTranslating }) {
+function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, coach, t, i18n, timeStr, showFloatingEditButton, coachTranslating, jobSearchStatus }) {
+  const displayCellClass = "flex flex-col gap-1 px-4 py-3 rounded-xl border border-slate-100 bg-white shadow-sm dark:bg-slate-800/50 dark:border-slate-700/50"
+  const displayLabelClass = "text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500"
+  const displayValueClass = "text-sm font-semibold text-slate-700 dark:text-slate-200"
   const hasData = profileHasVisibleData(cvProfile, resumeText, resumeNotes)
   const tr = String(targetRole || '').trim()
   const coachLangName = t(`profile.langName.${normalizeUiLang(i18n.language)}`)
@@ -497,6 +500,12 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
                 <DisplayCell label={t('profile.cv.email')} value={cvProfile.email} t={t} mailto />
                 <DisplayCell label={t('profile.cv.phone')} value={cvProfile.phone} t={t} />
                 <DisplayCell label={t('profile.cv.location')} value={cvProfile.location} t={t} />
+                <div className={displayCellClass}>
+                  <div className={displayLabelClass}>{t('profile.status')}</div>
+                  <div className={displayValueClass}>
+                    {jobSearchStatus === 'hired' ? t('profile.statusHired') : t('profile.statusSeeking')}
+                  </div>
+                </div>
                 <DisplayCell label={t('profile.cv.linkedIn')} value={cvProfile.linkedIn} t={t} asLink />
                 <DisplayCell label={t('profile.cv.website')} value={cvProfile.website} t={t} asLink />
               </div>
@@ -911,6 +920,7 @@ export default function ProfilePage() {
   const [parseBusy, setParseBusy] = useState(false)
   const [extractBusy, setExtractBusy] = useState(false)
   const [note, setNote] = useState(null)
+  const [jobSearchStatus, setJobSearchStatus] = useState('seeking')
   const [updatedAt, setUpdatedAt] = useState(null)
   const [pendingRaw, setPendingRaw] = useState('')
   const [rawResumeOpen, setRawResumeOpen] = useState(false)
@@ -941,6 +951,11 @@ export default function ProfilePage() {
       setResumeNotes(j.resumeNotes || '')
       setCvProfile(mergeCvProfileFromApi(j.profileJson?.cvProfile))
       setCoach(j.resumeCoach || null)
+      if (j.jobSearchStatus) {
+        setJobSearchStatus(j.jobSearchStatus)
+      } else {
+        setJobSearchStatus('seeking')
+      }
       setUpdatedAt(j.resumeUpdatedAt || null)
       const tr = j.profileJson?.coachTargetRole
       if (typeof tr === 'string') setTargetRole(tr)
@@ -989,6 +1004,7 @@ export default function ProfilePage() {
         body: JSON.stringify({
           resumeText,
           resumeNotes,
+          jobSearchStatus,
           profileJson: { coachTargetRole: targetRole, cvProfile },
         }),
       })
@@ -1204,6 +1220,7 @@ export default function ProfilePage() {
             t={t}
             i18n={i18n}
             timeStr={timeStr}
+            jobSearchStatus={jobSearchStatus}
             showFloatingEditButton={showFloatingQuickSwitch}
             coachTranslating={coachTranslating}
           />
@@ -1359,6 +1376,17 @@ export default function ProfilePage() {
                 <div>
                   <label className="mb-1.5 block text-xs font-bold text-slate-600 dark:text-slate-400">{t('profile.cv.linkedIn')}</label>
                   <input className={inputClass} value={cvProfile.linkedIn} onChange={(e) => setCvProfile((p) => ({ ...p, linkedIn: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold text-slate-600 dark:text-slate-400">{t('profile.status')}</label>
+                  <select
+                    className={inputClass}
+                    value={jobSearchStatus}
+                    onChange={(e) => setJobSearchStatus(e.target.value)}
+                  >
+                    <option value="seeking">{t('profile.statusSeeking')}</option>
+                    <option value="hired">{t('profile.statusHired')}</option>
+                  </select>
                 </div>
                 <div className="sm:col-span-2">
                   <label className="mb-1.5 block text-xs font-bold text-slate-600 dark:text-slate-400">{t('profile.cv.website')}</label>

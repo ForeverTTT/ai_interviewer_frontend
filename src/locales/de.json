@@ -200,6 +200,9 @@
   },
   "profile": {
     "title": "Profil & Lebenslauf",
+    "status": "Jobsuche-Status",
+    "statusSeeking": "Jobsuchend",
+    "statusHired": "Eingestellt",
     "sub": "Hier einen Standard-Lebenslauf speichern – beim Start musst du nicht jedes Mal hochladen; die Konfigurationsseite kann pro Sitzung überschreiben.",
     "backDash": "Zur Übersicht",
     "loading": "Laden…",

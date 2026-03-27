@@ -200,6 +200,9 @@
   },
   "profile": {
     "title": "Profile & resume",
+    "status": "Job Search Status",
+    "statusSeeking": "Seeking Job",
+    "statusHired": "Hired",
     "sub": "Save a default resume here so you do not need to upload every time; the setup page can still override per session.",
     "backDash": "Back to dashboard",
     "loading": "Loading…",
