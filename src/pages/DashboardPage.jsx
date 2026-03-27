@@ -9,6 +9,7 @@ import {
   TrendingUp, Target, Zap, ArrowRight, FileText, UserCircle,
   Trash2, Loader2, AlertTriangle, Sparkles, LayoutDashboard, History,
 } from 'lucide-react'
+import GamificationDashboard from '../components/GamificationDashboard'
 
 function useLocaleTag(i18nLang) {
   return useMemo(() => {
@@ -30,6 +31,8 @@ export default function DashboardPage() {
   const { user } = useAuth()
   const [interviews, setInterviews] = useState([])
   const [loading, setLoading] = useState(true)
+  const [gameStats, setGameStats] = useState(null)
+  const [checkingIn, setCheckingIn] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
   const [pendingDelete, setPendingDelete] = useState(null)
   const [deleteModalError, setDeleteModalError] = useState(null)
@@ -87,6 +90,51 @@ export default function DashboardPage() {
     }
     fetchInterviews()
   }, [user])
+
+  useEffect(() => {
+    async function fetchGameStats() {
+      if (!user) return
+      try {
+        const backendUrl = getBackendBaseUrl()
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session?.access_token) return
+        const res = await fetch(`${backendUrl}/api/profile/game-stats`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setGameStats(data)
+        }
+      } catch (err) {
+        console.error('Failed to fetch game stats', err)
+      }
+    }
+    fetchGameStats()
+  }, [user])
+
+  const handleCheckIn = async () => {
+    if (checkingIn || !user) return
+    setCheckingIn(true)
+    try {
+      const backendUrl = getBackendBaseUrl()
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch(`${backendUrl}/api/profile/check-in`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setGameStats(prev => ({ ...prev, streak: data.streak, alreadyCheckedIn: true }))
+        return true
+      }
+      return false
+    } catch (err) {
+      console.error('Check-in failed', err)
+      return false
+    } finally {
+      setCheckingIn(false)
+    }
+  }
 
   const requestDeleteInterview = (id, position) => {
     setDeleteModalError(null)
@@ -238,6 +286,9 @@ export default function DashboardPage() {
             </div>
           </div>
         </header>
+
+        {/* Gamification Dashboard */}
+        <GamificationDashboard stats={gameStats} onCheckIn={handleCheckIn} interviews={interviews} />
 
         <div className="mb-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 sm:mb-10">
           {statCards.map((stat) => {
