@@ -112,7 +112,7 @@ export default function GamificationDashboard({ stats, onCheckIn, interviews }) 
 
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="w-full btn-primary px-6 py-4"
+          className="w-full btn-setup-action-pill px-6 py-4"
         >
           <Sparkles className="w-4 h-4 mr-2" />
           {stats?.alreadyCheckedIn ? t('profile.game.checkInDoneBtn') : t('profile.game.checkInBtn')}

@@ -15,7 +15,7 @@ export default function HowItWorksShowcase({ ctaLink }) {
   const { t } = useTranslation()
 
   return (
-    <section id="how-it-works" className="py-32 bg-slate-50 dark:bg-slate-900 px-4 sm:px-6 lg:px-8 border-y border-slate-200 dark:border-slate-800">
+    <section id="how-it-works" className="pt-32 pb-16 bg-slate-50 dark:bg-slate-900 px-4 sm:px-6 lg:px-8 border-y border-slate-200 dark:border-slate-800">
       <div className="max-w-7xl mx-auto">
         <header className="text-center mb-24 max-w-4xl mx-auto space-y-8">
           <motion.h2

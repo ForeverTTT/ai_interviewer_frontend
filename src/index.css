@@ -89,8 +89,15 @@
     0% { transform: translateX(0); }
     100% { transform: translateX(-33.33%); }
   }
+  @keyframes marquee-reverse {
+    0% { transform: translateX(-33.33%); }
+    100% { transform: translateX(0); }
+  }
   .animate-marquee {
-    animation: marquee 40s linear infinite;
+    animation: marquee 50s linear infinite;
+  }
+  .animate-marquee-reverse {
+    animation: marquee-reverse 50s linear infinite;
   }
   .offer-marquee-mask {
     mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
@@ -202,6 +209,16 @@
 
   .card-premium {
     @apply relative overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1 hover:border-indigo-100 dark:hover:border-indigo-900;
+  }
+
+  /* Gray & Black Border Button for Setup/Profile */
+  .btn-setup-action {
+    @apply inline-flex items-center justify-center gap-3 px-10 py-5 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold rounded-xl border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:-translate-y-0.5 active:scale-[0.98] uppercase tracking-wider font-chinese-modern shadow-sm;
+  }
+
+  /* Pill-shaped Gray & Gray Border Button */
+  .btn-setup-action-pill {
+    @apply inline-flex items-center justify-center gap-3 px-10 py-5 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold rounded-full border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:-translate-y-0.5 active:scale-[0.98] uppercase tracking-wider font-chinese-modern shadow-sm;
   }
 }
 

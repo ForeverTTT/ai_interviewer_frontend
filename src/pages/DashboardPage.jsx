@@ -196,7 +196,7 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 pt-32 pb-20">
+    <div className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header Section */}
@@ -219,11 +219,11 @@ export default function DashboardPage() {
             animate={{ opacity: 1, x: 0 }}
             className="flex flex-row flex-nowrap items-center gap-3 shrink-0"
           >
-            <Link to="/profile" className="btn-secondary px-6 py-3 text-xs whitespace-nowrap">
+            <Link to="/profile" className="btn-setup-action-pill px-6 py-3 text-xs whitespace-nowrap">
               <UserCircle className="w-4 h-4" />
               <span className="shrink-0">{t('profile.title')}</span>
             </Link>
-            <Link to="/setup" className="btn-primary px-6 py-3 text-xs whitespace-nowrap">
+            <Link to="/setup" className="btn-setup-action-pill px-6 py-3 text-xs whitespace-nowrap">
               <PlusCircle className="w-4 h-4" />
               <span className="shrink-0">{t('dashboard.newInterview')}</span>
             </Link>

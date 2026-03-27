@@ -175,10 +175,10 @@ function CoachReport({ coach, t }) {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="flex gap-4 p-5 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/20 dark:bg-emerald-950/10 items-start"
+                className="flex gap-4 p-5 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/40 dark:bg-emerald-950/20 items-start shadow-sm shadow-emerald-500/5"
               >
-                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                <RichText text={h} className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed" />
+                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 ring-4 ring-emerald-500/10" />
+                <RichText text={h} className="text-sm font-bold text-slate-800 dark:text-emerald-50 leading-relaxed" />
               </motion.div>
             ))}
           </div>
@@ -196,18 +196,28 @@ function CoachReport({ coach, t }) {
                 key={i}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="group relative overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 transition-all hover:border-slate-900 dark:hover:border-white"
+                className="group relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 transition-all hover:border-slate-900 dark:hover:border-white"
               >
                 <div className="flex flex-col gap-4">
                   <h3 className="text-lg font-black font-serif text-slate-900 dark:text-white">{p.title}</h3>
                   <div className="grid gap-6 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">{t('profile.coachIssue')}</span>
-                      <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed"><RichText text={p.problem} /></p>
+                    <div className="space-y-4 p-5 rounded-2xl bg-orange-50/40 dark:bg-orange-950/10 border border-orange-200 dark:border-orange-900/30 relative overflow-hidden">
+                      <div className="relative z-10 space-y-2">
+                        <span className="text-[10px] uppercase font-black tracking-widest text-orange-600">{t('profile.coachIssue')}</span>
+                        <div className="flex gap-3 items-start">
+                          <div className="mt-2 w-1 h-1 rounded-full bg-orange-400 shrink-0" />
+                          <p className="text-sm font-bold text-slate-800 dark:text-orange-50 leading-relaxed"><RichText text={p.problem} /></p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <span className="text-[10px] uppercase font-black tracking-widest text-primary-600">{t('profile.coachAction')}</span>
-                      <p className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed"><RichText text={p.suggestedAction} /></p>
+                    <div className="space-y-4 p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
+                      <div className="space-y-2">
+                        <span className="text-[10px] uppercase font-black tracking-widest text-primary-600">{t('profile.coachAction')}</span>
+                        <div className="flex gap-3 items-start">
+                          <div className="mt-2 w-1 h-1 rounded-full bg-primary-400 shrink-0" />
+                          <p className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed"><RichText text={p.suggestedAction} /></p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   {p.rewriteExample && (
@@ -230,32 +240,39 @@ function CoachReport({ coach, t }) {
           </SectionTitle>
           <div className="space-y-8">
             {coach.moduleDeepDives.map((m, i) => (
-              <div key={i} className="space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-500">
+              <div key={i} className="p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-8 transition-all hover:border-slate-300">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-600">
+                  <Zap className="w-3 h-3 text-primary-600" />
                   {m.moduleTitle}
                 </div>
-                <div className="grid gap-6 md:grid-cols-3">
-                  <div className="space-y-2">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">{t('profile.coachFinding')}</span>
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed"><RichText text={m.finding} /></p>
+                
+                <div className="grid gap-8 md:grid-cols-3">
+                  <div className="space-y-3">
+                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-slate-100 pb-1 block w-fit">{t('profile.coachFinding')}</span>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed"><RichText text={m.finding} /></p>
                   </div>
-                  <div className="space-y-2">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">{t('profile.coachWhy')}</span>
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed"><RichText text={m.whyImportant} /></p>
+                  <div className="space-y-3">
+                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-slate-100 pb-1 block w-fit">{t('profile.coachWhy')}</span>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed"><RichText text={m.whyImportant} /></p>
                   </div>
-                  <div className="space-y-2">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-primary-600">{t('profile.coachSuggest')}</span>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed"><RichText text={m.modificationSuggestion} /></p>
+                  <div className="space-y-3">
+                    <span className="text-[10px] uppercase font-black tracking-widest text-primary-600 border-b border-primary-100 pb-1 block w-fit">{t('profile.coachSuggest')}</span>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed italic"><RichText text={m.modificationSuggestion} /></p>
                   </div>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 mb-2 block">{t('profile.coachBefore')}</span>
-                    <div className="text-xs text-slate-500 line-through"><SanitizedListText text={m.before} /></div>
+
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="p-6 rounded-2xl border border-orange-200 dark:border-orange-900/30 bg-orange-50/30">
+                    <span className="text-[10px] uppercase font-black tracking-widest text-orange-600 mb-3 block">{t('profile.coachBefore')}</span>
+                    <div className="text-sm font-medium text-slate-600 dark:text-orange-200 leading-relaxed font-mono">
+                      <SanitizedListText text={m.before} />
+                    </div>
                   </div>
-                  <div className="p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/20">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-emerald-600 mb-2 block">{t('profile.coachAfter')}</span>
-                    <div className="text-xs font-bold text-slate-900 dark:text-white"><SanitizedListText text={m.after} /></div>
+                  <div className="p-6 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/40">
+                    <span className="text-[10px] uppercase font-black tracking-widest text-emerald-600 mb-3 block">{t('profile.coachAfter')}</span>
+                    <div className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed">
+                      <SanitizedListText text={m.after} />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -477,11 +494,11 @@ function ProfileSectionsView({ cvProfile, t }) {
             <p className="text-sm text-slate-400 italic">{t('profile.cv.emptySection')}</p>
           ) : (
             cvProfile.education.map((ed, i) => (
-              <div key={i} className="group flex flex-col gap-2">
+              <div key={i} className="group p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 transition-all hover:border-slate-300 space-y-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-4">
-                  <h4 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary-600 transition-colors">{ed.institution || t('profile.viewSectionEmpty')}</h4>
+                  <h4 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary-600 transition-colors">{ed.institution || t('profile.viewSectionEmpty')}</h4>
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    {[ed.startDate, ed.endDate].filter(Boolean).join(' – ') || null}
+                    {[ed.duration, ed.startDate, ed.endDate].filter(Boolean).slice(0, 1).join(' – ') || null}
                   </span>
                 </div>
                 <div className="text-sm font-bold text-slate-500 dark:text-slate-400">
@@ -489,12 +506,12 @@ function ProfileSectionsView({ cvProfile, t }) {
                   {ed.gpa ? ` · GPA ${ed.gpa}` : ''}
                 </div>
                 {(() => {
-                  const bullets = parseBullets(ed.details)
+                  const bullets = parseBullets(ed.details || ed.description)
                   return bullets.length > 0 ? (
-                    <ul className="mt-2 space-y-2">
+                    <ul className="mt-4 space-y-3">
                       {bullets.map((b, idx) => (
-                        <li key={idx} className="flex gap-3 text-sm text-slate-600 dark:text-slate-400 leading-relaxed items-start">
-                          <div className="mt-1.5 w-1 h-1 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+                        <li key={idx} className="flex gap-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed items-start">
+                          <div className="mt-2 w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600 shrink-0" />
                           <RichText text={b} />
                         </li>
                       ))}
@@ -515,11 +532,11 @@ function ProfileSectionsView({ cvProfile, t }) {
             <p className="text-sm text-slate-400 italic">{t('profile.cv.emptySection')}</p>
           ) : (
             cvProfile.workExperience.map((w, i) => (
-              <div key={i} className="group flex flex-col gap-2">
+              <div key={i} className="group p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 transition-all hover:border-slate-300 space-y-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-4">
-                  <h4 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary-600 transition-colors">{w.title || t('profile.viewSectionEmpty')}</h4>
+                  <h4 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary-600 transition-colors">{w.title || t('profile.viewSectionEmpty')}</h4>
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    {[w.startDate, w.endDate].filter(Boolean).join(' – ') || null}
+                    {[w.duration, w.startDate, w.endDate].filter(Boolean).slice(0, 1).join(' – ') || null}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -532,7 +549,7 @@ function ProfileSectionsView({ cvProfile, t }) {
                     <ul className="mt-4 space-y-3">
                       {bullets.map((b, idx) => (
                         <li key={idx} className="flex gap-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed items-start">
-                          <div className="mt-2 w-1.5 h-1.5 rounded-full border border-slate-200 dark:border-slate-800 shrink-0" />
+                          <div className="mt-2 w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600 shrink-0" />
                           <RichText text={b} />
                         </li>
                       ))}
@@ -553,20 +570,21 @@ function ProfileSectionsView({ cvProfile, t }) {
             <p className="text-sm text-slate-400 italic">{t('profile.cv.emptySection')}</p>
           ) : (
             cvProfile.projects.map((pr, i) => (
-              <div key={i} className="group space-y-2">
+              <div key={i} className="group p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 transition-all hover:border-slate-300 space-y-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-4">
-                  <h4 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary-600 transition-colors">{pr.name || t('profile.viewSectionEmpty')}</h4>
+                  <h4 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary-600 transition-colors">{pr.name || t('profile.viewSectionEmpty')}</h4>
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    {[pr.startDate, pr.endDate].filter(Boolean).join(' – ') || null}
+                    {[pr.duration, pr.startDate, pr.endDate].filter(Boolean).slice(0, 1).join(' – ') || null}
                   </span>
                 </div>
                 {pr.role && <div className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{pr.role}</div>}
                 {(() => {
                   const bullets = parseBullets(pr.description)
                   return bullets.length > 0 ? (
-                    <ul className="mt-2 space-y-2">
+                    <ul className="mt-4 space-y-3">
                       {bullets.map((b, idx) => (
-                        <li key={idx} className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        <li key={idx} className="flex gap-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed items-start">
+                          <div className="mt-2 w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600 shrink-0" />
                           <RichText text={b} />
                         </li>
                       ))}
@@ -675,10 +693,10 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
         >
           <Link
             to="/profile/edit"
-            className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 border border-slate-900 dark:border-white shadow-2xl hover:bg-slate-800 dark:hover:bg-slate-100 transition-all font-black uppercase tracking-widest text-[10px]"
+            className="btn-setup-action-pill px-8 py-4 shadow-2xl"
           >
             <Pencil className="h-4 w-4" />
-            {t('profile.editProfile')}
+            <span className="font-bold">{t('profile.editProfile')}</span>
           </Link>
         </motion.div>
       ) : null}
@@ -713,10 +731,10 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
           <div className="flex flex-wrap items-center gap-4">
             <Link
               to="/profile/edit"
-              className="flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black uppercase tracking-widest text-[10px] hover:bg-slate-800 dark:hover:bg-slate-100 transition-all border border-slate-900 dark:border-white shadow-sm"
+              className="btn-setup-action-pill px-8 py-4"
             >
               <Pencil className="h-4 w-4" />
-              {t('profile.editProfile')}
+              <span className="font-bold">{t('profile.editProfile')}</span>
             </Link>
           </div>
         </div>
@@ -731,10 +749,10 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
             </div>
             <Link
               to="/profile/edit"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold hover:scale-[1.02] transition-all"
+              className="btn-setup-action-pill px-8 py-4"
             >
               <Pencil className="w-4 h-4" />
-              {t('profile.editProfile')}
+              <span className="font-bold">{t('profile.editProfile')}</span>
             </Link>
           </div>
         ) : (
@@ -804,14 +822,14 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
             <div className="grid gap-8">
               {resumeText.trim() && (
                 <details className="group space-y-4">
-                  <summary className="flex items-center justify-between p-6 rounded-2xl border border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors list-none uppercase font-black tracking-widest text-[10px] text-slate-400">
+                  <summary className="flex items-center justify-between p-6 rounded-2xl border border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors list-none uppercase font-black tracking-widest text-[10px] text-slate-400">
                     <span className="flex items-center gap-3">
                       <FileText className="w-4 h-4 text-slate-400" />
                       {t('profile.cv.rawResumeTitle')}
                     </span>
                     <ChevronDown className="w-4 h-4 group-open:rotate-180 transition-transform" />
                   </summary>
-                  <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                  <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <pre className="text-xs text-slate-600 dark:text-slate-400 whitespace-pre-wrap font-sans leading-relaxed">
                       {resumeText}
                     </pre>
@@ -820,7 +838,7 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
               )}
 
               {resumeNotes.trim() && (
-                <div className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4">
+                <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.sectionNotes')}</span>
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{resumeNotes}</p>
                 </div>
@@ -834,45 +852,25 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
 }
 
 const inputClass =
-  'w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-slate-900 dark:focus:border-white outline-none transition-all placeholder:text-slate-300 dark:placeholder:text-slate-700'
+  'w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-slate-900 dark:focus:border-white outline-none transition-all placeholder:text-slate-300 dark:placeholder:text-slate-700'
 
 function MultiLineInput({ lines, label, placeholder, onChange, t, inputClass }) {
   const safeLines = Array.isArray(lines) ? lines : []
+  const textValue = safeLines.join('\n')
+  
   return (
     <div className="space-y-4">
-      <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</label>
-      <div className="space-y-3">
-        {safeLines.map((line, idx) => (
-          <div key={idx} className="flex gap-2 group">
-            <input
-              className={inputClass}
-              placeholder={placeholder}
-              value={line}
-              onChange={(e) => {
-                const newLines = [...safeLines]
-                newLines[idx] = e.target.value
-                onChange(newLines)
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => onChange(safeLines.filter((_, i) => i !== idx))}
-              className="p-3 rounded-xl text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-800"
-              title={t('profile.cv.remove')}
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={() => onChange([...safeLines, ''])}
-          className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary-600 border-b border-primary-600 pb-0.5 hover:gap-3 transition-all"
-        >
-          <Plus className="w-3 h-3" />
-          {t('profile.cv.add')}
-        </button>
-      </div>
+      <label className="block text-[10px] font-black uppercase tracking-widest text-slate-600">{label}</label>
+      <textarea
+        className={`${inputClass} min-h-[160px] leading-relaxed resize-none`}
+        placeholder={placeholder || t('profile.cv.phHighlightsHint')}
+        value={textValue}
+        onChange={(e) => {
+          const val = e.target.value
+          const newLines = val.split('\n')
+          onChange(newLines)
+        }}
+      />
     </div>
   )
 }
@@ -1182,7 +1180,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-white dark:bg-slate-950">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[#FAF9F6] dark:bg-slate-950">
         <Loader2 className="h-8 w-8 animate-spin text-slate-900 dark:text-white" />
         <p className="text-[10px] uppercase font-black tracking-widest text-slate-400">{t('profile.title')}</p>
       </div>
@@ -1191,7 +1189,7 @@ export default function ProfilePage() {
 
   if (!isEdit) {
     return (
-      <div className="min-h-screen bg-white dark:bg-slate-950 pt-32 pb-24">
+      <div className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ProfileDisplayView
             cvProfile={cvProfile}
@@ -1215,7 +1213,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-32 pb-24">
+    <div className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <ProfileEditView
           cvProfile={cvProfile} setCvProfile={setCvProfile} resumeText={resumeText} setResumeText={setResumeText}
@@ -1262,7 +1260,7 @@ function ProfileEditView({
         <div className="space-y-4">
           <Link
             to="/profile"
-            className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             <ArrowRight className="w-3 h-3 rotate-180" />
             {t('common.back')}
@@ -1284,10 +1282,10 @@ function ProfileEditView({
           <button
             onClick={runCoach}
             disabled={coachGenerating || (resumeText.trim().length < 80)}
-            className="flex items-center gap-2 px-6 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 hover:border-slate-400 transition-all font-black uppercase tracking-widest text-[10px] disabled:opacity-50"
+            className="btn-setup-action-pill px-6 py-3"
           >
-            {coachGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-primary-600" />}
-            {coachGenerating ? t('profile.running') : t('profile.coachRun')}
+            {coachGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-emerald-500" />}
+            <span className="font-bold">{coachGenerating ? t('profile.running') : t('profile.coachRun')}</span>
           </button>
           {note && (
             <motion.div
@@ -1301,10 +1299,10 @@ function ProfileEditView({
           <button
             onClick={save}
             disabled={saving}
-            className="btn-primary"
+            className="btn-setup-action-pill px-8 py-3"
           >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-            {saving ? t('common.saving') : t('common.save')}
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+            <span className="font-bold">{saving ? t('common.saving') : t('common.save')}</span>
           </button>
         </div>
       </header>
@@ -1316,9 +1314,9 @@ function ProfileEditView({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-3 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id
-                  ? 'bg-primary-600 text-white shadow-lg shadow-indigo-500/25'
-                  : 'text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/20'
+                className={`flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab.id
+                  ? 'bg-slate-50 text-slate-900 border border-slate-300 dark:bg-slate-800 dark:text-white dark:border-slate-700 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50/50 dark:hover:bg-slate-900/50'
                   }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -1467,7 +1465,7 @@ function ProfileEditView({
                 <SectionTitle icon={Briefcase}>{t('profile.cv.work')}</SectionTitle>
                 <div className="space-y-8">
                   {(cvProfile.workExperience || []).map((exp, idx) => (
-                    <div key={idx} className="group relative p-8 rounded-3xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-6">
+                    <div key={idx} className="group relative p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-6">
                       <button
                         type="button"
                         onClick={() => {
@@ -1545,9 +1543,9 @@ function ProfileEditView({
                   <button
                     type="button"
                     onClick={() => setCvProfile({ ...cvProfile, workExperience: [...(cvProfile.workExperience || []), emptyWork()] })}
-                    className="w-full py-8 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-800 text-slate-400 font-bold hover:border-slate-300 hover:text-slate-600 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-8 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-600 font-bold hover:border-slate-400 hover:text-slate-900 transition-all flex items-center justify-center gap-2 bg-slate-50/20"
                   >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-5 h-5 text-emerald-500" />
                     {t('profile.cv.add')}
                   </button>
                 </div>
@@ -1565,7 +1563,7 @@ function ProfileEditView({
                 <SectionTitle icon={GraduationCap}>{t('profile.cv.education')}</SectionTitle>
                 <div className="space-y-8">
                   {cvProfile.education.map((edu, idx) => (
-                    <div key={idx} className="group relative p-8 rounded-3xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-6">
+                    <div key={idx} className="group relative p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-6">
                       <button
                         type="button"
                         onClick={() => {
@@ -1632,9 +1630,9 @@ function ProfileEditView({
                   <button
                     type="button"
                     onClick={() => setCvProfile({ ...cvProfile, education: [...cvProfile.education, emptyEducation()] })}
-                    className="w-full py-8 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-800 text-slate-400 font-bold hover:border-slate-300 hover:text-slate-600 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-8 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-600 font-bold hover:border-slate-400 hover:text-slate-900 transition-all flex items-center justify-center gap-2 bg-slate-50/20"
                   >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-5 h-5 text-emerald-500" />
                     {t('profile.cv.add')}
                   </button>
                 </div>
@@ -1651,7 +1649,7 @@ function ProfileEditView({
                 <SectionTitle icon={FolderKanban}>{t('profile.cv.projects')}</SectionTitle>
                 <div className="space-y-8">
                   {cvProfile.projects.map((pr, idx) => (
-                    <div key={idx} className="group relative p-8 rounded-3xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-6">
+                    <div key={idx} className="group relative p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-6">
                       <button
                         type="button"
                         onClick={() => {
@@ -1704,9 +1702,9 @@ function ProfileEditView({
                   <button
                     type="button"
                     onClick={() => setCvProfile({ ...cvProfile, projects: [...cvProfile.projects, emptyProject()] })}
-                    className="w-full py-8 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-800 text-slate-400 font-bold hover:border-slate-300 hover:text-slate-600 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-8 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-600 font-bold hover:border-slate-400 hover:text-slate-900 transition-all flex items-center justify-center gap-2 bg-slate-50/20"
                   >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-5 h-5 text-emerald-500" />
                     {t('profile.cv.add')}
                   </button>
                 </div>
@@ -1775,9 +1773,9 @@ function ProfileEditView({
                     <button
                       type="button"
                       onClick={() => setCvProfile({ ...cvProfile, languages: [...cvProfile.languages, emptyLanguage()] })}
-                      className="w-full py-4 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-800 text-slate-400 font-bold hover:border-slate-300 hover:text-slate-600 transition-all flex items-center justify-center gap-2"
+                      className="w-full py-8 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-600 font-bold hover:border-slate-400 hover:text-slate-900 transition-all flex items-center justify-center gap-2 bg-slate-50/20"
                     >
-                      <Plus className="w-4 h-4" />
+                      <Plus className="w-5 h-5 text-emerald-500" />
                       {t('profile.cv.add')}
                     </button>
                   </div>
@@ -1796,7 +1794,7 @@ function ProfileEditView({
                 <SectionTitle icon={Award}>{t('profile.cv.awards')}</SectionTitle>
                 <div className="space-y-4">
                   {cvProfile.awards.map((aw, idx) => (
-                    <div key={idx} className="group relative bg-white dark:bg-slate-950 p-8 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-6">
+                    <div key={idx} className="group relative bg-white dark:bg-slate-950 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6">
                       <button
                         type="button"
                         onClick={() => {
@@ -1850,9 +1848,9 @@ function ProfileEditView({
                   <button
                     type="button"
                     onClick={() => setCvProfile({ ...cvProfile, awards: [...cvProfile.awards, emptyAward()] })}
-                    className="w-full py-4 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-800 text-slate-400 font-bold hover:border-slate-300 hover:text-slate-600 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-8 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-600 font-bold hover:border-slate-400 hover:text-slate-900 transition-all flex items-center justify-center gap-2 bg-slate-50/20"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-5 h-5 text-emerald-500" />
                     {t('profile.cv.add')}
                   </button>
                 </div>

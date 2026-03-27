@@ -5,6 +5,8 @@ import { useAuth } from '../hooks/useAuth'
 import { motion } from 'framer-motion'
 import OfferLogosMarquee from '../components/OfferLogosMarquee'
 import HowItWorksShowcase from '../components/HowItWorksShowcase'
+import AdvantagesShowcase from '../components/AdvantagesShowcase'
+import TestimonialsMarquee from '../components/TestimonialsMarquee'
 import {
   ArrowRight, Mic, Globe2, Clock,
   Sparkles, Target, Zap, FileText, Star, Lightbulb,
@@ -260,53 +262,9 @@ export default function LandingPage() {
 
       <HowItWorksShowcase ctaLink={ctaLink} />
 
-      <section className="py-32 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col items-center text-center mb-16 space-y-6">
-            <div className="section-badge">
-              <Star className="w-3.5 h-3.5 fill-current" />
-              {t('landing.testimonialsBadge')}
-            </div>
-            <h2 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white font-serif">
-              {t('landing.testimonialsTitle')}
-            </h2>
-            <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl">
-              {t('landing.testimonialsSub')}
-            </p>
-          </div>
+      <AdvantagesShowcase />
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((idx) => (
-              <motion.div 
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 relative group"
-              >
-                <div className="flex gap-1 mb-6">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star key={s} className="w-4 h-4 text-brand-500 fill-current" />
-                  ))}
-                </div>
-                <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-8 italic">
-                  "{t(`landing.testimonial${idx}Body`)}"
-                </p>
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-black text-xs">
-                    {t(`landing.testimonial${idx}Initial`)}
-                  </div>
-                  <div>
-                    <div className="font-bold text-slate-900 dark:text-white text-sm">{t(`landing.testimonial${idx}Author`)}</div>
-                    <div className="text-xs text-slate-500">{t(`landing.testimonial${idx}Meta`)}</div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <TestimonialsMarquee />
 
       <section className="py-32 px-4 bg-slate-900 dark:bg-white relative overflow-hidden">
         <div className="max-w-4xl mx-auto text-center relative z-10 space-y-12">

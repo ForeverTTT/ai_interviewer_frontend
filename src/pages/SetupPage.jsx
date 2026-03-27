@@ -387,7 +387,7 @@ export default function SetupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 pt-32 pb-20">
+    <div className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-20">
       <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
         <header className="mb-20">
           <motion.div 
@@ -414,12 +414,12 @@ export default function SetupPage() {
                   <div className="space-y-8">
                     <div className="space-y-2">
                       <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest font-chinese-modern">{t('setup.sectionRole')}</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">{t('setup.panelSub')}</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">{t('setup.panelSub')}</p>
                     </div>
 
                     <div className="space-y-6">
                       <div className="space-y-4">
-                        <label className="text-xs font-bold uppercase tracking-widest text-slate-400">{t('setup.trackLabel')}</label>
+                        <label className="text-xs font-bold uppercase tracking-widest text-slate-600">{t('setup.trackLabel')}</label>
                         <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-800">
                           {trackTabs.map((tab) => (
                             <button
@@ -431,8 +431,8 @@ export default function SetupPage() {
                               }}
                               className={`rounded-xl px-4 py-3 text-sm font-bold transition-all ${
                                 roleTrack === tab.value
-                                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
-                                  : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300'
+                                  ? 'border border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white shadow-sm'
+                                : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950 text-slate-600'
                               }`}
                             >
                               {tab.label}
@@ -443,7 +443,7 @@ export default function SetupPage() {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
-                          <label className="text-xs font-bold uppercase tracking-widest text-slate-400">{t('setup.categoryLabel')}</label>
+                          <label className="text-xs font-bold uppercase tracking-widest text-slate-600">{t('setup.categoryLabel')}</label>
                           <CategorySelector
                             value={selectedCategory}
                             options={categoryEntries.map(([k, item]) => ({ value: k, label: item.label }))}
@@ -454,7 +454,7 @@ export default function SetupPage() {
                         </div>
 
                         <div className="space-y-4">
-                          <label className="text-xs font-bold uppercase tracking-widest text-slate-400" htmlFor="setup-position">
+                          <label className="text-xs font-bold uppercase tracking-widest text-slate-600" htmlFor="setup-position">
                             {t('setup.position')} <span className="text-red-500">*</span>
                           </label>
                           <input
@@ -503,7 +503,7 @@ export default function SetupPage() {
                   <div className="space-y-8">
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest font-chinese-modern">{t('setup.jobDesc')} <span className="text-red-500">*</span></h3>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t('setup.pasteHint')}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">{t('setup.pasteHint')}</span>
                     </div>
                     <div className="space-y-4">
                         <textarea
@@ -521,9 +521,9 @@ export default function SetupPage() {
                         {errors.jobDescription ? (
                           <p className="text-red-500 text-xs font-bold italic">{errors.jobDescription}</p>
                         ) : (
-                          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{t('setup.hintDetail')}</p>
+                          <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">{t('setup.hintDetail')}</p>
                         )}
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{form.jobDescription.length} {t('setup.chars')}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">{form.jobDescription.length} {t('setup.chars')}</span>
                       </div>
                     </div>
                   </div>
@@ -557,7 +557,7 @@ export default function SetupPage() {
                           type="button"
                           disabled={resumeParsing}
                           onClick={() => resumeFileRef.current?.click()}
-                          className="btn-primary"
+                          className="btn-setup-action px-10"
                         >
                           {resumeParsing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
                           {t('setup.resumeChoosePdf')}
@@ -601,6 +601,7 @@ export default function SetupPage() {
                   <div className="bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 p-8 space-y-8">
                     <div className="flex items-center gap-3">
                       <Sparkles className="h-4 w-4 text-slate-400" />
+                      <Sparkles className="h-4 w-4 text-slate-500" />
                       <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest">{t('setup.aiAssistantTitle')}</h3>
                     </div>
 
@@ -613,7 +614,7 @@ export default function SetupPage() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                           <div className="space-y-4">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                               {t('setup.mlLength')}
                             </label>
                             <div className="flex flex-wrap gap-2">
@@ -624,8 +625,8 @@ export default function SetupPage() {
                                   onClick={() => setMlForm({ ...mlForm, length: len })}
                                   className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
                                     mlForm.length === len
-                                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white'
-                                      : 'bg-white dark:bg-slate-950 border-slate-100 dark:border-slate-800 text-slate-400 hover:border-slate-300'
+                                      ? 'bg-slate-50 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-white dark:border-slate-700 shadow-sm'
+                                      : 'bg-white dark:bg-slate-950 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-500 font-medium'
                                   }`}
                                 >
                                   {t(`setup.mlLength${len}`)}
@@ -635,7 +636,7 @@ export default function SetupPage() {
                           </div>
 
                           <div className="space-y-4">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                               {t('setup.mlLang')}
                             </label>
                             <div className="flex gap-2">
@@ -646,8 +647,8 @@ export default function SetupPage() {
                                   onClick={() => setMlForm({ ...mlForm, language: lang })}
                                   className={`flex-1 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
                                     mlForm.language === lang
-                                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white'
-                                      : 'bg-white dark:bg-slate-950 border-slate-100 dark:border-slate-800 text-slate-400 hover:border-slate-300'
+                                      ? 'bg-slate-50 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-white dark:border-slate-700 shadow-sm'
+                                      : 'bg-white dark:bg-slate-950 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-500 font-medium'
                                   }`}
                                 >
                                   {lang === 'English' ? '🇬🇧 EN' : '🇩🇪 DE'}
@@ -662,7 +663,7 @@ export default function SetupPage() {
                             type="button"
                             disabled={mlLoading}
                             onClick={handleGenerateML}
-                            className="btn-primary px-8 py-3"
+                            className="btn-setup-action px-8 py-3"
                           >
                             {mlLoading ? (
                               <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -685,7 +686,7 @@ export default function SetupPage() {
                               <button
                                 type="button"
                                 onClick={handleCopyML}
-                                className="absolute top-4 right-4 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-slate-600 dark:text-slate-400"
+                                className="absolute top-4 right-4 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-slate-600 dark:text-slate-500"
                               >
                                 {mlCopied ? <Check className="h-5 w-5 text-emerald-600" /> : <Copy className="h-5 w-5" />}
                               </button>
@@ -706,19 +707,19 @@ export default function SetupPage() {
                             key={lang.value}
                             type="button"
                             onClick={() => setForm({ ...form, language: lang.value })}
-                            className={`flex flex-col items-start gap-4 p-6 rounded-3xl border transition-all duration-300 ${
+                            className={`flex flex-col items-start gap-4 p-6 rounded-2xl border transition-all duration-300 ${
                               form.language === lang.value
-                                ? 'border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900 shadow-xl'
+                                ? 'border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white shadow-sm'
                                 : 'border-slate-100 bg-white hover:border-slate-200 dark:border-slate-800 dark:bg-slate-950'
                             }`}
                           >
                             <div className="flex items-center justify-between w-full">
-                              <span className="text-3xl">{lang.flag}</span>
+                              <span className={`text-3xl ${form.language === lang.value ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-500'}`}>{lang.flag}</span>
                               {form.language === lang.value && <Check className="w-4 h-4" />}
                             </div>
                             <div>
-                              <div className="font-bold text-sm tracking-tight">{lang.label}</div>
-                              <div className={`text-[10px] uppercase font-bold mt-1 ${form.language === lang.value ? 'opacity-60' : 'text-slate-400'}`}>{lang.desc}</div>
+                              <div className={`font-bold text-sm tracking-tight ${form.language === lang.value ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-500'}`}>{lang.label}</div>
+                              <div className={`text-[10px] uppercase font-bold mt-1 ${form.language === lang.value ? 'opacity-60' : 'text-slate-500'}`}>{lang.desc}</div>
                             </div>
                           </button>
                         ))}
@@ -733,14 +734,14 @@ export default function SetupPage() {
                             key={dur.value}
                             type="button"
                             onClick={() => setForm({ ...form, duration: dur.value })}
-                            className={`flex flex-col items-center justify-center px-2 py-6 rounded-3xl border transition-all duration-300 ${
+                            className={`flex flex-col items-center justify-center px-2 py-6 rounded-2xl border transition-all duration-300 ${
                               form.duration === dur.value
-                                ? 'border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900 shadow-xl'
-                                : 'border-slate-100 bg-white hover:border-slate-200 dark:border-slate-800 dark:bg-slate-950'
+                                ? 'border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white shadow-sm'
+                                : 'border-slate-100 bg-white hover:border-slate-200 dark:border-slate-800 dark:bg-slate-950 text-slate-400'
                             }`}
                           >
-                            <span className="text-xl font-black whitespace-nowrap">{dur.label}</span>
-                            <span className={`text-[10px] uppercase font-bold mt-1 tracking-widest ${form.duration === dur.value ? 'opacity-60' : 'text-slate-400'}`}>{dur.desc}</span>
+                            <span className={`text-xl font-black whitespace-nowrap ${form.duration === dur.value ? 'text-slate-900' : 'text-slate-700'}`}>{dur.label}</span>
+                            <span className={`text-[10px] uppercase font-bold mt-1 tracking-widest ${form.duration === dur.value ? 'opacity-60' : 'text-slate-500'}`}>{dur.desc}</span>
                           </button>
                         ))}
                       </div>
@@ -772,7 +773,7 @@ export default function SetupPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="btn-primary w-full py-6 text-xl font-black uppercase tracking-widest group"
+                    className="btn-setup-action w-full py-6 text-xl"
                   >
                     {loading ? (
                       <Loader2 className="h-6 w-6 animate-spin mx-auto text-white dark:text-slate-900" />
