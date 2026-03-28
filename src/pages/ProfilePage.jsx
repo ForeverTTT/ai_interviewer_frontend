@@ -87,23 +87,155 @@ function SectionTitle({ icon: Icon, children }) {
   )
 }
 
+function ResumeScoreGauge({ score, size = 200 }) {
+  const percentage = Math.min(Math.max((score || 0) * 10, 0), 100)
+  const strokeWidth = 14
+  const radius = (size - strokeWidth) / 2
+  const circumference = radius * 2 * Math.PI // Full circle
+  const strokeDashoffset = circumference - (percentage / 100) * circumference
+
+  return (
+    <div className="relative flex items-center justify-center overflow-visible" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="transform -rotate-90">
+        {/* Background Track */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeLinecap="round"
+          className="text-slate-100 dark:text-slate-800"
+        />
+        {/* Progress Fill */}
+        <motion.circle
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="url(#gauge-gradient)"
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeLinecap="round"
+        />
+        <defs>
+          <linearGradient id="gauge-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#f97316" />
+            <stop offset="100%" stopColor="#fbbf24" />
+          </linearGradient>
+        </defs>
+      </svg>
+      {/* Central Content */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+        <div className="flex items-baseline justify-center">
+          <span className="text-5xl font-black font-serif text-slate-900 dark:text-white leading-none">
+            {Math.round(percentage)}
+          </span>
+          <span className="text-xl font-bold text-slate-400 dark:text-slate-600 ml-1">/100</span>
+        </div>
+        <div className={`mt-2 text-xs font-black uppercase tracking-widest ${percentage > 80 ? 'text-emerald-500' :
+          percentage > 60 ? 'text-primary-500' :
+            'text-orange-500'
+          }`}>
+          {percentage > 90 ? 'Exceptional' :
+            percentage > 80 ? 'Excellent' :
+              percentage > 70 ? 'Professional' :
+                percentage > 50 ? 'Developing' : 'Needs Review'}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function CoachReport({ coach, t }) {
+  const summaryRef = useRef(null)
   if (!coach) return null
   const s = coach.scores || {}
-  const scoreCells = [
-    { key: 'overall', label: t('profile.coachScoreOverall'), val: s.overall },
-    { key: 'clarity', label: t('profile.coachScoreClarity'), val: s.clarity },
-    { key: 'impact', label: t('profile.coachScoreImpact'), val: s.impact },
-    { key: 'structure', label: t('profile.coachScoreStructure'), val: s.structure },
-    { key: 'ats', label: t('profile.coachScoreAts'), val: s.ats },
+  const overallScore = s.overall || 0
+
+  const scrollToSummary = () => {
+    summaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const otherScores = [
+    { key: 'clarity', label: t('profile.coachScoreClarity', '清晰度'), val: s.clarity },
+    { key: 'impact', label: t('profile.coachScoreImpact', '成果影响力'), val: s.impact },
+    { key: 'structure', label: t('profile.coachScoreStructure', '结构逻辑'), val: s.structure },
+    { key: 'ats', label: t('profile.coachScoreAts', '关键词 / ATS'), val: s.ats },
+    {
+      key: 'professionalism',
+      label: t('profile.coachScoreProfessionalism', '专业度'),
+      val: s.professionalism || Math.round(((s.structure || 0) + (s.clarity || 0)) / 2)
+    },
   ]
 
   return (
-    <div className="space-y-16">
+    <div className="space-y-12">
+      {/* New Compact Professional Resume Score Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="card-premium p-8 bg-white dark:bg-slate-950 overflow-hidden relative group"
+      >
+        <div className="flex flex-col lg:flex-row items-center gap-8 relative z-10">
+          {/* Left: Compact Gauge */}
+          <div className="shrink-0">
+            <ResumeScoreGauge score={overallScore} size={160} />
+          </div>
+
+          {/* Right: Info & CTA */}
+          <div className="flex-1 space-y-6 text-center lg:text-left">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="flex items-center gap-4 justify-center lg:justify-start">
+                <div className="p-3 bg-primary-50 dark:bg-primary-950/30 rounded-2xl border border-primary-100 dark:border-primary-900/50 shadow-sm">
+                  <FileText className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black font-serif tracking-tight text-slate-900 dark:text-white leading-tight">OfferClaw Resume Score</h3>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1">AI Diagnostic Engine</p>
+                </div>
+              </div>
+              <button
+                onClick={scrollToSummary}
+                className="px-6 py-2.5 rounded-full border border-slate-900 dark:border-white text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-900 transition-all shadow-lg active:scale-95"
+              >
+                {t('profile.scoreDetails', '查看诊断详情')}
+              </button>
+            </div>
+
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-bold max-w-2xl bg-slate-50 dark:bg-slate-900/50 p-5 rounded-3xl border border-slate-100 dark:border-slate-800">
+              {t('profile.scoreInsight', "您的简历在内容深度和逻辑性上表现出色。通过进一步细化量化指标，可以显著提升针对 Top 级雇主的竞争力。")}
+            </p>
+
+            {/* Other scores with upgraded contrast */}
+            <div className="flex flex-wrap lg:flex-nowrap gap-3 pt-2">
+              {otherScores.map(c => (
+                <div key={c.key} className="flex-1 min-w-[120px] flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm hover:border-primary-500 transition-colors group/pill">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-400 opacity-70 group-hover/pill:opacity-100 whitespace-nowrap">{c.label}</span>
+                  <div className="flex items-baseline">
+                    <span className="text-lg font-black font-serif text-slate-900 dark:text-white">{c.val || 0}</span>
+                    <span className="text-[10px] font-bold text-slate-400 ml-0.5">/10</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Decorative corner accent */}
+        <div className="absolute top-0 right-0 w-80 h-80 bg-primary-600/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+      </motion.div>
+
       <motion.section
+        ref={summaryRef}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card-premium p-8 sm:p-12 bg-slate-900 text-white border-0 overflow-visible relative"
+        className="card-premium p-8 sm:p-12 bg-slate-900 text-white border-0 overflow-visible relative scroll-mt-24"
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
         <SectionTitle icon={Sparkles}>
@@ -115,31 +247,6 @@ function CoachReport({ coach, t }) {
           </div>
         </div>
       </motion.section>
-
-      <section>
-        <SectionTitle icon={BarChart3}>
-          {t('profile.coachScores')}
-        </SectionTitle>
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-          {scoreCells.map((c, i) => (
-            <motion.div
-              key={c.key}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="group p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col items-center justify-center text-center transition-all hover:border-slate-900 dark:hover:border-white"
-            >
-              <div className="text-3xl font-black font-serif text-slate-900 dark:text-white mb-2">
-                {c.val != null ? c.val : '—'}
-                <span className="text-xs text-slate-400 dark:text-slate-600 font-sans ml-1">/10</span>
-              </div>
-              <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                {c.label}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
       {coach.macroInsights?.length > 0 && (
         <section>
@@ -245,7 +352,7 @@ function CoachReport({ coach, t }) {
                   <Zap className="w-3 h-3 text-primary-600" />
                   {m.moduleTitle}
                 </div>
-                
+
                 <div className="grid gap-8 md:grid-cols-3">
                   <div className="space-y-3">
                     <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-slate-100 pb-1 block w-fit">{t('profile.coachFinding')}</span>
@@ -437,7 +544,7 @@ function jobStatusDisplay(status, t) {
 
 function GallupAdCard({ t }) {
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
@@ -775,39 +882,33 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
 
             <ProfileSectionsView cvProfile={cvProfile} t={t} />
 
-            {tr && (
-              <div className="p-8 rounded-3xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">{t('profile.coachTargetRole')}</span>
-                <p className="text-2xl font-black font-serif text-slate-900 dark:text-white">{tr}</p>
-              </div>
-            )}
-
+            {/* Moved to top: AI Diagnostic & Resume Score */}
             {coach ? (
-              <div className="space-y-16">
-                  <CoachReport coach={coach} t={t} />
-                  {timeStr && (
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 pt-8 border-t border-slate-100 dark:border-slate-800">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                      {t('profile.coachPersistNote', { time: timeStr })}
-                    </div>
-                  )}
+              <div className="space-y-12">
+                <CoachReport coach={coach} t={t} />
+                {timeStr && (
+                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 pt-6 border-t border-slate-100 dark:border-slate-800">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                    {t('profile.coachPersistNote', { time: timeStr })}
+                  </div>
+                )}
               </div>
             ) : (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
                 className="card-premium p-12 bg-slate-900 text-white border-0 text-center space-y-8 overflow-visible relative group"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative z-10 max-w-lg mx-auto space-y-6">
                   <div className="w-16 h-16 rounded-2xl bg-primary-600 flex items-center justify-center mx-auto shadow-2xl shadow-primary-500/20 mb-8">
-                      <Sparkles className="w-8 h-8 text-white" />
+                    <Sparkles className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-3xl font-black font-serif">{t('profile.coachPreviewTitle')}</h3>
+                  <h3 className="text-3xl font-black font-serif">{t('profile.coachPreviewTitle', '您的 AI 简历报告已就绪')}</h3>
                   <p className="text-slate-400 leading-relaxed">
-                    {t('landing.coachBannerSub')}
+                    {t('landing.coachBannerSub', '点击生成深度简历诊断。我们将基于德国人才市场标准和 ATS 算法为您提供全方位复盘。')}
                   </p>
-                  <button 
+                  <button
                     onClick={runCoach}
                     disabled={coachGenerating || !hasData}
                     className="btn-primary-dark w-full py-5 text-base rounded-2xl group hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
@@ -818,6 +919,16 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
                 </div>
               </motion.div>
             )}
+
+            {tr && (
+              <div className="p-8 rounded-3xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">{t('profile.coachTargetRole')}</span>
+                <p className="text-2xl font-black font-serif text-slate-900 dark:text-white">{tr}</p>
+              </div>
+            )}
+
+
+
 
             <div className="grid gap-8">
               {resumeText.trim() && (
@@ -857,7 +968,7 @@ const inputClass =
 function MultiLineInput({ lines, label, placeholder, onChange, t, inputClass }) {
   const safeLines = Array.isArray(lines) ? lines : []
   const textValue = safeLines.join('\n')
-  
+
   return (
     <div className="space-y-4">
       <label className="block text-[10px] font-black uppercase tracking-widest text-slate-600">{label}</label>
@@ -948,6 +1059,7 @@ export default function ProfilePage() {
       else if (j.resumeCoach?.targetRole) setTargetRole(j.resumeCoach.targetRole)
     } catch {
       setNote({ type: 'err', text: tRef.current('profile.loadErr') })
+      setTimeout(() => setNote(null), 2000)
     } finally {
       setLoading(false)
     }
@@ -999,8 +1111,10 @@ export default function ProfilePage() {
       const j = await res.json()
       setUpdatedAt(j.resumeUpdatedAt)
       setNote({ type: 'ok', text: t('profile.saveSuccess') })
+      setTimeout(() => setNote(null), 1000)
     } catch {
       setNote({ type: 'err', text: t('profile.saveErr') })
+      setTimeout(() => setNote(null), 2000)
     } finally {
       setSaving(false)
     }
@@ -1072,16 +1186,20 @@ export default function ProfilePage() {
       const j = await res.json().catch(() => ({}))
       if (res.status === 503) {
         setNote({ type: 'err', text: t('profile.coach503') })
+        setTimeout(() => setNote(null), 3000)
         return
       }
       if (!res.ok) {
         setNote({ type: 'err', text: j.details || j.error || t('profile.cv.extractErr') })
+        setTimeout(() => setNote(null), 3000)
         return
       }
       setCvProfile(mergeCvProfileFromApi(j.cvProfile))
       setNote({ type: 'ok', text: t('profile.cv.extractOk') })
+      setTimeout(() => setNote(null), 2000)
     } catch {
       setNote({ type: 'err', text: t('profile.cv.extractErr') })
+      setTimeout(() => setNote(null), 3000)
     } finally {
       setExtractBusy(false)
     }
@@ -1092,6 +1210,7 @@ export default function ProfilePage() {
     e.target.value = ''
     if (!file || file.type !== 'application/pdf') {
       setNote({ type: 'err', text: t('profile.pdfOnly') })
+      setTimeout(() => setNote(null), 3000)
       return
     }
     setParseBusy(true)
@@ -1117,8 +1236,10 @@ export default function ProfilePage() {
       }
       setPendingPreviewOpen(false)
       setNote({ type: 'ok', text: t('profile.cv.pdfExtractOk', { n: j.charCount ?? 0 }) })
+      setTimeout(() => setNote(null), 2000)
     } catch {
       setNote({ type: 'err', text: t('profile.parseErr') })
+      setTimeout(() => setNote(null), 3000)
     } finally {
       setParseBusy(false)
     }
@@ -1131,6 +1252,7 @@ export default function ProfilePage() {
     setPendingRaw('')
     setPendingPreviewOpen(false)
     setNote({ type: 'ok', text: t('profile.cv.appliedResumeOk') })
+    setTimeout(() => setNote(null), 2000)
   }
 
 
@@ -1188,11 +1310,11 @@ export default function ProfilePage() {
         <div className="space-y-1 text-center">
           <p className="text-[10px] uppercase font-black tracking-widest text-slate-400 animate-pulse">{t('profile.title')}</p>
           <div className="h-0.5 w-12 bg-slate-200 dark:bg-slate-800 mx-auto rounded-full overflow-hidden">
-            <motion.div 
-               className="h-full bg-primary-600"
-               initial={{ x: "-100%" }}
-               animate={{ x: "100%" }}
-               transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+            <motion.div
+              className="h-full bg-primary-600"
+              initial={{ x: "-100%" }}
+              animate={{ x: "100%" }}
+              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
             />
           </div>
         </div>
@@ -1202,20 +1324,20 @@ export default function ProfilePage() {
 
   const pageExitVariants = {
     initial: { opacity: 0, y: 20 },
-    animate: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { 
-        duration: 0.8, 
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
         ease: [0.16, 1, 0.3, 1],
-        staggerChildren: 0.1 
-      } 
+        staggerChildren: 0.1
+      }
     }
   }
 
   if (!isEdit) {
     return (
-      <motion.div 
+      <motion.div
         key="profile-display"
         variants={pageExitVariants}
         initial="initial"
@@ -1245,7 +1367,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <motion.div 
+    <motion.div
       key="profile-edit"
       variants={pageExitVariants}
       initial="initial"
@@ -1325,23 +1447,28 @@ function ProfileEditView({
             {coachGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-emerald-500" />}
             <span className="font-bold">{coachGenerating ? t('profile.running') : t('profile.coachRun')}</span>
           </button>
-          {note && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold ${note.type === 'ok' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}
+          <div className="flex items-center gap-4 relative">
+            <button
+              onClick={save}
+              disabled={saving}
+              className="btn-setup-action-pill px-8 py-3 shrink-0"
             >
-              {note.text}
-            </motion.div>
-          )}
-          <button
-            onClick={save}
-            disabled={saving}
-            className="btn-setup-action-pill px-8 py-3"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
-            <span className="font-bold">{saving ? t('common.saving') : t('common.save')}</span>
-          </button>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+              <span className="font-bold">{saving ? t('common.saving') : t('common.save')}</span>
+            </button>
+            <AnimatePresence>
+              {note && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  className={`absolute left-full ml-4 whitespace-nowrap px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${note.type === 'ok' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20' : 'bg-red-50 text-red-600 dark:bg-red-950/20'}`}
+                >
+                  {note.text}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </header>
 
@@ -1433,7 +1560,7 @@ function ProfileEditView({
                     </div>
                   )}
                 </div>
-                
+
                 {/* Avatar Selection */}
                 <div className="space-y-6">
                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.chooseAvatar')}</label>
@@ -1484,7 +1611,7 @@ function ProfileEditView({
                     <input className={inputClass} value={cvProfile.phone} onChange={(e) => setCvProfile({ ...cvProfile, phone: e.target.value })} />
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.summary')}</label>
                   <textarea className={`${inputClass} min-h-[160px] resize-none leading-relaxed`} value={cvProfile.summary} onChange={(e) => setCvProfile({ ...cvProfile, summary: e.target.value })} />

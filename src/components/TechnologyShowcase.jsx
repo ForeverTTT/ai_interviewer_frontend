@@ -2,7 +2,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { 
-  Users, Bot, Settings2, Volume2, ShieldCheck, Zap 
+  Users, Bot, Settings2, Volume2, ShieldCheck, Zap, Video 
 } from 'lucide-react'
 
 const containerVariants = {
@@ -32,40 +32,44 @@ export default function TechnologyShowcase() {
 
   const techFeatures = [
     {
-      icon: <Bot className="w-6 h-6" />,
+      icon: <Bot className="w-6 h-6 text-primary-500" />,
       title: t('landing.tech.agentT'),
       description: t('landing.tech.agentD'),
-      className: "md:col-span-1 md:row-span-1",
-      gradient: "from-blue-500/10 to-transparent"
+      accent: "bg-primary-500/10"
     },
     {
-      icon: <Settings2 className="w-6 h-6" />,
+      icon: <Settings2 className="w-6 h-6 text-purple-500" />,
       title: t('landing.tech.fineTuneT'),
       description: t('landing.tech.fineTuneD'),
-      className: "md:col-span-1 md:row-span-1",
-      gradient: "from-purple-500/10 to-transparent"
+      accent: "bg-purple-500/10"
     },
     {
-      icon: <Volume2 className="w-6 h-6" />,
+      icon: <Volume2 className="w-6 h-6 text-amber-500" />,
       title: t('landing.tech.voiceT'),
       description: t('landing.tech.voiceD'),
-      className: "md:col-span-1 md:row-span-1",
-      gradient: "from-amber-500/10 to-transparent"
+      accent: "bg-amber-500/10"
     },
     {
-      icon: <ShieldCheck className="w-6 h-6" />,
+      icon: <Video className="w-6 h-6 text-orange-500" />,
+      title: t('landing.tech.simT'),
+      description: t('landing.tech.simD'),
+      accent: "bg-orange-500/10"
+    },
+    {
+      icon: <ShieldCheck className="w-6 h-6 text-emerald-500" />,
       title: t('landing.tech.privacyT'),
       description: t('landing.tech.privacyD'),
-      className: "md:col-span-1 md:row-span-1",
-      gradient: "from-emerald-500/10 to-transparent"
+      accent: "bg-emerald-500/10"
     }
   ]
 
   return (
-    <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-950 overflow-hidden">
+    <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-12 bg-white dark:bg-slate-950 overflow-hidden">
       {/* Decorative Orbs */}
-      <div className="absolute top-1/4 -left-24 w-96 h-96 bg-indigo-500/5 blur-[120px] rounded-full" />
-      <div className="absolute bottom-1/4 -right-24 w-96 h-96 bg-primary-500/5 blur-[120px] rounded-full" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary-500/5 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-sky-500/5 blur-[120px] rounded-full animate-pulse-slow" />
+      </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.div 
@@ -73,11 +77,11 @@ export default function TechnologyShowcase() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={containerVariants}
-          className="space-y-20"
+          className="space-y-16"
         >
-          {/* Header */}
-          <div className="text-center space-y-4 max-w-3xl mx-auto">
-            <motion.div variants={itemVariants} className="section-badge mx-auto">
+          {/* Section Header */}
+          <div className="space-y-6 max-w-3xl mx-auto text-center">
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px] font-black uppercase tracking-[0.2em] text-primary-500">
               <Zap className="w-3.5 h-3.5" />
               {t('landing.tech.badge')}
             </motion.div>
@@ -89,60 +93,58 @@ export default function TechnologyShowcase() {
             </motion.h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Team Block - Large Highlight with Premium Border */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* Team Block - Premium Horizontal Banner (Top/Full-Width across 5 columns) */}
             <motion.div
               variants={itemVariants}
-              className="lg:col-span-12 p-8 sm:p-12 rounded-[2.5rem] bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/50 relative overflow-hidden group shadow-2xl transition-all duration-500 backdrop-blur-xl"
+              className="lg:col-span-5 p-1 px-1 rounded-[3rem] bg-gradient-to-r from-primary-500/10 via-slate-200/50 to-sky-500/10 dark:from-primary-500/20 dark:via-slate-800/50 dark:to-sky-500/20"
             >
-              {/* Premium Gradient Border Effect */}
-              <div className="absolute inset-0 p-[1px] rounded-[2.5rem] bg-gradient-to-br from-indigo-500/20 via-slate-200/30 to-primary-500/20 dark:from-indigo-400/20 dark:via-slate-800/30 dark:to-primary-400/20 -z-10" />
-              <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-white/90 to-slate-50/90 dark:from-slate-900/90 dark:to-slate-950/90 -z-10" />
-              
-              {/* Inner Glow/Shadow for Depth */}
-              <div className="absolute inset-0 rounded-[2.5rem] shadow-[inset_0_0_80px_rgba(79,70,229,0.05)] pointer-events-none" />
-
-              <div className="relative flex flex-col lg:flex-row gap-10 items-center z-10">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-indigo-600 blur-xl opacity-20 animate-pulse" />
-                  <div className="relative w-16 h-16 shrink-0 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white shadow-2xl shadow-indigo-500/40">
-                    <Users className="w-8 h-8" />
+              <div className="h-full w-full bg-white/90 dark:bg-slate-950/90 backdrop-blur-3xl rounded-[2.9rem] p-10 sm:p-14 flex flex-col lg:flex-row items-center gap-12 border border-white dark:border-slate-800 shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[80px] group-hover:bg-primary-500/10 transition-colors" />
+                
+                <div className="relative shrink-0">
+                  <div className="w-20 h-20 rounded-3xl bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 shadow-2xl rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                    <Users className="w-10 h-10" />
+                  </div>
+                  <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-primary-500 border-4 border-white dark:border-slate-950 flex items-center justify-center">
+                    <Zap className="w-3 h-3 text-white" />
                   </div>
                 </div>
+
                 <div className="space-y-6 flex-1 text-center lg:text-left">
-                  <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+                  <h3 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white font-serif tracking-tight">
                     {t('landing.tech.teamT')}
                   </h3>
-                  <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-medium italic sm:not-italic">
+                  <div className="w-24 h-1 bg-primary-500/20 rounded-full mx-auto lg:mx-0" />
+                  <p className="text-xl text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
                     {t('landing.tech.teamD')}
                   </p>
                 </div>
               </div>
             </motion.div>
 
-            {/* Other Tech Bento Cards */}
+            {/* 5 Feature Cards - Fixed 1-Line Grid on LG */}
             {techFeatures.map((feature, idx) => (
               <motion.div
                 key={idx}
                 variants={itemVariants}
-                className="lg:col-span-6 p-8 rounded-[2rem] bg-white/50 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/50 shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden backdrop-blur-md group relative"
+                className="group relative p-8 rounded-[2.5rem] bg-white dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60 hover:border-primary-500/30 hover:shadow-2xl hover:shadow-primary-500/5 transition-all duration-700 flex flex-col h-full"
               >
-                {/* Accent Gradient Glow */}
-                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${feature.gradient} blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
-                <div className={`absolute -inset-[1px] rounded-[2rem] bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-700 -z-10`} />
+                <div className={`w-14 h-14 rounded-2xl ${feature.accent} flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500`}>
+                  {feature.icon}
+                </div>
+                
+                <div className="space-y-4 flex-1">
+                  <h4 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">
+                    {feature.title}
+                  </h4>
+                  <p className="text-sm text-slate-400 dark:text-slate-500 leading-relaxed font-medium">
+                    {feature.description}
+                  </p>
+                </div>
 
-                <div className="relative space-y-6 z-10">
-                  <div className="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-slate-900 dark:text-white group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500">
-                    {feature.icon}
-                  </div>
-                  <div className="space-y-3">
-                    <h4 className="text-xl font-black text-slate-900 dark:text-white">
-                      {feature.title}
-                    </h4>
-                    <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                      {feature.description}
-                    </p>
-                  </div>
+                <div className="mt-8 pt-6 border-t border-slate-50 dark:border-slate-800/50 flex justify-end">
+                   <div className="w-6 h-1 rounded-full bg-slate-200 dark:bg-slate-800 group-hover:w-12 group-hover:bg-primary-500 transition-all duration-500" />
                 </div>
               </motion.div>
             ))}
@@ -152,3 +154,4 @@ export default function TechnologyShowcase() {
     </section>
   )
 }
+

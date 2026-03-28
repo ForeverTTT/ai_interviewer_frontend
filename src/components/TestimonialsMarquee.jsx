@@ -41,7 +41,7 @@ export default function TestimonialsMarquee() {
   const indices = [1, 2, 3, 4, 5, 6]
 
   return (
-    <section className="relative py-24 bg-white dark:bg-slate-950 overflow-hidden">
+    <section className="relative pt-16 pb-24 bg-white dark:bg-slate-950 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 text-center mb-16 space-y-4">
         <motion.div 
           initial={{ opacity: 0, y: 10 }}

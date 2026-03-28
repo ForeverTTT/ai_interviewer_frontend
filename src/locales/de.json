@@ -157,7 +157,9 @@
       "v3t": "Personalisierter Karriere-Mentor",
       "v3d": "Bietet personalisierte Lernpfade und Karrierebewertungen. Fungiert als Mentor, um den Nutzern zu helfen, reibungslos vom Studium in den Beruf zu wechseln und sich frühzeitig an das Umfeld anzupassen.",
       "v4t": "Modernster LLM-gestützter Lebenslauf",
-      "v4d": "Nutzt modernste LLMs, um Lebensläufe zu analysieren und Daten automatisch auszufüllen, und bietet eine personalisierte Lebenslaufanpassung und Steigerung der Wettbewerbsfähigkeit über die STAR-Methode."
+      "v4d": "Nutzt modernste LLMs, um Lebensläufe zu analysieren und Daten automatisch auszufüllen, und bietet eine personalisierte Lebenslaufanpassung und Steigerung der Wettbewerbsfähigkeit über die STAR-Methode.",
+      "v5t": "Immersive Mock-Umgebung",
+      "v5d": "Integration fortschrittlicher neuraler TTS-Technologie zur Replikation authentischer Recruiter-Stimmen und Stresssituationen. Gekoppelt mit einem Zoom-ähnlichen professionellen Fenster."
     },
     "tech": {
       "badge": "Kerntechnologie",
@@ -169,9 +171,11 @@
       "fineTuneT": "大模型监督微调 (SFT)",
       "fineTuneD": "Wir beherrschen modernste LLM-Fine-Tuning-Methoden und haben über 10.000 Iterationen speziell für den deutschen Bewerbungskontext durchgeführt. Ob es um die Nuancen eines deutschen Vorstellungsgesprächs oder die präzise technische Prüfung geht, OfferClaw liefert Antworten, die exakt den Anforderungen entsprechen.",
       "voiceT": "Absolute Sprachpräsenz",
-      "voiceD": "Durch High-Fidelity Neural Voice Synthesis simulieren wir Sprechgeschwindigkeit, Pausen und Akzente echter Interviewpartner. Durch hunderte Voice-Stress-Trainings verwandeln wir Prüfungsangst in „Muscle Memory“.",
+      "voiceD": "Durch High-Fidelity Neural Voice Synthesis simulieren wir Sprechgeschwindigkeit, Pausen und Akzente echter Interviewpartner. Verwandeln Sie Prüfungsangst in „Muscle Memory“.",
+      "simT": "Authentisches Interface",
+      "simD": "Integration eines modernen Zoom-Style-Interfaces. Echtzeit-Kamerakopplung und realistische Layouts simulieren das authentische Bewerbungsumfeld deutsches Unternehmen.",
       "privacyT": "Datenschutz nach deutschem Standard",
-      "privacyD": "Wir verstehen die Bedeutung Ihrer Privatsphäre. Alle Daten werden nach GDPR-Vorgaben anonymisiert verarbeitet. Ihr Training bleibt absolut vertraulich – Sicherheit, die Ihren Fortschritt ermutigt."
+      "privacyD": "Wir verstehen die Bedeutung Ihrer Privatsphäre. Alle Daten werden nach GDPR-Vorgaben anonymisiert verarbeitet. Sicherheit, die Ihren Fortschritt ermutigt."
     }
   },
   "offerMarquee": {
@@ -285,6 +289,8 @@
       "radarExperience": "Interview-Count",
       "radarLanguage": "Vokabular",
       "radarSoftSkills": "Soft Skills",
+      "radarPortfolio": "Portfolio-Tiefe",
+      "radarNetworking": "Netzwerk-Stärke",
       "level": "Lvl",
       "lvlMap": "Roadmap",
       "curLvl": "Aktuelles Level",
@@ -578,7 +584,17 @@
     "durMin": "min",
     "bannerTitle": "Dranbleiben!",
     "bannerSub": "10 Minuten täglich helfen.",
-    "bannerBtn": "Start"
+    "bannerBtn": "Start",
+    "aiInsight": "KI Karriere-Analyse",
+    "achievements": "Medaillenwand",
+    "insights": {
+      "language": "Ihr deutscher Wortschatz ist ausbaufähig. Wir empfehlen Simulationen zur Ausdrucksstärkung.",
+      "softSkills": "Ihre Soft Skills sind top-bewertet mit starkem Kommunikationspotenzial.",
+      "resume": "Ihr Lebenslauf ist der Türöffner; quantifizieren Sie Erfolge stärker.",
+      "experience": "Die Beschreibungen benötigen konkretere STAR-Beispiele. Testen Sie dies im Interview.",
+      "portfolio": "Die Portfolio-Tiefe kann optimiert werden; zeigen Sie Lösungswege auf.",
+      "networking": "Networking ist im Anfangsstadium. Nutzen Sie LinkedIn für Alumni-Kontakte."
+    }
   },
   "interview": {
     "live": "Live Interview",

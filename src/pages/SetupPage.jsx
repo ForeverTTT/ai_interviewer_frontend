@@ -396,7 +396,7 @@ export default function SetupPage() {
             className="max-w-3xl space-y-6"
           >
             <div className="section-badge">{t('setup.badge')}</div>
-            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight font-chinese-modern uppercase">
+            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight font-serif">
               {t('setup.title')}
             </h1>
             <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed">

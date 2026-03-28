@@ -59,7 +59,7 @@ export default function LanguageSwitcher({ className = '', variant = 'light' }) 
         onClick={() => setOpen((v) => !v)}
         className={`flex h-10 items-center gap-2 rounded-full border px-4 py-2 text-left text-xs font-bold transition-all duration-300 focus:outline-none ${
           open 
-            ? 'bg-primary-600 text-white border-primary-600' 
+            ? 'bg-slate-50 dark:bg-slate-800 text-primary-600 dark:text-primary-400 border-primary-500/50' 
             : 'bg-slate-50 text-slate-500 border-slate-100 hover:border-slate-200 dark:bg-slate-900 dark:border-slate-800 dark:hover:border-slate-700 dark:text-slate-400'
         }`}
       >

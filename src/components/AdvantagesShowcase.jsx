@@ -6,7 +6,8 @@ import {
   UserPlus, 
   FileCheck2,
   Trophy,
-  Activity
+  Activity,
+  MonitorPlay
 } from 'lucide-react'
 
 export default function AdvantagesShowcase() {
@@ -36,6 +37,12 @@ export default function AdvantagesShowcase() {
       title: t('landing.advantages.v4t'),
       desc: t('landing.advantages.v4d'),
       color: 'from-blue-500/10 to-transparent'
+    },
+    {
+      icon: <MonitorPlay className="w-8 h-8 text-orange-500" />,
+      title: t('landing.advantages.v5t'),
+      desc: t('landing.advantages.v5d'),
+      color: 'from-orange-500/10 to-transparent'
     }
   ]
 
@@ -72,7 +79,7 @@ export default function AdvantagesShowcase() {
           </motion.p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
           {ads.map((ad, i) => (
             <motion.div
               key={i}
@@ -80,19 +87,19 @@ export default function AdvantagesShowcase() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="relative group p-10 bg-slate-50 dark:bg-slate-900/50 rounded-[3rem] border border-slate-200 dark:border-white/5 overflow-hidden transition-all hover:bg-white dark:hover:bg-slate-900 shadow-sm hover:shadow-2xl hover:-translate-y-2"
+              className="relative group p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[2.5rem] border border-slate-200 dark:border-white/5 overflow-hidden transition-all hover:bg-white dark:hover:bg-slate-900 shadow-sm hover:shadow-2xl hover:-translate-y-2 h-full"
             >
               <div className={`absolute inset-0 bg-gradient-to-br ${ad.color} opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
               
-              <div className="relative z-10 space-y-8">
-                <div className="w-16 h-16 rounded-2xl bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+              <div className="relative z-10 space-y-6">
+                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
                   {ad.icon}
                 </div>
-                <div className="space-y-4">
-                  <h3 className="text-2xl font-black text-slate-900 dark:text-white leading-tight">
+                <div className="space-y-3">
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight">
                     {ad.title}
                   </h3>
-                  <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
                     {ad.desc}
                   </p>
                 </div>

@@ -9,6 +9,7 @@ import {
   PlusCircle, Clock, Globe2, Briefcase,
   TrendingUp, Target, Zap, ArrowRight, FileText, UserCircle,
   Trash2, Loader2, AlertTriangle, Sparkles, LayoutDashboard, History,
+  Lock, CheckCircle2, Flame,
 } from 'lucide-react'
 import GamificationDashboard from '../components/GamificationDashboard'
 
@@ -249,89 +250,262 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Gamification Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mb-16"
-        >
-          <GamificationDashboard stats={gameStats} onCheckIn={handleCheckIn} interviews={interviews} />
-        </motion.div>
-
-        {/* History Section */}
-        <section className="space-y-8">
-          <div className="flex items-end justify-between">
-            <h2 className="text-3xl font-black text-slate-900 dark:text-white font-serif tracking-tight">
-              {t('dashboard.history')}
-            </h2>
-            {interviews.length > 0 && (
-              <span className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                {interviews.length} {t('dashboard.records')}
-              </span>
-            )}
-          </div>
-
-          {loading ? (
-            <div className="py-20 flex flex-col items-center justify-center gap-4 text-slate-400">
-              <Loader2 className="w-8 h-8 animate-spin" />
-              <p className="text-sm font-medium">{t('dashboard.loading')}</p>
-            </div>
-          ) : interviews.length === 0 ? (
-            <div className="py-32 card-premium border-2 border-dashed flex flex-col items-center text-center space-y-8">
-              <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/20 rounded-[2rem] flex items-center justify-center mx-auto shadow-inner">
-                <Target className="w-10 h-10 text-indigo-500" />
+        {/* Bento Grid layout matching the new premium design */}
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Column: Success Radar card with Achievements & AI Insights below */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="lg:col-span-12 xl:col-span-7"
+          >
+            <div className="card-premium p-10 h-full flex flex-col gap-10 min-h-[600px] overflow-hidden relative">
+              {/* Background Accent orbs */}
+              <div className="absolute top-0 right-0 w-80 h-80 bg-primary-500/5 blur-[120px] translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+              
+              {/* Header */}
+              <div className="flex items-center justify-between relative z-10">
+                <div className="space-y-1">
+                  <div className="text-[10px] font-black text-primary-500 uppercase tracking-widest">{t('dashboard.heroBadge')}</div>
+                  <h2 className="text-3xl font-black text-slate-900 dark:text-white font-serif tracking-tight">{t('profile.game.radarTitle')}</h2>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                  <TrendingUp className="w-6 h-6 text-primary-500" />
+                </div>
               </div>
-              <div className="space-y-2 px-8">
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white font-serif">{t('dashboard.emptyTitle')}</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">{t('dashboard.emptySub')}</p>
+
+              {/* Radar Chart Panel - Centered at the top half */}
+              <div className="flex-1 flex items-center justify-center relative min-h-[350px] py-4">
+                <GamificationDashboard 
+                  stats={gameStats} 
+                  onCheckIn={handleCheckIn} 
+                  interviews={interviews} 
+                  viewMode="radarOnly" 
+                />
               </div>
-              <Link to="/setup" className="btn-primary">
-                <Zap className="w-4 h-4" />
-                {t('dashboard.emptyCta')}
-              </Link>
-            </div>
-          ) : (
-            <div className="grid gap-4">
-              {interviews.map((interview, i) => (
-                <motion.article
-                  key={interview.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
-                  className="card-premium group p-8 flex flex-col md:flex-row md:items-center justify-between gap-8"
-                >
-                  <div className="flex items-center gap-6">
-                    <div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-blue-500 transition-colors">
-                      <Briefcase className="w-6 h-6" />
+
+              {/* Bottom Section: Achievements & Insights Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-slate-100 dark:border-slate-800 relative z-10">
+                
+                {/* AI Insight Highlight */}
+                <div className="p-6 rounded-[2rem] bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 space-y-4">
+                  <div className="flex items-center gap-2 text-primary-600 dark:text-primary-400 text-[10px] font-black uppercase tracking-widest">
+                    <Sparkles className="w-4 h-4" />
+                    {t('dashboard.aiInsight')}
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-bold">
+                    {(() => {
+                      const radar = gameStats?.radar || { language: 1, softSkills: 8, resume: 5 }
+                      const minKey = Object.entries(radar).reduce((p, c) => (c[1] < p[1] ? c : p))[0]
+                      return t(`dashboard.insights.${minKey}`, "您的面试表现稳步提升，建议针对性挑战中高级模拟面试。")
+                    })()}
+                  </p>
+                </div>
+
+                {/* Achievements & Score Side-by-Side */}
+                <div className="flex flex-col justify-between gap-6">
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t('dashboard.achievements')}</h4>
+                    <div className="flex gap-4">
+                      {[
+                        { id: 'pioneer', icon: Target, label: '面试先锋', active: interviews.length > 0 },
+                        { id: 'linguist', icon: Globe2, label: '德语达人', active: (gameStats?.radar?.language || 0) > 7 },
+                        { id: 'allrounder', icon: Zap, label: '全能王', active: (gameStats?.level || 1) > 4 },
+                        { id: 'streak', icon: Flame, label: '勤奋蜂', active: (gameStats?.streak || 0) > 2 },
+                      ].map(badge => (
+                        <div key={badge.id} className="relative group">
+                          <div className={`
+                            w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 border
+                            ${badge.active ? 'bg-white dark:bg-slate-800 border-primary-500 shadow-lg shadow-primary-500/20 text-primary-500' : 'bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-300 dark:text-slate-700 opacity-50'}
+                          `}>
+                            <badge.icon className="w-6 h-6" />
+                          </div>
+                          {/* Tooltip on hover */}
+                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-slate-900 dark:bg-slate-800 text-white text-[10px] font-black rounded-lg opacity-0 group-hover:opacity-100 group-hover:-top-12 transition-all duration-300 pointer-events-none z-20 whitespace-nowrap shadow-xl">
+                            {badge.label}
+                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 dark:bg-slate-800 rotate-45" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{interview.position}</h3>
-                      <div className="flex items-center gap-4 text-sm text-slate-500">
-                        <span className="flex items-center gap-1.5"><History className="w-3.5 h-3.5" />{formatDate(interview.created_at)}</span>
-                        <span className="flex items-center gap-1.5"><Globe2 className="w-3.5 h-3.5" />{interview.language}</span>
-                        <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{interview.duration} {t('dashboard.durMin')}</span>
+                  </div>
+
+                  <div className="flex items-end gap-3 pb-1">
+                      <div className="shrink-0 flex items-end gap-1">
+                        <span className="text-5xl font-black text-slate-900 dark:text-white leading-none">
+                          {Math.round(Object.values(gameStats?.radar || { r: 6 }).reduce((a, b) => a + b, 0) / 6 * 10) || 45}
+                        </span>
+                        <span className="text-sm font-bold text-slate-400 mb-1">/ 100 PTS</span>
                       </div>
-                    </div>
+                      <div className="h-2 flex-1 bg-slate-100 dark:bg-slate-800 rounded-full mb-1.5 overflow-hidden">
+                        <div 
+                          className="h-full bg-primary-500 rounded-full transition-all duration-1000" 
+                          style={{ width: `${Math.round(Object.values(gameStats?.radar || { r: 6 }).reduce((a, b) => a + b, 0) / 6 * 10) || 45}%` }}
+                        />
+                      </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Link to={`/interview/${interview.id}/report`} className="btn-secondary px-6 py-2.5 text-xs">
-                      <FileText className="w-4 h-4 mr-2" />
-                      {t('report.viewReport')}
-                    </Link>
-                    <button
-                      onClick={() => requestDeleteInterview(interview.id, interview.position)}
-                      className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </motion.article>
-              ))}
+                </div>
+
+              </div>
             </div>
-          )}
-        </section>
+          </motion.div>
+
+          {/* Right Column: History & Milestones */}
+          <div className="lg:col-span-12 xl:col-span-5 space-y-8">
+            
+            {/* Interview History List */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="card-premium p-8 space-y-8 min-h-[400px]"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white font-serif tracking-tight">{t('dashboard.history')}</h3>
+                <span className="px-3 py-1 bg-slate-50 dark:bg-slate-900 rounded-full text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border border-slate-100 dark:border-slate-800">
+                  {interviews.length} {t('dashboard.records')}
+                </span>
+              </div>
+
+              <div className="space-y-6">
+                {loading ? (
+                  <div className="py-20 flex flex-col items-center justify-center gap-4 text-slate-400">
+                    <Loader2 className="w-8 h-8 animate-spin" />
+                  </div>
+                ) : interviews.length === 0 ? (
+                  <div className="py-12 text-center space-y-4">
+                    <p className="text-slate-500 text-sm italic font-medium">{t('dashboard.emptySub')}</p>
+                    <Link to="/setup" className="text-indigo-500 text-sm font-bold flex items-center justify-center gap-2 hover:underline">
+                      {t('dashboard.newInterview')} <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                ) : (
+                  interviews.slice(0, 5).map((interview, i) => {
+                    const d = new Date(interview.created_at)
+                    const month = d.toLocaleDateString(localeTag, { month: 'short' })
+                    const day = d.toLocaleDateString(localeTag, { day: '2-digit' })
+                    
+                    return (
+                      <motion.div
+                        key={interview.id}
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.4 + i * 0.05 }}
+                        className="group flex gap-6 items-start p-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 rounded-2xl transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-700/50"
+                      >
+                        <div className="flex flex-col items-center justify-center shrink-0 w-12 h-14 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                          <span className="text-[10px] font-black uppercase text-slate-400 leading-none mb-1">{month}</span>
+                          <span className="text-lg font-black text-slate-900 dark:text-white leading-none">{day}</span>
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <Link to={`/interview/${interview.id}/report`} className="text-sm font-black text-slate-900 dark:text-white group-hover:text-indigo-500 transition-colors block leading-tight">
+                            {interview.position}
+                          </Link>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-slate-500">{interview.language} · {interview.duration} {t('dashboard.durMin')}</span>
+                            <button
+                              onClick={() => requestDeleteInterview(interview.id, interview.position)}
+                              className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 transition-all hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )
+                  })
+                )}
+              </div>
+            </motion.div>
+
+            {/* Gamification Level Map */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="card-premium p-8 space-y-10"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white font-serif tracking-tight">{t('profile.game.lvlMap')}</h3>
+                <div className="px-3 py-1 bg-primary-50 dark:bg-primary-950/30 rounded-full text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest border border-primary-100 dark:border-primary-900/50">
+                  Level {gameStats?.level || 1}
+                </div>
+              </div>
+
+              {/* Connected Level Path */}
+              <div className="relative py-6">
+                {/* Connection Line */}
+                <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-slate-100 dark:bg-slate-800 -translate-y-1/2" />
+                
+                <div className="relative flex justify-between gap-4 overflow-x-auto pb-8 scrollbar-hide snap-x">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((lvl) => {
+                    const currentLvl = gameStats?.level || 1
+                    const isPassed = lvl < currentLvl
+                    const isActive = lvl === currentLvl
+                    const isLocked = lvl > currentLvl
+                    
+                    return (
+                      <div key={lvl} className="flex flex-col items-center shrink-0 w-20 snap-center relative">
+                        {/* Connecting Line (Success state) */}
+                        {isPassed && (
+                          <div className="absolute top-1/2 left-[50%] w-full h-[2px] bg-primary-500 -translate-y-1/2 z-0" />
+                        )}
+
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          className={`
+                            relative z-10 w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500
+                            ${isActive ? 'bg-primary-500 text-white shadow-xl shadow-primary-500/40 ring-4 ring-primary-100 dark:ring-primary-950/50' : 
+                              isPassed ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-2 border-primary-500' : 
+                              'bg-white dark:bg-slate-900 text-slate-300 dark:text-slate-700 border-2 border-slate-100 dark:border-slate-800'}
+                          `}
+                        >
+                          {isPassed ? <CheckCircle2 className="w-6 h-6" /> : 
+                           isLocked ? <Lock className="w-5 h-5" /> :
+                           <span className="text-lg font-black">{lvl}</span>}
+                          
+                          {isActive && (
+                            <motion.div 
+                              layoutId="activeGlow"
+                              className="absolute -inset-2 rounded-[1.5rem] bg-primary-500/20 animate-pulse -z-10" 
+                            />
+                          )}
+                        </motion.div>
+                        
+                        <div className={`mt-4 text-[10px] font-black uppercase tracking-tighter text-center leading-tight transition-colors duration-500 ${
+                          isActive ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400'
+                        }`}>
+                          {t(`profile.game.lvls.${lvl}`)}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Next Highlight Challenge */}
+              <div className="p-6 bg-slate-900 dark:bg-white rounded-[2rem] flex items-center justify-between group cursor-pointer hover:shadow-2xl hover:shadow-primary-500/10 transition-all">
+                <div className="flex gap-5 items-center">
+                   <div className="w-12 h-12 rounded-2xl bg-white/10 dark:bg-slate-100 flex items-center justify-center text-primary-500">
+                     <Zap className="w-6 h-6 animate-pulse" />
+                   </div>
+                   <div className="space-y-1">
+                      <div className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">{t('profile.game.nextQuest')}</div>
+                      <div className="text-white dark:text-slate-900 font-bold text-lg leading-none">
+                        {gameStats?.nextLevelQuest ? t(`profile.game.quests.${gameStats.nextLevelQuest}`) : 'Complete 1 more mock'}
+                      </div>
+                   </div>
+                </div>
+                <div className="w-10 h-10 rounded-full border border-white/20 dark:border-slate-200 flex items-center justify-center text-white dark:text-slate-900 group-hover:bg-primary-500 group-hover:border-primary-500 transition-all">
+                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </motion.div>
+
+          </div>
+        </div>
+
 
         {/* Promotional Banner */}
         {interviews.length > 0 && (
