@@ -110,19 +110,19 @@ function CategorySelector({ value, options, onChange, placeholder, t }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex w-full items-center justify-between gap-2 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all duration-300 ${
+        className={`flex w-full items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-sm font-bold transition-all duration-300 ${
           isOpen
-            ? 'border-primary-500 bg-white ring-4 ring-primary-500/10 dark:border-primary-400 dark:bg-slate-900/90 dark:ring-primary-400/15'
-            : 'border-slate-200/90 bg-white hover:border-slate-300 hover:bg-slate-50/80 dark:border-slate-600 dark:bg-slate-800/80 dark:hover:border-slate-500 dark:hover:bg-slate-700/60'
+            ? 'border-slate-900 bg-white dark:border-white dark:bg-slate-900'
+            : 'border-slate-100 bg-slate-50 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-600'
         }`}
       >
-        <div className="flex items-center gap-2 overflow-hidden">
-          <LayoutTemplate className={`h-4 w-4 shrink-0 ${value ? 'text-primary-600' : 'text-slate-400'}`} />
-          <span className={`truncate ${value ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'}`}>
+        <div className="flex items-center gap-3 overflow-hidden">
+          <LayoutTemplate className={`h-4 w-4 shrink-0 ${value ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`} />
+          <span className={`truncate ${value ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
         </div>
-        <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-500 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
@@ -387,461 +387,412 @@ export default function SetupPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-100 via-slate-50/90 to-white pt-24 pb-12 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 sm:pb-16">
-      <div className="pointer-events-none absolute inset-0 bg-mesh-subtle opacity-60 dark:opacity-40" aria-hidden />
-      <div className="pointer-events-none absolute inset-0 bg-dot-grid opacity-[0.12] dark:opacity-[0.08]" aria-hidden />
-      <div
-        className="pointer-events-none absolute -top-16 right-0 h-[min(420px,85vw)] w-[min(420px,85vw)] rounded-full bg-primary-200/30 blur-3xl dark:bg-primary-900/25"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute bottom-0 left-0 h-[min(320px,75vw)] w-[min(320px,75vw)] rounded-full bg-violet-200/25 blur-3xl dark:bg-violet-950/30"
-        aria-hidden
-      />
-
-      <div className="relative mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-10">
-        <header className="mb-8 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 shadow-card ring-1 ring-slate-900/[0.04] dark:border-slate-700/80 dark:bg-slate-900/60 dark:ring-white/[0.06] sm:mb-10">
-          <div className="relative border-b border-slate-100 bg-gradient-to-br from-primary-600/[0.08] via-white to-violet-600/[0.07] px-5 py-6 dark:border-slate-800 dark:from-primary-500/10 dark:via-slate-900 dark:to-violet-600/10 sm:px-8 sm:py-7">
-            <div
-              className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary-400/25 to-transparent dark:via-primary-500/15"
-              aria-hidden
-            />
-            <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-600 to-violet-600 text-white shadow-lg shadow-primary-600/25 ring-2 ring-white dark:ring-slate-900">
-                <LayoutTemplate className="h-7 w-7" aria-hidden />
-              </div>
-              <div className="min-w-0 flex-1 text-center sm:text-left">
-                <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary-200/80 bg-primary-50/90 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary-800 shadow-soft backdrop-blur-sm dark:border-primary-700/50 dark:bg-primary-900/40 dark:text-primary-100">
-                  <Sparkles className="h-3.5 w-3.5 text-primary-600 dark:text-primary-300" aria-hidden />
-                  {t('setup.badge')}
-                </span>
-                <h1 className="text-balance text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl lg:text-4xl">
-                  {t('setup.title')}
-                </h1>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400 sm:text-base">
-                  {t('setup.sub')}
-                </p>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-20">
+      <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
+        <header className="mb-20">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-3xl space-y-6"
+          >
+            <div className="section-badge">{t('setup.badge')}</div>
+            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight font-serif">
+              {t('setup.title')}
+            </h1>
+            <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed">
+              {t('setup.sub')}
+            </p>
+          </motion.div>
         </header>
 
-        <div className="mx-auto max-w-4xl">
-          <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-card ring-1 ring-slate-900/[0.04] dark:border-slate-700/90 dark:bg-slate-900 dark:ring-white/[0.06]">
-            <div className="relative border-b border-slate-200/80 bg-gradient-to-br from-primary-600/[0.07] via-white to-violet-600/[0.06] px-5 py-5 dark:border-slate-700/80 dark:from-primary-500/10 dark:via-slate-900 dark:to-violet-600/10 sm:px-8 sm:py-6">
-              <div
-                className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary-400/30 to-transparent dark:via-primary-500/20"
-                aria-hidden
-              />
-              <div className="relative flex items-center gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-600 to-violet-600 text-white shadow-md">
-                  <Briefcase className="h-5 w-5" aria-hidden />
-                </span>
-                <div>
-                  <h2 className="text-lg font-black tracking-tight text-slate-900 dark:text-white sm:text-xl">
-                    {t('setup.panelTitle')}
-                  </h2>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{t('setup.panelSub')}</p>
-                </div>
-              </div>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+          <main className="lg:col-span-12">
+            <div className="bg-white dark:bg-slate-950 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 p-8 sm:p-12 shadow-sm">
+              <form onSubmit={handleSubmit} className="space-y-16">
+                <div className="space-y-12">
+                  {/* Role Section */}
+                  <div className="space-y-8">
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest font-chinese-modern">{t('setup.sectionRole')}</h3>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">{t('setup.panelSub')}</p>
+                    </div>
 
-            <div className="p-6 sm:p-8 lg:p-10">
-              <form onSubmit={handleSubmit} className="space-y-10">
-                <div className="space-y-6">
-                  <p className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    {t('setup.sectionRole')}
-                  </p>
-            <div>
-              <label className="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200 mb-2.5 tracking-tight" htmlFor="setup-position">
-                <Briefcase className="w-4 h-4 text-primary-600 dark:text-primary-400 shrink-0" aria-hidden />
-                {t('setup.position')} <span className="text-red-500">*</span>
-              </label>
-              <div className="mb-3 space-y-3">
-                <div>
-                  <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    {t('setup.trackLabel')}
-                  </p>
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {trackTabs.map((tab) => (
-                      <button
-                        key={tab.value}
-                        type="button"
-                        onClick={() => {
-                          setRoleTrack(tab.value)
-                          setSelectedCategory('')
-                        }}
-                        className={`rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${
-                          roleTrack === tab.value
-                            ? 'border-primary-500 bg-primary-50 text-primary-800 dark:border-primary-400 dark:bg-primary-900/40 dark:text-primary-200'
-                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700/80'
-                        }`}
+                    <div className="space-y-6">
+                      <div className="space-y-4">
+                        <label className="text-xs font-bold uppercase tracking-widest text-slate-600">{t('setup.trackLabel')}</label>
+                        <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-800">
+                          {trackTabs.map((tab) => (
+                            <button
+                              key={tab.value}
+                              type="button"
+                              onClick={() => {
+                                setRoleTrack(tab.value)
+                                setSelectedCategory('')
+                              }}
+                              className={`rounded-xl px-4 py-3 text-sm font-bold transition-all ${
+                                roleTrack === tab.value
+                                  ? 'border border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white shadow-sm'
+                                : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950 text-slate-600'
+                              }`}
+                            >
+                              {tab.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <label className="text-xs font-bold uppercase tracking-widest text-slate-600">{t('setup.categoryLabel')}</label>
+                          <CategorySelector
+                            value={selectedCategory}
+                            options={categoryEntries.map(([k, item]) => ({ value: k, label: item.label }))}
+                            onChange={setSelectedCategory}
+                            placeholder={t('setup.categoryPlaceholder')}
+                            t={t}
+                          />
+                        </div>
+
+                        <div className="space-y-4">
+                          <label className="text-xs font-bold uppercase tracking-widest text-slate-600" htmlFor="setup-position">
+                            {t('setup.position')} <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={form.position}
+                            onChange={(e) => {
+                              setForm({ ...form, position: e.target.value })
+                              setErrors({ ...errors, position: '' })
+                            }}
+                            id="setup-position"
+                            placeholder="e.g. Frontend Developer"
+                            className={`input-field-premium px-5 py-4 ${errors.position ? 'border-red-500' : ''}`}
+                          />
+                          {errors.position && (
+                            <p className="text-red-500 text-xs mt-2 flex items-center gap-1 font-bold italic">
+                              {errors.position}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
+                          {selectedRoles.length > 0 ? t('setup.subRoleHint') : t('setup.subRoleHintEmpty')}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedRoles.map((pos) => (
+                            <button
+                              key={pos}
+                              type="button"
+                              onClick={() => {
+                                setForm({ ...form, position: pos })
+                                setErrors({ ...errors, position: '' })
+                              }}
+                              className="px-5 py-2.5 text-xs font-black border border-slate-200 dark:border-slate-800 rounded-2xl hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-900 transition-all text-slate-700 dark:text-slate-300 shadow-sm"
+                            >
+                              {pos}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Job Description Section */}
+                  <div className="space-y-8">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest font-chinese-modern">{t('setup.jobDesc')} <span className="text-red-500">*</span></h3>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">{t('setup.pasteHint')}</span>
+                    </div>
+                    <div className="space-y-4">
+                        <textarea
+                          id="setup-job-desc"
+                          value={form.jobDescription}
+                          onChange={(e) => {
+                            setForm({ ...form, jobDescription: e.target.value })
+                            setErrors({ ...errors, jobDescription: '' })
+                          }}
+                          placeholder={t('setup.placeholder')}
+                          rows={10}
+                          className={`textarea-field-premium ${errors.jobDescription ? 'border-red-500 ring-4 ring-red-500/10' : ''}`}
+                        />
+                      <div className="flex items-center justify-between">
+                        {errors.jobDescription ? (
+                          <p className="text-red-500 text-xs font-bold italic">{errors.jobDescription}</p>
+                        ) : (
+                          <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">{t('setup.hintDetail')}</p>
+                        )}
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">{form.jobDescription.length} {t('setup.chars')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Resume Section */}
+                  <div className="card-premium p-8 space-y-8">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Upload className="h-4 w-4 text-slate-400" />
+                        <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest">{t('setup.resumeTitle')}</h3>
+                      </div>
+                      <Link
+                        to="/profile"
+                        className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                       >
-                        {tab.label}
-                      </button>
-                    ))}
+                        {t('setup.resumeProfileLink')}
+                      </Link>
+                    </div>
+
+                    <div className="space-y-6">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{t('setup.resumeEncourage')}</p>
+                      <input
+                        ref={resumeFileRef}
+                        type="file"
+                        accept="application/pdf"
+                        className="hidden"
+                        onChange={(e) => void handleResumePdf(e)}
+                      />
+                      <div className="flex flex-wrap items-center gap-4">
+                        <button
+                          type="button"
+                          disabled={resumeParsing}
+                          onClick={() => resumeFileRef.current?.click()}
+                          className="btn-setup-action px-10"
+                        >
+                          {resumeParsing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
+                          {t('setup.resumeChoosePdf')}
+                        </button>
+                        {sessionResumeText.trim() && (
+                          <button
+                            type="button"
+                            onClick={() => { setSessionResumeText(''); setResumeNote(null) }}
+                            className="btn-secondary"
+                          >
+                            <X className="h-4 w-4 mr-2" />
+                            {t('setup.resumeClearSession')}
+                          </button>
+                        )}
+                      </div>
+
+                      {resumeNote && (
+                        <div className={`p-4 rounded-2xl border text-sm font-bold ${
+                          resumeNote.type === 'ok' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                          resumeNote.type === 'warn' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                          'bg-red-50 text-red-700 border-red-100'
+                        }`}>
+                          {resumeNote.text}
+                        </div>
+                      )}
+
+                      <div className="bg-white dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                          {effectiveResume ? (
+                            <>
+                              {sessionResumeText.trim() ? t('setup.resumeUsingSession') : t('setup.resumeUsingProfile')}
+                              <span className="ml-2 text-slate-900 dark:text-white">{effectiveResume.length} {t('setup.chars')}</span>
+                            </>
+                          ) : t('setup.resumeNone')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* AI Assistant Section */}
+                  <div className="bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 p-8 space-y-8">
+                    <div className="flex items-center gap-3">
+                      <Sparkles className="h-4 w-4 text-slate-400" />
+                      <Sparkles className="h-4 w-4 text-slate-500" />
+                      <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest">{t('setup.aiAssistantTitle')}</h3>
+                    </div>
+
+                    <div className="space-y-10">
+                      <div className="space-y-6">
+                        <div className="flex flex-col gap-2">
+                          <h4 className="text-xl font-bold text-slate-900 dark:text-white">{t('setup.mlTitle')}</h4>
+                          <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{t('setup.mlDesc')}</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div className="space-y-4">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                              {t('setup.mlLength')}
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                              {[100, 200, 300].map(len => (
+                                <button
+                                  key={len}
+                                  type="button"
+                                  onClick={() => setMlForm({ ...mlForm, length: len })}
+                                  className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+                                    mlForm.length === len
+                                      ? 'bg-slate-50 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-white dark:border-slate-700 shadow-sm'
+                                      : 'bg-white dark:bg-slate-950 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-500 font-medium'
+                                  }`}
+                                >
+                                  {t(`setup.mlLength${len}`)}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                              {t('setup.mlLang')}
+                            </label>
+                            <div className="flex gap-2">
+                              {['English', 'Deutsch'].map(lang => (
+                                <button
+                                  key={lang}
+                                  type="button"
+                                  onClick={() => setMlForm({ ...mlForm, language: lang })}
+                                  className={`flex-1 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+                                    mlForm.language === lang
+                                      ? 'bg-slate-50 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-white dark:border-slate-700 shadow-sm'
+                                      : 'bg-white dark:bg-slate-950 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-500 font-medium'
+                                  }`}
+                                >
+                                  {lang === 'English' ? '🇬🇧 EN' : '🇩🇪 DE'}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <button
+                            type="button"
+                            disabled={mlLoading}
+                            onClick={handleGenerateML}
+                            className="btn-setup-action px-8 py-3"
+                          >
+                            {mlLoading ? (
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                              mlResult ? <RotateCcw className="h-4 w-4 mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />
+                            )}
+                            {mlLoading ? t('setup.mlGenerating') : (mlResult ? t('setup.mlBtnNew') : t('setup.mlBtn'))}
+                          </button>
+
+                          <div className="relative group">
+                            <textarea
+                              readOnly
+                              value={mlResult}
+                              placeholder={t('setup.mlPlaceholder')}
+                              className={`textarea-field-premium transition-all ${
+                                mlResult ? 'h-[500px] shadow-sm' : 'h-[160px] border-dashed'
+                              } scrollbar-hide`}
+                            />
+                            {mlResult && (
+                              <button
+                                type="button"
+                                onClick={handleCopyML}
+                                className="absolute top-4 right-4 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-slate-600 dark:text-slate-500"
+                              >
+                                {mlCopied ? <Check className="h-5 w-5 text-emerald-600" /> : <Copy className="h-5 w-5" />}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Interview Config */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+                    <div className="space-y-8">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">{t('setup.interviewLang')}</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        {languages.map((lang) => (
+                          <button
+                            key={lang.value}
+                            type="button"
+                            onClick={() => setForm({ ...form, language: lang.value })}
+                            className={`flex flex-col items-start gap-4 p-6 rounded-2xl border transition-all duration-300 ${
+                              form.language === lang.value
+                                ? 'border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white shadow-sm'
+                                : 'border-slate-100 bg-white hover:border-slate-200 dark:border-slate-800 dark:bg-slate-950'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <span className={`text-3xl ${form.language === lang.value ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-500'}`}>{lang.flag}</span>
+                              {form.language === lang.value && <Check className="w-4 h-4" />}
+                            </div>
+                            <div>
+                              <div className={`font-bold text-sm tracking-tight ${form.language === lang.value ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-500'}`}>{lang.label}</div>
+                              <div className={`text-[10px] uppercase font-bold mt-1 ${form.language === lang.value ? 'opacity-60' : 'text-slate-500'}`}>{lang.desc}</div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-8">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">{t('setup.duration')}</h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        {durations.map((dur) => (
+                          <button
+                            key={dur.value}
+                            type="button"
+                            onClick={() => setForm({ ...form, duration: dur.value })}
+                            className={`flex flex-col items-center justify-center px-2 py-6 rounded-2xl border transition-all duration-300 ${
+                              form.duration === dur.value
+                                ? 'border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white shadow-sm'
+                                : 'border-slate-100 bg-white hover:border-slate-200 dark:border-slate-800 dark:bg-slate-950 text-slate-400'
+                            }`}
+                          >
+                            <span className={`text-xl font-black whitespace-nowrap ${form.duration === dur.value ? 'text-slate-900' : 'text-slate-700'}`}>{dur.label}</span>
+                            <span className={`text-[10px] uppercase font-bold mt-1 tracking-widest ${form.duration === dur.value ? 'opacity-60' : 'text-slate-500'}`}>{dur.desc}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    {t('setup.categoryLabel')}
-                  </p>
-                  <CategorySelector
-                    value={selectedCategory}
-                    options={categoryEntries.map(([k, item]) => ({ value: k, label: item.label }))}
-                    onChange={setSelectedCategory}
-                    placeholder={t('setup.categoryPlaceholder')}
-                    t={t}
-                  />
-                </div>
-              </div>
-              <input
-                type="text"
-                value={form.position}
-                onChange={(e) => {
-                  setForm({ ...form, position: e.target.value })
-                  setErrors({ ...errors, position: '' })
-                }}
-                id="setup-position"
-                placeholder="e.g. Werkstudent Frontend Developer"
-                className={`input-field ${errors.position ? 'border-red-300 focus:ring-red-400' : ''}`}
-              />
-              {errors.position && (
-                <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
-                  <Info className="w-3 h-3" /> {errors.position}
-                </p>
-              )}
-              <div className="mt-2">
-                <p className="mb-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  {selectedRoles.length > 0 ? t('setup.subRoleHint') : t('setup.subRoleHintEmpty')}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedRoles.map((pos) => (
-                    <button
-                      key={pos}
-                      type="button"
-                      onClick={() => {
-                        setForm({ ...form, position: pos })
-                        setErrors({ ...errors, position: '' })
-                      }}
-                      className="rounded-xl border border-slate-200/90 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-soft transition-all duration-200 hover:border-primary-200/80 hover:bg-primary-50 hover:text-primary-800 hover:shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-primary-800/50 dark:hover:bg-primary-950/50 dark:hover:text-primary-300"
-                    >
-                      {pos}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2.5 flex flex-wrap items-center gap-2 text-sm font-bold tracking-tight text-slate-800 dark:text-slate-200" htmlFor="setup-job-desc">
-                <FileText className="h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400" aria-hidden />
-                {t('setup.jobDesc')} <span className="text-red-500">*</span>
-                <span className="w-full text-xs font-semibold text-slate-400 dark:text-slate-500 sm:ml-auto sm:w-auto">{t('setup.pasteHint')}</span>
-              </label>
-              <textarea
-                id="setup-job-desc"
-                value={form.jobDescription}
-                onChange={(e) => {
-                  setForm({ ...form, jobDescription: e.target.value })
-                  setErrors({ ...errors, jobDescription: '' })
-                }}
-                placeholder={t('setup.placeholder')}
-                rows={8}
-                className={`textarea-field !min-h-[12rem] !resize-y ${errors.jobDescription ? 'border-red-300 focus:ring-red-400' : ''}`}
-              />
-              <div className="flex items-center justify-between mt-1.5">
-                {errors.jobDescription ? (
-                  <p className="text-red-500 text-xs flex items-center gap-1">
-                    <Info className="w-3 h-3" /> {errors.jobDescription}
-                  </p>
-                ) : (
-                  <p className="text-slate-400 dark:text-slate-500 text-xs">{t('setup.hintDetail')}</p>
-                )}
-                <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{form.jobDescription.length} {t('setup.chars')}</span>
-              </div>
-            </div>
-                </div>
-
-            <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-50/40 ring-1 ring-slate-900/[0.03] dark:border-slate-600 dark:bg-slate-800/25 dark:ring-white/[0.05]">
-              <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/80 bg-gradient-to-r from-primary-600/[0.07] to-violet-600/[0.06] px-4 py-3.5 dark:border-slate-600 dark:from-primary-500/12 dark:to-violet-600/10 sm:px-5">
-                <Upload className="h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400" aria-hidden />
-                <span className="text-sm font-black text-slate-900 dark:text-white">{t('setup.resumeTitle')}</span>
-                <Link
-                  to="/profile"
-                  className="ml-auto text-xs font-bold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-                >
-                  {t('setup.resumeProfileLink')}
-                </Link>
-              </div>
-              <div className="space-y-4 p-5 sm:p-6">
-                <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 sm:text-sm">{t('setup.resumeEncourage')}</p>
-                <input
-                  ref={resumeFileRef}
-                  type="file"
-                  accept="application/pdf"
-                  className="hidden"
-                  onChange={(e) => void handleResumePdf(e)}
-                />
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    disabled={resumeParsing}
-                    onClick={() => resumeFileRef.current?.click()}
-                    className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-primary-200 bg-primary-50 px-4 py-2.5 text-sm font-bold text-primary-800 transition-colors hover:bg-primary-100 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-primary-300 dark:hover:bg-slate-700/80"
-                  >
-                    {resumeParsing ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <FileText className="h-4 w-4" aria-hidden />}
-                    {t('setup.resumeChoosePdf')}
-                  </button>
-                  {sessionResumeText.trim() ? (
-                    <button
-                      type="button"
-                      onClick={() => { setSessionResumeText(''); setResumeNote(null) }}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:border-red-200 hover:text-red-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-red-900/50 dark:hover:text-red-400"
-                    >
-                      <X className="h-3.5 w-3.5" aria-hidden />
-                      {t('setup.resumeClearSession')}
-                    </button>
-                  ) : null}
-                </div>
-                {resumeNote ? (
-                  <p
-                    className={`rounded-xl border px-3 py-2.5 text-xs sm:text-sm ${
-                      resumeNote.type === 'ok'
-                        ? 'border-emerald-200 bg-emerald-50/90 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200'
-                        : resumeNote.type === 'warn'
-                          ? 'border-amber-200 bg-amber-50/90 text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200'
-                          : 'border-red-200 bg-red-50/90 text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200'
-                    }`}
-                  >
-                    {resumeNote.text}
-                  </p>
-                ) : null}
-                <div className="rounded-xl border border-slate-200/90 bg-white/90 px-4 py-3 dark:border-slate-600 dark:bg-slate-900/60">
-                  {effectiveResume ? (
-                    <p className="text-sm font-medium leading-relaxed text-slate-800 dark:text-slate-200">
-                      {sessionResumeText.trim()
-                        ? t('setup.resumeUsingSession')
-                        : t('setup.resumeUsingProfile')}
-                      {' '}
-                      <span className="font-mono text-[0.8125rem] font-semibold text-primary-700 tabular-nums dark:text-primary-300">
-                        ({effectiveResume.length} {t('setup.chars')})
+                {/* Footer Section */}
+                <div className="p-12 bg-slate-50 dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+                  <p className="mb-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">{t('setup.summary')}</p>
+                  <div className="flex flex-wrap gap-4 mb-12">
+                    {form.position ? (
+                      <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm flex items-center gap-2">
+                        {form.position}
                       </span>
-                    </p>
-                  ) : (
-                    <p className="text-sm font-medium leading-relaxed text-slate-800 dark:text-slate-200">{t('setup.resumeNone')}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-50/40 ring-1 ring-slate-900/[0.03] dark:border-slate-600 dark:bg-slate-800/25 dark:ring-white/[0.05]">
-              <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/80 bg-gradient-to-r from-primary-600/[0.07] to-violet-600/[0.06] px-4 py-3.5 dark:border-slate-600 dark:from-primary-500/12 dark:to-violet-600/10 sm:px-5">
-                <Sparkles className="h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400" aria-hidden />
-                <span className="text-sm font-black text-slate-900 dark:text-white">{t('setup.aiAssistantTitle')}</span>
-              </div>
-              <div className="p-5 sm:p-6 space-y-6">
-                <div className="flex flex-col gap-1">
-                  <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">{t('setup.mlTitle')}</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{t('setup.mlDesc')}</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <label className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                      {t('setup.mlLength')}
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {[100, 200, 300].map(len => (
-                        <button
-                          key={len}
-                          type="button"
-                          onClick={() => setMlForm({ ...mlForm, length: len })}
-                          className={`px-3 py-2 rounded-xl text-xs font-bold border transition ${
-                            mlForm.length === len
-                              ? 'bg-primary-50 border-primary-500 text-primary-700 dark:bg-primary-950/40 dark:border-primary-400 dark:text-primary-300'
-                              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-400'
-                          }`}
-                        >
-                          {t(`setup.mlLength${len}`)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <label className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                      {t('setup.mlLang')}
-                    </label>
-                    <div className="flex gap-2">
-                      {['English', 'Deutsch'].map(lang => (
-                        <button
-                          key={lang}
-                          type="button"
-                          onClick={() => setMlForm({ ...mlForm, language: lang })}
-                          className={`flex-1 px-3 py-2 rounded-xl text-xs font-bold border transition ${
-                            mlForm.language === lang
-                              ? 'bg-primary-50 border-primary-500 text-primary-700 dark:bg-primary-950/40 dark:border-primary-400 dark:text-primary-300'
-                              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-400'
-                          }`}
-                        >
-                          {lang === 'English' ? '🇬🇧 English' : '🇩🇪 Deutsch'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <button
-                    type="button"
-                    disabled={mlLoading}
-                    onClick={handleGenerateML}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-700 text-white text-sm font-bold hover:bg-slate-800 transition disabled:opacity-50"
-                  >
-                    {mlLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      mlResult ? <RotateCcw className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />
+                      <span className="px-5 py-2.5 rounded-full border border-dashed border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-400">
+                        {t('setup.emptyPos')}
+                      </span>
                     )}
-                    {mlLoading ? t('setup.mlGenerating') : (mlResult ? t('setup.mlBtnNew') : t('setup.mlBtn'))}
-                  </button>
-
-                  <div className="relative group">
-                    <textarea
-                      readOnly
-                      value={mlResult}
-                      placeholder={t('setup.mlPlaceholder')}
-                      className={`w-full p-4 rounded-2xl border bg-white/50 dark:bg-slate-900/50 text-sm leading-relaxed focus:outline-none transition resize-y overflow-auto ${
-                        mlResult ? 'min-h-[400px] border-primary-200 dark:border-primary-800/50' : 'min-h-[160px] border-slate-200 dark:border-slate-700'
-                      }`}
-                    />
-                    {mlResult && (
-                      <button
-                        type="button"
-                        onClick={handleCopyML}
-                        className="absolute top-3 right-3 p-2 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-primary-50 dark:hover:bg-primary-950 transition-all text-slate-600 dark:text-slate-400"
-                        title={t('setup.mlCopy')}
-                      >
-                        {mlCopied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
-                        {mlCopied && <span className="absolute -top-8 right-0 text-[10px] font-bold bg-emerald-600 text-white px-1.5 py-0.5 rounded">{t('setup.mlCopied')}</span>}
-                      </button>
-                    )}
+                    <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm">
+                      {form.language}
+                    </span>
+                    <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm">
+                      {form.duration} {t('setup.minSuffix')}
+                    </span>
                   </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn-setup-action w-full py-6 text-xl"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto text-white dark:text-slate-900" />
+                    ) : (
+                      <>
+                        {t('setup.submit')}
+                        <ArrowRight className="h-6 w-6 ml-4 group-hover:translate-x-2 transition-transform" />
+                      </>
+                    )}
+                  </button>
                 </div>
-              </div>
+              </form>
             </div>
-
-            <div className="space-y-6">
-              <p className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                {t('setup.sectionMeta')}
-              </p>
-            <div>
-              <label className="mb-3 flex items-center gap-2 text-sm font-bold tracking-tight text-slate-800 dark:text-slate-200">
-                <Globe2 className="h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400" aria-hidden />
-                {t('setup.interviewLang')}
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                {languages.map((lang) => (
-                  <button
-                    key={lang.value}
-                    type="button"
-                    onClick={() => setForm({ ...form, language: lang.value })}
-                    className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all duration-300 text-left shadow-soft ${
-                      form.language === lang.value
-                        ? 'border-primary-500 bg-primary-50/90 ring-2 ring-primary-500/20 dark:border-primary-400 dark:bg-primary-900/40 dark:ring-primary-500/30'
-                        : 'border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/80 ring-1 ring-transparent hover:ring-slate-100 dark:border-slate-600 dark:hover:border-slate-500 dark:hover:bg-slate-800/50'
-                    }`}
-                  >
-                    <span className="text-2xl">{lang.flag}</span>
-                    <div>
-                      <div className={`font-semibold text-sm ${form.language === lang.value ? 'text-primary-700 dark:text-primary-300' : 'text-slate-700 dark:text-slate-300'}`}>
-                        {lang.label}
-                      </div>
-                      <div className="text-xs text-slate-400 dark:text-slate-500">{lang.desc}</div>
-                    </div>
-                    {form.language === lang.value ? (
-                      <div className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-600 to-violet-600 text-white shadow-md">
-                        <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden />
-                      </div>
-                    ) : null}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-3 flex items-center gap-2 text-sm font-bold tracking-tight text-slate-800 dark:text-slate-200">
-                <Clock className="h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400" aria-hidden />
-                {t('setup.duration')}
-              </label>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {durations.map((dur) => (
-                  <button
-                    key={dur.value}
-                    type="button"
-                    onClick={() => setForm({ ...form, duration: dur.value })}
-                    className={`flex flex-col items-center rounded-2xl border-2 p-3.5 shadow-soft transition-all duration-300 sm:p-4 ${
-                      form.duration === dur.value
-                        ? 'border-primary-500 bg-primary-50/90 text-primary-700 ring-2 ring-primary-500/15 dark:border-primary-400 dark:bg-primary-900/40 dark:text-primary-100'
-                        : 'border-slate-200/90 text-slate-600 hover:border-slate-300 hover:bg-slate-50/80 dark:border-slate-600 dark:text-slate-400 dark:hover:bg-slate-800/50'
-                    }`}
-                  >
-                    <span className="text-sm font-black">{dur.label}</span>
-                    <span className="mt-1 text-xs text-slate-400 dark:text-slate-500">{dur.desc}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-slate-50 to-white p-5 shadow-inner ring-1 ring-slate-900/[0.03] dark:border-slate-600 dark:from-slate-800/80 dark:to-slate-900/60 dark:ring-white/[0.05] sm:p-6">
-              <p className="mb-3 text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('setup.summary')}</p>
-              <div className="flex flex-wrap gap-2">
-                {form.position ? (
-                  <span className="rounded-xl border border-slate-200/90 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
-                    🏢 {form.position}
-                  </span>
-                ) : (
-                  <span className="rounded-xl border border-dashed border-slate-200/90 bg-white/60 px-3 py-2 text-xs font-medium text-slate-400 dark:border-slate-600 dark:bg-slate-800/40 dark:text-slate-500">
-                    🏢 {t('setup.emptyPos')}
-                  </span>
-                )}
-                <span className="rounded-xl border border-slate-200/90 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
-                  🌐 {form.language}
-                </span>
-                <span className="rounded-xl border border-slate-200/90 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
-                  ⏱️ {form.duration} {t('setup.minSuffix')}
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-primary-600 px-6 py-4 text-base font-bold text-white shadow-lg transition hover:from-violet-700 hover:to-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin text-white" aria-hidden />
-                  {t('setup.submitting')}
-                </>
-              ) : (
-                <>
-                  {t('setup.submit')}
-                  <ArrowRight className="h-5 w-5 shrink-0" aria-hidden />
-                </>
-              )}
-            </button>
-          </form>
-            </div>
-          </div>
-
-          <p className="mx-auto mt-8 max-w-2xl text-center text-xs leading-relaxed text-slate-500 dark:text-slate-500 sm:text-sm">
-            {t('setup.footerTip')}
-          </p>
+          </main>
         </div>
+
+        <p className="mx-auto mt-12 max-w-2xl text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 leading-relaxed">
+          {t('setup.footerTip')}
+        </p>
       </div>
     </div>
   )

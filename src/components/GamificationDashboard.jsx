@@ -3,39 +3,47 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { 
   Trophy, Target, Flame, Sparkles, Shield, 
-  ChevronRight, Lock, CheckCircle2, Zap 
+  ChevronRight, Lock, CheckCircle2, Zap,
+  Briefcase, Globe2
 } from 'lucide-react'
 import CheckInModal from './CheckInModal'
 
 // Radar Dimensions definitions
 const DIMENSIONS = [
-  { key: 'resume', label: 'game.radarResume', icon: Target },
-  { key: 'experience', label: 'game.radarExperience', icon: Trophy },
-  { key: 'language', label: 'game.radarLanguage', icon: Zap },
-  { key: 'softSkills', label: 'game.radarSoftSkills', icon: Shield },
+  { key: 'resume', label: 'profile.game.radarResume', icon: Target },
+  { key: 'experience', label: 'profile.game.radarExperience', icon: Trophy },
+  { key: 'language', label: 'profile.game.radarLanguage', icon: Zap },
+  { key: 'softSkills', label: 'profile.game.radarSoftSkills', icon: Shield },
+  { key: 'portfolio', label: 'profile.game.radarPortfolio', icon: Briefcase },
+  { key: 'networking', label: 'profile.game.radarNetworking', icon: Globe2 },
 ]
 
 const LVL_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-
-const RADAR_SIZE = 240
+const RADAR_SIZE = 400
 const CENTER = RADAR_SIZE / 2
-const RADIUS = 80
+const RADIUS = 140
 
 /**
  * Premium Gamification Dashboard
- * Visualizes level progress and a 4-dimension radar chart.
+ * Visualizes level progress and a multi-dimension radar chart.
  */
-export default function GamificationDashboard({ stats, onCheckIn, interviews }) {
+export default function GamificationDashboard({ stats, onCheckIn, interviews, viewMode }) {
   const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState('radar')
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Calculate Radar polygon points
   const points = useMemo(() => {
-    if (!stats?.radar) return ""
+    // Merge real stats with some placeholders for the 2 new dimensions
+    const mockRadar = { 
+      ...stats?.radar, 
+      portfolio: stats?.radar?.resume || 5, 
+      networking: stats?.radar?.softSkills || 4 
+    }
+    
     return DIMENSIONS.map((d, i) => {
       const angle = (Math.PI * 2 / DIMENSIONS.length) * i - Math.PI / 2
-      const value = stats.radar[d.key] || 0
+      const value = mockRadar[d.key] || 0
       const length = (value / 10) * RADIUS
       const x = CENTER + length * Math.cos(angle)
       const y = CENTER + length * Math.sin(angle)
@@ -55,86 +63,166 @@ export default function GamificationDashboard({ stats, onCheckIn, interviews }) 
 
   const currentLvl = stats?.level || 1
   const streak = stats?.streak || 0
-  const nextQuest = stats?.nextLevelQuest || "Keep practice!"
-
-  return (
-    <div className="mb-10 grid grid-cols-1 gap-6 lg:grid-cols-12">
-      {/* Left Panel: Radar & Stats */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-xl ring-1 ring-slate-900/[0.05] dark:border-slate-700/80 dark:bg-slate-900/60 dark:ring-white/[0.05] lg:col-span-4">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-primary-100 text-primary-600 dark:bg-primary-900/40 dark:text-primary-400">
+  
+  const radarPanel = (
+    <div className={`p-8 flex flex-col items-center justify-center ${viewMode === 'radarOnly' ? '' : 'bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800'}`}>
+      {!viewMode && (
+        <div className="flex items-center justify-between w-full mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400">
               <Target className="w-5 h-5" />
             </div>
-            <h3 className="font-black text-slate-800 dark:text-white uppercase tracking-wider text-sm">{t('profile.game.radarTitle')}</h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">{t('profile.game.radarTitle')}</h3>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400 font-bold text-xs ring-1 ring-orange-200 dark:ring-orange-800">
-            <Flame className="w-3.5 h-3.5" />
-            {streak} {t('profile.game.streak')}
+          <div className="flex items-center gap-2 px-3 py-1 bg-slate-50 dark:bg-slate-800 rounded-full border border-slate-100 dark:border-slate-700">
+            <Flame className="w-4 h-4 text-orange-500" />
+            <span className="text-sm font-bold text-slate-900 dark:text-white tabular-nums">{stats?.streak || 0}</span>
           </div>
         </div>
+      )}
 
-        {/* Radar Chart Display */}
-        <div className="flex flex-col items-center justify-center py-4">
-          <div className="relative">
-            <svg width={RADAR_SIZE} height={RADAR_SIZE} className="drop-shadow-sm">
-              {/* Radial Grids */}
-              {grids.map((g, i) => (
-                <polygon key={i} points={g} fill="none" stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeWidth="1" />
-              ))}
-              {/* Axis lines */}
-              {DIMENSIONS.map((_, i) => {
-                const angle = (Math.PI * 2 / DIMENSIONS.length) * i - Math.PI / 2
-                const x2 = CENTER + RADIUS * Math.cos(angle)
-                const y2 = CENTER + RADIUS * Math.sin(angle)
-                return <line key={i} x1={CENTER} y1={CENTER} x2={x2} y2={y2} stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeWidth="1" strokeDasharray="2,2" />
-              })}
-              {/* Data Polygon */}
-              <motion.polygon 
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                points={points} 
-                fill="rgba(99, 102, 241, 0.25)" 
-                stroke="#6366f1" 
-                strokeWidth="3" 
-                className="transition-all duration-700 ease-out"
+      <div className="relative">
+        <svg width={RADAR_SIZE} height={RADAR_SIZE} className="overflow-visible">
+          <defs>
+            <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#f97316" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#6366f1" stopOpacity="0.3" />
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          
+          {/* Circular Grids for a more 'premium' feel */}
+          {[0.2, 0.4, 0.6, 0.8, 1].map((scale, i) => (
+            <circle 
+              key={i} 
+              cx={CENTER} 
+              cy={CENTER} 
+              r={RADIUS * scale} 
+              fill="none" 
+              stroke="currentColor" 
+              className="text-slate-100 dark:text-slate-800" 
+              strokeWidth="1" 
+            />
+          ))}
+          
+          {/* Axis lines (Guides) */}
+          {DIMENSIONS.map((_, i) => {
+            const angle = (Math.PI * 2 / DIMENSIONS.length) * i - Math.PI / 2
+            const x2 = CENTER + RADIUS * Math.cos(angle)
+            const y2 = CENTER + RADIUS * Math.sin(angle)
+            return (
+              <line 
+                key={i} 
+                x1={CENTER} 
+                y1={CENTER} 
+                x2={x2} 
+                y2={y2} 
+                stroke="currentColor" 
+                className="text-slate-100 dark:text-slate-800" 
+                strokeWidth="1" 
+                strokeDasharray="4,4" 
               />
-              {/* dimension points */}
-              {points.split(" ").map((p, i) => {
-                if (!p) return null
-                const parts = p.split(",")
-                if (parts.length < 2) return null
-                const [x, y] = parts
-                return <circle key={i} cx={x} cy={y} r="4" fill="white" stroke="#6366f1" strokeWidth="2" />
-              })}
-            </svg>
+            )
+          })}
 
-            {/* Labels */}
-            {DIMENSIONS.map((d, i) => {
-              const angle = (Math.PI * 2 / DIMENSIONS.length) * i - Math.PI / 2
-              const r = RADIUS + 25
-              const x = CENTER + r * Math.cos(angle)
-              const y = CENTER + r * Math.sin(angle)
-              return (
-                <div key={i} className="absolute text-[10px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap transform -translate-x-1/2 -translate-y-1/2" style={{ left: x, top: y }}>
-                  {t(`profile.${d.label}`)}
-                  <div className="text-primary-600 dark:text-primary-400 text-center">{stats?.radar?.[d.key] || 0}</div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
+          {/* Value Polygon */}
+          <motion.polygon 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+            points={points} 
+            fill="url(#radarGradient)"
+            stroke="currentColor" 
+            className="text-primary-500 transition-all duration-1000 ease-out"
+            strokeWidth="2.5" 
+            strokeLinejoin="round"
+            filter="url(#glow)"
+          />
 
+          {/* Intersection Points */}
+          {DIMENSIONS.map((d, i) => {
+            const mockRadar = { 
+              ...stats?.radar, 
+              portfolio: stats?.radar?.resume || 5, 
+              networking: stats?.radar?.softSkills || 4 
+            }
+            const angle = (Math.PI * 2 / DIMENSIONS.length) * i - Math.PI / 2
+            const value = mockRadar[d.key] || 0
+            const length = (value / 10) * RADIUS
+            const x = CENTER + length * Math.cos(angle)
+            const y = CENTER + length * Math.sin(angle)
+            return (
+              <circle 
+                key={i} 
+                cx={x} 
+                cy={y} 
+                r="4.5" 
+                className="fill-white dark:fill-slate-900 stroke-primary-500 stroke-[2.5px]" 
+              />
+            )
+          })}
+        </svg>
+
+        {/* Labels with enhanced styling */}
+        {DIMENSIONS.map((d, i) => {
+          const mockRadar = { 
+            ...stats?.radar, 
+            portfolio: stats?.radar?.resume || 5, 
+            networking: stats?.radar?.softSkills || 4 
+          }
+          const angle = (Math.PI * 2 / DIMENSIONS.length) * i - Math.PI / 2
+          const r = RADIUS + 55
+          const x = CENTER + r * Math.cos(angle)
+          const y = CENTER + r * Math.sin(angle)
+          const val = (mockRadar[d.key] || 0) * 10
+          
+          return (
+            <motion.div 
+              key={i} 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 + i * 0.1 }}
+              className="absolute transform -translate-x-1/2 -translate-y-1/2 text-center" 
+              style={{ left: x, top: y }}
+            >
+              <div className="text-[11px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest mb-1.5 whitespace-nowrap drop-shadow-sm">
+                {t(d.label)}
+              </div>
+              <div className="inline-flex h-6 flex-nowrap items-center px-2.5 rounded-full bg-slate-900/5 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 text-[11px] font-black text-primary-600 dark:text-primary-400 backdrop-blur-sm">
+                <span className="tabular-nums">{val}%</span>
+              </div>
+            </motion.div>
+          )
+        })}
+      </div>
+
+      {!viewMode && (
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="mt-4 w-full group relative overflow-hidden rounded-xl bg-gradient-to-r from-primary-600 to-violet-600 p-[1px] shadow-lg transition-all hover:shadow-primary-500/25"
+          className="w-full mt-12 btn-setup-action-pill px-6 py-4"
         >
-          <div className="relative flex items-center justify-center gap-2 rounded-xl bg-white/95 px-4 py-3 text-sm font-bold text-primary-700 transition-all group-hover:bg-transparent group-hover:text-white dark:bg-slate-900/90 dark:text-primary-300 dark:group-hover:bg-transparent">
-            <Sparkles className="w-4 h-4" />
-            {stats?.alreadyCheckedIn ? t('profile.game.checkInDoneBtn') : t('profile.game.checkInBtn')}
-          </div>
+          <Sparkles className="w-4 h-4 mr-2" />
+          {stats?.alreadyCheckedIn ? t('profile.game.checkInDoneBtn') : t('profile.game.checkInBtn')}
         </button>
+      )}
+    </div>
+  )
+
+  if (viewMode === 'radarOnly') return radarPanel
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      {/* Radar Panel */}
+      <div className="lg:col-span-4 self-start">
+        {radarPanel}
       </div>
+
 
       {/* Check-in Modal */}
       <CheckInModal 
@@ -145,49 +233,35 @@ export default function GamificationDashboard({ stats, onCheckIn, interviews }) 
         onCheckIn={onCheckIn}
       />
 
-      {/* Right Panel: Level Track & Quest */}
-      <div className="lg:col-span-8 flex flex-col gap-6">
-        {/* Level Track Area */}
-        <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl ring-1 ring-slate-900/[0.05] dark:border-slate-700/80 dark:bg-slate-900/70 dark:ring-white/[0.05]">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="font-black text-slate-800 dark:text-white uppercase tracking-wider text-sm flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-500" />
+      {/* Progress & Quests Panel */}
+      <div className="lg:col-span-8 space-y-8">
+        <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 p-8">
+          <div className="flex items-center justify-between mb-10">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
+              <Zap className="w-4 h-4 text-slate-400" />
               {t('profile.game.lvlMap')}
             </h3>
-            <span className="text-xs font-bold text-slate-400">{t('profile.game.curLvl')}: Lvl {currentLvl}</span>
+            <span className="text-xs font-bold text-slate-400 uppercase">Lvl {currentLvl}</span>
           </div>
 
-          <div className="relative flex gap-4 overflow-x-auto pb-6 scrollbar-hide snap-x">
+          <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x">
             {LVL_IDS.map((lvl) => {
               const isDone = lvl < currentLvl
               const isActive = lvl === currentLvl
-              const isLocked = lvl > currentLvl
-
               return (
-                <div key={lvl} className="relative flex flex-col items-center min-w-[100px] snap-center">
-                  {/* Connector Line */}
-                  {lvl < 10 && (
-                    <div className={`absolute top-6 left-[60%] w-[80%] h-0.5 ${isDone ? 'bg-primary-500' : 'bg-slate-200 dark:bg-slate-800'}`} />
-                  )}
-                  
-                  {/* Level Node */}
+                <div key={lvl} className="flex flex-col items-center min-w-[100px] snap-center space-y-4">
                   <motion.div 
-                    whileHover={{ scale: 1.1 }}
-                    className={`relative z-10 flex h-12 w-12 items-center justify-center rounded-2xl shadow-md ring-2 ring-white dark:ring-slate-900 ${
-                      isActive ? 'bg-gradient-to-br from-primary-500 to-violet-600 text-white shadow-primary-500/30' : 
-                      isDone ? 'bg-emerald-500 text-white' : 
-                      'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600'
+                    whileHover={{ scale: 1.05 }}
+                    className={`relative w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
+                      isActive ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xl' : 
+                      isDone ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white' : 
+                      'bg-slate-50 dark:bg-slate-900/50 text-slate-200 dark:text-slate-700 border border-slate-100 dark:border-slate-800'
                     }`}
                   >
-                    {isDone ? <CheckCircle2 className="w-5 h-5 text-white" /> : 
-                     isLocked ? <Lock className="w-4 h-4" /> : 
-                     <span className="font-black text-lg">{lvl}</span>}
+                    {isDone ? <CheckCircle2 className="w-6 h-6" /> : <span className="text-lg font-black">{lvl}</span>}
                   </motion.div>
-                  
-                  <span className={`mt-3 text-[10px] font-black uppercase text-center leading-tight ${
-                    isActive ? 'text-primary-600 dark:text-primary-400' : 
-                    isDone ? 'text-emerald-600 dark:text-emerald-400' : 
-                    'text-slate-400 dark:text-slate-600'
+                  <span className={`text-[10px] font-bold uppercase tracking-tighter text-center max-w-[80px] leading-tight ${
+                    isActive ? 'text-slate-900 dark:text-white' : 'text-slate-400'
                   }`}>
                     {t(`profile.game.lvls.${lvl}`)}
                   </span>
@@ -197,27 +271,21 @@ export default function GamificationDashboard({ stats, onCheckIn, interviews }) 
           </div>
         </div>
 
-        {/* Current Quest Card */}
-        <div className="group relative overflow-hidden rounded-3xl border border-primary-200/50 bg-gradient-to-r from-primary-50 to-indigo-50 p-6 shadow-md dark:border-primary-900/30 dark:from-primary-900/20 dark:to-indigo-950/20">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <Target className="w-24 h-24 text-primary-500" />
+        <div className="group bg-slate-50 dark:bg-slate-900 p-8 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-8 border border-slate-100 dark:border-slate-800 transition-colors hover:border-blue-500/30">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-xs font-black text-blue-500 uppercase tracking-widest">
+              <Sparkles className="w-4 h-4" />
+              {t('profile.game.nextQuest')}
+            </div>
+            <h4 className="text-2xl font-black text-slate-900 dark:text-white font-serif tracking-tight">
+              {t('profile.game.nextLvChallenge', { lvl: currentLvl + 1 })}
+            </h4>
+            <p className="text-slate-500 dark:text-slate-400 font-medium">
+              {stats?.nextLevelQuest ? t(`profile.game.quests.${stats.nextLevelQuest}`) : 'Keep practice!'}
+            </p>
           </div>
-          <div className="relative flex flex-col md:flex-row items-center gap-6">
-            <div className="flex-1">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-100 px-2.5 py-1 text-xs font-bold text-primary-700 dark:bg-primary-900/60 dark:text-primary-300">
-                <Sparkles className="w-3.5 h-3.5" />
-                {t('profile.game.nextQuest')}
-              </span>
-              <h4 className="mt-3 text-xl font-black text-slate-800 dark:text-white">
-                {t('profile.game.nextLvChallenge', { lvl: currentLvl + 1 })}
-              </h4>
-              <p className="mt-2 text-slate-600 dark:text-slate-400 font-medium">
-                {stats?.nextLevelQuest ? t(`profile.game.quests.${stats.nextLevelQuest}`) : 'Keep practice!'}
-              </p>
-            </div>
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white shadow-lg dark:bg-slate-800">
-               <ChevronRight className="w-6 h-6 text-primary-600 group-hover:translate-x-1 transition-transform" />
-            </div>
+          <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-brand-500 group-hover:-translate-y-1 transition-all">
+            <ChevronRight className="w-6 h-6" />
           </div>
         </div>
       </div>

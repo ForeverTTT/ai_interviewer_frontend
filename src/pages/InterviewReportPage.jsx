@@ -6,7 +6,9 @@ import { getBackendBaseUrl } from '../lib/backendBase'
 import {
   ArrowLeft, Briefcase, Globe2, Clock, FileText, Loader2, RefreshCw,
   Sparkles, ListChecks, Target, MessageSquareQuote, GitCompare,
+  User, CheckCircle2, AlertTriangle, Lightbulb, Zap, ArrowRight,
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 function normalizeUiCode(code) {
   const c = String(code || '').toLowerCase()
@@ -75,7 +77,7 @@ function RichText({ text, className, strongClassName }) {
   if (!text) return null
   const parts = String(text).split(/(\*\*[^*\n]+\*\*)/g)
   if (parts.length === 1) return <span className={className}>{text}</span>
-  const strongCls = strongClassName || 'font-semibold text-slate-900 dark:text-white'
+  const strongCls = strongClassName || 'font-black text-primary-600 dark:text-primary-400'
   return (
     <span className={className}>
       {parts.map((part, i) => {
@@ -325,186 +327,208 @@ function StructuredReportBody({ report, t }) {
     : []
 
   return (
-    <div className="space-y-12">
-      {qaReview.length > 0 && (
-        <section>
-          <div className="mb-5 flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white shadow-md">
-              <GitCompare className="w-5 h-5" aria-hidden />
-            </span>
-            <div>
-              <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
-                {t('report.sectionQaCompare')}
+    <div className="space-y-16">
+      {/* Bento Grid for Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Core Summary */}
+        {summary.length > 0 && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="lg:col-span-12 p-8 rounded-[2rem] border border-primary-100/50 dark:border-primary-900/20 bg-gradient-to-br from-white to-primary-50/50 dark:from-slate-900 dark:to-primary-950/20 shadow-sm space-y-8"
+          >
+            <div className="flex items-center gap-4 text-primary-600 dark:text-primary-400">
+              <div className="p-3 rounded-2xl bg-primary-100 dark:bg-primary-900/30">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <h2 className="text-[10px] font-black uppercase tracking-[0.2em]">
+                {t('report.sectionSummary')}
               </h2>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl">
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {summary.map((s, i) => (
+                <div key={i} className="group relative p-8 rounded-[2rem] bg-indigo-50/30 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/20 transition-all hover:border-indigo-300 dark:hover:border-indigo-700">
+                  <div className="absolute top-6 right-8 text-[40px] font-black text-indigo-500/10 group-hover:text-indigo-500/20 transition-colors leading-none tabular-nums">
+                    {String(i + 1).padStart(2, '0')}
+                  </div>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200 leading-relaxed relative z-10">
+                    <RichText text={s} />
+                  </p>
+                </div>
+              ))}
+            </div>
+          </motion.section>
+        )}
+
+        {/* Strengths & Improvements */}
+        <div className="lg:col-span-12 grid md:grid-cols-2 gap-6">
+          {strengths.length > 0 && (
+            <motion.section
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="p-8 rounded-[2rem] border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/20 dark:bg-emerald-950/10 space-y-8"
+            >
+              <div className="flex items-center gap-4 text-emerald-600 dark:text-emerald-400">
+                <div className="p-3 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30">
+                  <ListChecks className="w-6 h-6" />
+                </div>
+                <h2 className="text-2xl font-black font-serif tracking-tight uppercase tracking-widest text-xs">
+                  {t('report.sectionStrengths')}
+                </h2>
+              </div>
+              <ul className="space-y-4">
+                {strengths.map((s, i) => (
+                  <li key={i} className="flex gap-4 p-4 rounded-xl bg-white/60 dark:bg-slate-900/40 border border-emerald-50 dark:border-emerald-900/20 text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                    <RichText text={s} />
+                  </li>
+                ))}
+              </ul>
+            </motion.section>
+          )}
+
+          {toImprove.length > 0 && (
+            <motion.section
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="p-8 rounded-[2rem] border border-amber-100 dark:border-amber-900/30 bg-amber-50/20 dark:bg-amber-950/10 space-y-8"
+            >
+              <div className="flex items-center gap-4 text-amber-600 dark:text-amber-400">
+                <div className="p-3 rounded-2xl bg-amber-100 dark:bg-amber-900/30">
+                  <Target className="w-6 h-6" />
+                </div>
+                <h2 className="text-2xl font-black font-serif tracking-tight uppercase tracking-widest text-xs">
+                  {t('report.sectionImprove')}
+                </h2>
+              </div>
+              <div className="space-y-4">
+                {toImprove.map((item, i) => (
+                  <div key={i} className="p-5 rounded-2xl bg-white/60 dark:bg-slate-900/40 border border-amber-50 dark:border-amber-900/20 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/40 text-[10px] font-black text-amber-600">
+                        {i + 1}
+                      </span>
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{item.title}</p>
+                    </div>
+                    {item.how && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed pl-9 italic">
+                        <RichText text={item.how} />
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </motion.section>
+          )}
+        </div>
+      </div>
+
+      {/* Comparison View */}
+      {qaReview.length > 0 && (
+        <section className="space-y-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600">
+                  <GitCompare className="w-6 h-6" />
+                </div>
+                <h2 className="text-3xl font-black font-serif tracking-tight text-slate-900 dark:text-white">
+                  {t('report.sectionQaCompare')}
+                </h2>
+              </div>
+              <p className="text-slate-500 dark:text-slate-400 max-w-2xl font-medium leading-relaxed">
                 {t('report.sectionQaCompareSub')}
               </p>
             </div>
           </div>
-          <ol className="space-y-8 list-none m-0 p-0">
+
+          <div className="space-y-8">
             {qaReview.map((qa, i) => (
-              <li
+              <motion.div
                 key={i}
-                className="overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-50/40 shadow-sm dark:border-slate-600 dark:bg-slate-800/30"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="group relative bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden"
               >
-                <div className="border-b border-slate-200/80 bg-white/80 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/60">
-                  <span className="text-xs font-black text-primary-600 dark:text-primary-400 tabular-nums">
-                    {t('report.qaRound', { n: i + 1 })}
-                  </span>
-                  <h3 className="mt-1 text-[15px] font-bold text-slate-900 dark:text-white leading-snug">
-                    {qa.questionSummary || t('report.qaQuestionFallback')}
-                  </h3>
+                <div className="bg-slate-50 dark:bg-slate-800/50 px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <span className="px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-[10px] font-black text-indigo-600 uppercase tracking-widest">
+                      {t('report.qaRound', { n: i + 1 })}
+                    </span>
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white font-serif">
+                      {qa.questionSummary || t('report.qaQuestionFallback')}
+                    </h3>
+                  </div>
                 </div>
-                <div className="grid gap-0 lg:grid-cols-2 lg:divide-x lg:divide-slate-200/80 dark:lg:divide-slate-700">
-                  <div className="p-4 sm:p-5 border-b border-slate-200/70 lg:border-b-0 dark:border-slate-700">
-                    <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-primary-700 dark:text-primary-400">
+
+                <div className="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-100 dark:divide-slate-800">
+                  {/* User Answer */}
+                  <div className="p-8 space-y-4">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <User className="w-3 h-3" />
                       {t('report.yourAnswerLabel')}
                     </div>
-                    <p className="text-[15px] leading-relaxed text-slate-800 dark:text-slate-100 whitespace-pre-wrap">
-                      <RichText text={qa.yourAnswerSummary || '—'} />
-                    </p>
+                    <div className="p-6 rounded-2xl bg-indigo-50/30 dark:bg-indigo-950/10 border border-indigo-50/50 dark:border-indigo-900/20">
+                      <p className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-300 font-medium whitespace-pre-wrap">
+                        <RichText text={qa.yourAnswerSummary || '—'} />
+                      </p>
+                    </div>
                   </div>
-                  <div className="p-4 sm:p-5 bg-white/50 dark:bg-slate-900/40">
-                    <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-emerald-800 dark:text-emerald-400">
+
+                  {/* Reference Answer */}
+                  <div className="p-8 space-y-4 bg-emerald-50/[0.02] dark:bg-emerald-950/[0.02]">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-600/60">
+                      <CheckCircle2 className="w-3 h-3" />
                       {t('report.referenceExampleLabel')}
                     </div>
-                    <p className="text-[15px] leading-relaxed text-slate-800 dark:text-slate-100 whitespace-pre-wrap">
-                      <RichText
-                        text={qa.referenceExample || '—'}
-                        strongClassName="font-bold text-slate-950 dark:text-white"
-                      />
-                    </p>
+                    <div className="p-6 rounded-2xl bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-50/50 dark:border-emerald-900/20">
+                      <p className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-300 font-medium whitespace-pre-wrap italic">
+                        <RichText text={qa.referenceExample || '—'} />
+                      </p>
+                    </div>
                   </div>
                 </div>
+
                 {(qa.gaps.length > 0 || qa.howToImprove) && (
-                  <div className="border-t border-amber-200/60 bg-amber-50/40 px-4 py-4 dark:border-amber-900/35 dark:bg-amber-950/15 sm:px-5">
-                    {qa.gaps.length > 0 ? (
-                      <>
-                        <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-amber-900 dark:text-amber-400">
-                          {t('report.gapsLabel')}
+                  <div className="p-8 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800">
+                    <div className="grid md:grid-cols-2 gap-8">
+                      {qa.gaps.length > 0 && (
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            {t('report.gapsLabel')}
+                          </label>
+                          <ul className="space-y-2">
+                            {qa.gaps.map((g, j) => (
+                              <li key={j} className="flex gap-3 text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                                <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                                <RichText text={g} />
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                        <ul className="mb-3 space-y-2">
-                          {qa.gaps.map((g, j) => (
-                            <li key={j} className="flex gap-2 text-[14px] leading-relaxed text-slate-800 dark:text-slate-200">
-                              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" aria-hidden />
-                              <RichText
-                                text={g}
-                                strongClassName="font-bold text-slate-950 dark:text-white"
-                              />
-                            </li>
-                          ))}
-                        </ul>
-                      </>
-                    ) : null}
-                    {qa.howToImprove ? (
-                      <p className="text-[14px] leading-relaxed text-slate-800 dark:text-slate-200">
-                        <span className="font-bold text-amber-900 dark:text-amber-300">{t('report.improveTipLabel')}</span>
-                        <RichText
-                          text={qa.howToImprove}
-                          strongClassName="font-bold text-slate-950 dark:text-white"
-                        />
-                      </p>
-                    ) : null}
+                      )}
+                      {qa.howToImprove && (
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            {t('report.improveTipLabel')}
+                          </label>
+                          <div className="flex gap-4 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm">
+                            <Lightbulb className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-bold">
+                              <RichText text={qa.howToImprove} />
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
-
-      {summary.length > 0 && (
-        <section className="relative">
-          <div className="flex items-center gap-3 mb-5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-violet-600 text-white shadow-md">
-              <Sparkles className="w-5 h-5" aria-hidden />
-            </span>
-            <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
-              {t('report.sectionSummary')}
-            </h2>
-          </div>
-          <div className="space-y-3">
-            {summary.map((p, i) => (
-              <div
-                key={i}
-                className="rounded-xl border border-slate-200/90 bg-slate-50/80 px-4 py-3.5 text-[15px] leading-relaxed text-slate-800 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-100"
-              >
-                <span className="mr-2 inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-md bg-primary-600/10 text-xs font-black text-primary-700 dark:bg-primary-500/20 dark:text-primary-300">
-                  {i + 1}
-                </span>
-                <RichText text={p} />
-              </div>
+              </motion.div>
             ))}
           </div>
-        </section>
-      )}
-
-      {strengths.length > 0 && (
-        <section>
-          <div className="flex items-center gap-3 mb-5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md">
-              <ListChecks className="w-5 h-5" aria-hidden />
-            </span>
-            <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
-              {t('report.sectionStrengths')}
-            </h2>
-          </div>
-          <ul className="space-y-3">
-            {strengths.map((s, i) => (
-              <li
-                key={i}
-                className="flex gap-3 rounded-xl border border-emerald-200/60 bg-emerald-50/40 px-4 py-3 text-[15px] leading-relaxed text-slate-800 dark:border-emerald-900/35 dark:bg-emerald-950/20 dark:text-slate-100"
-              >
-                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500 shadow-sm" aria-hidden />
-                <RichText text={s} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {toImprove.length > 0 && (
-        <section>
-          <div className="flex items-center gap-3 mb-5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md">
-              <Target className="w-5 h-5" aria-hidden />
-            </span>
-            <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
-              {t('report.sectionImprove')}
-            </h2>
-          </div>
-          <ol className="space-y-4 list-none m-0 p-0">
-            {toImprove.map((item, i) => (
-              <li
-                key={i}
-                className="relative overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50/50 to-white p-5 dark:border-amber-900/40 dark:from-amber-950/25 dark:to-slate-900/80"
-              >
-                <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-amber-500 to-orange-500" aria-hidden />
-                <div className="pl-3">
-                  <div className="mb-3 flex items-start gap-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-sm font-black text-white shadow-sm">
-                      {i + 1}
-                    </span>
-                    {item.title ? (
-                      <p className="pt-0.5 text-base font-bold text-slate-900 dark:text-white">{item.title}</p>
-                    ) : null}
-                  </div>
-                  {item.why ? (
-                    <p className="mb-2 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
-                      <span className="font-semibold text-amber-800/90 dark:text-amber-400">{t('report.whyLabel')}</span>
-                      <RichText text={item.why} />
-                    </p>
-                  ) : null}
-                  {item.how ? (
-                    <p className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
-                      <span className="font-semibold text-amber-800/90 dark:text-amber-400">{t('report.howLabel')}</span>
-                      <RichText text={item.how} />
-                    </p>
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ol>
         </section>
       )}
     </div>
@@ -681,73 +705,89 @@ export default function InterviewReportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-slate-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 pt-24 pb-20 px-4 sm:px-6">
-      <div className="max-w-4xl mx-auto">
-        <Link
-          to="/dashboard"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-primary-600 dark:text-primary-400 hover:underline mb-6"
+    <div className="min-h-screen bg-white dark:bg-slate-950 bg-dot-grid pt-32 pb-24 px-6 sm:px-10 lg:px-16">
+      <div className="mx-auto max-w-5xl space-y-12">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
         >
-          <ArrowLeft className="w-4 h-4" />
-          {t('report.backDashboard')}
-        </Link>
+          <Link
+            to="/dashboard"
+            className="group inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            {t('report.backDashboard')}
+          </Link>
+        </motion.div>
 
-        <article className="mb-8 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_24px_48px_-12px_rgba(15,23,42,0.12)] ring-1 ring-slate-900/[0.04] dark:border-slate-700 dark:bg-slate-900 dark:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.45)] dark:ring-white/[0.06]">
-          <div className="border-b border-slate-100 bg-gradient-to-br from-primary-50/90 via-white to-violet-50/40 px-6 py-6 sm:px-8 sm:py-8 dark:border-slate-800 dark:from-primary-950/30 dark:via-slate-900 dark:to-violet-950/20">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-600 to-violet-600 text-white shadow-lg shadow-primary-600/25">
-                <FileText className="w-7 h-7" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400">
-                  {t('report.docLabel')}
-                </p>
-                <h1 className="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                  {t('report.title')}
-                </h1>
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
+        <article className="space-y-16">
+          <motion.header
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-10"
+          >
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-slate-100 dark:border-slate-800">
+              <div className="space-y-6 max-w-2xl">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xl shadow-slate-900/10 transition-transform hover:rotate-3">
+                    <Zap className="w-8 h-8" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-md bg-primary-100 dark:bg-primary-950 text-[10px] font-black uppercase tracking-widest text-primary-600 dark:text-primary-400">
+                      {t('report.docLabel')}
+                    </div>
+                    <h1 className="text-4xl sm:text-5xl font-black font-serif tracking-tight text-slate-900 dark:text-white">
+                      {t('report.title')}
+                    </h1>
+                  </div>
+                </div>
+                <p className="text-lg text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                   {t('report.subtitle')}
                 </p>
-                <div className="mt-5 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-200">
-                    <Briefcase className="w-3.5 h-3.5 text-primary-500 shrink-0" />
-                    <span className="truncate max-w-[220px] sm:max-w-xs">{interview?.position}</span>
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-200">
-                    <Globe2 className="w-3.5 h-3.5 text-primary-500 shrink-0" />
-                    {interview?.language}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-200">
-                    <Clock className="w-3.5 h-3.5 text-primary-500 shrink-0" />
-                    {interview?.duration} {t('dashboard.durMin')}
-                  </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                  <Briefcase className="w-4 h-4 text-slate-400" />
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate max-w-[140px]">{interview?.position}</span>
+                </div>
+                <div className="px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                  <Globe2 className="w-4 h-4 text-slate-400" />
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{interview?.language}</span>
+                </div>
+                <div className="px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                  <Clock className="w-4 h-4 text-slate-400" />
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{interview?.duration} {t('dashboard.durMin')}</span>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.header>
 
-          <div className="px-6 py-8 sm:px-8 sm:py-10">
+          <div className="min-h-[400px]">
             {reportTranslating ? (
-              <div className="flex flex-col items-center justify-center gap-3 py-12">
-                <Loader2 className="h-7 w-7 animate-spin text-primary-600 dark:text-primary-400" aria-hidden />
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+              <div className="flex flex-col items-center justify-center gap-6 py-24">
+                <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                   {t('report.translating', { lang: t(`profile.langName.${normalizeUiCode(i18n.resolvedLanguage || i18n.language)}`) })}
                 </p>
               </div>
             ) : !hasAnyReport ? (
-              <div className="text-center py-6">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800">
-                  <FileText className="w-7 h-7 text-slate-400" />
+              <div className="text-center py-20 px-8 rounded-[3rem] border-2 border-dashed border-slate-100 dark:border-slate-800 space-y-8">
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[2rem] bg-slate-50 dark:bg-slate-900">
+                  <FileText className="w-10 h-10 text-slate-300" />
                 </div>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-2 max-w-md mx-auto">{t('report.noReport')}</p>
-                <p className="text-xs text-slate-500 mb-8 max-w-sm mx-auto">{t('report.retryHint')}</p>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black font-serif text-slate-900 dark:text-white">{t('report.noReport')}</h3>
+                  <p className="text-sm text-slate-500 max-w-sm mx-auto">{t('report.retryHint')}</p>
+                </div>
                 {transcript.length > 0 && (
                   <button
                     type="button"
                     disabled={retrying}
                     onClick={() => void finalizeReport()}
-                    className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-primary-600 text-white font-bold hover:bg-primary-700 disabled:opacity-50 shadow-md"
+                    className="btn-primary px-10 py-4 text-sm font-black uppercase tracking-widest group"
                   >
-                    {retrying ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                    {retrying ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />}
                     {retrying ? t('report.retrying') : t('report.retryGenerate')}
                   </button>
                 )}
@@ -755,17 +795,19 @@ export default function InterviewReportPage() {
             ) : hasStructuredReport ? (
               <StructuredReportBody report={parsedReport} t={t} />
             ) : (
-              <div className="space-y-10">
-                <div className="rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
+              <div className="space-y-16">
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
                   {t('report.legacyFormatHint')}
                 </div>
                 {sections.map((sec, i) => (
-                  <section key={`${sec.title}-${i}`}>
+                  <section key={`${sec.title}-${i}`} className="space-y-8">
                     {sec.title ? (
-                      <h2 className="mb-5 flex items-center gap-2 text-lg font-black text-slate-900 dark:text-white tracking-tight">
-                        <span className="h-8 w-1 rounded-full bg-gradient-to-b from-primary-500 to-violet-600" aria-hidden />
-                        {stripMdNoise(sec.title)}
-                      </h2>
+                      <div className="flex items-center gap-4">
+                        <div className="h-8 w-1.5 rounded-full bg-slate-900 dark:bg-white" />
+                        <h2 className="text-2xl font-black font-serif tracking-tight text-slate-900 dark:text-white">
+                          {stripMdNoise(sec.title)}
+                        </h2>
+                      </div>
                     ) : null}
                     <LegacySectionBody body={sec.body} t={t} />
                   </section>
@@ -774,93 +816,100 @@ export default function InterviewReportPage() {
             )}
 
             {!reportTranslating && transcript.length > 0 && (
-              <div className="mt-10 border-t border-slate-200/90 pt-10 dark:border-slate-800">
-                <div className="mb-5 flex items-center gap-3 border-b border-slate-100 pb-4 dark:border-slate-800">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
-                    <MessageSquareQuote className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+              <section className="mt-24 pt-24 border-t border-slate-100 dark:border-slate-800 space-y-12">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                      <MessageSquareQuote className="w-6 h-6" />
+                    </div>
+                    <h2 className="text-3xl font-black font-serif tracking-tight text-slate-900 dark:text-white">
+                      {t('report.transcriptTitle')}
+                    </h2>
                   </div>
-                  <div>
-                    <h2 className="text-lg font-black text-slate-900 dark:text-white">{t('report.transcriptTitle')}</h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{t('report.transcriptSub')}</p>
-                  </div>
+                  <p className="text-slate-500 dark:text-slate-400 max-w-xl font-medium">
+                    {t('report.transcriptSub')}
+                  </p>
                 </div>
-                <ol className="space-y-5 list-none m-0 p-0">
+
+                <div className="space-y-6">
                   {transcript.map((m, i) => {
                     const coach = lineReviewByIndex.get(i)
                     return (
-                      <li
+                      <div
                         key={i}
-                        className={`rounded-xl px-4 py-3.5 text-sm border transition-shadow hover:shadow-sm ${
+                        className={`group relative p-8 rounded-[2rem] border transition-all ${
                           m.role === 'assistant'
-                            ? 'bg-slate-50/90 dark:bg-slate-800/60 border-slate-200/80 dark:border-slate-700'
-                            : 'bg-primary-50/70 dark:bg-primary-950/25 border-primary-200/60 dark:border-primary-900/40 sm:ml-10'
+                            ? 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-sm'
+                            : 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 md:ml-20'
                         }`}
                       >
-                        <div className="flex flex-wrap items-baseline gap-2 mb-1.5">
-                          <span className="text-xs font-black text-primary-600 dark:text-primary-400 tabular-nums">
-                            {t('report.transcriptIndex', { n: i + 1 })}
+                        <div className="flex items-center gap-4 mb-4">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">
+                            {String(i + 1).padStart(2, '0')}
                           </span>
-                          <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                            {m.role === 'assistant' ? t('report.roleInterviewer') : t('report.roleCandidate')}
+                          <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${
+                            m.role === 'assistant' ? 'bg-slate-100 dark:bg-slate-800 text-slate-500' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-600'
+                          }`}>
+                            {m.role === 'assistant' ? t('dashboard.roleAssistant') : t('dashboard.roleUser')}
                           </span>
                         </div>
-                        <p className="text-slate-800 dark:text-slate-100 whitespace-pre-wrap leading-relaxed text-[15px]">{m.content}</p>
-                        {coach ? (
-                          <div className="mt-4 space-y-3 border-t border-slate-200/80 pt-4 dark:border-slate-600/80">
-                            {coach.parse ? (
-                              <div>
-                                <div className="mb-1 text-[11px] font-bold uppercase tracking-wide text-slate-600 dark:text-slate-400">
-                                  {t('report.lineParse')}
+                        <p className="text-sm font-medium leading-relaxed text-slate-700 dark:text-slate-300">
+                          {m.content}
+                        </p>
+
+                        {coach && (
+                          <div className="mt-8 p-6 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/10 border border-indigo-100/50 dark:border-indigo-900/20 space-y-6">
+                            <div className="flex items-center gap-3">
+                              <Sparkles className="w-4 h-4 text-indigo-500" />
+                              <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600">AI Feedback</span>
+                            </div>
+                            
+                            <div className="grid md:grid-cols-2 gap-8">
+                              {coach.parse && (
+                                <div className="space-y-2">
+                                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Analysis</label>
+                                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">
+                                    <RichText text={coach.parse} />
+                                  </p>
                                 </div>
-                                <p className="text-[14px] leading-relaxed text-slate-700 dark:text-slate-200 whitespace-pre-wrap">
-                                  <RichText
-                                    text={coach.parse}
-                                    strongClassName="font-bold text-slate-950 dark:text-white"
-                                  />
+                              )}
+                              {coach.improvements?.length > 0 && (
+                                <div className="space-y-3">
+                                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Points to Note</label>
+                                  <ul className="space-y-1.5">
+                                    {coach.improvements.map((g, j) => (
+                                      <li key={j} className="flex gap-2 text-xs text-indigo-900/70 dark:text-indigo-300/70 font-bold">
+                                        <ArrowRight className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                                        <RichText text={g} />
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {coach.modelAnswer && (
+                              <div className="pt-4 border-t border-indigo-100/50 dark:border-indigo-900/20 space-y-2">
+                                <label className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Better Expression</label>
+                                <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-bold">
+                                  <RichText text={coach.modelAnswer} />
                                 </p>
                               </div>
-                            ) : null}
-                            {coach.improvements.length > 0 ? (
-                              <div>
-                                <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-400">
-                                  {t('report.lineImprovements')}
-                                </div>
-                                <ul className="space-y-1.5">
-                                  {coach.improvements.map((g, j) => (
-                                    <li key={j} className="flex gap-2 text-[14px] leading-relaxed text-slate-700 dark:text-slate-200">
-                                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" aria-hidden />
-                                      <RichText
-                                        text={g}
-                                        strongClassName="font-bold text-slate-950 dark:text-white"
-                                      />
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            ) : null}
-                            {coach.modelAnswer ? (
-                              <div className="rounded-lg border border-emerald-200/70 bg-emerald-50/50 px-3 py-2.5 dark:border-emerald-900/40 dark:bg-emerald-950/20">
-                                <div className="mb-1 text-[11px] font-bold uppercase tracking-wide text-emerald-800 dark:text-emerald-400">
-                                  {t('report.lineModelAnswer')}
-                                </div>
-                                <p className="text-[14px] leading-relaxed text-slate-800 dark:text-slate-100 whitespace-pre-wrap">
-                                  <RichText
-                                    text={coach.modelAnswer}
-                                    strongClassName="font-bold text-slate-950 dark:text-white"
-                                  />
-                                </p>
-                              </div>
-                            ) : null}
+                            )}
                           </div>
-                        ) : null}
-                      </li>
+                        )}
+                      </div>
                     )
                   })}
-                </ol>
-              </div>
+                </div>
+              </section>
             )}
           </div>
         </article>
+
+        <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-300">
+          End of Interview Report
+        </p>
       </div>
     </div>
   )
