@@ -256,8 +256,17 @@ export default function SetupPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     const newErrors = validate()
+    
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
+      
+      // Auto-scroll to first error
+      const firstErrorKey = newErrors.position ? 'setup-position' : 'setup-job-desc'
+      const el = document.getElementById(firstErrorKey)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        el.focus()
+      }
       return
     }
 
@@ -341,12 +350,17 @@ export default function SetupPage() {
 
   const handleGenerateML = async () => {
     if (!form.position.trim() || !form.jobDescription.trim()) {
-      setErrors({
+      const e = {
         position: !form.position.trim() ? t('setup.errPos') : '',
         jobDescription: !form.jobDescription.trim() ? t('setup.errDesc') : '',
-      })
-      // Scroll to top to show errors if needed
-      window.scrollTo({ top: 300, behavior: 'smooth' })
+      }
+      setErrors(e)
+      
+      const el = document.getElementById(e.position ? 'setup-position' : 'setup-job-desc')
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        el.focus()
+      }
       return
     }
     setMlLoading(true)
