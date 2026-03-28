@@ -16,6 +16,7 @@
     "signOut": "退出登录",
     "profile": "个人资料",
     "gallup": "优势测试",
+    "experiences": "面经库",
     "chooseAvatar": "选择个人头像"
   },
   "footer": {
@@ -263,7 +264,15 @@
     "mlLength100": "100词 (精简)",
     "mlLength200": "200词 (标准)",
     "mlLength300": "300词 (深度)",
-    "mlPlaceholder": "点击上方按钮，AI 专家将为您撰写..."
+    "mlPlaceholder": "点击上方按钮，AI 专家将为您撰写...",
+    "historyTitle": "历史记录",
+    "historyEmpty": "暂无历史记录，完成一次面试后将自动保存",
+    "historyUse": "使用",
+    "historyDelete": "删除",
+    "historyClear": "清空全部",
+    "historyClearConfirm": "确定清空所有历史记录？",
+    "historyCount": "{{n}} 条记录",
+    "historyAgo": "{{t}}前"
   },
   "profile": {
     "title": "个人资料与简历",
@@ -767,6 +776,31 @@
     "saving": "保存中...",
     "show": "显示",
     "hide": "隐藏"
+  },
+  "exp": {
+    "badge": "真实面经 · 社区共享",
+    "title": "面经库",
+    "subtitle": "来自在德留学生的真实面经，覆盖大厂、独角兽与高校，帮你少踩坑、多拿 Offer",
+    "loading": "正在加载面经...",
+    "error": "加载失败，请稍后重试",
+    "totalCount": "共 {{n}} 条面经",
+    "filterAll": "全部",
+    "filterWork": "实习/学生工",
+    "filterSchool": "学校面试",
+    "searchPlaceholder": "搜索企业、岗位、关键词...",
+    "roundLabel": "第 {{n}} 轮",
+    "questionsTitle": "面试真题",
+    "reflectionTitle": "面经感想",
+    "result": "结果",
+    "salary": "薪资",
+    "noResults": "没有找到匹配的面经",
+    "resultOffer": "拿到 Offer",
+    "resultRejected": "未通过",
+    "resultAdmitted": "录取",
+    "tagWork": "工作",
+    "tagSchool": "学校",
+    "expand": "展开详情",
+    "collapse": "收起"
   },
   "gallup": {
     "title": "盖洛普优势测试 (Gallup Strengths Test)",

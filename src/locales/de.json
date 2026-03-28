@@ -16,6 +16,7 @@
     "signOut": "Abmelden",
     "profile": "Profil",
     "gallup": "Stärkentest",
+    "experiences": "Erfahrungen",
     "chooseAvatar": "Profilbild wählen"
   },
   "footer": {
@@ -263,7 +264,15 @@
     "mlLength100": "100 Wörter (Kompakt)",
     "mlLength200": "200 Wörter (Standard)",
     "mlLength300": "300 Wörter (Tiefer)",
-    "mlPlaceholder": "Klicken, damit die KI schreibt..."
+    "mlPlaceholder": "Klicken, damit die KI schreibt...",
+    "historyTitle": "Verlauf",
+    "historyEmpty": "Noch kein Verlauf. Einträge werden nach jedem Interview gespeichert.",
+    "historyUse": "Verwenden",
+    "historyDelete": "Löschen",
+    "historyClear": "Alle löschen",
+    "historyClearConfirm": "Alle Verlaufseinträge löschen?",
+    "historyCount": "{{n}} Einträge",
+    "historyAgo": "vor {{t}}"
   },
   "profile": {
     "title": "Profil & Lebenslauf",
@@ -767,6 +776,31 @@
     "saving": "Speichert...",
     "show": "Anzeigen",
     "hide": "Ausblenden"
+  },
+  "exp": {
+    "badge": "Echte Erfahrungen · Community",
+    "title": "Erfahrungsberichte",
+    "subtitle": "Echte Interview-Erfahrungen von Studierenden in Deutschland — von DAX-Unternehmen bis Hochschulen",
+    "loading": "Erfahrungen werden geladen...",
+    "error": "Laden fehlgeschlagen. Bitte versuchen Sie es später erneut.",
+    "totalCount": "{{n}} Erfahrungen",
+    "filterAll": "Alle",
+    "filterWork": "Praktikum / Werkstudent",
+    "filterSchool": "Hochschulzulassung",
+    "searchPlaceholder": "Unternehmen, Position, Stichwort suchen...",
+    "roundLabel": "Runde {{n}}",
+    "questionsTitle": "Interviewfragen",
+    "reflectionTitle": "Reflexion",
+    "result": "Ergebnis",
+    "salary": "Gehalt",
+    "noResults": "Keine passenden Erfahrungen gefunden",
+    "resultOffer": "Angebot erhalten",
+    "resultRejected": "Abgelehnt",
+    "resultAdmitted": "Zugelassen",
+    "tagWork": "Arbeit",
+    "tagSchool": "Hochschule",
+    "expand": "Details anzeigen",
+    "collapse": "Einklappen"
   },
   "gallup": {
     "title": "Gallup Stärkentest",

@@ -16,6 +16,7 @@
     "signOut": "Sign Out",
     "profile": "Profile",
     "gallup": "Strengths Test",
+    "experiences": "Experiences",
     "chooseAvatar": "Choose Avatar"
   },
   "footer": {
@@ -263,7 +264,15 @@
     "mlLength100": "100 words (Concise)",
     "mlLength200": "200 words (Standard)",
     "mlLength300": "300 words (Deep)",
-    "mlPlaceholder": "Click button above to let AI expert write for you..."
+    "mlPlaceholder": "Click button above to let AI expert write for you...",
+    "historyTitle": "History",
+    "historyEmpty": "No history yet. Records are saved after each interview.",
+    "historyUse": "Use",
+    "historyDelete": "Delete",
+    "historyClear": "Clear All",
+    "historyClearConfirm": "Clear all history records?",
+    "historyCount": "{{n}} records",
+    "historyAgo": "{{t}} ago"
   },
   "profile": {
     "title": "Profile & Resume",
@@ -767,6 +776,31 @@
     "saving": "Saving...",
     "show": "Show",
     "hide": "Hide"
+  },
+  "exp": {
+    "badge": "Real Experiences · Community Shared",
+    "title": "Interview Experiences",
+    "subtitle": "Real interview stories from students in Germany — covering top companies, unicorns, and universities",
+    "loading": "Loading experiences...",
+    "error": "Failed to load. Please try again later.",
+    "totalCount": "{{n}} experiences",
+    "filterAll": "All",
+    "filterWork": "Internship / Working Student",
+    "filterSchool": "University Admission",
+    "searchPlaceholder": "Search company, position, keyword...",
+    "roundLabel": "Round {{n}}",
+    "questionsTitle": "Interview Questions",
+    "reflectionTitle": "Reflection",
+    "result": "Result",
+    "salary": "Salary",
+    "noResults": "No matching experiences found",
+    "resultOffer": "Offer Received",
+    "resultRejected": "Rejected",
+    "resultAdmitted": "Admitted",
+    "tagWork": "Work",
+    "tagSchool": "School",
+    "expand": "Show Details",
+    "collapse": "Collapse"
   },
   "gallup": {
     "title": "Gallup Strengths Test",

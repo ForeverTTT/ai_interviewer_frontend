@@ -6,7 +6,7 @@ import LanguageSwitcher from './LanguageSwitcher'
 import { AppThemeToggle } from './ThemeToggle'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
-import { Menu, X, BrainCircuit, ChevronDown, LogOut, LayoutDashboard, UserCircle, Briefcase } from 'lucide-react'
+import { Menu, X, BrainCircuit, ChevronDown, LogOut, LayoutDashboard, UserCircle, Briefcase, BookOpen } from 'lucide-react'
 
 export default function Navbar() {
   const { t } = useTranslation()
@@ -150,6 +150,23 @@ export default function Navbar() {
                     <span className="absolute -bottom-1 left-4 right-4 h-[3px] bg-primary-600 dark:bg-primary-400 rounded-full" />
                   )}
                 </Link>
+              </>
+            )}
+            <Link
+              to="/experiences"
+              className={`relative px-4 py-2 text-sm font-bold transition-all duration-300 ${
+                isActive('/experiences') 
+                  ? 'text-primary-600 dark:text-primary-400' 
+                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              {t('nav.experiences')}
+              {isActive('/experiences') && (
+                <span className="absolute -bottom-1 left-4 right-4 h-[3px] bg-primary-600 dark:bg-primary-400 rounded-full" />
+              )}
+            </Link>
+            {user && (
+              <>
                 <Link
                   to="/gallup"
                   className={`relative px-4 py-2 text-sm font-bold transition-all duration-300 ${
@@ -275,6 +292,7 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="md:hidden bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900 p-8 space-y-6 animate-in slide-in-from-top-4 duration-500 font-chinese-modern uppercase">
           <Link to="/" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.home')}</Link>
+          <Link to="/experiences" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.experiences')}</Link>
           {user ? (
             <>
               <Link to="/setup" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.startInterview')}</Link>

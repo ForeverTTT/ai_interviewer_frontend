@@ -6,7 +6,7 @@ import { getBackendBaseUrl } from '../lib/backendBase'
 import {
   Briefcase, FileText, Globe2, Clock, ArrowRight,
   Info, Sparkles, Upload, Loader2, X, Check, LayoutTemplate,
-  ChevronDown, Copy, RotateCcw,
+  ChevronDown, Copy, RotateCcw, History, Trash2,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -21,6 +21,46 @@ function fileToBase64Data(file) {
     r.onerror = () => reject(new Error('read failed'))
     r.readAsDataURL(file)
   })
+}
+
+const JD_HISTORY_KEY = 'interviewde_jd_history'
+const JD_HISTORY_MAX = 10
+
+function loadJdHistory() {
+  try {
+    const raw = localStorage.getItem(JD_HISTORY_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch { return [] }
+}
+
+function saveJdHistory(entries) {
+  try { localStorage.setItem(JD_HISTORY_KEY, JSON.stringify(entries.slice(0, JD_HISTORY_MAX))) } catch { /* ignore */ }
+}
+
+function addJdHistoryEntry(position, jobDescription) {
+  if (!position?.trim() || !jobDescription?.trim()) return
+  const entries = loadJdHistory()
+  const deduped = entries.filter(e =>
+    !(e.position === position.trim() && e.jobDescription === jobDescription.trim())
+  )
+  deduped.unshift({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    position: position.trim(),
+    jobDescription: jobDescription.trim(),
+    createdAt: Date.now(),
+  })
+  saveJdHistory(deduped)
+}
+
+function formatTimeAgo(ts, uiLang) {
+  const diff = Date.now() - ts
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return uiLang === 'zh' ? '刚刚' : uiLang === 'de' ? 'gerade eben' : 'just now'
+  if (mins < 60) return `${mins}m`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h`
+  const days = Math.floor(hours / 24)
+  return `${days}d`
 }
 
 function buildRoleCatalog(lang) {
@@ -183,6 +223,9 @@ export default function SetupPage() {
   const [mlResult, setMlResult] = useState('')
   const [mlLoading, setMlLoading] = useState(false)
   const [mlCopied, setMlCopied] = useState(false)
+  const [jdHistory, setJdHistory] = useState(() => loadJdHistory())
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const historyRef = useRef(null)
 
   const resumeFileRef = useRef(null)
 
@@ -191,6 +234,14 @@ export default function SetupPage() {
   useEffect(() => {
     document.title = t('meta.title')
   }, [t])
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (historyRef.current && !historyRef.current.contains(e.target)) setHistoryOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -301,6 +352,9 @@ export default function SetupPage() {
     } catch {
       // non-blocking
     }
+
+    addJdHistoryEntry(form.position, form.jobDescription)
+    setJdHistory(loadJdHistory())
 
     setLoading(false)
     navigate('/interview', {
@@ -517,7 +571,102 @@ export default function SetupPage() {
                   <div className="space-y-8">
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest font-chinese-modern">{t('setup.jobDesc')} <span className="text-red-500">*</span></h3>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">{t('setup.pasteHint')}</span>
+                      <div className="flex items-center gap-4">
+                        {jdHistory.length > 0 && (
+                          <div className="relative" ref={historyRef}>
+                            <button
+                              type="button"
+                              onClick={() => setHistoryOpen(!historyOpen)}
+                              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+                                historyOpen
+                                  ? 'border-slate-900 bg-white text-slate-900 dark:border-white dark:bg-slate-900 dark:text-white shadow-sm'
+                                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-400 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400 dark:hover:border-slate-500 dark:hover:text-white'
+                              }`}
+                            >
+                              <History className="h-3.5 w-3.5" />
+                              {t('setup.historyTitle')}
+                              <span className="ml-0.5 px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 text-[10px] font-black">{jdHistory.length}</span>
+                            </button>
+
+                            <AnimatePresence>
+                              {historyOpen && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                                  className="absolute right-0 z-50 mt-2 w-[420px] max-h-[480px] overflow-auto rounded-2xl border border-slate-200 bg-white/98 p-2 shadow-[0_20px_48px_-12px_rgba(15,23,42,0.18)] backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/98 dark:shadow-[0_20px_48px_-12px_rgba(0,0,0,0.5)]"
+                                >
+                                  <div className="flex items-center justify-between px-3 py-2 mb-1">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                      {t('setup.historyCount', { n: jdHistory.length })}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        if (window.confirm(t('setup.historyClearConfirm'))) {
+                                          saveJdHistory([])
+                                          setJdHistory([])
+                                          setHistoryOpen(false)
+                                        }
+                                      }}
+                                      className="text-[10px] font-bold text-red-400 hover:text-red-600 transition-colors uppercase tracking-wider"
+                                    >
+                                      {t('setup.historyClear')}
+                                    </button>
+                                  </div>
+
+                                  {jdHistory.map((entry) => (
+                                    <div
+                                      key={entry.id}
+                                      className="group rounded-xl px-3.5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors"
+                                    >
+                                      <div className="flex items-start justify-between gap-3">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setForm(prev => ({
+                                              ...prev,
+                                              position: entry.position,
+                                              jobDescription: entry.jobDescription,
+                                            }))
+                                            setErrors({})
+                                            setHistoryOpen(false)
+                                          }}
+                                          className="flex-1 text-left min-w-0"
+                                        >
+                                          <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-sm font-bold text-slate-900 dark:text-white truncate">{entry.position}</span>
+                                            <span className="shrink-0 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                              {t('setup.historyAgo', { t: formatTimeAgo(entry.createdAt, uiLang) })}
+                                            </span>
+                                          </div>
+                                          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                                            {entry.jobDescription.slice(0, 150)}{entry.jobDescription.length > 150 ? '...' : ''}
+                                          </p>
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const updated = jdHistory.filter(e => e.id !== entry.id)
+                                            saveJdHistory(updated)
+                                            setJdHistory(updated)
+                                            if (updated.length === 0) setHistoryOpen(false)
+                                          }}
+                                          className="shrink-0 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
+                                          title={t('setup.historyDelete')}
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        )}
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">{t('setup.pasteHint')}</span>
+                      </div>
                     </div>
                     <div className="space-y-4">
                         <textarea
