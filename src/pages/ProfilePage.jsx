@@ -19,7 +19,7 @@ import {
   MapPin, ClipboardList, CheckCircle2, Telescope,
   ChevronDown, ChevronUp, Plus, Trash2, User,
   Briefcase, GraduationCap, FolderKanban, BookOpen, Tags, Languages, Award, Wand2,
-  Pencil, Eye, ArrowUpRight, Zap, ArrowRight,
+  Pencil, Eye, ArrowUpRight, Zap, ArrowRight, BrainCircuit,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -786,7 +786,7 @@ function ProfileSectionsView({ cvProfile, t }) {
   )
 }
 
-function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, coach, t, i18n, timeStr, showFloatingEditButton, coachTranslating, coachGenerating, runCoach, jobSearchStatus, avatarId }) {
+function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, coach, t, i18n, timeStr, showFloatingEditButton, coachTranslating, coachGenerating, runCoach, jobSearchStatus, avatarId, tokens, recharge }) {
   const hasData = profileHasVisibleData(cvProfile, resumeText, resumeNotes)
   const tr = String(targetRole || '').trim()
 
@@ -807,6 +807,65 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
           </Link>
         </motion.div>
       ) : null}
+
+      {/* Energy Status Card */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="card-premium p-8 bg-white dark:bg-slate-950 border-orange-100 dark:border-orange-500/20 shadow-xl shadow-orange-500/5 overflow-hidden relative"
+      >
+        <div className="absolute top-0 right-0 p-8 opacity-10">
+          <BrainCircuit className="w-32 h-32 text-orange-500" />
+        </div>
+        <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+          <div className="shrink-0 flex flex-col items-center gap-2">
+            <div className="w-20 h-20 rounded-3xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
+              <Zap className="w-10 h-10 text-white fill-current" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500">{t('profile.tokens')}</span>
+          </div>
+          
+          <div className="flex-1 space-y-4 text-center md:text-left">
+            <div>
+              <div className="flex items-baseline justify-center md:justify-start gap-2">
+                <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">{tokens}</span>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Energy Points</span>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-bold mt-1">
+                {t('profile.initialTokensHint', 'Full access to AI-powered career tools.')}
+              </p>
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('profile.tokenUsageInterview')}</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary-500" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('profile.tokenUsageCoach')}</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('profile.tokenUsageExtract')}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="shrink-0 flex flex-col gap-3 w-full md:w-auto">
+            <button
+              onClick={recharge}
+              className="px-8 py-4 bg-orange-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20 active:scale-95 flex items-center justify-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              {t('profile.recharge')}
+            </button>
+            <div className="px-4 py-2 rounded-xl bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 text-center">
+              <p className="text-[10px] font-bold text-orange-600 dark:text-orange-400">{t('profile.tokenRewardContribution')}</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       <header className="space-y-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-slate-100 dark:border-slate-800">
@@ -1016,6 +1075,7 @@ export default function ProfilePage() {
   const [note, setNote] = useState(null)
   const [jobSearchStatus, setJobSearchStatus] = useState('seeking')
   const [avatarId, setAvatarId] = useState(null)
+  const [tokens, setTokens] = useState(0)
   const [updatedAt, setUpdatedAt] = useState(null)
   const [pendingRaw, setPendingRaw] = useState('')
   const [rawResumeOpen, setRawResumeOpen] = useState(false)
@@ -1053,6 +1113,7 @@ export default function ProfilePage() {
       setCoach(j.resumeCoach || null)
       setJobSearchStatus(j.jobSearchStatus || 'seeking')
       setAvatarId(j.avatarId || null)
+      setTokens(j.tokens || 0)
       setUpdatedAt(j.resumeUpdatedAt || null)
       const tr = j.profileJson?.coachTargetRole
       if (typeof tr === 'string') setTargetRole(tr)
@@ -1146,6 +1207,31 @@ export default function ProfilePage() {
       setTimeout(() => setNote(null), 3000)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const recharge = async (amount) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      if (!token) return
+
+      const res = await fetch(`${backendUrl}/api/profile/recharge`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ amount })
+      })
+      if (res.ok) {
+        setTokens(prev => prev + amount)
+        setNote({ type: 'ok', text: t('profile.rechargeModal.success') })
+        setTimeout(() => setNote(null), 2000)
+      }
+    } catch {
+      setNote({ type: 'err', text: t('common.error') })
+      setTimeout(() => setNote(null), 3000)
     }
   }
 
@@ -1389,6 +1475,8 @@ export default function ProfilePage() {
             coachTranslating={coachTranslating}
             coachGenerating={coachGenerating}
             runCoach={runCoach}
+            tokens={tokens}
+            recharge={recharge}
           />
         </div>
       </motion.div>

@@ -17,7 +17,9 @@
     "profile": "Profil",
     "gallup": "Stärkentest",
     "experiences": "Erfahrungen",
-    "chooseAvatar": "Profilbild wählen"
+    "myExperiences": "Meine Erfahrungen",
+    "chooseAvatar": "Profilbild wählen",
+    "tokens": "Energie"
   },
   "footer": {
     "tagline": "KI-gestützte Interview-Plattform für Praktika und Jobs in Deutschland. Mit neuesten Modellen, High-Fidelity-Stimme und kuratierten Fragenkatalogen.",
@@ -256,8 +258,8 @@
     "mlDesc": "Erstellt ein überzeugendes Anschreiben basierend auf CV und JD. ✨",
     "mlLength": "Empfohlene Länge",
     "mlLang": "Ausgabesprache",
-    "mlBtn": "Anschreiben erstellen",
-    "mlBtnNew": "Neu generieren",
+    "mlBtn": "Anschreiben erstellen (100 Energie)",
+    "mlBtnNew": "Neu generieren (100 Energie)",
     "mlGenerating": "Meister denkt nach...",
     "mlCopy": "Kopieren",
     "mlCopied": "Kopiert!",
@@ -797,6 +799,8 @@
     "myBadge": "Ihre Beiträge",
     "mySubtitle": "Verwalten und überdenken Sie die Interview-Erfahrungen, die Sie mit der Community geteilt haben.",
     "postBtn": "Erfahrung teilen",
+    "rewardBadge": "+200 Energie",
+    "rewardHint": "Teilen Sie Ihre Interviewerfahrung, tragen Sie zur Community bei und erhalten Sie +200 Energie!",
     "postTitle": "Teilen Sie Ihren Weg",
     "postSubtitle": "Helfen Sie anderen Studierenden, indem Sie Ihren Interviewprozess und Tipps teilen.",
     "postCompany": "Name des Unternehmens / der Schule",
@@ -809,6 +813,7 @@
     "filterAll": "Alle",
     "filterWork": "Praktikum / Werkstudent",
     "filterSchool": "Hochschulzulassung",
+    "filterMine": "Meine Erfahrungen",
     "searchPlaceholder": "Unternehmen, Position, Stichworte suchen...",
     "roundLabel": "Runde {{n}}",
     "questionsTitle": "Interviewfragen",

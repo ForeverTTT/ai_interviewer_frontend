@@ -9,7 +9,7 @@ import {
   Search, Building2, GraduationCap, Briefcase, MapPin,
   Clock, ChevronDown, ChevronUp, MessageSquareQuote,
   CheckCircle2, XCircle, Award, Globe2, Loader2, Filter,
-  Trash2, Plus, X, Send
+  Trash2, Plus, X, Send, BrainCircuit, Zap
 } from 'lucide-react'
 
 function ResultBadge({ result, t }) {
@@ -399,6 +399,18 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
           </button>
         </div>
 
+        <div className="mx-8 mt-6 p-4 rounded-2xl bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-orange-500 p-2 rounded-xl text-white shadow-lg shadow-orange-500/20">
+              <BrainCircuit className="w-4 h-4" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-black text-orange-900 dark:text-orange-400">{t('profile.tokenRewardContribution')}</span>
+              <p className="text-[10px] font-bold text-orange-600/70 dark:text-orange-500/70 uppercase tracking-widest">Community Reward: +200 Energy</p>
+            </div>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="p-8 space-y-8">
           <div className="grid grid-cols-2 gap-4">
             <CustomDropdown 
@@ -709,7 +721,7 @@ export default function ExperiencesPage() {
   ]
   
   if (user) {
-    filterTabs.push({ key: 'mine', label: t('nav.myExperiences'), count: stats.mine })
+    filterTabs.push({ key: 'mine', label: t('exp.filterMine'), count: stats.mine })
   }
 
   return (
@@ -731,15 +743,26 @@ export default function ExperiencesPage() {
           </motion.div>
 
           {user && (
-             <motion.button
-               initial={{ opacity: 0, scale: 0.9 }}
-               animate={{ opacity: 1, scale: 1 }}
-               onClick={() => setPostModalOpen(true)}
-               className="flex items-center gap-2 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2rem] text-sm font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-slate-900/10"
-             >
-               <Plus className="w-4 h-4" />
-               {t('exp.postBtn')}
-             </motion.button>
+             <div className="flex flex-col items-center gap-2">
+               <motion.button
+                 initial={{ opacity: 0, scale: 0.9 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 onClick={() => setPostModalOpen(true)}
+                 className="flex items-center gap-3 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2rem] text-sm font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-slate-900/10"
+               >
+                 <Plus className="w-5 h-5" />
+                 {t('exp.postBtn')}
+               </motion.button>
+               <motion.div 
+                 initial={{ opacity: 0, y: -5 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ delay: 0.2 }}
+                 className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-[10px] font-black tracking-widest uppercase border border-amber-200 dark:border-amber-800/50 shadow-sm"
+               >
+                 <Zap className="w-3 h-3" />
+                 {t('exp.rewardBadge')}
+               </motion.div>
+             </div>
           )}
         </header>
 

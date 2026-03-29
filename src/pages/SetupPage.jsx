@@ -225,6 +225,8 @@ export default function SetupPage() {
   const [mlCopied, setMlCopied] = useState(false)
   const [jdHistory, setJdHistory] = useState(() => loadJdHistory())
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [tokens, setTokens] = useState(0)
+  const [tokenError, setTokenError] = useState(null)
   const historyRef = useRef(null)
 
   const resumeFileRef = useRef(null)
@@ -260,6 +262,24 @@ export default function SetupPage() {
       } catch { /* ignore */ }
     })()
     return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    const fetchTokens = async () => {
+      try {
+        const backendUrl = getBackendBaseUrl()
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) return
+        const res = await fetch(`${backendUrl}/api/profile`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        if (res.ok) {
+          const j = await res.json()
+          setTokens(j.tokens || 0)
+        }
+      } catch { /* ignore */ }
+    }
+    fetchTokens()
   }, [])
 
   const languages = useMemo(() => [
@@ -318,6 +338,12 @@ export default function SetupPage() {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' })
         el.focus()
       }
+      return
+    }
+
+    if (tokens < 300) {
+      setTokenError(t('common.insufficientTokens', 'Insufficient Energy'))
+      window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
 
@@ -437,6 +463,9 @@ export default function SetupPage() {
           language: mlForm.language,
         }),
       })
+      if (res.status === 403) {
+        throw new Error(t('common.insufficientTokens', 'Insufficient Energy'))
+      }
       const j = await res.json()
       if (res.ok) setMlResult(j.text)
       else throw new Error(j.error)
@@ -457,6 +486,24 @@ export default function SetupPage() {
   return (
     <div className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-20">
       <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
+        {tokenError && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <Info className="h-5 w-5 text-red-500" />
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-red-700 dark:text-red-400">{tokenError}</span>
+                <span className="text-[10px] font-bold text-red-500/80 uppercase tracking-widest">{t('profile.tokenUsageInterview')}: 300 ({t('profile.tokens')}: {tokens})</span>
+              </div>
+            </div>
+            <Link to="/profile" className="px-4 py-2 rounded-xl bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-[10px] font-black uppercase tracking-widest hover:bg-red-200 transition-colors">
+              {t('profile.recharge')}
+            </Link>
+          </motion.div>
+        )}
         <header className="mb-20">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
