@@ -818,6 +818,7 @@
     "collapse": "收起",
     "labelType": "类型",
     "labelResult": "面试结果",
+    "selectPlaceholder": "请选择...",
     "labelRounds": "面试轮次",
     "btnPulseRound": "添加轮次",
     "btnPulseQuestion": "添加题目",

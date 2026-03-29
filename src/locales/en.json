@@ -818,6 +818,7 @@
     "collapse": "Collapse",
     "labelType": "Type",
     "labelResult": "Result",
+    "selectPlaceholder": "Select...",
     "labelRounds": "Interview Rounds",
     "btnPulseRound": "Add Round",
     "btnPulseQuestion": "Add Question",

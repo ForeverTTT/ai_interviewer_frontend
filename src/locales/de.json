@@ -817,6 +817,7 @@
     "collapse": "Einklappen",
     "labelType": "Typ",
     "labelResult": "Ergebnis",
+    "selectPlaceholder": "Auswählen...",
     "labelRounds": "Interview-Runden",
     "btnPulseRound": "Runde hinzufügen",
     "btnPulseQuestion": "Frage hinzufügen",

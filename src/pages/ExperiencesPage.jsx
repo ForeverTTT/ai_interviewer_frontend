@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -52,6 +52,83 @@ function TypeBadge({ type, t }) {
       <Briefcase className="w-3 h-3" />
       {t('exp.tagWork')}
     </span>
+  )
+}
+
+function CustomDropdown({ label, value, options, onChange, t }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const selectedOption = options.find(o => o.value === value)
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-2 block">{label}</label>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full h-[54px] flex items-center justify-between px-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all hover:bg-white dark:hover:bg-slate-800 shadow-sm"
+      >
+        <div className="flex items-center gap-3">
+          {selectedOption?.icon && <selectedOption.icon className="w-4 h-4 text-slate-400" />}
+          <span className="text-slate-900 dark:text-white">{selectedOption?.label || t('exp.selectPlaceholder')}</span>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute z-[100] w-full mt-2 p-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-100 dark:border-slate-800 rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden"
+          >
+            {options.map((opt) => {
+              const Icon = opt.icon
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(opt.value)
+                    setIsOpen(false)
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all relative group ${
+                    value === opt.value
+                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <div className={`p-1.5 rounded-lg transition-colors ${
+                    value === opt.value 
+                      ? (value === 'work' || value === 'Passed' ? 'bg-primary-500/20' : 'bg-slate-500/20')
+                      : 'bg-slate-100 dark:bg-slate-800 group-hover:bg-white dark:group-hover:bg-slate-700'
+                  }`}>
+                    {Icon && <Icon className={`w-3.5 h-3.5 ${value === opt.value ? 'text-current' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />}
+                  </div>
+                  <span className="flex-1 text-left">{opt.label}</span>
+                  {value === opt.value && (
+                    <motion.div layoutId="activeOption" className="absolute right-4 w-1.5 h-1.5 rounded-full bg-current" />
+                  )}
+                </button>
+              )
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
 
@@ -324,29 +401,26 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
 
         <form onSubmit={handleSubmit} className="p-8 space-y-8">
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('exp.labelType')}</label>
-              <select 
-                value={formData.type} 
-                onChange={e => setFormData({...formData, type: e.target.value})}
-                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
-              >
-                <option value="work">{t('exp.filterWork')}</option>
-                <option value="school">{t('exp.filterSchool')}</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('exp.labelResult')}</label>
-              <select 
-                value={formData.result} 
-                onChange={e => setFormData({...formData, result: e.target.value})}
-                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all cursor-pointer appearance-none"
-                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
-              >
-                <option value="Passed">{t('exp.resultPass')}</option>
-                <option value="Failed">{t('exp.resultFail')}</option>
-              </select>
-            </div>
+            <CustomDropdown 
+              label={t('exp.labelType')}
+              value={formData.type}
+              onChange={val => setFormData({...formData, type: val})}
+              t={t}
+              options={[
+                { value: 'work', label: t('exp.filterWork'), icon: Briefcase },
+                { value: 'school', label: t('exp.filterSchool'), icon: GraduationCap }
+              ]}
+            />
+            <CustomDropdown 
+              label={t('exp.labelResult')}
+              value={formData.result}
+              onChange={val => setFormData({...formData, result: val})}
+              t={t}
+              options={[
+                { value: 'Passed', label: t('exp.resultPass'), icon: CheckCircle2 },
+                { value: 'Failed', label: t('exp.resultFail'), icon: XCircle }
+              ]}
+            />
           </div>
 
           <div className="space-y-4">
