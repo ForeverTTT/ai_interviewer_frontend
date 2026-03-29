@@ -1,11 +1,15 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getBackendBaseUrl } from '../lib/backendBase'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../hooks/useAuth'
 import {
   Search, Building2, GraduationCap, Briefcase, MapPin,
   Clock, ChevronDown, ChevronUp, MessageSquareQuote,
   CheckCircle2, XCircle, Award, Globe2, Loader2, Filter,
+  Trash2, Plus, X, Send
 } from 'lucide-react'
 
 function ResultBadge({ result, t }) {
@@ -52,8 +56,9 @@ function TypeBadge({ type, t }) {
   )
 }
 
-function ExperienceCard({ exp, t }) {
+function ExperienceCard({ exp, t, user, onDelete }) {
   const [expanded, setExpanded] = useState(false)
+  const isOwner = user && exp.user_id === user.id
 
   return (
     <motion.div
@@ -61,8 +66,19 @@ function ExperienceCard({ exp, t }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
-      className="bg-white dark:bg-slate-950 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
+      className="bg-white dark:bg-slate-950 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden group relative"
     >
+      {isOwner && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            if (window.confirm(t('exp.confirmDelete'))) onDelete(exp.id)
+          }}
+          className="absolute top-6 right-16 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all opacity-0 group-hover:opacity-100 z-10"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
@@ -108,6 +124,12 @@ function ExperienceCard({ exp, t }) {
                 <Globe2 className="w-3.5 h-3.5" />
                 {exp.language}
               </span>
+              {exp.publisher && (
+                <span className="flex items-center gap-1 text-slate-400">
+                  <Award className="w-3.5 h-3.5" />
+                  {exp.publisher}
+                </span>
+              )}
             </div>
           </div>
 
@@ -197,40 +219,356 @@ function ExperienceCard({ exp, t }) {
   )
 }
 
+function PostModal({ isOpen, onClose, t, onPost, user }) {
+  const [formData, setFormData] = useState({
+    type: 'work',
+    company: '',
+    position: '',
+    location: '',
+    department: '',
+    date: new Date().toISOString().slice(0, 7),
+    language: 'English',
+    result: 'Offer received',
+    salary: '',
+    reflection: '',
+    rounds: [{ round: 1, format: '', duration_min: 30, questions: [''] }]
+  })
+  const [loading, setLoading] = useState(false)
+
+  if (!isOpen) return null
+
+  const addRound = () => {
+    setFormData({ ...formData, rounds: [...formData.rounds, { round: formData.rounds.length + 1, format: '', duration_min: 30, questions: [''] }] })
+  }
+
+  const removeRound = (i) => {
+    const nr = formData.rounds.filter((_, idx) => idx !== i).map((r, idx) => ({ ...r, round: idx + 1 }))
+    setFormData({ ...formData, rounds: nr })
+  }
+
+  const updateRound = (i, field, value) => {
+    const nr = [...formData.rounds]
+    nr[i] = { ...nr[i], [field]: value }
+    setFormData({ ...formData, rounds: nr })
+  }
+
+  const addQuestion = (ri) => {
+    const nr = [...formData.rounds]
+    nr[ri].questions.push('')
+    setFormData({ ...formData, rounds: nr })
+  }
+
+  const updateQuestion = (ri, qi, val) => {
+    const nr = [...formData.rounds]
+    nr[ri].questions[qi] = val
+    setFormData({ ...formData, rounds: nr })
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      await onPost(formData)
+      onClose()
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:pt-24">
+      <motion.div 
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="relative w-full max-w-2xl max-h-[90vh] bg-white dark:bg-slate-950 rounded-[2.5rem] shadow-2xl overflow-y-auto experience-modal"
+      >
+        <style dangerouslySetInnerHTML={{ __html: `
+          .experience-modal::-webkit-scrollbar {
+            width: 6px;
+          }
+          .experience-modal::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.02);
+            border-radius: 10px;
+          }
+          .experience-modal::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+          }
+          .experience-modal::-webkit-scrollbar-thumb:hover {
+            background: rgba(0,0,0,0.2);
+            background-clip: content-box;
+          }
+          .dark .experience-modal::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.05);
+          }
+        `}} />
+        <div className="sticky top-0 z-10 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">{t('exp.postTitle')}</h2>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('exp.postSubtitle')}</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-colors">
+            <X className="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-8 space-y-8">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('exp.labelType')}</label>
+              <select 
+                value={formData.type} 
+                onChange={e => setFormData({...formData, type: e.target.value})}
+                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
+              >
+                <option value="work">{t('exp.filterWork')}</option>
+                <option value="school">{t('exp.filterSchool')}</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('exp.labelResult')}</label>
+              <input 
+                value={formData.result} 
+                onChange={e => setFormData({...formData, result: e.target.value})}
+                placeholder="Offer / Admitted / Rejected"
+                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <input 
+                required
+                value={formData.company} 
+                onChange={e => setFormData({...formData, company: e.target.value})}
+                placeholder={t('exp.postCompany')}
+                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
+              />
+              <input 
+                required
+                value={formData.position} 
+                onChange={e => setFormData({...formData, position: e.target.value})}
+                placeholder={t('exp.postPosition')}
+                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <input 
+                value={formData.location} 
+                onChange={e => setFormData({...formData, location: e.target.value})}
+                placeholder={t('exp.postLocation')}
+                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
+              />
+              <input 
+                value={formData.department} 
+                onChange={e => setFormData({...formData, department: e.target.value})}
+                placeholder={t('exp.postDepartment')}
+                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <input 
+              type="month"
+              value={formData.date} 
+              onChange={e => setFormData({...formData, date: e.target.value})}
+              className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs font-bold focus:outline-none focus:border-slate-300 transition-all"
+            />
+            <input 
+              value={formData.language} 
+              onChange={e => setFormData({...formData, language: e.target.value})}
+              placeholder="English / German / Chinese"
+              className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
+            />
+            <input 
+              value={formData.salary} 
+              onChange={e => setFormData({...formData, salary: e.target.value})}
+              placeholder="e.g. 16€/h"
+              className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
+            />
+          </div>
+
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('exp.labelRounds')}</h4>
+              <button 
+                type="button" 
+                onClick={addRound}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform"
+              >
+                <Plus className="w-3 h-3" /> {t('exp.btnPulseRound')}
+              </button>
+            </div>
+            
+            {formData.rounds.map((r, ri) => (
+              <div key={ri} className="p-6 rounded-3xl border border-slate-100 dark:border-slate-900/50 space-y-4">
+                <div className="flex items-center justify-between font-black text-xs uppercase tracking-widest text-slate-400">
+                  <span>{t('exp.roundLabel', { n: r.round })}</span>
+                  {ri > 0 && <button onClick={() => removeRound(ri)} type="button" className="text-red-500 hover:text-red-600">{t('exp.labelRemove')}</button>}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <input 
+                    value={r.format} 
+                    onChange={e => updateRound(ri, 'format', e.target.value)}
+                    placeholder={t('exp.phRoundsFormat')}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs font-bold"
+                  />
+                  <input 
+                    type="number"
+                    value={r.duration_min} 
+                    onChange={e => updateRound(ri, 'duration_min', parseInt(e.target.value))}
+                    placeholder={t('exp.phRoundsDuration')}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs font-bold"
+                  />
+                </div>
+                <div className="space-y-3">
+                   {r.questions.map((q, qi) => (
+                     <div key={qi} className="flex gap-2">
+                        <input 
+                          value={q} 
+                          onChange={e => updateQuestion(ri, qi, e.target.value)}
+                          placeholder={`${t('exp.phRoundsQuestion')} ${qi + 1}`}
+                          className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs font-bold"
+                        />
+                     </div>
+                   ))}
+                   <button type="button" onClick={() => addQuestion(ri)} className="text-[10px] font-black text-primary-600 uppercase tracking-widest">+ {t('exp.btnPulseQuestion')}</button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2">
+             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('exp.labelReflection')}</label>
+             <textarea 
+               value={formData.reflection}
+               onChange={e => setFormData({...formData, reflection: e.target.value})}
+               className="w-full px-5 py-4 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold min-h-[150px] focus:outline-none focus:border-slate-300 transition-all"
+               placeholder="Share your thoughts, tips, and experience..."
+             />
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-3xl text-xs font-black uppercase tracking-widest shadow-xl shadow-slate-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            {t('exp.submit')}
+          </button>
+        </form>
+      </motion.div>
+    </div>
+  )
+}
+
 export default function ExperiencesPage() {
   const { t } = useTranslation()
+  const { user } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [experiences, setExperiences] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [filter, setFilter] = useState('all')
+  const [filter, setFilter] = useState(searchParams.get('mine') === 'true' ? 'mine' : 'all')
   const [search, setSearch] = useState('')
+  const [postModalOpen, setPostModalOpen] = useState(false)
+
+  // Sync filter with URL parameter if it changes from Navbar
+  useEffect(() => {
+    if (searchParams.get('mine') === 'true') {
+      setFilter('mine')
+    } else {
+      setFilter(prev => prev === 'mine' ? 'all' : prev)
+    }
+  }, [searchParams])
 
   useEffect(() => {
-    document.title = t('meta.title')
-  }, [t])
+    document.title = filter === 'mine' ? t('nav.myExperiences') : t('meta.title')
+  }, [t, filter])
+
+  const fetchExperiences = async () => {
+    setLoading(true)
+    try {
+      const backendUrl = getBackendBaseUrl()
+      const url = `${backendUrl}/api/experiences`
+      const res = await fetch(url)
+      if (!res.ok) throw new Error('Failed')
+      const data = await res.json()
+      setExperiences(data.experiences || [])
+    } catch {
+      setError(true)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const backendUrl = getBackendBaseUrl()
-        const res = await fetch(`${backendUrl}/api/experiences`)
-        if (!res.ok) throw new Error('Failed')
-        const data = await res.json()
-        if (!cancelled) setExperiences(data.experiences || [])
-      } catch {
-        if (!cancelled) setError(true)
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    })()
-    return () => { cancelled = true }
+    fetchExperiences()
   }, [])
+
+  const handlePost = async (formData) => {
+    const backendUrl = getBackendBaseUrl()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) throw new Error('No valid session found. Please log in again.')
+
+    const res = await fetch(`${backendUrl}/api/experiences`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify(formData)
+    })
+
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}))
+      throw new Error(errBody.error || `Server returned ${res.status}: ${res.statusText}`)
+    }
+    
+    // Refresh
+    await fetchExperiences()
+  }
+
+  const handleDelete = async (id) => {
+    try {
+      const backendUrl = getBackendBaseUrl()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) return
+
+      const res = await fetch(`${backendUrl}/api/experiences/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      })
+      
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}))
+        throw new Error(errBody.error || `Delete failed with status ${res.status}`)
+      }
+
+      setExperiences(prev => prev.filter(e => e.id !== id))
+    } catch (err) {
+      alert(`Delete Error: ${err.message}`)
+    }
+  }
 
   const filtered = useMemo(() => {
     let list = experiences
     if (filter === 'work') list = list.filter(e => e.type === 'work')
-    if (filter === 'school') list = list.filter(e => e.type === 'school')
+    else if (filter === 'school') list = list.filter(e => e.type === 'school')
+    else if (filter === 'mine') list = list.filter(e => user && e.user_id === user.id)
 
     if (search.trim()) {
       const q = search.toLowerCase()
@@ -253,23 +591,28 @@ export default function ExperiencesPage() {
     const total = experiences.length
     const work = experiences.filter(e => e.type === 'work').length
     const school = experiences.filter(e => e.type === 'school').length
+    const mine = experiences.filter(e => user && e.user_id === user.id).length
     const offers = experiences.filter(e => {
       const r = (e.result || '').toLowerCase()
       return r.includes('offer') || r.includes('admitted')
     }).length
-    return { total, work, school, offers }
-  }, [experiences])
+    return { total, work, school, mine, offers }
+  }, [experiences, user])
 
   const filterTabs = [
     { key: 'all', label: t('exp.filterAll'), count: stats.total },
     { key: 'work', label: t('exp.filterWork'), count: stats.work },
     { key: 'school', label: t('exp.filterSchool'), count: stats.school },
   ]
+  
+  if (user) {
+    filterTabs.push({ key: 'mine', label: t('nav.myExperiences'), count: stats.mine })
+  }
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-20">
       <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
-        <header className="mb-16">
+        <header className="mb-16 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -283,6 +626,18 @@ export default function ExperiencesPage() {
               {t('exp.subtitle')}
             </p>
           </motion.div>
+
+          {user && (
+             <motion.button
+               initial={{ opacity: 0, scale: 0.9 }}
+               animate={{ opacity: 1, scale: 1 }}
+               onClick={() => setPostModalOpen(true)}
+               className="flex items-center gap-2 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2rem] text-sm font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-slate-900/10"
+             >
+               <Plus className="w-4 h-4" />
+               {t('exp.postBtn')}
+             </motion.button>
+          )}
         </header>
 
         {loading ? (
@@ -296,30 +651,30 @@ export default function ExperiencesPage() {
           </div>
         ) : (
           <>
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10"
-            >
-              {[
-                { n: stats.total, label: t('exp.filterAll'), icon: Filter, color: 'slate' },
-                { n: stats.work, label: t('exp.filterWork'), icon: Briefcase, color: 'blue' },
-                { n: stats.school, label: t('exp.filterSchool'), icon: GraduationCap, color: 'violet' },
-                { n: stats.offers, label: 'Offers / Admitted', icon: Award, color: 'emerald' },
-              ].map(({ n, label, icon: Icon, color }) => (
-                <div
-                  key={label}
-                  className="bg-white dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <Icon className={`w-4 h-4 text-${color}-500`} />
-                    <span className="text-2xl font-black text-slate-900 dark:text-white">{n}</span>
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10"
+              >
+                {[
+                  { n: stats.total, label: t('exp.filterAll'), icon: Filter, color: 'slate' },
+                  { n: stats.work, label: t('exp.filterWork'), icon: Briefcase, color: 'blue' },
+                  { n: stats.school, label: t('exp.filterSchool'), icon: GraduationCap, color: 'violet' },
+                  { n: stats.offers, label: 'Offers / Admitted', icon: Award, color: 'emerald' },
+                ].map(({ n, label, icon: Icon, color }) => (
+                  <div
+                    key={label}
+                    className="bg-white dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <Icon className={`w-4 h-4 text-${color}-500`} />
+                      <span className="text-2xl font-black text-slate-900 dark:text-white">{n}</span>
+                    </div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</p>
                   </div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</p>
-                </div>
-              ))}
-            </motion.div>
+                ))}
+              </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 12 }}
@@ -327,28 +682,34 @@ export default function ExperiencesPage() {
               transition={{ delay: 0.15 }}
               className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-10"
             >
-              <div className="flex gap-2 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-800">
-                {filterTabs.map((tab) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => setFilter(tab.key)}
-                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                      filter === tab.key
-                        ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {tab.label}
-                    <span className={`ml-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-black ${
-                      filter === tab.key
-                        ? 'bg-slate-100 dark:bg-slate-700'
-                        : 'bg-slate-200/50 dark:bg-slate-800'
-                    }`}>
-                      {tab.count}
-                    </span>
-                  </button>
-                ))}
-              </div>
+                <div className="flex flex-wrap gap-2 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-800">
+                  {filterTabs.map((tab) => (
+                    <button
+                      key={tab.key}
+                      onClick={() => {
+                        setFilter(tab.key)
+                        // Optionally clear URL param
+                        if (searchParams.get('mine')) {
+                          setSearchParams({})
+                        }
+                      }}
+                      className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                        filter === tab.key
+                          ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 shadow-sm'
+                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {tab.label}
+                      <span className={`ml-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-black ${
+                        filter === tab.key
+                          ? 'bg-slate-100 dark:bg-slate-700'
+                          : 'bg-slate-200/50 dark:bg-slate-800'
+                      }`}>
+                        {tab.count}
+                      </span>
+                    </button>
+                  ))}
+                </div>
 
               <div className="flex-1 relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -363,8 +724,8 @@ export default function ExperiencesPage() {
             </motion.div>
 
             {filtered.length === 0 ? (
-              <div className="flex items-center justify-center py-20">
-                <p className="text-sm font-bold text-slate-400">{t('exp.noResults')}</p>
+              <div className="flex items-center justify-center py-20 px-10 text-center">
+                <p className="text-sm font-bold text-slate-400">{filter === 'mine' ? t('exp.noMyResults') : t('exp.noResults')}</p>
               </div>
             ) : (
               <motion.div
@@ -375,11 +736,28 @@ export default function ExperiencesPage() {
               >
                 <AnimatePresence mode="popLayout">
                   {filtered.map((exp) => (
-                    <ExperienceCard key={exp.id} exp={exp} t={t} />
+                    <ExperienceCard 
+                      key={exp.id} 
+                      exp={exp} 
+                      t={t} 
+                      user={user} 
+                      onDelete={handleDelete} 
+                    />
                   ))}
                 </AnimatePresence>
               </motion.div>
             )}
+            <AnimatePresence>
+              {postModalOpen && (
+                <PostModal 
+                  isOpen={postModalOpen} 
+                  onClose={() => setPostModalOpen(false)} 
+                  t={t} 
+                  onPost={handlePost}
+                  user={user}
+                />
+              )}
+            </AnimatePresence>
           </>
         )}
       </div>

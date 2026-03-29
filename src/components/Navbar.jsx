@@ -98,7 +98,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-2">
             <Link
               to="/"
-              className={`relative px-4 py-2 text-sm font-bold transition-all duration-300 ${
+              className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${
                 isActive('/') 
                   ? 'text-primary-600 dark:text-primary-400' 
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -113,7 +113,7 @@ export default function Navbar() {
               <>
                 <Link
                   to="/setup"
-                  className={`relative px-4 py-2 text-sm font-bold transition-all duration-300 ${
+                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${
                     isActive('/setup') 
                       ? 'text-primary-600 dark:text-primary-400' 
                       : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -126,7 +126,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/dashboard"
-                  className={`relative px-4 py-2 text-sm font-bold transition-all duration-300 ${
+                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${
                     isActive('/dashboard') 
                       ? 'text-primary-600 dark:text-primary-400' 
                       : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -139,7 +139,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/profile"
-                  className={`relative px-4 py-2 text-sm font-bold transition-all duration-300 ${
+                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${
                     isActive('/profile') 
                       ? 'text-primary-600 dark:text-primary-400' 
                       : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -154,7 +154,7 @@ export default function Navbar() {
             )}
             <Link
               to="/experiences"
-              className={`relative px-4 py-2 text-sm font-bold transition-all duration-300 ${
+              className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${
                 isActive('/experiences') 
                   ? 'text-primary-600 dark:text-primary-400' 
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -169,7 +169,7 @@ export default function Navbar() {
               <>
                 <Link
                   to="/gallup"
-                  className={`relative px-4 py-2 text-sm font-bold transition-all duration-300 ${
+                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${
                     isActive('/gallup') 
                       ? 'text-primary-600 dark:text-primary-400' 
                       : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -235,6 +235,14 @@ export default function Navbar() {
                     >
                       <UserCircle className="w-4 h-4" />
                       {t('nav.profile')}
+                    </Link>
+                    <Link
+                      to="/experiences?mine=true"
+                      className="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <BookOpen className="w-4 h-4" />
+                      {t('nav.myExperiences')}
                     </Link>
                     <button
                       onClick={(e) => {
