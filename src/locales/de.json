@@ -488,6 +488,8 @@
     "editProfile": "Daten bearbeiten",
     "editHint": "Strukturierte Daten aktualisieren — für Interviews wichtig.",
     "cancelEdit": "Abbrechen",
+    "securityNotice": "Profil-Verschlüsselung · Injektionsschutz aktiv",
+    "securityTip": "Ihr Lebenslauf und Ihre Profildaten werden per End-to-End-Verschlüsselung übertragen. Unsere Filter schützen Ihre Privatsphäre.",
     "viewBadge": "Vorschau",
     "viewImportHint": "Upload in 'Bearbeiten' verfügbar.",
     "viewSectionEmpty": "Nicht gefüllt",
@@ -775,7 +777,14 @@
     "save": "Speichern",
     "saving": "Speichert...",
     "show": "Anzeigen",
-    "hide": "Ausblenden"
+    "hide": "Ausblenden",
+    "cookie": {
+      "title": "🍪 Cookie & Privatsphäre",
+      "desc": "Wir verwenden Cookies für eine sicherere und bessere Erfahrung. Durch die weitere Nutzung stimmen Sie unseren Datenschutzbestimmungen zu.",
+      "accept": "Akzeptieren",
+      "settings": "Einstellungen",
+      "decline": "Ablehnen"
+    }
   },
   "exp": {
     "badge": "Echte Erfahrungen · Community",
@@ -825,7 +834,9 @@
     "phRoundsFormat": "z.B. Technisches Interview",
     "phRoundsDuration": "Dauer (Min)",
     "phRoundsQuestion": "Interviewfrage",
-    "labelRemove": "Löschen"
+    "labelRemove": "Löschen",
+    "securityNotice": "Verschlüsselt übertragen · Injektionsschutz aktiv",
+    "securityTip": "Ihre Erfahrungen werden anonymisiert oder mit Nickname geteilt. Sensitive Daten werden gefiltert."
   },
   "gallup": {
     "title": "Gallup Stärkentest",

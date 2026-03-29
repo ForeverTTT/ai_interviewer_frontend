@@ -1089,10 +1089,32 @@ export default function ProfilePage() {
   const save = async () => {
     setSaving(true)
     setNote(null)
+
+    // SECURITY: Sanitize all string inputs in cvProfile and other fields before saving (prevent injection/XSS)
+    const sanitize = (val) => {
+      if (typeof val === 'string') return val.replace(/<[^>]*>?/gm, '').trim();
+      if (Array.isArray(val)) return val.map(sanitize);
+      if (val !== null && typeof val === 'object') {
+        const out = {};
+        for (const k in val) { out[k] = sanitize(val[k]); }
+        return out;
+      }
+      return val;
+    };
+
+    const sanitizedCvProfile = sanitize(cvProfile);
+    const sanitizedResumeText = sanitize(resumeText);
+    const sanitizedResumeNotes = sanitize(resumeNotes);
+    const sanitizedTargetRole = sanitize(targetRole);
+
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const token = session?.access_token
-      if (!token) return
+      if (!token) {
+        setSaving(false);
+        return;
+      }
+
       const res = await fetch(`${backendUrl}/api/profile`, {
         method: 'PUT',
         headers: {
@@ -1100,21 +1122,28 @@ export default function ProfilePage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          resumeText,
-          resumeNotes,
+          resumeText: sanitizedResumeText,
+          resumeNotes: sanitizedResumeNotes,
           jobSearchStatus,
           avatarId,
-          profileJson: { coachTargetRole: targetRole, cvProfile },
+          profileJson: { coachTargetRole: sanitizedTargetRole, cvProfile: sanitizedCvProfile },
         }),
       })
-      if (!res.ok) throw new Error('save')
-      const j = await res.json()
-      setUpdatedAt(j.resumeUpdatedAt)
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.error || 'save');
+      }
+
+      const data = await res.json()
+      setResumeUpdatedAt(data.resumeUpdatedAt || null)
+      setUpdatedAt(data.resumeUpdatedAt || null)
       setNote({ type: 'ok', text: t('profile.saveSuccess') })
-      setTimeout(() => setNote(null), 1000)
-    } catch {
+      setTimeout(() => setNote(null), 3000)
+    } catch (err) {
+      console.error('[Profile save]', err);
       setNote({ type: 'err', text: t('profile.saveErr') })
-      setTimeout(() => setNote(null), 2000)
+      setTimeout(() => setNote(null), 3000)
     } finally {
       setSaving(false)
     }

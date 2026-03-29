@@ -15,6 +15,7 @@ import GallupTestPage from './pages/GallupTestPage'
 import ExperiencesPage from './pages/ExperiencesPage'
 
 import BackgroundAurora from './components/BackgroundAurora'
+import CookieBanner from './components/CookieBanner'
 
 function Layout({ children, hideFooter = false }) {
   return (
@@ -32,6 +33,7 @@ function AppThemeShell() {
   return (
     <ThemeProvider>
       <Outlet />
+      <CookieBanner />
     </ThemeProvider>
   )
 }

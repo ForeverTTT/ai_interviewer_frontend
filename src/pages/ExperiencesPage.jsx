@@ -600,13 +600,31 @@ export default function ExperiencesPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.access_token) throw new Error('No valid session found. Please log in again.')
 
+    // SECURITY: Sanitize all string inputs on the frontend before sending to the backend (prevent injection/XSS)
+    const sanitize = (str) => typeof str === 'string' ? str.replace(/<[^>]*>?/gm, '').trim() : str;
+    
+    const sanitizedData = {
+      ...formData,
+      company: sanitize(formData.company),
+      location: sanitize(formData.location),
+      position: sanitize(formData.position),
+      department: sanitize(formData.department),
+      reflection: sanitize(formData.reflection),
+      salary: sanitize(formData.salary),
+      rounds: (formData.rounds || []).map(r => ({
+        ...r,
+        format: sanitize(r.format),
+        questions: (r.questions || []).map(sanitize)
+      }))
+    }
+
     const res = await fetch(`${backendUrl}/api/experiences`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${session.access_token}`
       },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(sanitizedData)
     })
 
     if (!res.ok) {

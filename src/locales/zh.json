@@ -489,6 +489,8 @@
     "editProfile": "编辑资料",
     "editHint": "更新您的结构化资料与简历文本 — 保存后的数据将用于模拟面试。",
     "cancelEdit": "取消编辑",
+    "securityNotice": "个人资料加密保护 · 严格防注入过滤",
+    "securityTip": "您的简历与个人资料经过端到端加密传输，且系统已启用深度防注入机制确保您的隐私安全。",
     "viewBadge": "展示",
     "viewImportHint": "上传 PDF、提取文字与 AI 解析请在「编辑资料」模式下进行。",
     "viewSectionEmpty": "暂未填写",
@@ -776,7 +778,14 @@
     "save": "保存",
     "saving": "保存中...",
     "show": "显示",
-    "hide": "隐藏"
+    "hide": "隐藏",
+    "cookie": {
+      "title": "🍪 Cookie 与隐私设置",
+      "desc": "我们使用 Cookie 以提供更安全、更优质的服务体验。继续使用即表示您同意我们的数据保护政策。",
+      "accept": "全部接受",
+      "settings": "自定义",
+      "decline": "拒绝"
+    }
   },
   "exp": {
     "badge": "真实面经 · 社区共享",
@@ -826,7 +835,9 @@
     "phRoundsFormat": "例如：技术面、HR面",
     "phRoundsDuration": "时长 (分钟)",
     "phRoundsQuestion": "面试真题",
-    "labelRemove": "删除"
+    "labelRemove": "删除",
+    "securityNotice": "数据加密传输中 · 已开启防注入过滤",
+    "securityTip": "您的面试经验将以匿名方式或仅显示昵称共享，敏感数据会被自动过滤。"
   },
   "gallup": {
     "title": "盖洛普优势测试 (Gallup Strengths Test)",

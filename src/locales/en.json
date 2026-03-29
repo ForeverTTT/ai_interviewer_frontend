@@ -489,6 +489,8 @@
     "editProfile": "Edit Profile",
     "editHint": "Update your structured data and resume text — saved data is used for mock interviews.",
     "cancelEdit": "Cancel Edit",
+    "securityNotice": "Profile Data Encryption · Anti-Injection Protection Active",
+    "securityTip": "Your resume and data are transferred via end-to-end encryption. Our deep injection filters ensure your privacy.",
     "viewBadge": "Preview",
     "viewImportHint": "PDF upload and AI parsing available in 'Edit' mode.",
     "viewSectionEmpty": "Not filled",
@@ -776,7 +778,14 @@
     "save": "Save",
     "saving": "Saving...",
     "show": "Show",
-    "hide": "Hide"
+    "hide": "Hide",
+    "cookie": {
+      "title": "🍪 Cookie & Privacy Settings",
+      "desc": "We use cookies to provide a safer and better experience. By continuing to use our service, you agree to our data protection policy.",
+      "accept": "Accept All",
+      "settings": "Settings",
+      "decline": "Decline"
+    }
   },
   "exp": {
     "badge": "Real Experiences · Community Shared",
@@ -826,7 +835,9 @@
     "phRoundsFormat": "e.g. Technical Interview",
     "phRoundsDuration": "Duration (min)",
     "phRoundsQuestion": "Question",
-    "labelRemove": "Remove"
+    "labelRemove": "Remove",
+    "securityNotice": "Secured via Encrypted Transfer · Input Sanitization Active",
+    "securityTip": "Your experience is shared anonymously or via nickname. Our system filters sensitive data to keep you safe."
   },
   "gallup": {
     "title": "Gallup Strengths Test",

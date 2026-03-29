@@ -89,11 +89,11 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white dark:bg-slate-950">
       <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-dot-grid opacity-[0.4] dark:opacity-[0.1]" />
-        
+
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-20 items-center">
             {/* Left Content */}
-            <motion.div 
+            <motion.div
               initial="hidden"
               animate="visible"
               variants={containerVariants}
@@ -101,12 +101,12 @@ export default function LandingPage() {
             >
               <div className="space-y-8">
                 <motion.div variants={itemVariants} className="section-badge w-fit bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 backdrop-blur-md">
-                   <Sparkles className="w-3.5 h-3.5" />
-                   {t('landing.badgePremium')}
+                  <Sparkles className="w-3.5 h-3.5" />
+                  {t('landing.badgePremium')}
                 </motion.div>
-                
-                <motion.h1 
-                  variants={itemVariants} 
+
+                <motion.h1
+                  variants={itemVariants}
                   className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white leading-[1.2] tracking-tight font-chinese-modern"
                 >
                   {t('landing.headline1')}
@@ -161,25 +161,25 @@ export default function LandingPage() {
               <div className="absolute inset-0 bg-primary-500/20 blur-[160px] rounded-full group-hover:bg-primary-500/30 transition-colors duration-1000" />
               <div className="relative p-2 rounded-[3.5rem] bg-gradient-to-br from-white/10 to-transparent backdrop-blur-3xl border border-white/20 shadow-2xl overflow-hidden scale-100 group-hover:scale-[1.02] transition-transform duration-1000 image-glow-primary">
                 <div className="hero-image-overlay" />
-                <img 
-                  src={darkInterviewMockup} 
+                <img
+                  src={darkInterviewMockup}
                   alt="AI Interview Premium Interface"
                   className="relative z-10 w-[640px] rounded-[3rem] shadow-2xl border border-slate-800/50"
                 />
               </div>
 
               {/* Floating Performance Indicator */}
-              <motion.div 
+              <motion.div
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 className="absolute -top-6 -right-6 z-20 p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-2xl space-y-2 hidden xl:block"
               >
-                  <div className="flex items-center gap-2 text-emerald-500 font-bold text-xs">
-                    <Zap className="w-4 h-4 fill-current" />
-                    {t('landing.previewSuccess')}
-                  </div>
-                  <div className="text-2xl font-black text-slate-900 dark:text-white">98%</div>
-                  <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('landing.previewMatchRate')}</div>
+                <div className="flex items-center gap-2 text-emerald-500 font-bold text-xs">
+                  <Zap className="w-4 h-4 fill-current" />
+                  {t('landing.previewSuccess')}
+                </div>
+                <div className="text-2xl font-black text-slate-900 dark:text-white">98%</div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('landing.previewMatchRate')}</div>
               </motion.div>
             </motion.div>
           </div>
@@ -192,7 +192,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, idx) => (
-              <motion.div 
+              <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -211,7 +211,7 @@ export default function LandingPage() {
       <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -227,7 +227,7 @@ export default function LandingPage() {
               <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
                 {t('landing.featuresSub')}
               </p>
-              
+
               <div className="grid sm:grid-cols-2 gap-6">
                 {features.map((feature, i) => (
                   <div key={i} className="p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
@@ -241,7 +241,7 @@ export default function LandingPage() {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -250,8 +250,8 @@ export default function LandingPage() {
               <div className="absolute inset-0 bg-primary-500/15 rounded-[3rem] blur-[120px] group-hover:bg-primary-500/25 transition-colors duration-1000" />
               <div className="relative p-4 rounded-[4rem] bg-gradient-to-tr from-white/5 to-white/10 backdrop-blur-2xl border border-white/10 shadow-2xl overflow-hidden hover:scale-[1.02] transition-transform duration-1000 image-glow-primary">
                 <div className="hero-image-overlay" />
-                <img 
-                  src={darkResumeMockup} 
+                <img
+                  src={darkResumeMockup}
                   alt="Premium Resume Analytics"
                   className="w-full rounded-[3rem] border border-slate-800/50 shadow-2xl"
                 />
