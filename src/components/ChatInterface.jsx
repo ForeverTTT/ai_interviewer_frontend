@@ -95,6 +95,8 @@ function useStreamingTTS(language, enabled) {
   const quotaExhaustedRef = useRef(false)
   /** Ordering chain: fetches run in parallel, but audio scheduling is serialized */
   const scheduleChainRef = useRef(Promise.resolve())
+  /** AbortControllers for in-flight TTS HTTP requests */
+  const abortControllersRef = useRef(new Set())
 
   useLayoutEffect(() => { enabledRef.current = enabled }, [enabled])
 
@@ -169,6 +171,10 @@ function useStreamingTTS(language, enabled) {
       try { src.stop(); src.disconnect() } catch { /* ignore */ }
     }
     activeSourcesRef.current.clear()
+    for (const ac of abortControllersRef.current) {
+      try { ac.abort() } catch { /* ignore */ }
+    }
+    abortControllersRef.current.clear()
     nextTimeRef.current = 0
     pendingRef.current = 0
     scheduleChainRef.current = Promise.resolve()
@@ -186,14 +192,15 @@ function useStreamingTTS(language, enabled) {
     pendingRef.current++
     setSpeaking(true)
 
-    // Reserve an ordering slot: fetches run in parallel,
-    // but scheduling waits for the previous sentence to finish first.
+    const ac = new AbortController()
+    abortControllersRef.current.add(ac)
+    const signal = ac.signal
+
     let resolveSlot
     const waitPrev = scheduleChainRef.current
     scheduleChainRef.current = new Promise(r => { resolveSlot = r })
 
     try {
-      // ── Quota exhausted: skip Gemini entirely, use browser TTS ──
       if (quotaExhaustedRef.current) {
         await waitPrev
         if (gen !== playGenRef.current) return
@@ -203,13 +210,13 @@ function useStreamingTTS(language, enabled) {
 
       const ctx = getCtx()
 
-      // ── No AudioContext: try Gemini + HTMLAudioElement, then browser TTS ──
       if (!ctx) {
         try {
           const res = await fetch(`${BACKEND_URL}/api/chat/tts`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
             body: JSON.stringify({ text, language }),
+            signal,
           })
           if (gen !== playGenRef.current) return
           if (res.status === 429) { quotaExhaustedRef.current = true; await waitPrev; speakWithBrowserTTS(text, gen); return }
@@ -225,6 +232,7 @@ function useStreamingTTS(language, enabled) {
           audio.onerror = () => { URL.revokeObjectURL(url); checkIdle() }
           await audio.play()
         } catch (e) {
+          if (e.name === 'AbortError') return
           console.warn('[TTS] Legacy fallback failed, using browser TTS', e)
           speakWithBrowserTTS(text, gen)
         }
@@ -233,12 +241,12 @@ function useStreamingTTS(language, enabled) {
 
       let handled = false
 
-      // ── Primary: streaming PCM from /tts-stream ──
       try {
         const res = await fetch(`${BACKEND_URL}/api/chat/tts-stream`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
           body: JSON.stringify({ text, language }),
+          signal,
         })
         if (gen !== playGenRef.current) return
 
@@ -284,16 +292,17 @@ function useStreamingTTS(language, enabled) {
           }
         }
       } catch (streamErr) {
+        if (streamErr.name === 'AbortError') { return }
         console.warn('[TTS-stream] Streaming failed, falling back', streamErr)
       }
 
-      // ── Fallback A: non-streaming /tts → decodeAudioData ──
       if (!handled && !quotaExhaustedRef.current && gen === playGenRef.current) {
         try {
           const res = await fetch(`${BACKEND_URL}/api/chat/tts`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
             body: JSON.stringify({ text, language }),
+            signal,
           })
           if (gen !== playGenRef.current) return
           if (res.status === 429) { quotaExhaustedRef.current = true }
@@ -324,6 +333,7 @@ function useStreamingTTS(language, enabled) {
             handled = true
           }
         } catch (fallbackErr) {
+          if (fallbackErr.name === 'AbortError') return
           console.warn('[TTS] WAV fallback failed', fallbackErr)
         }
       }
@@ -335,9 +345,11 @@ function useStreamingTTS(language, enabled) {
         speakWithBrowserTTS(text, gen)
       }
     } catch (err) {
+      if (err.name === 'AbortError') return
       console.warn('[TTS] Enqueue error, using browser TTS', err)
       speakWithBrowserTTS(text, playGenRef.current)
     } finally {
+      abortControllersRef.current.delete(ac)
       resolveSlot()
       pendingRef.current = Math.max(0, pendingRef.current - 1)
       checkIdle()
@@ -662,6 +674,7 @@ const ChatInterface = forwardRef(function ChatInterface({
     let firstChunkSent = false
     let lastAgentName = null
     let sseDone = false
+    let hasError = false
 
     try {
       const res = await fetch(`${BACKEND_URL}/api/chat/message`, {
@@ -768,6 +781,7 @@ const ChatInterface = forwardRef(function ChatInterface({
           }
 
           if (evt.type === 'error') {
+            hasError = true
             setMessages(prev => prev.map(m =>
               m.id === aiId ? { ...m, content: m.content || t('chat.errRetry'), streaming: false } : m
             ))
@@ -775,9 +789,11 @@ const ChatInterface = forwardRef(function ChatInterface({
         }
       }
 
-      setMessages(prev => prev.map(m =>
-        m.id === aiId ? { ...m, content: sanitizeSquareBrackets(fullText), streaming: false } : m
-      ))
+      if (!hasError || fullText) {
+        setMessages(prev => prev.map(m =>
+          m.id === aiId ? { ...m, content: sanitizeSquareBrackets(fullText || m.content), streaming: false } : m
+        ))
+      }
     } catch (err) {
       if (err.name === 'AbortError') {
         // StrictMode cancelled the first call — silently remove the orphan bubble
