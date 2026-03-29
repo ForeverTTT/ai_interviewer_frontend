@@ -12,6 +12,7 @@ import InterviewReportPage from './pages/InterviewReportPage'
 import AuthCallbackPage from './pages/AuthCallbackPage'
 import ProfilePage from './pages/ProfilePage'
 import GallupTestPage from './pages/GallupTestPage'
+import ExperiencesPage from './pages/ExperiencesPage'
 
 import BackgroundAurora from './components/BackgroundAurora'
 
@@ -103,6 +104,12 @@ export default function App() {
                 <GallupTestPage />
               </Layout>
             </ProtectedRoute>
+          } />
+
+          <Route path="/experiences" element={
+            <Layout>
+              <ExperiencesPage />
+            </Layout>
           } />
         </Route>
       </Routes>

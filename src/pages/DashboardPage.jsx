@@ -368,7 +368,7 @@ export default function DashboardPage() {
                 </span>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-6 max-h-[480px] overflow-y-auto pr-2 custom-scrollbar">
                 {loading ? (
                   <div className="py-20 flex flex-col items-center justify-center gap-4 text-slate-400">
                     <Loader2 className="w-8 h-8 animate-spin" />
@@ -381,7 +381,7 @@ export default function DashboardPage() {
                     </Link>
                   </div>
                 ) : (
-                  interviews.slice(0, 5).map((interview, i) => {
+                  interviews.map((interview, i) => {
                     const d = new Date(interview.created_at)
                     const month = d.toLocaleDateString(localeTag, { month: 'short' })
                     const day = d.toLocaleDateString(localeTag, { day: '2-digit' })
@@ -403,7 +403,9 @@ export default function DashboardPage() {
                             {interview.position}
                           </Link>
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-slate-500">{interview.language} · {interview.duration} {t('dashboard.durMin')}</span>
+                            <span className="text-xs font-medium text-slate-500">
+                              {d.toLocaleTimeString(localeTag, { hour: '2-digit', minute: '2-digit' })} · {interview.language} · {interview.duration} {t('dashboard.durMin')}
+                            </span>
                             <button
                               onClick={() => requestDeleteInterview(interview.id, interview.position)}
                               className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 transition-all hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg"

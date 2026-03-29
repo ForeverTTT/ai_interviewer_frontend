@@ -16,6 +16,7 @@
     "signOut": "Abmelden",
     "profile": "Profil",
     "gallup": "Stärkentest",
+    "experiences": "Erfahrungen",
     "chooseAvatar": "Profilbild wählen"
   },
   "footer": {
@@ -263,7 +264,15 @@
     "mlLength100": "100 Wörter (Kompakt)",
     "mlLength200": "200 Wörter (Standard)",
     "mlLength300": "300 Wörter (Tiefer)",
-    "mlPlaceholder": "Klicken, damit die KI schreibt..."
+    "mlPlaceholder": "Klicken, damit die KI schreibt...",
+    "historyTitle": "Verlauf",
+    "historyEmpty": "Noch kein Verlauf. Einträge werden nach jedem Interview gespeichert.",
+    "historyUse": "Verwenden",
+    "historyDelete": "Löschen",
+    "historyClear": "Alle löschen",
+    "historyClearConfirm": "Alle Verlaufseinträge löschen?",
+    "historyCount": "{{n}} Einträge",
+    "historyAgo": "vor {{t}}"
   },
   "profile": {
     "title": "Profil & Lebenslauf",
@@ -768,14 +777,63 @@
     "show": "Anzeigen",
     "hide": "Ausblenden"
   },
+  "exp": {
+    "badge": "Echte Erfahrungen · Community",
+    "title": "Erfahrungsberichte",
+    "subtitle": "Echte Interview-Erfahrungen von Studierenden in Deutschland — von DAX-Unternehmen bis Hochschulen",
+    "loading": "Erfahrungen werden geladen...",
+    "error": "Laden fehlgeschlagen. Bitte versuchen Sie es später erneut.",
+    "noResults": "Keine passenden Erfahrungen gefunden.",
+    "noMyResults": "Sie haben noch keine Erfahrungen gepostet. Klicken Sie auf den Button oben, um Ihren Weg zu teilen!",
+    "myBadge": "Ihre Beiträge",
+    "mySubtitle": "Verwalten und überdenken Sie die Interview-Erfahrungen, die Sie mit der Community geteilt haben.",
+    "postBtn": "Erfahrung teilen",
+    "postTitle": "Teilen Sie Ihren Weg",
+    "postSubtitle": "Helfen Sie anderen Studierenden, indem Sie Ihren Interviewprozess und Tipps teilen.",
+    "postCompany": "Name des Unternehmens / der Schule",
+    "postPosition": "Position / Programm",
+    "postLocation": "Ort (z.B. München, Remote)",
+    "postDepartment": "Abteilung (Optional)",
+    "submit": "Erfahrung veröffentlichen",
+    "confirmDelete": "Sind Sie sicher, dass Sie diese Erfahrung löschen möchten? Sie wird aus der öffentlichen Bibliothek entfernt, aber eine Kopie wird zur Sicherheit in unserem Archiv aufbewahrt.",
+    "totalCount": "Insgesamt {{n}} Erfahrungen",
+    "filterAll": "Alle",
+    "filterWork": "Praktikum / Werkstudent",
+    "filterSchool": "Hochschulzulassung",
+    "searchPlaceholder": "Unternehmen, Position, Stichworte suchen...",
+    "roundLabel": "Runde {{n}}",
+    "questionsTitle": "Interviewfragen",
+    "reflectionTitle": "Reflexion & Tipps",
+    "result": "Ergebnis",
+    "salary": "Gehalt",
+    "resultOffer": "Angebot erhalten",
+    "resultRejected": "Abgelehnt",
+    "resultAdmitted": "Zugelassen",
+    "resultPass": "Bestanden",
+    "resultFail": "Nicht bestanden",
+    "tagWork": "Arbeit",
+    "tagSchool": "Hochschule",
+    "expand": "Details anzeigen",
+    "collapse": "Einklappen",
+    "labelType": "Typ",
+    "labelResult": "Ergebnis",
+    "labelRounds": "Interview-Runden",
+    "btnPulseRound": "Runde hinzufügen",
+    "btnPulseQuestion": "Frage hinzufügen",
+    "labelReflection": "Reflexion",
+    "phRoundsFormat": "z.B. Technisches Interview",
+    "phRoundsDuration": "Dauer (Min)",
+    "phRoundsQuestion": "Interviewfrage",
+    "labelRemove": "Löschen"
+  },
   "gallup": {
     "title": "Gallup Stärkentest",
     "subtitle": "Entdecken Sie Ihre Kerntalente und entfalten Sie Ihr Potenzial",
     "domains": {
       "executing": "Durchführung (Executing)",
-      "influencing": "Einflussnahme (Influencing)",
+      "influencing": "Einfluss (Influence)",
       "relationship": "Beziehungsaufbau (Relationship)",
-      "strategic": "Strategisches Denken (Strategic)"
+      "strategic": "Strategie (Strategic)"
     },
     "startBtn": "Test starten",
     "resumeBtn": "Test fortsetzen",
@@ -849,53 +907,6 @@
       "presenceIndex": "Präsenz-Index",
       "roadmapBtn": "Roadmap ansehen",
       "disclaimer": "* Basierend auf Ihren Talenten im Kontext deutscher Unternehmensstandards."
-    },
-    "questions": [
-      {
-        "id": 1,
-        "text": "Ich setze extrem hohe Qualitätsstandards und strebe nach Exzellenz.",
-        "domain": "executing"
-      },
-      {
-        "id": 2,
-        "text": "Ich leite andere ganz natürlich durch Logik und Leidenschaft.",
-        "domain": "influencing"
-      },
-      {
-        "id": 3,
-        "text": "Ich habe eine feine Wahrnehmung für Stimmungen und baue Empathie auf.",
-        "domain": "relationship"
-      },
-      {
-        "id": 4,
-        "text": "Ich blicke gewohnheitsmäßig über Grenzen hinaus und denke strategisch.",
-        "domain": "strategic"
-      },
-      {
-        "id": 5,
-        "text": "Habe ich ein Ziel, zeige ich große Ausdauer und genieße den Prozess.",
-        "domain": "executing"
-      },
-      {
-        "id": 6,
-        "text": "In unsicheren Lagen übernehme ich instinktiv die Führung.",
-        "domain": "influencing"
-      },
-      {
-        "id": 7,
-        "text": "Teamzusammenhalt ist für mich der Schlüssel zum Erfolg.",
-        "domain": "relationship"
-      },
-      {
-        "id": 8,
-        "text": "Ich liebe es, Informationen zu Mustern zu zerlegen.",
-        "domain": "strategic"
-      },
-      {
-        "id": 13,
-        "text": "Commitment ist für mich ein Kernwert, auch unter Druck.",
-        "domain": "executing"
-      }
-    ]
+    }
   }
 }

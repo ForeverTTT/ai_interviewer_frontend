@@ -30,7 +30,7 @@ import GallupReport from '../components/GallupReport'
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 export default function GallupTestPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
   
@@ -41,10 +41,36 @@ export default function GallupTestPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [isLoadingProgress, setIsLoadingProgress] = useState(true)
 
+  const [dbQuestions, setDbQuestions] = useState([])
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(true)
+
   const questions = useMemo(() => {
-    const raw = t('gallup.questions', { returnObjects: true })
-    return Array.isArray(raw) ? raw : []
-  }, [t])
+    if (dbQuestions.length === 0) return []
+    const langKey = (i18n.language || 'zh').split('-')[0] // 'zh-CN' -> 'zh'
+    
+    return dbQuestions.map(q => ({
+      id: q.index_number,
+      text: q[`question_${langKey}`] || q.question_en, // Fallback to EN if lang not found
+      domain: q.category
+    }))
+  }, [dbQuestions, i18n.language])
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/gallup/questions`)
+        if (res.ok) {
+          const data = await res.json()
+          setDbQuestions(data)
+        }
+      } catch (err) {
+        console.error('Failed to fetch questions from DB:', err)
+      } finally {
+        setIsLoadingQuestions(false)
+      }
+    }
+    fetchQuestions()
+  }, [])
 
   useEffect(() => {
     const fetchProgress = async () => {
@@ -59,7 +85,11 @@ export default function GallupTestPage() {
         if (res.ok) {
           const data = await res.json()
           if (data.status === 'completed') {
-            setResults(data.results)
+            if (Array.isArray(data.results)) {
+              setResults({ scores: data.results, analysis: null })
+            } else {
+              setResults(data.results)
+            }
             setStep('report')
           } else if (data.status === 'in_progress') {
             setAnswers(data.answers || {})
@@ -104,6 +134,7 @@ export default function GallupTestPage() {
   }
 
   const handleSubmit = async () => {
+    setStep('loading')
     const domainScores = { executing: 0, influencing: 0, relationship: 0, strategic: 0 }
     const domainCounts = { executing: 0, influencing: 0, relationship: 0, strategic: 0 }
     
@@ -121,14 +152,32 @@ export default function GallupTestPage() {
       score: Math.min(100, Math.round((domainScores[key] / (domainCounts[key] * 5)) * 100))
     })).sort((a, b) => b.score - a.score)
 
-    setResults(finalResults)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      
+      const langKey = (i18n.language || 'zh').split('-')[0]
+      const res = await fetch(`${API_URL}/api/gallup/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ answers, results: finalResults, language: langKey, status: 'completed' })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setResults(data.results)
+      } else {
+        setResults({ scores: finalResults, analysis: null })
+      }
+    } catch(e) {
+      console.error('Analyze error:', e)
+      setResults({ scores: finalResults, analysis: null })
+    }
     setStep('report')
-    await saveToBackend(answers, finalResults, true)
   }
 
   const progress = questions.length > 0 ? (Object.keys(answers).length / questions.length) * 100 : 0
 
-  if (isLoadingProgress) {
+  if (isLoadingQuestions || isLoadingProgress) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950">
         <Loader2 className="w-10 h-10 text-primary-600 animate-spin" />
@@ -143,6 +192,16 @@ export default function GallupTestPage() {
           setAnswers({}); setResults(null); setCurrentIndex(0); setStep('intro');
           saveToBackend({}, null, false);
         }} />
+      </div>
+    )
+  }
+
+  if (step === 'loading') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-slate-950 space-y-6">
+        <Sparkles className="w-12 h-12 text-primary-500 animate-pulse" />
+        <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-widest">{t('gallup.loading')}</h2>
+        <p className="text-slate-500 text-sm">Fetching and assembling your structured dimension analysis...</p>
       </div>
     )
   }

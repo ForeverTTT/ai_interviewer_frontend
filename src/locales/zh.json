@@ -16,6 +16,8 @@
     "signOut": "退出登录",
     "profile": "个人资料",
     "gallup": "优势测试",
+    "experiences": "面经库",
+    "myExperiences": "我的面经",
     "chooseAvatar": "选择个人头像"
   },
   "footer": {
@@ -263,7 +265,15 @@
     "mlLength100": "100词 (精简)",
     "mlLength200": "200词 (标准)",
     "mlLength300": "300词 (深度)",
-    "mlPlaceholder": "点击上方按钮，AI 专家将为您撰写..."
+    "mlPlaceholder": "点击上方按钮，AI 专家将为您撰写...",
+    "historyTitle": "历史记录",
+    "historyEmpty": "暂无历史记录，完成一次面试后将自动保存",
+    "historyUse": "使用",
+    "historyDelete": "删除",
+    "historyClear": "清空全部",
+    "historyClearConfirm": "确定清空所有历史记录？",
+    "historyCount": "{{n}} 条记录",
+    "historyAgo": "{{t}}前"
   },
   "profile": {
     "title": "个人资料与简历",
@@ -768,6 +778,55 @@
     "show": "显示",
     "hide": "隐藏"
   },
+  "exp": {
+    "badge": "真实面经 · 社区共享",
+    "title": "面经库",
+    "subtitle": "来自在德留学生的真实面经，覆盖大厂、独角兽与高校，帮你少踩坑、多拿 Offer",
+    "loading": "正在加载面经...",
+    "error": "加载失败，请刷新重试。",
+    "noResults": "没有找到匹配的面经。",
+    "noMyResults": "你还没有发布过面经。点击上方按钮，分享你的面试经历吧！",
+    "myBadge": "你的贡献",
+    "mySubtitle": "管理和回顾你分享给社区的面试经验。",
+    "postBtn": "分享面经",
+    "postTitle": "分享你的经历",
+    "postSubtitle": "通过分享你的面试流程和心得，帮助更多留德小伙伴。",
+    "postCompany": "公司 / 学校名称",
+    "postPosition": "岗位 / 项目方向",
+    "postLocation": "地点 (例如慕尼黑, 远程)",
+    "postDepartment": "部门 (可选)",
+    "submit": "发布面经",
+    "confirmDelete": "你确定要删除这条面经吗？它将从公共库中移除，但我们会出于安全考虑在存档中保留备份。",
+    "totalCount": "共 {{n}} 条面经",
+    "filterAll": "全部",
+    "filterWork": "实习 / 学生工",
+    "filterSchool": "高校录取",
+    "searchPlaceholder": "搜索公司、岗位、关键词...",
+    "roundLabel": "第 {{n}} 轮",
+    "questionsTitle": "面试真题",
+    "reflectionTitle": "心得与小贴士",
+    "result": "结果",
+    "salary": "薪资",
+    "resultOffer": "拿到 Offer",
+    "resultRejected": "未通过",
+    "resultAdmitted": "录取",
+    "resultPass": "通过",
+    "resultFail": "未通过",
+    "tagWork": "工作",
+    "tagSchool": "学校",
+    "expand": "展开详情",
+    "collapse": "收起",
+    "labelType": "类型",
+    "labelResult": "面试结果",
+    "labelRounds": "面试轮次",
+    "btnPulseRound": "添加轮次",
+    "btnPulseQuestion": "添加题目",
+    "labelReflection": "心得体会",
+    "phRoundsFormat": "例如：技术面、HR面",
+    "phRoundsDuration": "时长 (分钟)",
+    "phRoundsQuestion": "面试真题",
+    "labelRemove": "删除"
+  },
   "gallup": {
     "title": "盖洛普优势测试 (Gallup Strengths Test)",
     "subtitle": "发现你的核心天赋，开启职场成功之路",
@@ -849,108 +908,6 @@
       "presenceIndex": "显现指数",
       "roadmapBtn": "查看完整发展规划",
       "disclaimer": "* 基于您的首要才干特征及其在德企语境下的映射分析。"
-    },
-    "questions": [
-      {
-        "id": 1,
-        "text": "我对自己产出的工作质量有着近乎严苛的标准，并始终致力于实现卓越的执行结果。",
-        "domain": "executing"
-      },
-      {
-        "id": 2,
-        "text": "我发现自己能够自然地通过逻辑和热情引导他人，使他们认同并支持我的观点。",
-        "domain": "influencing"
-      },
-      {
-        "id": 3,
-        "text": "我具备敏锐的情感触觉，能够洞察他人的微小情绪变化并建立深刻的共鸣。",
-        "domain": "relationship"
-      },
-      {
-        "id": 4,
-        "text": "我习惯于跳出当下的局限，系统性地思考各种潜在的可能性及未来的战略蓝图。",
-        "domain": "strategic"
-      },
-      {
-        "id": 5,
-        "text": "一旦设定目标，我会表现出极强的毅力，不达目的绝不罢休，且享受攻克难关的过程。",
-        "domain": "executing"
-      },
-      {
-        "id": 6,
-        "text": "在复杂或不确定的局势中，我往往会本能地接过指挥权，为团队指明前进方向。",
-        "domain": "influencing"
-      },
-      {
-        "id": 7,
-        "text": "我深信团队的凝聚力是成功的核心，并致力于创造一个包容且高度协作的工作环境。",
-        "domain": "relationship"
-      },
-      {
-        "id": 8,
-        "text": "我热衷于拆解复杂信息，通过严密的逻辑推演发现隐藏在数据背后的底层规律。",
-        "domain": "strategic"
-      },
-      {
-        "id": 9,
-        "text": "我善于构建高效的运作流程，通过优化资源配置确保每一个环节都能发挥最大效能。",
-        "domain": "executing"
-      },
-      {
-        "id": 10,
-        "text": "在公众场合或社交互动中，我总能以积极的状态影响氛围，并将互动转化为机会。",
-        "domain": "influencing"
-      },
-      {
-        "id": 11,
-        "text": "我倾向于投资他人的成长，看到他人潜力的激发会给我带来极大的职业成就感。",
-        "domain": "relationship"
-      },
-      {
-        "id": 12,
-        "text": "面对挑战时，我总能另辟蹊径，提出具有颠覆性的创意或极具远见的解决方案。",
-        "domain": "strategic"
-      },
-      {
-        "id": 13,
-        "text": "我将承诺视为最核心的价值，无论面临多大的外部压力，都会坚守职责的底线。",
-        "domain": "executing"
-      },
-      {
-        "id": 14,
-        "text": "我擅长通过极具感染力的表达方式，在更广阔的层面上传递愿景并激发听众的行动。",
-        "domain": "influencing"
-      },
-      {
-        "id": 15,
-        "text": "我具有卓越的冲突解决能力，能够在多元化的诉求中找到平衡点并驱动共识。",
-        "domain": "relationship"
-      },
-      {
-        "id": 16,
-        "text": "在采取行动之前，我会进行全方位的风险评估和详尽的规划，确胜券在握。",
-        "domain": "strategic"
-      },
-      {
-        "id": 17,
-        "text": "我拥有一种内在的竞争动力，不断追求自我超越，并将‘平庸’视为最大的挑战。",
-        "domain": "executing"
-      },
-      {
-        "id": 18,
-        "text": "我喜欢在竞争环境中验证自己的实力，并将胜利视为衡量个人成就的重要指标。",
-        "domain": "influencing"
-      },
-      {
-        "id": 19,
-        "text": "我极其看重基于深厚信任的长期伙伴关系，而非依赖于短期利益的临时互动。",
-        "domain": "relationship"
-      },
-      {
-        "id": 20,
-        "text": "我拥有一种持续的求知欲，乐于探索未知领域，并能快速整合不同领域的知识。",
-        "domain": "strategic"
-      }
-    ]
+    }
   }
 }

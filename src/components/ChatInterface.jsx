@@ -78,303 +78,285 @@ function WaveIcon({ active }) {
   )
 }
 
-/* ── Gemini TTS hook (with browser-TTS fallback) ──────────────── */
+/* ── Streaming TTS hook (Web Audio API + chunked PCM) ──────────── */
 
-/** Chrome 等浏览器常在首次调用时 voices 仍为空，需等 voiceschanged */
-function waitForSpeechVoices(timeoutMs = 2500) {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return Promise.resolve()
-  if (window.speechSynthesis.getVoices().length > 0) return Promise.resolve()
-  return new Promise((resolve) => {
-    const synth = window.speechSynthesis
-    const done = () => {
-      synth.removeEventListener('voiceschanged', done)
-      resolve()
-    }
-    synth.addEventListener('voiceschanged', done)
-    setTimeout(() => {
-      synth.removeEventListener('voiceschanged', done)
-      resolve()
-    }, timeoutMs)
-  })
-}
+const TTS_SAMPLE_RATE = 24000
+const TTS_MIN_CHUNK_BYTES = 4800 // ~100ms of 16-bit mono @ 24kHz
 
-function useGeminiTTS(language, enabled) {
-  const audioRef = useRef(null)   // current HTMLAudioElement
+function useStreamingTTS(language, enabled) {
+  const ctxRef = useRef(null)
   const enabledRef = useRef(enabled)
-  /** 每次 stop() +1；异步 TTS 在 play 前比对，避免已离开页面仍开播 */
   const playGenRef = useRef(0)
   const [speaking, setSpeaking] = useState(false)
-  const langCode = language === 'Deutsch' ? 'de-DE' : 'en-US'
+  const activeSourcesRef = useRef(new Set())
+  const pendingRef = useRef(0)
+  const nextTimeRef = useRef(0)
+  const legacyAudioRef = useRef(null)
+  const quotaExhaustedRef = useRef(false)
+  /** Ordering chain: fetches run in parallel, but audio scheduling is serialized */
+  const scheduleChainRef = useRef(Promise.resolve())
+  /** AbortControllers for in-flight TTS HTTP requests */
+  const abortControllersRef = useRef(new Set())
 
-  useLayoutEffect(() => {
-    enabledRef.current = enabled
-  }, [enabled])
+  useLayoutEffect(() => { enabledRef.current = enabled }, [enabled])
 
-  /** Stop any currently playing audio immediately */
-  const stop = useCallback(() => {
-    playGenRef.current += 1
-    if (audioRef.current) {
-      try {
-        const a = audioRef.current
-        a.pause()
-        a.currentTime = 0
-        a.src = ''
-        a.removeAttribute('src')
-        a.load()
-      } catch { /* ignore */ }
-      audioRef.current = null
+  const hasWebAudio = typeof window !== 'undefined' && !!(window.AudioContext || window.webkitAudioContext)
+  const hasSpeechSynth = typeof window !== 'undefined' && !!window.speechSynthesis
+
+  const getCtx = useCallback(() => {
+    if (!hasWebAudio) return null
+    const AC = window.AudioContext || window.webkitAudioContext
+    if (!ctxRef.current || ctxRef.current.state === 'closed') {
+      ctxRef.current = new AC({ sampleRate: TTS_SAMPLE_RATE })
     }
-    try {
-      window.speechSynthesis?.cancel()
-      window.speechSynthesis?.resume() // Force unblock
-    } catch { /* ignore */ }
+    if (ctxRef.current.state === 'suspended') ctxRef.current.resume()
+    return ctxRef.current
+  }, [hasWebAudio])
+
+  const checkIdle = useCallback(() => {
+    if (activeSourcesRef.current.size === 0 && pendingRef.current === 0) {
+      setSpeaking(false)
+    }
+  }, [])
+
+  const scheduleChunk = useCallback((ctx, int16, gen) => {
+    if (gen !== playGenRef.current || int16.length === 0) return
+
+    const floats = new Float32Array(int16.length)
+    for (let i = 0; i < int16.length; i++) floats[i] = int16[i] / 32768
+
+    const audioBuf = ctx.createBuffer(1, floats.length, TTS_SAMPLE_RATE)
+    audioBuf.getChannelData(0).set(floats)
+
+    const src = ctx.createBufferSource()
+    const gainNode = ctx.createGain()
+    src.buffer = audioBuf
+
+    src.connect(gainNode)
+    gainNode.connect(ctx.destination)
+
+    const now = ctx.currentTime
+    const startAt = Math.max(nextTimeRef.current, now + 0.005)
+    
+    // --- Precise Anti-Pop Ramp (Synced to startAt) ---
+    const fadeTime = 0.020 // 20ms fade-in window
+    gainNode.gain.setValueAtTime(0, startAt)
+    gainNode.gain.linearRampToValueAtTime(1, startAt + fadeTime)
+
+    src.start(startAt)
+    nextTimeRef.current = startAt + audioBuf.duration
+
+    activeSourcesRef.current.add(src)
+    src.onended = () => {
+      activeSourcesRef.current.delete(src)
+      checkIdle()
+    }
+  }, [checkIdle])
+
+  /** Browser SpeechSynthesis — last resort when Gemini quota is exhausted */
+  const speakWithBrowserTTS = useCallback((text, gen) => {
+    if (!hasSpeechSynth || gen !== playGenRef.current) return
+    const synth = window.speechSynthesis
+    const utter = new SpeechSynthesisUtterance(text)
+    utter.lang = language === 'Deutsch' ? 'de-DE' : 'en-US'
+    utter.rate = 1.05
+    utter.onend = () => { if (gen === playGenRef.current) checkIdle() }
+    utter.onerror = () => { if (gen === playGenRef.current) checkIdle() }
+    synth.speak(utter)
+  }, [language, hasSpeechSynth, checkIdle])
+
+  const stop = useCallback(() => {
+    playGenRef.current++
+    for (const src of activeSourcesRef.current) {
+      try { src.stop(); src.disconnect() } catch { /* ignore */ }
+    }
+    activeSourcesRef.current.clear()
+    for (const ac of abortControllersRef.current) {
+      try { ac.abort() } catch { /* ignore */ }
+    }
+    abortControllersRef.current.clear()
+    nextTimeRef.current = 0
+    pendingRef.current = 0
+    scheduleChainRef.current = Promise.resolve()
+    if (legacyAudioRef.current) {
+      try { legacyAudioRef.current.pause(); legacyAudioRef.current.src = '' } catch { /* ignore */ }
+      legacyAudioRef.current = null
+    }
+    try { window.speechSynthesis?.cancel() } catch { /* ignore */ }
     setSpeaking(false)
   }, [])
 
-  /**
-   * Speak `text` using Gemini neural TTS.
-   * Falls back to browser SpeechSynthesis on API error.
-   */
-  const speak = useCallback(async (text, authToken) => {
+  const enqueue = useCallback(async (text, authToken) => {
     if (!enabledRef.current || !text?.trim()) return
-    stop()
-    const genAfterStop = playGenRef.current
-
+    const gen = playGenRef.current
+    pendingRef.current++
     setSpeaking(true)
 
-    // ── Try Gemini TTS first ─────────────────────────────────
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/chat/tts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-        body: JSON.stringify({ text, language }),
-      })
+    const ac = new AbortController()
+    abortControllersRef.current.add(ac)
+    const signal = ac.signal
 
-      if (!enabledRef.current || playGenRef.current !== genAfterStop) {
-        setSpeaking(false)
+    let resolveSlot
+    const waitPrev = scheduleChainRef.current
+    scheduleChainRef.current = new Promise(r => { resolveSlot = r })
+
+    try {
+      if (quotaExhaustedRef.current) {
+        await waitPrev
+        if (gen !== playGenRef.current) return
+        speakWithBrowserTTS(text, gen)
         return
       }
 
-      if (!res.ok) {
-        let detail = ''
+      const ctx = getCtx()
+
+      if (!ctx) {
         try {
-          const bodyText = await res.text()
-          try {
-            const j = JSON.parse(bodyText)
-            detail = String(j.details || j.hint || j.error || bodyText)
-          } catch {
-            detail = bodyText
-          }
-        } catch { /* ignore */ }
-        const msg = detail ? detail.slice(0, 280) : ''
-        throw new Error(`TTS HTTP ${res.status}${msg ? ` — ${msg}` : ''}`)
-      }
-
-      const blob = await res.blob()
-      if (!enabledRef.current || playGenRef.current !== genAfterStop) {
-        setSpeaking(false)
+          const res = await fetch(`${BACKEND_URL}/api/chat/tts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+            body: JSON.stringify({ text, language }),
+            signal,
+          })
+          if (gen !== playGenRef.current) return
+          if (res.status === 429) { quotaExhaustedRef.current = true; await waitPrev; speakWithBrowserTTS(text, gen); return }
+          if (!res.ok) { await waitPrev; speakWithBrowserTTS(text, gen); return }
+          const blob = await res.blob()
+          if (gen !== playGenRef.current) return
+          await waitPrev
+          if (gen !== playGenRef.current) return
+          const url = URL.createObjectURL(blob)
+          const audio = new Audio(url)
+          legacyAudioRef.current = audio
+          audio.onended = () => { URL.revokeObjectURL(url); checkIdle() }
+          audio.onerror = () => { URL.revokeObjectURL(url); checkIdle() }
+          await audio.play()
+        } catch (e) {
+          if (e.name === 'AbortError') return
+          console.warn('[TTS] Legacy fallback failed, using browser TTS', e)
+          speakWithBrowserTTS(text, gen)
+        }
         return
       }
 
-      const url = URL.createObjectURL(blob)
-      const audio = new Audio(url)
-      audioRef.current = audio
-
-      audio.onended = audio.onerror = () => {
-        URL.revokeObjectURL(url)
-        audioRef.current = null
-        setSpeaking(false)
-      }
+      let handled = false
 
       try {
-        // 用户可能在 await fetch 期间关掉语音或离开页面
-        if (!enabledRef.current || playGenRef.current !== genAfterStop) {
-          URL.revokeObjectURL(url)
-          audioRef.current = null
-          setSpeaking(false)
-          return
-        }
-        setSpeaking(true)
-        audio.volume = 1
-        await audio.play()
-        if (playGenRef.current !== genAfterStop) {
-          audio.onended = audio.onerror = null
-          URL.revokeObjectURL(url)
-          try {
-            audio.pause()
-            audio.src = ''
-          } catch { /* ignore */ }
-          if (audioRef.current === audio) audioRef.current = null
-          setSpeaking(false)
-          return
-        }
-        return
-      } catch (playErr) {
-        URL.revokeObjectURL(url)
-        audioRef.current = null
-        console.warn('[TTS] Audio play blocked or failed, trying browser TTS:', playErr?.message)
-      }
-    } catch (err) {
-      console.warn('[TTS] Gemini TTS failed, falling back to browser TTS:', err.message)
-    }
-
-    if (!enabledRef.current || playGenRef.current !== genAfterStop) {
-      setSpeaking(false)
-      return
-    }
-
-    // ── Browser SpeechSynthesis fallback ────────────────────
-    try {
-      const synth = window.speechSynthesis
-      synth.cancel()
-      await waitForSpeechVoices()
-
-      if (playGenRef.current !== genAfterStop) {
-        setSpeaking(false)
-        return
-      }
-
-      const voices = synth.getVoices()
-      const pre = langCode.split('-')[0]
-      // Prefer OS neural / premium voices; slightly slower rate reads less "robotic"
-      const voice =
-        voices.find(v => v.lang.startsWith(langCode) && /neural|premium|natural|online natural/i.test(v.name)) ||
-        voices.find(v => v.lang.startsWith(langCode) && /microsoft.*(hedda|katja|conrad|ingrid|stefan)/i.test(v.name)) ||
-        voices.find(v => v.lang.startsWith(langCode) && /google|samantha|daniel|karen|moira|fiona|serena/i.test(v.name)) ||
-        voices.find(v => v.lang.startsWith(langCode) && /natural|online/i.test(v.name)) ||
-        voices.find(v => v.lang.startsWith(langCode) && /google/i.test(v.name)) ||
-        voices.find(v => v.lang.startsWith(langCode)) ||
-        voices.find(v => v.lang.startsWith(pre)) ||
-        null
-
-      const utt = new SpeechSynthesisUtterance(text)
-      utt.lang = langCode
-      utt.rate = langCode.startsWith('de') ? 0.9 : 0.92
-      utt.pitch = 0.98
-      if (voice) utt.voice = voice
-
-      utt.onend = utt.onerror = () => setSpeaking(false)
-      if (playGenRef.current !== genAfterStop) {
-        setSpeaking(false)
-        return
-      }
-      setSpeaking(true)
-      window.speechSynthesis?.resume() // Safety wake
-      synth.speak(utt)
-    } catch {
-      setSpeaking(false)
-    }
-  }, [language, langCode, stop])
-
-  /**
-   * 神经 TTS 先拉取并等到真正开始出声（playing / utterance.onstart），再让调用方展示文字，避免「字先出、声晚到」。
-   */
-  const speakWhenPlaying = useCallback(async (text, authToken) => {
-    if (!text?.trim() || !enabledRef.current) return
-    stop()
-    const genAfterStop = playGenRef.current
-    setSpeaking(true)
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/chat/tts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-        body: JSON.stringify({ text, language }),
-      })
-      if (playGenRef.current !== genAfterStop) {
-        setSpeaking(false)
-        return
-      }
-      if (!res.ok) throw new Error(`TTS HTTP ${res.status}`)
-      const blob = await res.blob()
-      if (playGenRef.current !== genAfterStop) {
-        setSpeaking(false)
-        return
-      }
-      const objectUrl = URL.createObjectURL(blob)
-      const audio = new Audio(objectUrl)
-      audioRef.current = audio
-      audio.volume = 1
-      const revokeAndClear = () => {
-        URL.revokeObjectURL(objectUrl)
-        if (audioRef.current === audio) audioRef.current = null
-        setSpeaking(false)
-      }
-      audio.onended = revokeAndClear
-      audio.onerror = revokeAndClear
-
-      await new Promise((resolve, reject) => {
-        const onPlaying = () => {
-          audio.removeEventListener('playing', onPlaying)
-          resolve()
-        }
-        // Safety timeout: if it doesn't start playing in 5 seconds, proceed anyway
-        const tmr = setTimeout(() => {
-          audio.removeEventListener('playing', onPlaying)
-          resolve()
-        }, 5000)
-
-        audio.addEventListener('playing', onPlaying, { once: true })
-        audio.play().catch((err) => {
-          clearTimeout(tmr)
-          audio.removeEventListener('playing', onPlaying)
-          revokeAndClear()
-          reject(err)
+        const res = await fetch(`${BACKEND_URL}/api/chat/tts-stream`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+          body: JSON.stringify({ text, language }),
+          signal,
         })
-      })
-      if (playGenRef.current !== genAfterStop) {
-        revokeAndClear()
-      }
-    } catch (err) {
-      if (playGenRef.current !== genAfterStop) {
-        setSpeaking(false)
-        return
-      }
-      try {
-        const synth = window.speechSynthesis
-        synth.cancel()
-        await waitForSpeechVoices()
-        if (playGenRef.current !== genAfterStop) {
-          setSpeaking(false)
-          return
-        }
-        const voices = synth.getVoices()
-        const pre = langCode.split('-')[0]
-        const voice =
-          voices.find(v => v.lang.startsWith(langCode) && /neural|premium|natural|online natural/i.test(v.name)) ||
-          voices.find(v => v.lang.startsWith(langCode) && /microsoft.*(hedda|katja|conrad|ingrid|stefan)/i.test(v.name)) ||
-          voices.find(v => v.lang.startsWith(langCode) && /google|samantha|daniel|karen|moira|fiona|serena/i.test(v.name)) ||
-          voices.find(v => v.lang.startsWith(langCode) && /natural|online/i.test(v.name)) ||
-          voices.find(v => v.lang.startsWith(langCode) && /google/i.test(v.name)) ||
-          voices.find(v => v.lang.startsWith(langCode)) ||
-          voices.find(v => v.lang.startsWith(pre)) ||
-          null
+        if (gen !== playGenRef.current) return
 
-        const utt = new SpeechSynthesisUtterance(text)
-        utt.lang = langCode
-        utt.rate = langCode.startsWith('de') ? 0.9 : 0.92
-        utt.pitch = 0.98
-        if (voice) utt.voice = voice
+        if (res.status === 429) {
+          quotaExhaustedRef.current = true
+        } else if (res.ok && res.body) {
+          handled = true
+          const reader = res.body.getReader()
+          let accum = new Uint8Array(0)
+          let orderedIn = false
 
-        await new Promise((resolve, reject) => {
-          utt.onstart = () => resolve()
-          utt.onend = utt.onerror = () => setSpeaking(false)
-          if (playGenRef.current !== genAfterStop) {
-            setSpeaking(false)
-            reject(new Error('cancelled'))
-            return
+          while (true) {
+            const { done, value } = await reader.read()
+            if (gen !== playGenRef.current) { reader.cancel(); return }
+            if (done) break
+
+            const merged = new Uint8Array(accum.length + value.length)
+            merged.set(accum)
+            merged.set(value, accum.length)
+            accum = merged
+
+            if (accum.length >= TTS_MIN_CHUNK_BYTES) {
+              if (!orderedIn) {
+                await waitPrev
+                if (gen !== playGenRef.current) return
+                orderedIn = true
+              }
+              const usable = accum.length & ~1
+              const int16 = new Int16Array(accum.buffer.slice(0, usable))
+              scheduleChunk(ctx, int16, gen)
+              accum = accum.slice(usable)
+            }
           }
-          setSpeaking(true)
-          synth.speak(utt)
-        })
-      } catch {
-        setSpeaking(false)
-        throw err
-      }
-    }
-  }, [language, langCode, stop])
 
-  return { speak, stop, speaking, speakWhenPlaying }
+          if (accum.length >= 2 && gen === playGenRef.current) {
+            if (!orderedIn) {
+              await waitPrev
+              if (gen !== playGenRef.current) return
+            }
+            const usable = accum.length & ~1
+            const int16 = new Int16Array(accum.buffer.slice(0, usable))
+            scheduleChunk(ctx, int16, gen)
+          }
+        }
+      } catch (streamErr) {
+        if (streamErr.name === 'AbortError') { return }
+        console.warn('[TTS-stream] Streaming failed, falling back', streamErr)
+      }
+
+      if (!handled && !quotaExhaustedRef.current && gen === playGenRef.current) {
+        try {
+          const res = await fetch(`${BACKEND_URL}/api/chat/tts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+            body: JSON.stringify({ text, language }),
+            signal,
+          })
+          if (gen !== playGenRef.current) return
+          if (res.status === 429) { quotaExhaustedRef.current = true }
+          else if (res.ok) {
+            const arrayBuf = await res.arrayBuffer()
+            if (gen !== playGenRef.current) return
+
+            const decoded = await ctx.decodeAudioData(arrayBuf)
+            if (gen !== playGenRef.current) return
+
+            await waitPrev
+            if (gen !== playGenRef.current) return
+
+            const src = ctx.createBufferSource()
+            src.buffer = decoded
+            src.connect(ctx.destination)
+
+            const now = ctx.currentTime
+            const startAt = Math.max(nextTimeRef.current, now + 0.002)
+            src.start(startAt)
+            nextTimeRef.current = startAt + decoded.duration
+
+            activeSourcesRef.current.add(src)
+            src.onended = () => {
+              activeSourcesRef.current.delete(src)
+              checkIdle()
+            }
+            handled = true
+          }
+        } catch (fallbackErr) {
+          if (fallbackErr.name === 'AbortError') return
+          console.warn('[TTS] WAV fallback failed', fallbackErr)
+        }
+      }
+
+      // ── Fallback B: browser SpeechSynthesis (quota exhausted or all else failed) ──
+      if (!handled && gen === playGenRef.current) {
+        await waitPrev
+        if (gen !== playGenRef.current) return
+        speakWithBrowserTTS(text, gen)
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') return
+      console.warn('[TTS] Enqueue error, using browser TTS', err)
+      speakWithBrowserTTS(text, playGenRef.current)
+    } finally {
+      abortControllersRef.current.delete(ac)
+      resolveSlot()
+      pendingRef.current = Math.max(0, pendingRef.current - 1)
+      checkIdle()
+    }
+  }, [language, hasWebAudio, getCtx, scheduleChunk, checkIdle, speakWithBrowserTTS])
+
+  return { enqueue, stop, speaking }
 }
 
 /* ── Web Speech API (STT) ────────────────────────────────────── */
@@ -386,63 +368,113 @@ function useSpeechRecognition(language, onFinal, onInterim) {
   /** Sync ref — false immediately on stop, before React re-renders.
    *  Fixes: onChange still sees stt.active===true for one frame and ignores typing. */
   const listeningRef = useRef(false)
+  /** true while the user intends to keep recording (set false only by explicit stop()) */
+  const wantActiveRef = useRef(false)
+  const restartTimerRef = useRef(null)
+  /** Consecutive auto-restarts without receiving any result — caps infinite loops */
+  const consecutiveRestartsRef = useRef(0)
   const [active, setActive] = useState(false)
   const supported = !!(window.SpeechRecognition || window.webkitSpeechRecognition)
+
+  const onFinalRef = useRef(onFinal)
+  const onInterimRef = useRef(onInterim)
+  const langRef = useRef(language)
+  onFinalRef.current = onFinal
+  onInterimRef.current = onInterim
+  langRef.current = language
 
   const flushInterimToFinal = useCallback(() => {
     const tail = interimRef.current?.trim()
     interimRef.current = ''
     if (tail) {
       accRef.current = `${accRef.current}${accRef.current && !accRef.current.endsWith(' ') ? ' ' : ''}${tail}`
-      onFinal(accRef.current)
+      onFinalRef.current(accRef.current)
     }
-  }, [onFinal])
+  }, [])
 
-  const start = useCallback((existing = '') => {
+  const startEngineRef = useRef(null)
+
+  const startEngine = useCallback(() => {
     if (!supported) return
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     const r = new SR()
     r.continuous = true; r.interimResults = true
-    r.lang = language === 'Deutsch' ? 'de-DE' : 'en-US'
-    accRef.current = existing
-    interimRef.current = ''
+    r.lang = langRef.current === 'Deutsch' ? 'de-DE' : 'en-US'
     listeningRef.current = true
 
     r.onresult = e => {
       if (!listeningRef.current) return
+      consecutiveRestartsRef.current = 0
       let fin = '', int = ''
       for (let i = e.resultIndex; i < e.results.length; i++)
         e.results[i].isFinal ? (fin += e.results[i][0].transcript + ' ') : (int += e.results[i][0].transcript)
-      if (fin) { accRef.current += fin; onFinal(accRef.current) }
+      if (fin) { accRef.current += fin; onFinalRef.current(accRef.current) }
       interimRef.current = int
-      onInterim(int)
+      onInterimRef.current(int)
     }
-    const onDone = () => {
-      flushInterimToFinal()
-      onInterim('')
-      interimRef.current = ''
-      listeningRef.current = false
-      setActive(false)
-    }
+
     r.onerror = (evt) => {
       console.warn('[STT] error:', evt.error, evt.message)
-      onDone()
+      if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(evt.error)) {
+        wantActiveRef.current = false
+      }
     }
-    r.onend = onDone
+
+    r.onend = () => {
+      flushInterimToFinal()
+      onInterimRef.current('')
+      interimRef.current = ''
+
+      // Browser often stops continuous recognition on its own (silence timeout,
+      // internal session limits, network hiccups). Auto-restart transparently so
+      // the user's long answer isn't truncated mid-sentence.
+      if (wantActiveRef.current && consecutiveRestartsRef.current < 5) {
+        consecutiveRestartsRef.current++
+        clearTimeout(restartTimerRef.current)
+        restartTimerRef.current = setTimeout(() => {
+          if (wantActiveRef.current) startEngineRef.current?.()
+        }, 300)
+        return
+      }
+
+      listeningRef.current = false
+      wantActiveRef.current = false
+      setActive(false)
+    }
+
     recRef.current = r
-    r.start()
+    try {
+      r.start()
+    } catch (e) {
+      console.warn('[STT] start() failed:', e)
+      listeningRef.current = false
+      wantActiveRef.current = false
+      setActive(false)
+    }
+  }, [supported, flushInterimToFinal])
+
+  startEngineRef.current = startEngine
+
+  const start = useCallback((existing = '') => {
+    accRef.current = existing
+    interimRef.current = ''
+    wantActiveRef.current = true
+    consecutiveRestartsRef.current = 0
+    startEngineRef.current?.()
     setActive(true)
-  }, [language, onFinal, onInterim, flushInterimToFinal, supported])
+  }, [])
 
   const stop = useCallback(() => {
     /** 必须先置 false，避免 stop() 之后浏览器仍投递 onresult，把已发送的文本写回输入框 */
+    wantActiveRef.current = false
     listeningRef.current = false
+    clearTimeout(restartTimerRef.current)
     flushInterimToFinal()
     recRef.current?.stop()
-    onInterim('')
+    onInterimRef.current('')
     interimRef.current = ''
     setActive(false)
-  }, [onInterim, flushInterimToFinal])
+  }, [flushInterimToFinal])
 
   /** 录音中用户手动改字时，与引擎累计文本对齐，避免下一轮识别叠在旧 acc 上 */
   const syncAccumulatedFromUser = useCallback((text) => {
@@ -590,24 +622,24 @@ const ChatInterface = forwardRef(function ChatInterface({
     ttsEnabledRef.current = ttsEnabled
   }, [ttsEnabled])
 
-  const tts = useGeminiTTS(language, ttsEnabled)
+  const tts = useStreamingTTS(language, ttsEnabled)
   const stt = useSpeechRecognition(
     language,
     useCallback(t => setInput(t), []),
     useCallback(t => setInterimText(t), []),
   )
 
-  const ttsStopRef = useRef(tts.stop)
+  const ttsRef = useRef(tts)
   const sttRef = useRef(stt)
   useLayoutEffect(() => {
-    ttsStopRef.current = tts.stop
+    ttsRef.current = tts
     sttRef.current = stt
   }, [tts, stt])
 
-  // ── 离开面试页：立刻停神经语音、浏览器朗读与麦克风（须用 ref，避免 effect 闭包拿到旧的 stop）──
+  // ── 离开面试页：立刻停语音与麦克风 ──
   useEffect(() => {
     return () => {
-      ttsStopRef.current()
+      ttsRef.current.stop()
       try { sttRef.current.stop() } catch { /* ignore */ }
       try { window.speechSynthesis?.cancel() } catch { /* ignore */ }
     }
@@ -687,9 +719,12 @@ const ChatInterface = forwardRef(function ChatInterface({
     setIsStreaming(true)
     setCurrentAgent(null)
 
-    let fullText = ''   // accumulate for TTS
-    let sseDoneInfo = null
-    let lastAgentName = null  // track which agent is responding
+    let fullText = ''
+    let sentenceBuffer = ''
+    let firstChunkSent = false
+    let lastAgentName = null
+    let sseDone = false
+    let hasError = false
 
     try {
       const res = await fetch(`${BACKEND_URL}/api/chat/message`, {
@@ -712,7 +747,6 @@ const ChatInterface = forwardRef(function ChatInterface({
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
       let buf = ''
-      let streamHadError = false
 
       sse: while (true) {
         const { done, value } = await reader.read()
@@ -738,23 +772,66 @@ const ChatInterface = forwardRef(function ChatInterface({
           if (evt.type === 'text' && evt.content) {
             const chunk = evt.content
             fullText += chunk
-            if (!deferAssistantText) {
-              setMessages(prev => prev.map(m =>
-                m.id === aiId ? { ...m, content: m.content + chunk } : m
-              ))
-            }
+            sentenceBuffer += chunk
+
+               // Real-time TTS trigger — larger chunks to save API quota
+               if (ttsEnabledRef.current && lastAgentName !== 'feedback') {
+                  const sentenceEndMatch = sentenceBuffer.match(/[。！？.!?\n]/)
+                  const commaMatch = sentenceBuffer.match(/[，,;；]/)
+                  let splitIdx = -1
+
+                   if (sentenceEndMatch && (sentenceBuffer.length >= 15 || firstChunkSent)) {
+                     splitIdx = sentenceEndMatch.index + 1
+                   } else if (!firstChunkSent && sentenceBuffer.length >= 40) {
+                     const boundary = sentenceBuffer.match(/[。！？.!?，,;；:：\n]/)
+                     if (boundary) splitIdx = boundary.index + 1
+                     else if (sentenceBuffer.length >= 60) {
+                        const lastSpace = sentenceBuffer.lastIndexOf(' ')
+                        if (lastSpace >= 20) splitIdx = lastSpace + 1
+                     }
+                   } else if (commaMatch && sentenceBuffer.length >= 100) {
+                     splitIdx = commaMatch.index + 1
+                   } else if (sentenceBuffer.length >= 150) {
+                     const lastSpace = sentenceBuffer.lastIndexOf(' ')
+                     splitIdx = lastSpace > 80 ? lastSpace + 1 : sentenceBuffer.length
+                   }
+
+                   if (splitIdx !== -1) {
+                     const toSend = sanitizeSquareBrackets(sentenceBuffer.slice(0, splitIdx))
+                     if (toSend.trim()) {
+                       tts.enqueue(toSend, token)
+                       sentenceBuffer = sentenceBuffer.slice(splitIdx)
+                       firstChunkSent = true 
+                     }
+                   }
+               }
+
+            // UI Text Update: Use fullText to guarantee no truncation
+            setMessages(prev => prev.map(m =>
+              m.id === aiId ? { ...m, content: fullText } : m
+            ))
           }
 
           if (evt.type === 'done') {
             if (signal?.aborted) break sse
+            // Finalize remaining buffer
+            if (ttsEnabledRef.current && sentenceBuffer.trim() && lastAgentName !== 'feedback') {
+               tts.enqueue(sanitizeSquareBrackets(sentenceBuffer), token)
+            }
+            sseDone = true
+            
             const deferOpen = deferGateRef.current && openingLatchRef.current
-            if (deferOpen) openingLatchRef.current = false
-            sseDoneInfo = { fullText, deferOpen }
+            if (deferOpen) {
+              openingLatchRef.current = false
+              // Since we're now streaming, "ready" might be better defined as "first audio started"
+              // but for now, we'll keep it at the end of text stream to be safe.
+              onInterviewReadyRef.current?.()
+            }
             break sse
           }
 
           if (evt.type === 'error') {
-            streamHadError = true
+            hasError = true
             setMessages(prev => prev.map(m =>
               m.id === aiId ? { ...m, content: m.content || t('chat.errRetry'), streaming: false } : m
             ))
@@ -762,39 +839,10 @@ const ChatInterface = forwardRef(function ChatInterface({
         }
       }
 
-      // 流异常结束未收到 done 时，仍尽量把已缓冲正文与语音对齐（已 error 落屏则不覆盖）
-      if (!sseDoneInfo && fullText.trim() && !streamHadError) {
-        sseDoneInfo = { fullText, deferOpen: false }
-      }
-
-      if (sseDoneInfo) {
-        const { fullText: ft, deferOpen } = sseDoneInfo
-        const body = sanitizeSquareBrackets(String(ft || ''))
-
-        // For feedback agent: TTS only the closing remark before '---', not the report
-        let ttsBody = body
-        if (lastAgentName === 'feedback') {
-          const sepIdx = body.search(/\n---\n|^---$/m)
-          ttsBody = sepIdx !== -1 ? body.slice(0, sepIdx).trim() : ''
-        }
-
-        const wantSpeak = ttsEnabledRef.current && ttsBody.trim()
-        if (wantSpeak && deferAssistantText) {
-          try {
-            await tts.speakWhenPlaying(ttsBody, token)
-          } catch (e) {
-            console.warn('[TTS] speakWhenPlaying failed', e)
-          }
-        }
+      if (!hasError || fullText) {
         setMessages(prev => prev.map(m =>
-          m.id === aiId ? { ...m, content: body, streaming: false } : m
+          m.id === aiId ? { ...m, content: sanitizeSquareBrackets(fullText || m.content), streaming: false } : m
         ))
-        if (wantSpeak && !deferAssistantText) {
-          tts.speak(ttsBody, token)
-        }
-        if (deferOpen) {
-          onInterviewReadyRef.current?.()
-        }
       }
     } catch (err) {
       if (err.name === 'AbortError') {
@@ -815,7 +863,7 @@ const ChatInterface = forwardRef(function ChatInterface({
     } finally {
       setIsStreaming(false)
       setCurrentAgent(null)
-      if (!sseDoneInfo) {
+      if (!sseDone) {
         setMessages(prev => prev.map(m => m.id === aiId ? { ...m, streaming: false } : m))
       }
     }
