@@ -722,8 +722,17 @@ export default function SetupPage() {
                           onClick={() => resumeFileRef.current?.click()}
                           className="btn-setup-action px-10"
                         >
-                          {resumeParsing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
-                          {t('setup.resumeChoosePdf')}
+                          {resumeParsing ? (
+                            <span className="flex items-center gap-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <span>{t('setup.resumeChoosePdf')}</span>
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-2">
+                              <FileText className="h-4 w-4" />
+                              <span>{t('setup.resumeChoosePdf')}</span>
+                            </span>
+                          )}
                         </button>
                         {sessionResumeText.trim() && (
                           <button
@@ -829,11 +838,16 @@ export default function SetupPage() {
                             className="btn-setup-action px-8 py-3"
                           >
                             {mlLoading ? (
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              <span className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <span>{t('setup.mlGenerating')}</span>
+                              </span>
                             ) : (
-                              mlResult ? <RotateCcw className="h-4 w-4 mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />
+                              <span className="flex items-center gap-2">
+                                {mlResult ? <RotateCcw className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+                                <span>{mlResult ? t('setup.mlBtnNew') : t('setup.mlBtn')}</span>
+                              </span>
                             )}
-                            {mlLoading ? t('setup.mlGenerating') : (mlResult ? t('setup.mlBtnNew') : t('setup.mlBtn'))}
                           </button>
 
                           <div className="relative group">
@@ -939,12 +953,14 @@ export default function SetupPage() {
                     className="btn-setup-action w-full py-6 text-xl"
                   >
                     {loading ? (
-                      <Loader2 className="h-6 w-6 animate-spin mx-auto text-white dark:text-slate-900" />
+                      <span className="flex items-center justify-center w-full">
+                        <Loader2 className="h-6 w-6 animate-spin text-white dark:text-slate-900" />
+                      </span>
                     ) : (
-                      <>
-                        {t('setup.submit')}
+                      <span className="flex items-center justify-center w-full">
+                        <span>{t('setup.submit')}</span>
                         <ArrowRight className="h-6 w-6 ml-4 group-hover:translate-x-2 transition-transform" />
-                      </>
+                      </span>
                     )}
                   </button>
                 </div>

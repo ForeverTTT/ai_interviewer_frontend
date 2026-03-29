@@ -15,20 +15,19 @@ import {
 function ResultBadge({ result, t }) {
   if (!result) return null
   const lower = result.toLowerCase()
-  if (lower.includes('offer') || lower.includes('admitted')) {
-    const label = lower.includes('admitted') ? t('exp.resultAdmitted') : t('exp.resultOffer')
+  if (lower.includes('offer') || lower.includes('admitted') || lower.includes('pass')) {
     return (
       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800">
         <CheckCircle2 className="w-3.5 h-3.5" />
-        {label}
+        {t('exp.resultPass')}
       </span>
     )
   }
-  if (lower.includes('reject')) {
+  if (lower.includes('reject') || lower.includes('fail')) {
     return (
       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-red-50 text-red-600 border border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800">
         <XCircle className="w-3.5 h-3.5" />
-        {t('exp.resultRejected')}
+        {t('exp.resultFail')}
       </span>
     )
   }
@@ -228,7 +227,7 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
     department: '',
     date: new Date().toISOString().slice(0, 7),
     language: 'English',
-    result: 'Offer received',
+    result: 'Passed',
     salary: '',
     reflection: '',
     rounds: [{ round: 1, format: '', duration_min: 30, questions: [''] }]
@@ -338,12 +337,15 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('exp.labelResult')}</label>
-              <input 
+              <select 
                 value={formData.result} 
                 onChange={e => setFormData({...formData, result: e.target.value})}
-                placeholder="Offer / Admitted / Rejected"
-                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
-              />
+                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all cursor-pointer appearance-none"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
+              >
+                <option value="Passed">{t('exp.resultPass')}</option>
+                <option value="Failed">{t('exp.resultFail')}</option>
+              </select>
             </div>
           </div>
 
@@ -572,17 +574,26 @@ export default function ExperiencesPage() {
 
     if (search.trim()) {
       const q = search.toLowerCase()
-      list = list.filter(e =>
-        e.company.toLowerCase().includes(q) ||
-        e.position.toLowerCase().includes(q) ||
-        (e.department || '').toLowerCase().includes(q) ||
-        (e.location || '').toLowerCase().includes(q) ||
-        e.rounds?.some(r =>
-          r.questions?.some(qu => qu.toLowerCase().includes(q)) ||
-          (r.format || '').toLowerCase().includes(q)
-        ) ||
-        (e.reflection || '').toLowerCase().includes(q)
-      )
+      list = list.filter(e => {
+        const company = (e.company || '').toLowerCase()
+        const position = (e.position || '').toLowerCase()
+        const dept = (e.department || '').toLowerCase()
+        const loc = (e.location || '').toLowerCase()
+        const refl = (e.reflection || '').toLowerCase()
+        
+        const inRounds = e.rounds?.some(r => {
+          const format = (r.format || '').toLowerCase()
+          const questions = r.questions?.some(qu => (qu || '').toLowerCase().includes(q))
+          return format.includes(q) || questions
+        })
+
+        return company.includes(q) || 
+               position.includes(q) || 
+               dept.includes(q) || 
+               loc.includes(q) || 
+               refl.includes(q) || 
+               inRounds
+      })
     }
     return list
   }, [experiences, filter, search])
@@ -594,7 +605,7 @@ export default function ExperiencesPage() {
     const mine = experiences.filter(e => user && e.user_id === user.id).length
     const offers = experiences.filter(e => {
       const r = (e.result || '').toLowerCase()
-      return r.includes('offer') || r.includes('admitted')
+      return r.includes('offer') || r.includes('admitted') || r.includes('pass')
     }).length
     return { total, work, school, mine, offers }
   }, [experiences, user])
@@ -661,7 +672,7 @@ export default function ExperiencesPage() {
                   { n: stats.total, label: t('exp.filterAll'), icon: Filter, color: 'slate' },
                   { n: stats.work, label: t('exp.filterWork'), icon: Briefcase, color: 'blue' },
                   { n: stats.school, label: t('exp.filterSchool'), icon: GraduationCap, color: 'violet' },
-                  { n: stats.offers, label: 'Offers / Admitted', icon: Award, color: 'emerald' },
+                  { n: stats.offers, label: 'Passed / Offers', icon: Award, color: 'emerald' },
                 ].map(({ n, label, icon: Icon, color }) => (
                   <div
                     key={label}
@@ -724,8 +735,16 @@ export default function ExperiencesPage() {
             </motion.div>
 
             {filtered.length === 0 ? (
-              <div className="flex items-center justify-center py-20 px-10 text-center">
+              <div className="flex flex-col items-center justify-center py-20 px-10 text-center space-y-4">
                 <p className="text-sm font-bold text-slate-400">{filter === 'mine' ? t('exp.noMyResults') : t('exp.noResults')}</p>
+                {search && (
+                   <button 
+                     onClick={() => setSearch('')}
+                     className="text-xs font-black text-slate-900 dark:text-white underline underline-offset-4 decoration-slate-200 hover:decoration-slate-900 transition-all uppercase tracking-widest"
+                   >
+                     Clear Search
+                   </button>
+                )}
               </div>
             ) : (
               <motion.div

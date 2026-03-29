@@ -464,8 +464,17 @@ export default function InterviewPage() {
                             : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200 dark:bg-slate-950 dark:border-slate-800'
                         }`}
                       >
-                        {lobbyCameraOn ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
-                        {lobbyCameraOn ? t('interview.lobbyDisableCamera') : t('interview.lobbyEnableCamera')}
+                        {lobbyCameraOn ? (
+                          <span className="flex items-center gap-2">
+                            <Video className="w-4 h-4" />
+                            <span>{t('interview.lobbyDisableCamera')}</span>
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            <VideoOff className="w-4 h-4" />
+                            <span>{t('interview.lobbyEnableCamera')}</span>
+                          </span>
+                        )}
                       </button>
 
                       <div className="flex items-center gap-4">
@@ -478,8 +487,17 @@ export default function InterviewPage() {
                               : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200 dark:bg-slate-950 dark:border-slate-800'
                           }`}
                         >
-                          {micBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
-                          {micGranted ? t('interview.lobbyMicReady') : t('interview.lobbyTestMic')}
+                          {micBusy ? (
+                            <span className="flex items-center gap-2">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span>{t('interview.lobbyTestMic')}</span>
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-2">
+                              <Mic className="w-4 h-4" />
+                              <span>{micGranted ? t('interview.lobbyMicReady') : t('interview.lobbyTestMic')}</span>
+                            </span>
+                          )}
                         </button>
                         {micGranted && <MicLevelBar />}
                       </div>
@@ -569,10 +587,16 @@ export default function InterviewPage() {
                       type="button"
                       disabled={finalizing}
                       onClick={() => void finalizeAndGoReport()}
-                      className="flex-1 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-slate-800 dark:hover:bg-slate-100 transition-all border border-slate-900 dark:border-white shadow-xl shadow-slate-900/10 disabled:opacity-50"
+                      className="flex-1 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-slate-800 dark:hover:bg-slate-100 transition-all border border-slate-900 dark:border-white shadow-xl shadow-slate-900/10 disabled:opacity-50 inline-flex items-center justify-center gap-3"
                     >
-                      {finalizing ? <Loader2 className="w-4 h-4 animate-spin inline mr-2" /> : null}
-                      {interviewId ? t('report.viewReport') : t('interview.viewRecords')}
+                      {finalizing ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>{t('report.generatingTitle')}</span>
+                        </span>
+                      ) : (
+                        <span>{interviewId ? t('report.viewReport') : t('interview.viewRecords')}</span>
+                      )}
                     </button>
                     <Link 
                       to="/setup" 
@@ -617,8 +641,14 @@ export default function InterviewPage() {
                 onClick={() => void finalizeAndGoReport()}
                 className="w-full px-8 py-4 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-red-700 transition-all shadow-lg shadow-red-600/20 disabled:opacity-50 inline-flex items-center justify-center gap-3"
               >
-                {finalizing && <Loader2 className="w-4 h-4 animate-spin" />}
-                {t('interview.confirmEnd')}
+                {finalizing ? (
+                   <span className="flex items-center gap-2">
+                     <Loader2 className="w-4 h-4 animate-spin" />
+                     <span>{t('interview.confirmEnd')}</span>
+                   </span>
+                ) : (
+                  <span>{t('interview.confirmEnd')}</span>
+                )}
               </button>
               <button 
                 type="button" 

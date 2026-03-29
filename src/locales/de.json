@@ -1,4 +1,4 @@
-﻿{
+{
   "meta": {
     "title": "OfferClaw - KI-gestütztes Interview-Training für Deutschland"
   },
@@ -809,6 +809,8 @@
     "resultOffer": "Angebot erhalten",
     "resultRejected": "Abgelehnt",
     "resultAdmitted": "Zugelassen",
+    "resultPass": "Bestanden",
+    "resultFail": "Nicht bestanden",
     "tagWork": "Arbeit",
     "tagSchool": "Hochschule",
     "expand": "Details anzeigen",

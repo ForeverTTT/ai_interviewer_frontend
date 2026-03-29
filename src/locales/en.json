@@ -810,6 +810,8 @@
     "resultOffer": "Offer Received",
     "resultRejected": "Rejected",
     "resultAdmitted": "Admitted",
+    "resultPass": "Passed",
+    "resultFail": "Failed",
     "tagWork": "Work",
     "tagSchool": "School",
     "expand": "Show Details",

@@ -127,11 +127,20 @@ function useStreamingTTS(language, enabled) {
     audioBuf.getChannelData(0).set(floats)
 
     const src = ctx.createBufferSource()
+    const gainNode = ctx.createGain()
     src.buffer = audioBuf
-    src.connect(ctx.destination)
+
+    src.connect(gainNode)
+    gainNode.connect(ctx.destination)
 
     const now = ctx.currentTime
-    const startAt = Math.max(nextTimeRef.current, now + 0.002)
+    const startAt = Math.max(nextTimeRef.current, now + 0.005)
+    
+    // --- Precise Anti-Pop Ramp (Synced to startAt) ---
+    const fadeTime = 0.020 // 20ms fade-in window
+    gainNode.gain.setValueAtTime(0, startAt)
+    gainNode.gain.linearRampToValueAtTime(1, startAt + fadeTime)
+
     src.start(startAt)
     nextTimeRef.current = startAt + audioBuf.duration
 
@@ -652,6 +661,7 @@ const ChatInterface = forwardRef(function ChatInterface({
     let sentenceBuffer = ''
     let firstChunkSent = false
     let lastAgentName = null
+    let sseDone = false
 
     try {
       const res = await fetch(`${BACKEND_URL}/api/chat/message`, {
@@ -745,6 +755,7 @@ const ChatInterface = forwardRef(function ChatInterface({
             if (ttsEnabledRef.current && sentenceBuffer.trim() && lastAgentName !== 'feedback') {
                tts.enqueue(sanitizeSquareBrackets(sentenceBuffer), token)
             }
+            sseDone = true
             
             const deferOpen = deferGateRef.current && openingLatchRef.current
             if (deferOpen) {
@@ -786,7 +797,7 @@ const ChatInterface = forwardRef(function ChatInterface({
     } finally {
       setIsStreaming(false)
       setCurrentAgent(null)
-      if (!sseDoneInfo) {
+      if (!sseDone) {
         setMessages(prev => prev.map(m => m.id === aiId ? { ...m, streaming: false } : m))
       }
     }
