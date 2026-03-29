@@ -7,6 +7,7 @@ import {
   Briefcase, FileText, Globe2, Clock, ArrowRight,
   Info, Sparkles, Upload, Loader2, X, Check, LayoutTemplate,
   ChevronDown, Copy, RotateCcw, History, Trash2,
+  AlertCircle, Coins,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -221,6 +222,7 @@ export default function SetupPage() {
     language: 'English',
   })
   const [mlResult, setMlResult] = useState('')
+  const [mlError, setMlError] = useState(null)
   const [mlLoading, setMlLoading] = useState(false)
   const [mlCopied, setMlCopied] = useState(false)
   const [jdHistory, setJdHistory] = useState(() => loadJdHistory())
@@ -463,14 +465,20 @@ export default function SetupPage() {
           language: mlForm.language,
         }),
       })
+      setMlError(null)
       if (res.status === 403) {
-        throw new Error(t('common.insufficientTokens', 'Insufficient Energy'))
+        setMlError({ type: 'insufficient_tokens', cost: 100 })
+        return
       }
       const j = await res.json()
-      if (res.ok) setMlResult(j.text)
-      else throw new Error(j.error)
+      if (res.ok) {
+        setMlResult(j.text)
+        setMlError(null)
+      } else {
+        setMlError({ type: 'error', message: j.error })
+      }
     } catch (err) {
-      setMlResult('Error: ' + err.message)
+      setMlError({ type: 'error', message: err.message })
     } finally {
       setMlLoading(false)
     }
@@ -898,22 +906,71 @@ export default function SetupPage() {
                           </button>
 
                           <div className="relative group">
-                            <textarea
-                              readOnly
-                              value={mlResult}
-                              placeholder={t('setup.mlPlaceholder')}
-                              className={`textarea-field-premium transition-all ${
-                                mlResult ? 'h-[500px] shadow-sm' : 'h-[160px] border-dashed'
-                              } scrollbar-hide`}
-                            />
-                            {mlResult && (
-                              <button
-                                type="button"
-                                onClick={handleCopyML}
-                                className="absolute top-4 right-4 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-slate-600 dark:text-slate-500"
+                            {mlError ? (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="h-[500px] flex flex-col items-center justify-center p-8 text-center rounded-2xl bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800"
                               >
-                                {mlCopied ? <Check className="h-5 w-5 text-emerald-600" /> : <Copy className="h-5 w-5" />}
-                              </button>
+                                {mlError.type === 'insufficient_tokens' ? (
+                                  <>
+                                    <div className="p-4 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-600 mb-6">
+                                      <Coins className="h-10 w-10" />
+                                    </div>
+                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                                      {t('common.insufficientTokens')}
+                                    </h4>
+                                    <p className="text-sm text-slate-500 max-w-[280px] mb-8 leading-relaxed">
+                                      {t('common.insufficientTokensDesc', { cost: mlError.cost })}
+                                    </p>
+                                    <Link
+                                      to={{ pathname: "/profile", state: { openRecharge: true } }}
+                                      className="btn-setup-secondary px-8 py-3 bg-amber-600 text-white border-none hover:bg-amber-700 font-bold"
+                                    >
+                                      {t('common.rechargeNow')}
+                                    </Link>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="p-4 rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-600 mb-6">
+                                      <AlertCircle className="h-10 w-10" />
+                                    </div>
+                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                                      {t('common.errorTitle')}
+                                    </h4>
+                                    <p className="text-sm text-slate-500 max-w-[280px] mb-8 leading-relaxed">
+                                      {t('common.errorDesc')}
+                                    </p>
+                                    <button
+                                      type="button"
+                                      onClick={handleGenerateML}
+                                      className="btn-setup-secondary px-8 py-3 font-bold"
+                                    >
+                                      {t('common.tryAgain')}
+                                    </button>
+                                  </>
+                                )}
+                              </motion.div>
+                            ) : (
+                              <>
+                                <textarea
+                                  readOnly
+                                  value={mlResult}
+                                  placeholder={t('setup.mlPlaceholder')}
+                                  className={`textarea-field-premium transition-all ${
+                                    mlResult ? 'h-[500px] shadow-sm' : 'h-[160px] border-dashed'
+                                  } scrollbar-hide`}
+                                />
+                                {mlResult && (
+                                  <button
+                                    type="button"
+                                    onClick={handleCopyML}
+                                    className="absolute top-4 right-4 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-slate-600 dark:text-slate-500"
+                                  >
+                                    {mlCopied ? <Check className="h-5 w-5 text-emerald-600" /> : <Copy className="h-5 w-5" />}
+                                  </button>
+                                )}
+                              </>
                             )}
                           </div>
                         </div>

@@ -17,9 +17,9 @@ import {
   Upload, Loader2, Lightbulb, FileText,
   Sparkles, BarChart3, ListChecks, AlertTriangle, Layers,
   MapPin, ClipboardList, CheckCircle2, Telescope,
-  ChevronDown, ChevronUp, Plus, Trash2, User,
+  ChevronDown, ChevronUp, Plus, Trash2, User, X,
   Briefcase, GraduationCap, FolderKanban, BookOpen, Tags, Languages, Award, Wand2,
-  Pencil, Eye, ArrowUpRight, Zap, ArrowRight, BrainCircuit,
+  Pencil, Eye, ArrowUpRight, Zap, ArrowRight, BrainCircuit, Share2, MessageCircle, ExternalLink,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -857,7 +857,7 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
               onClick={recharge}
               className="px-8 py-4 bg-orange-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20 active:scale-95 flex items-center justify-center gap-2"
             >
-              <Plus className="w-4 h-4" />
+              <Zap className="w-4 h-4" />
               {t('profile.recharge')}
             </button>
             <div className="px-4 py-2 rounded-xl bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 text-center">
@@ -1045,6 +1045,103 @@ function MultiLineInput({ lines, label, placeholder, onChange, t, inputClass }) 
   )
 }
 
+function RechargeModal({ isOpen, onClose, t }) {
+  if (!isOpen) return null
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800"
+      >
+        <div className="p-8 sm:p-10 space-y-8">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h2 className="text-3xl font-black font-serif text-slate-900 dark:text-white leading-tight">
+                {t('profile.rechargeModal.title')}
+              </h2>
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+                {t('profile.rechargeModal.subtitle')}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all hover:rotate-90"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="grid gap-6">
+            <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-primary-500 transition-all space-y-4 text-left">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600">
+                  <Share2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-sm">
+                    {t('profile.rechargeModal.method1Title')}
+                  </h3>
+                </div>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                {t('profile.rechargeModal.method1Desc')}
+              </p>
+              <Link
+                to="/experiences"
+                onClick={onClose}
+                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary-600 hover:gap-4 transition-all"
+              >
+                {t('profile.rechargeModal.method1Btn')}
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-orange-500 transition-all space-y-6 text-left">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600">
+                  <MessageCircle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-sm">
+                    {t('profile.rechargeModal.method2Title')}
+                  </h3>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                  {t('profile.rechargeModal.method2Desc')}
+                </p>
+                <div className="aspect-square w-48 mx-auto rounded-3xl bg-white border-4 border-slate-100 dark:border-slate-800 flex items-center justify-center relative overflow-hidden group/qr">
+                  <div className="text-center p-6 space-y-2">
+                    <Zap className="w-8 h-8 text-orange-200 mx-auto" />
+                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{t('profile.rechargeModal.qrHint')}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="w-full py-5 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-xl active:scale-[0.98]"
+          >
+            {t('profile.rechargeModal.cancel')}
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 const avatars = [
   'professional_male_1',
   'professional_female_1',
@@ -1080,6 +1177,7 @@ export default function ProfilePage() {
   const [pendingRaw, setPendingRaw] = useState('')
   const [rawResumeOpen, setRawResumeOpen] = useState(false)
   const [pendingPreviewOpen, setPendingPreviewOpen] = useState(false)
+  const [showRechargeModal, setShowRechargeModal] = useState(false)
   const fileRef = useRef(null)
 
   const backendUrl = getBackendBaseUrl()
@@ -1136,6 +1234,12 @@ export default function ProfilePage() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  useEffect(() => {
+    if (location.state?.openRecharge) {
+      setShowRechargeModal(true)
+    }
+  }, [location.state])
 
   useEffect(() => {
     if (!isEdit) return
@@ -1476,9 +1580,18 @@ export default function ProfilePage() {
             coachGenerating={coachGenerating}
             runCoach={runCoach}
             tokens={tokens}
-            recharge={recharge}
+            recharge={() => setShowRechargeModal(true)}
           />
         </div>
+        <AnimatePresence>
+          {showRechargeModal && (
+            <RechargeModal
+              isOpen={showRechargeModal}
+              onClose={() => setShowRechargeModal(false)}
+              t={t}
+            />
+          )}
+        </AnimatePresence>
       </motion.div>
     )
   }
@@ -1502,7 +1615,16 @@ export default function ProfilePage() {
           avatarId={avatarId} setAvatarId={setAvatarId} t={t}
         />
       </div>
-    </motion.div>
+        <AnimatePresence>
+          {showRechargeModal && (
+            <RechargeModal
+              isOpen={showRechargeModal}
+              onClose={() => setShowRechargeModal(false)}
+              t={t}
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
   )
 }
 
