@@ -368,63 +368,113 @@ function useSpeechRecognition(language, onFinal, onInterim) {
   /** Sync ref — false immediately on stop, before React re-renders.
    *  Fixes: onChange still sees stt.active===true for one frame and ignores typing. */
   const listeningRef = useRef(false)
+  /** true while the user intends to keep recording (set false only by explicit stop()) */
+  const wantActiveRef = useRef(false)
+  const restartTimerRef = useRef(null)
+  /** Consecutive auto-restarts without receiving any result — caps infinite loops */
+  const consecutiveRestartsRef = useRef(0)
   const [active, setActive] = useState(false)
   const supported = !!(window.SpeechRecognition || window.webkitSpeechRecognition)
+
+  const onFinalRef = useRef(onFinal)
+  const onInterimRef = useRef(onInterim)
+  const langRef = useRef(language)
+  onFinalRef.current = onFinal
+  onInterimRef.current = onInterim
+  langRef.current = language
 
   const flushInterimToFinal = useCallback(() => {
     const tail = interimRef.current?.trim()
     interimRef.current = ''
     if (tail) {
       accRef.current = `${accRef.current}${accRef.current && !accRef.current.endsWith(' ') ? ' ' : ''}${tail}`
-      onFinal(accRef.current)
+      onFinalRef.current(accRef.current)
     }
-  }, [onFinal])
+  }, [])
 
-  const start = useCallback((existing = '') => {
+  const startEngineRef = useRef(null)
+
+  const startEngine = useCallback(() => {
     if (!supported) return
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     const r = new SR()
     r.continuous = true; r.interimResults = true
-    r.lang = language === 'Deutsch' ? 'de-DE' : 'en-US'
-    accRef.current = existing
-    interimRef.current = ''
+    r.lang = langRef.current === 'Deutsch' ? 'de-DE' : 'en-US'
     listeningRef.current = true
 
     r.onresult = e => {
       if (!listeningRef.current) return
+      consecutiveRestartsRef.current = 0
       let fin = '', int = ''
       for (let i = e.resultIndex; i < e.results.length; i++)
         e.results[i].isFinal ? (fin += e.results[i][0].transcript + ' ') : (int += e.results[i][0].transcript)
-      if (fin) { accRef.current += fin; onFinal(accRef.current) }
+      if (fin) { accRef.current += fin; onFinalRef.current(accRef.current) }
       interimRef.current = int
-      onInterim(int)
+      onInterimRef.current(int)
     }
-    const onDone = () => {
-      flushInterimToFinal()
-      onInterim('')
-      interimRef.current = ''
-      listeningRef.current = false
-      setActive(false)
-    }
+
     r.onerror = (evt) => {
       console.warn('[STT] error:', evt.error, evt.message)
-      onDone()
+      if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(evt.error)) {
+        wantActiveRef.current = false
+      }
     }
-    r.onend = onDone
+
+    r.onend = () => {
+      flushInterimToFinal()
+      onInterimRef.current('')
+      interimRef.current = ''
+
+      // Browser often stops continuous recognition on its own (silence timeout,
+      // internal session limits, network hiccups). Auto-restart transparently so
+      // the user's long answer isn't truncated mid-sentence.
+      if (wantActiveRef.current && consecutiveRestartsRef.current < 5) {
+        consecutiveRestartsRef.current++
+        clearTimeout(restartTimerRef.current)
+        restartTimerRef.current = setTimeout(() => {
+          if (wantActiveRef.current) startEngineRef.current?.()
+        }, 300)
+        return
+      }
+
+      listeningRef.current = false
+      wantActiveRef.current = false
+      setActive(false)
+    }
+
     recRef.current = r
-    r.start()
+    try {
+      r.start()
+    } catch (e) {
+      console.warn('[STT] start() failed:', e)
+      listeningRef.current = false
+      wantActiveRef.current = false
+      setActive(false)
+    }
+  }, [supported, flushInterimToFinal])
+
+  startEngineRef.current = startEngine
+
+  const start = useCallback((existing = '') => {
+    accRef.current = existing
+    interimRef.current = ''
+    wantActiveRef.current = true
+    consecutiveRestartsRef.current = 0
+    startEngineRef.current?.()
     setActive(true)
-  }, [language, onFinal, onInterim, flushInterimToFinal, supported])
+  }, [])
 
   const stop = useCallback(() => {
     /** 必须先置 false，避免 stop() 之后浏览器仍投递 onresult，把已发送的文本写回输入框 */
+    wantActiveRef.current = false
     listeningRef.current = false
+    clearTimeout(restartTimerRef.current)
     flushInterimToFinal()
     recRef.current?.stop()
-    onInterim('')
+    onInterimRef.current('')
     interimRef.current = ''
     setActive(false)
-  }, [onInterim, flushInterimToFinal])
+  }, [flushInterimToFinal])
 
   /** 录音中用户手动改字时，与引擎累计文本对齐，避免下一轮识别叠在旧 acc 上 */
   const syncAccumulatedFromUser = useCallback((text) => {
