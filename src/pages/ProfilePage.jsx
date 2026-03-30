@@ -22,6 +22,7 @@ import {
   Pencil, Eye, ArrowUpRight, Zap, ArrowRight, BrainCircuit, Share2, MessageCircle, ExternalLink,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import xiaohongshuQr from '../assets/xiaohongshu_qr.png'
 
 function fileToBase64Data(file) {
   return new Promise((resolve, reject) => {
@@ -1081,9 +1082,9 @@ function RechargeModal({ isOpen, onClose, t }) {
           </div>
 
           <div className="grid gap-6">
-            <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-primary-500 transition-all space-y-4 text-left">
+            <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-emerald-500 transition-all space-y-4 text-left">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600">
                   <Share2 className="w-6 h-6" />
                 </div>
                 <div>
@@ -1098,7 +1099,7 @@ function RechargeModal({ isOpen, onClose, t }) {
               <Link
                 to="/experiences"
                 onClick={onClose}
-                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary-600 hover:gap-4 transition-all"
+                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 hover:gap-4 transition-all"
               >
                 {t('profile.rechargeModal.method1Btn')}
                 <ArrowRight className="w-4 h-4" />
@@ -1107,8 +1108,8 @@ function RechargeModal({ isOpen, onClose, t }) {
 
             <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-emerald-500 transition-all space-y-6 text-left">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600">
-                  <MessageCircle className="w-6 h-6" />
+                <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500">
+                  <ExternalLink className="w-6 h-6" />
                 </div>
                 <div>
                   <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-sm">
@@ -1120,11 +1121,8 @@ function RechargeModal({ isOpen, onClose, t }) {
                 <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                   {t('profile.rechargeModal.method2Desc')}
                 </p>
-                <div className="aspect-square w-48 mx-auto rounded-3xl bg-white border-4 border-slate-100 dark:border-slate-800 flex items-center justify-center relative overflow-hidden group/qr">
-                  <div className="text-center p-6 space-y-2">
-                    <Zap className="w-8 h-8 text-emerald-200 mx-auto" />
-                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{t('profile.rechargeModal.qrHint')}</p>
-                  </div>
+                <div className="w-48 mx-auto rounded-3xl overflow-hidden shadow-lg">
+                  <img src={xiaohongshuQr} alt="Xiaohongshu QR Code" className="w-full h-full object-cover" />
                 </div>
               </div>
             </div>
