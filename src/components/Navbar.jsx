@@ -13,6 +13,7 @@ export default function Navbar() {
   const { user, signOut } = useAuth()
   const [jobStatus, setJobStatus] = useState('seeking')
   const [avatarId, setAvatarId] = useState(null)
+  const [tokens, setTokens] = useState(0)
   const navigate = useNavigate()
   const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -25,7 +26,7 @@ export default function Navbar() {
           const { data: { session } } = await supabase.auth.getSession()
           const token = session?.access_token
           if (!token) return
-          
+
           const backendUrl = getBackendBaseUrl()
           const res = await fetch(`${backendUrl}/api/profile`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -38,12 +39,22 @@ export default function Navbar() {
             if (j.avatarId) {
               setAvatarId(j.avatarId)
             }
+            if (j.tokens !== undefined) {
+              setTokens(j.tokens)
+            }
           }
         } catch (err) {
           console.error('Failed to fetch job status', err)
         }
       }
+
+      const onTokensChanged = () => {
+        void fetchStatus()
+      }
+
       fetchStatus()
+      window.addEventListener('tokensChanged', onTokensChanged)
+      return () => window.removeEventListener('tokensChanged', onTokensChanged)
     }
   }, [user])
 
@@ -209,6 +220,10 @@ export default function Navbar() {
                   <span className="text-sm font-bold text-slate-700 dark:text-slate-200 max-w-[100px] truncate">
                      {user.user_metadata?.full_name || user.email.split('@')[0]}
                   </span>
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20">
+                    <BrainCircuit className="w-3 h-3 text-orange-500" />
+                    <span className="text-[10px] font-black text-orange-600 dark:text-orange-400">{tokens}</span>
+                  </div>
                   <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
@@ -219,6 +234,10 @@ export default function Navbar() {
                        <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
                          {user.user_metadata?.full_name || user.email}
                        </p>
+                       <div className="mt-2 flex items-center justify-between">
+                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('nav.tokens')}</span>
+                         <span className="text-xs font-black text-orange-500">{tokens}</span>
+                       </div>
                     </div>
                     <Link
                       to="/dashboard"

@@ -113,6 +113,8 @@ export default function DashboardPage() {
     fetchGameStats()
   }, [user])
 
+  const [checkInReward, setCheckInReward] = useState(false)
+
   const handleCheckIn = async () => {
     if (checkingIn || !user) return
     setCheckingIn(true)
@@ -126,6 +128,11 @@ export default function DashboardPage() {
       if (res.ok) {
         const data = await res.json()
         setGameStats(prev => ({ ...prev, streak: data.streak, alreadyCheckedIn: true }))
+        if (data.tokensAwarded > 0) {
+          setCheckInReward(true)
+          window.dispatchEvent(new Event('tokensChanged'))
+          setTimeout(() => setCheckInReward(false), 3000)
+        }
         return true
       }
       return false
@@ -353,7 +360,67 @@ export default function DashboardPage() {
 
           {/* Right Column: History & Milestones */}
           <div className="lg:col-span-12 xl:col-span-5 space-y-8">
-            
+
+            {/* Daily Check-in Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="card-premium p-8 relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/8 blur-[80px] pointer-events-none" />
+              <div className="relative z-10 flex items-center gap-6">
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-500 ${
+                  gameStats?.alreadyCheckedIn 
+                    ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 border-2 border-emerald-200 dark:border-emerald-800' 
+                    : 'bg-amber-50 dark:bg-amber-950/30 text-amber-500 border-2 border-amber-200 dark:border-amber-800'
+                }`}>
+                  {gameStats?.alreadyCheckedIn ? <CheckCircle2 className="w-7 h-7" /> : <Flame className="w-7 h-7" />}
+                </div>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{t('dashboard.checkIn.title')}</h3>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-bold text-slate-400">
+                      {gameStats?.streak || 0} {t('profile.game.streak')}
+                    </span>
+                    <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
+                      +200 {t('common.energyShort')}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCheckIn}
+                  disabled={checkingIn || gameStats?.alreadyCheckedIn}
+                  className={`shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${
+                    gameStats?.alreadyCheckedIn 
+                      ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 border border-emerald-200 dark:border-emerald-800 cursor-default' 
+                      : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:scale-105 active:scale-95 shadow-lg shadow-slate-900/20 dark:shadow-none'
+                  } disabled:opacity-70 disabled:scale-100`}
+                >
+                  {checkingIn ? (
+                    <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                  ) : gameStats?.alreadyCheckedIn ? (
+                    t('dashboard.checkIn.done')
+                  ) : (
+                    t('dashboard.checkIn.btn')
+                  )}
+                </button>
+              </div>
+              <AnimatePresence>
+                {checkInReward && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="mt-4 flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20"
+                  >
+                    <Zap className="w-4 h-4 text-emerald-500" />
+                    <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">{t('dashboard.checkIn.reward')}</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
             {/* Interview History List */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}

@@ -17,9 +17,9 @@ import {
   Upload, Loader2, Lightbulb, FileText,
   Sparkles, BarChart3, ListChecks, AlertTriangle, Layers,
   MapPin, ClipboardList, CheckCircle2, Telescope,
-  ChevronDown, ChevronUp, Plus, Trash2, User,
+  ChevronDown, ChevronUp, Plus, Trash2, User, X,
   Briefcase, GraduationCap, FolderKanban, BookOpen, Tags, Languages, Award, Wand2,
-  Pencil, Eye, ArrowUpRight, Zap, ArrowRight,
+  Pencil, Eye, ArrowUpRight, Zap, ArrowRight, BrainCircuit, Share2, MessageCircle, ExternalLink,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -786,7 +786,7 @@ function ProfileSectionsView({ cvProfile, t }) {
   )
 }
 
-function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, coach, t, i18n, timeStr, showFloatingEditButton, coachTranslating, coachGenerating, runCoach, jobSearchStatus, avatarId }) {
+function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, coach, t, i18n, timeStr, showFloatingEditButton, coachTranslating, coachGenerating, runCoach, jobSearchStatus, avatarId, tokens, recharge }) {
   const hasData = profileHasVisibleData(cvProfile, resumeText, resumeNotes)
   const tr = String(targetRole || '').trim()
 
@@ -807,6 +807,65 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
           </Link>
         </motion.div>
       ) : null}
+
+      {/* Energy Status Card */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="card-premium p-8 bg-white dark:bg-slate-950 border-orange-100 dark:border-orange-500/20 shadow-xl shadow-orange-500/5 overflow-hidden relative"
+      >
+        <div className="absolute top-0 right-0 p-8 opacity-10">
+          <BrainCircuit className="w-32 h-32 text-orange-500" />
+        </div>
+        <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+          <div className="shrink-0 flex flex-col items-center gap-2">
+            <div className="w-20 h-20 rounded-3xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
+              <Zap className="w-10 h-10 text-white fill-current" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500">{t('profile.tokens')}</span>
+          </div>
+          
+          <div className="flex-1 space-y-4 text-center md:text-left">
+            <div>
+              <div className="flex items-baseline justify-center md:justify-start gap-2">
+                <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">{tokens}</span>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Energy Points</span>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-bold mt-1">
+                {t('profile.initialTokensHint', 'Full access to AI-powered career tools.')}
+              </p>
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('profile.tokenUsageInterview')}</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary-500" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('profile.tokenUsageCoach')}</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('profile.tokenUsageExtract')}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="shrink-0 flex flex-col gap-3 w-full md:w-auto">
+            <button
+              onClick={recharge}
+              className="px-8 py-4 bg-orange-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20 active:scale-95 flex items-center justify-center gap-2"
+            >
+              <Zap className="w-4 h-4" />
+              {t('profile.recharge')}
+            </button>
+            <div className="px-4 py-2 rounded-xl bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 text-center">
+              <p className="text-[10px] font-bold text-orange-600 dark:text-orange-400">{t('profile.tokenRewardContribution')}</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       <header className="space-y-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-slate-100 dark:border-slate-800">
@@ -986,6 +1045,103 @@ function MultiLineInput({ lines, label, placeholder, onChange, t, inputClass }) 
   )
 }
 
+function RechargeModal({ isOpen, onClose, t }) {
+  if (!isOpen) return null
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800"
+      >
+        <div className="p-8 sm:p-10 space-y-8">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h2 className="text-3xl font-black font-serif text-slate-900 dark:text-white leading-tight">
+                {t('profile.rechargeModal.title')}
+              </h2>
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+                {t('profile.rechargeModal.subtitle')}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all hover:rotate-90"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="grid gap-6">
+            <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-primary-500 transition-all space-y-4 text-left">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600">
+                  <Share2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-sm">
+                    {t('profile.rechargeModal.method1Title')}
+                  </h3>
+                </div>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                {t('profile.rechargeModal.method1Desc')}
+              </p>
+              <Link
+                to="/experiences"
+                onClick={onClose}
+                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary-600 hover:gap-4 transition-all"
+              >
+                {t('profile.rechargeModal.method1Btn')}
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-orange-500 transition-all space-y-6 text-left">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600">
+                  <MessageCircle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-sm">
+                    {t('profile.rechargeModal.method2Title')}
+                  </h3>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                  {t('profile.rechargeModal.method2Desc')}
+                </p>
+                <div className="aspect-square w-48 mx-auto rounded-3xl bg-white border-4 border-slate-100 dark:border-slate-800 flex items-center justify-center relative overflow-hidden group/qr">
+                  <div className="text-center p-6 space-y-2">
+                    <Zap className="w-8 h-8 text-orange-200 mx-auto" />
+                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{t('profile.rechargeModal.qrHint')}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="w-full py-5 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-xl active:scale-[0.98]"
+          >
+            {t('profile.rechargeModal.cancel')}
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 const avatars = [
   'professional_male_1',
   'professional_female_1',
@@ -1016,10 +1172,12 @@ export default function ProfilePage() {
   const [note, setNote] = useState(null)
   const [jobSearchStatus, setJobSearchStatus] = useState('seeking')
   const [avatarId, setAvatarId] = useState(null)
+  const [tokens, setTokens] = useState(0)
   const [updatedAt, setUpdatedAt] = useState(null)
   const [pendingRaw, setPendingRaw] = useState('')
   const [rawResumeOpen, setRawResumeOpen] = useState(false)
   const [pendingPreviewOpen, setPendingPreviewOpen] = useState(false)
+  const [showRechargeModal, setShowRechargeModal] = useState(false)
   const fileRef = useRef(null)
 
   const backendUrl = getBackendBaseUrl()
@@ -1053,6 +1211,7 @@ export default function ProfilePage() {
       setCoach(j.resumeCoach || null)
       setJobSearchStatus(j.jobSearchStatus || 'seeking')
       setAvatarId(j.avatarId || null)
+      setTokens(j.tokens || 0)
       setUpdatedAt(j.resumeUpdatedAt || null)
       const tr = j.profileJson?.coachTargetRole
       if (typeof tr === 'string') setTargetRole(tr)
@@ -1067,6 +1226,34 @@ export default function ProfilePage() {
 
   useEffect(() => { void load() }, [load])
 
+  const refreshTokens = useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      if (!token) return
+
+      const res = await fetch(`${backendUrl}/api/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) return
+
+      const j = await res.json()
+      setTokens(j.tokens || 0)
+    } catch (err) {
+      // Non-fatal: tokens may temporarily be stale.
+      console.error('[Profile] Failed to refresh tokens', err)
+    }
+  }, [backendUrl])
+
+  // Keep token UI in sync across pages (Gallup / Experiences delete / Recharge).
+  useEffect(() => {
+    const onTokensChanged = () => {
+      void refreshTokens()
+    }
+    window.addEventListener('tokensChanged', onTokensChanged)
+    return () => window.removeEventListener('tokensChanged', onTokensChanged)
+  }, [refreshTokens])
+
   useEffect(() => {
     const onScroll = () => {
       setShowFloatingQuickSwitch(window.scrollY > 280)
@@ -1075,6 +1262,12 @@ export default function ProfilePage() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  useEffect(() => {
+    if (location.state?.openRecharge) {
+      setShowRechargeModal(true)
+    }
+  }, [location.state])
 
   useEffect(() => {
     if (!isEdit) return
@@ -1089,10 +1282,32 @@ export default function ProfilePage() {
   const save = async () => {
     setSaving(true)
     setNote(null)
+
+    // SECURITY: Sanitize all string inputs in cvProfile and other fields before saving (prevent injection/XSS)
+    const sanitize = (val) => {
+      if (typeof val === 'string') return val.replace(/<[^>]*>?/gm, '').trim();
+      if (Array.isArray(val)) return val.map(sanitize);
+      if (val !== null && typeof val === 'object') {
+        const out = {};
+        for (const k in val) { out[k] = sanitize(val[k]); }
+        return out;
+      }
+      return val;
+    };
+
+    const sanitizedCvProfile = sanitize(cvProfile);
+    const sanitizedResumeText = sanitize(resumeText);
+    const sanitizedResumeNotes = sanitize(resumeNotes);
+    const sanitizedTargetRole = sanitize(targetRole);
+
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const token = session?.access_token
-      if (!token) return
+      if (!token) {
+        setSaving(false);
+        return;
+      }
+
       const res = await fetch(`${backendUrl}/api/profile`, {
         method: 'PUT',
         headers: {
@@ -1100,23 +1315,60 @@ export default function ProfilePage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          resumeText,
-          resumeNotes,
+          resumeText: sanitizedResumeText,
+          resumeNotes: sanitizedResumeNotes,
           jobSearchStatus,
           avatarId,
-          profileJson: { coachTargetRole: targetRole, cvProfile },
+          profileJson: { coachTargetRole: sanitizedTargetRole, cvProfile: sanitizedCvProfile },
         }),
       })
-      if (!res.ok) throw new Error('save')
-      const j = await res.json()
-      setUpdatedAt(j.resumeUpdatedAt)
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        console.error('[Profile save] Backend error response:', res.status, errBody)
+        const details = Array.isArray(errBody.details) ? errBody.details : []
+        const detailsText = details.length
+          ? details.map((d) => `${d?.path ? d.path + ': ' : ''}${d?.message || ''}`.trim()).join('; ')
+          : ''
+        throw new Error(`${errBody.error || 'save'}${detailsText ? `: ${detailsText}` : ''}`)
+      }
+
+      const data = await res.json()
+      setUpdatedAt(data.resumeUpdatedAt || null)
       setNote({ type: 'ok', text: t('profile.saveSuccess') })
-      setTimeout(() => setNote(null), 1000)
-    } catch {
-      setNote({ type: 'err', text: t('profile.saveErr') })
-      setTimeout(() => setNote(null), 2000)
+      setTimeout(() => setNote(null), 3000)
+    } catch (err) {
+      console.error('[Profile save]', err);
+      setNote({ type: 'err', text: err?.message || t('profile.saveErr') })
+      setTimeout(() => setNote(null), 3000)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const recharge = async (amount) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      if (!token) return
+
+      const res = await fetch(`${backendUrl}/api/profile/recharge`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ amount })
+      })
+      if (res.ok) {
+        setTokens(prev => prev + amount)
+        window.dispatchEvent(new Event('tokensChanged'))
+        setNote({ type: 'ok', text: t('profile.rechargeModal.success') })
+        setTimeout(() => setNote(null), 2000)
+      }
+    } catch {
+      setNote({ type: 'err', text: t('common.error') })
+      setTimeout(() => setNote(null), 3000)
     }
   }
 
@@ -1164,14 +1416,19 @@ export default function ProfilePage() {
   }
 
   const runExtractCv = async () => {
-    const src = (pendingRaw || resumeText).trim()
-    if (src.length < 80) {
+    console.log('[runExtractCv] clicked');
+    const src = (pendingRaw || resumeText || '').trim()
+    console.log('[runExtractCv] src length:', src.length);
+    if (src.length < 50) {
+      console.warn('[runExtractCv] text too short');
       setNote({ type: 'err', text: t('profile.cv.extractNeedText') })
+      setTimeout(() => setNote(null), 5000)
       return
     }
     setExtractBusy(true)
     setNote(null)
     try {
+      console.log('[runExtractCv] calling backend...');
       const { data: { session } } = await supabase.auth.getSession()
       const token = session?.access_token
       if (!token) throw new Error('auth')
@@ -1237,8 +1494,9 @@ export default function ProfilePage() {
       setPendingPreviewOpen(false)
       setNote({ type: 'ok', text: t('profile.cv.pdfExtractOk', { n: j.charCount ?? 0 }) })
       setTimeout(() => setNote(null), 2000)
-    } catch {
-      setNote({ type: 'err', text: t('profile.parseErr') })
+    } catch (err) {
+      console.error('[onPdf] error:', err)
+      setNote({ type: 'err', text: err?.message || t('profile.parseErr') })
       setTimeout(() => setNote(null), 3000)
     } finally {
       setParseBusy(false)
@@ -1360,8 +1618,19 @@ export default function ProfilePage() {
             coachTranslating={coachTranslating}
             coachGenerating={coachGenerating}
             runCoach={runCoach}
+            tokens={tokens}
+            recharge={() => setShowRechargeModal(true)}
           />
         </div>
+        <AnimatePresence>
+          {showRechargeModal && (
+            <RechargeModal
+              isOpen={showRechargeModal}
+              onClose={() => setShowRechargeModal(false)}
+              t={t}
+            />
+          )}
+        </AnimatePresence>
       </motion.div>
     )
   }
@@ -1379,20 +1648,29 @@ export default function ProfilePage() {
           cvProfile={cvProfile} setCvProfile={setCvProfile} resumeText={resumeText} setResumeText={setResumeText}
           resumeNotes={resumeNotes} setResumeNotes={setResumeNotes} targetRole={targetRole} setTargetRole={setTargetRole}
           coach={coach} coachGenerating={coachGenerating} coachErr={coachErr} runCoach={runCoach}
-          save={save} saving={saving} note={note} parseBusy={parseBusy} extractBusy={extractBusy} onPdf={onPdf} fileRef={fileRef}
+          save={save} saving={saving} note={note} parseBusy={parseBusy} extractBusy={extractBusy} onPdf={onPdf} fileRef={fileRef} runExtractCv={runExtractCv}
           pendingRaw={pendingRaw} setPendingRaw={setPendingRaw} pendingPreviewOpen={pendingPreviewOpen} setPendingPreviewOpen={setPendingPreviewOpen}
           applyPendingToResume={applyPendingToResume} jobSearchStatus={jobSearchStatus} setJobSearchStatus={setJobSearchStatus}
           avatarId={avatarId} setAvatarId={setAvatarId} t={t}
         />
       </div>
-    </motion.div>
+        <AnimatePresence>
+          {showRechargeModal && (
+            <RechargeModal
+              isOpen={showRechargeModal}
+              onClose={() => setShowRechargeModal(false)}
+              t={t}
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
   )
 }
 
 function ProfileEditView({
   cvProfile, setCvProfile, resumeText, setResumeText, resumeNotes, setResumeNotes,
   targetRole, setTargetRole, coach, coachGenerating, coachErr, runCoach,
-  save, saving, note, parseBusy, extractBusy, onPdf, fileRef,
+  save, saving, note, parseBusy, extractBusy, onPdf, fileRef, runExtractCv,
   pendingRaw, setPendingRaw, pendingPreviewOpen, setPendingPreviewOpen, applyPendingToResume,
   jobSearchStatus, setJobSearchStatus, avatarId, setAvatarId, t
 }) {
@@ -1462,7 +1740,11 @@ function ProfileEditView({
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
-                  className={`absolute left-full ml-4 whitespace-nowrap px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${note.type === 'ok' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20' : 'bg-red-50 text-red-600 dark:bg-red-950/20'}`}
+                  className={`absolute top-full right-0 mt-3 px-4 py-3 rounded-2xl text-[11px] font-bold leading-snug max-w-[280px] whitespace-normal break-words shadow-lg ring-1 ring-black/5 backdrop-blur ${
+                    note.type === 'ok'
+                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-200'
+                      : 'bg-red-50 text-red-700 dark:bg-red-950/20 dark:text-red-200'
+                  }`}
                 >
                   {note.text}
                 </motion.div>
@@ -1520,7 +1802,7 @@ function ProfileEditView({
                       </button>
                       <button
                         onClick={() => void runExtractCv()}
-                        disabled={extractBusy || ((pendingRaw || resumeText).trim().length < 80)}
+                        disabled={extractBusy || parseBusy || !(pendingRaw || resumeText || '').trim()}
                         className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 dark:bg-primary-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-primary-700 transition-all disabled:opacity-50 shadow-lg shadow-slate-900/10 dark:shadow-primary-600/20"
                       >
                         {extractBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
@@ -1549,13 +1831,14 @@ function ProfileEditView({
                         </div>
                       </div>
                       {pendingPreviewOpen && (
-                        <motion.pre
+                        <motion.textarea
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
-                          className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-primary-100 dark:border-primary-900/30 text-xs font-mono text-slate-600 dark:text-slate-400 overflow-auto max-h-60 leading-relaxed"
-                        >
-                          {pendingRaw}
-                        </motion.pre>
+                          value={pendingRaw}
+                          onChange={(e) => setPendingRaw(e.target.value)}
+                          spellCheck={false}
+                          className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-primary-100 dark:border-primary-900/30 text-xs font-mono text-slate-600 dark:text-slate-400 overflow-auto max-h-60 leading-relaxed resize-y min-h-[120px] w-full"
+                        />
                       )}
                     </div>
                   )}

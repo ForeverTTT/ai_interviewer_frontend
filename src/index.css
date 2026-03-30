@@ -148,16 +148,43 @@
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-3 px-12 py-5 bg-orange-600 text-white font-black rounded-full shadow-[0_15px_30px_-10px_rgba(249,115,22,0.4)] transition-all duration-500 hover:bg-orange-500 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-12px_rgba(249,115,22,0.5)] active:scale-[0.96] active:translate-y-0 active:shadow-inner focus:ring-4 focus:ring-orange-500/20 relative overflow-hidden font-chinese-modern uppercase tracking-wider;
-    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    @apply inline-flex items-center justify-center gap-3 px-12 py-5 text-white font-black rounded-[2rem] transition-all duration-500 relative overflow-hidden font-display uppercase tracking-widest;
+    background: linear-gradient(135deg, #ff8c42 0%, #f97316 50%, #ea580c 100%);
+    box-shadow: 0 20px 40px -12px rgba(249, 115, 22, 0.35);
   }
 
-  .btn-primary-dark {
-    @apply inline-flex items-center justify-center gap-3 px-12 py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black rounded-full transition-all duration-500 hover:bg-slate-800 dark:hover:bg-slate-100 hover:-translate-y-1.5 shadow-[0_15px_30px_-10px_rgba(0,0,0,0.2)] dark:shadow-[0_15px_30px_-10px_rgba(255,255,255,0.1)] active:scale-[0.96] active:translate-y-0 font-chinese-modern uppercase tracking-wider;
+  .btn-primary::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-700 pointer-events-none;
+  }
+
+  .btn-primary:hover {
+    @apply -translate-y-1.5;
+    box-shadow: 0 30px 60px -12px rgba(249, 115, 22, 0.5);
+    background: linear-gradient(135deg, #ffa26b 0%, #fb923c 50%, #f97316 100%);
+  }
+
+  .btn-primary:hover::before {
+    @apply translate-x-full;
+  }
+
+  .btn-primary:active {
+    @apply scale-[0.96] translate-y-0.5;
+    box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.4);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-3 px-10 py-5 bg-white/40 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-black rounded-[2rem] border border-slate-200 dark:border-slate-800 backdrop-blur-xl transition-all duration-500 font-display uppercase tracking-widest;
+    box-shadow: 0 10px 20px -8px rgba(0, 0, 0, 0.05);
   }
   
-  .btn-secondary {
-    @apply inline-flex items-center justify-center gap-3 px-12 py-5 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-black rounded-full border border-slate-100 dark:border-slate-800 shadow-[0_10px_20px_-8px_rgba(0,0,0,0.05)] transition-all duration-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.1)] active:scale-[0.96] active:translate-y-0 font-chinese-modern uppercase tracking-wider;
+  .btn-secondary:hover {
+    @apply -translate-y-1.5 border-slate-400 dark:border-slate-600 bg-white/60 dark:bg-slate-800/60;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn-secondary:active {
+    @apply scale-[0.96] translate-y-0.5;
   }
   
   .btn-ghost {

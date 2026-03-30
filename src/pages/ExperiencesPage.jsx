@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -9,7 +9,7 @@ import {
   Search, Building2, GraduationCap, Briefcase, MapPin,
   Clock, ChevronDown, ChevronUp, MessageSquareQuote,
   CheckCircle2, XCircle, Award, Globe2, Loader2, Filter,
-  Trash2, Plus, X, Send
+  Trash2, Plus, X, Send, BrainCircuit, Zap, AlertTriangle
 } from 'lucide-react'
 
 function ResultBadge({ result, t }) {
@@ -55,8 +55,138 @@ function TypeBadge({ type, t }) {
   )
 }
 
+function CustomDropdown({ label, value, options, onChange, t }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const selectedOption = options.find(o => o.value === value)
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-2 block">{label}</label>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full h-[54px] flex items-center justify-between px-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all hover:bg-white dark:hover:bg-slate-800 shadow-sm"
+      >
+        <div className="flex items-center gap-3">
+          {selectedOption?.icon && <selectedOption.icon className="w-4 h-4 text-slate-400" />}
+          <span className="text-slate-900 dark:text-white">{selectedOption?.label || t('exp.selectPlaceholder')}</span>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute z-[100] w-full mt-2 p-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-100 dark:border-slate-800 rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden"
+          >
+            {options.map((opt) => {
+              const Icon = opt.icon
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(opt.value)
+                    setIsOpen(false)
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all relative group ${
+                    value === opt.value
+                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <div className={`p-1.5 rounded-lg transition-colors ${
+                    value === opt.value 
+                      ? (value === 'work' || value === 'Passed' ? 'bg-primary-500/20' : 'bg-slate-500/20')
+                      : 'bg-slate-100 dark:bg-slate-800 group-hover:bg-white dark:group-hover:bg-slate-700'
+                  }`}>
+                    {Icon && <Icon className={`w-3.5 h-3.5 ${value === opt.value ? 'text-current' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />}
+                  </div>
+                  <span className="flex-1 text-left">{opt.label}</span>
+                  {value === opt.value && (
+                    <motion.div layoutId="activeOption" className="absolute right-4 w-1.5 h-1.5 rounded-full bg-current" />
+                  )}
+                </button>
+              )
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+function DeleteConfirmModal({ isOpen, onClose, onConfirm }) {
+  if (!isOpen) return null
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={onClose}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 10 }}
+        transition={{ type: 'spring', duration: 0.35, bounce: 0.2 }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-sm bg-white dark:bg-slate-950 rounded-3xl shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800"
+      >
+        <div className="flex flex-col items-center px-8 pt-8 pb-6 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-950/30 flex items-center justify-center mb-5 border border-red-100 dark:border-red-900/50">
+            <AlertTriangle className="w-7 h-7 text-red-500" />
+          </div>
+          <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">
+            确定要删除这条面经吗？
+          </h3>
+          <p className="mt-2.5 text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+            删除后能量值
+            <span className="inline-flex items-center gap-0.5 font-black text-red-500">
+              <Zap className="w-3.5 h-3.5" />-200
+            </span>
+          </p>
+        </div>
+        <div className="flex border-t border-slate-100 dark:border-slate-800">
+          <button
+            onClick={onClose}
+            className="flex-1 py-4 text-sm font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
+          >
+            取消
+          </button>
+          <div className="w-px bg-slate-100 dark:bg-slate-800" />
+          <button
+            onClick={onConfirm}
+            className="flex-1 py-4 text-sm font-black text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+          >
+            删除
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 function ExperienceCard({ exp, t, user, onDelete }) {
   const [expanded, setExpanded] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const isOwner = user && exp.user_id === user.id
 
   return (
@@ -68,15 +198,29 @@ function ExperienceCard({ exp, t, user, onDelete }) {
       className="bg-white dark:bg-slate-950 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden group relative"
     >
       {isOwner && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            if (window.confirm(t('exp.confirmDelete'))) onDelete(exp.id)
-          }}
-          className="absolute top-6 right-16 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all opacity-0 group-hover:opacity-100 z-10"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowDeleteConfirm(true)
+            }}
+            className="absolute top-6 right-16 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all opacity-0 group-hover:opacity-100 z-10"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+          <AnimatePresence>
+            {showDeleteConfirm && (
+              <DeleteConfirmModal
+                isOpen={showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(false)}
+                onConfirm={() => {
+                  setShowDeleteConfirm(false)
+                  onDelete(exp.id)
+                }}
+              />
+            )}
+          </AnimatePresence>
+        </>
       )}
       <button
         type="button"
@@ -233,6 +377,7 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
     rounds: [{ round: 1, format: '', duration_min: 30, questions: [''] }]
   })
   const [loading, setLoading] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   if (!isOpen) return null
 
@@ -266,11 +411,12 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
+    setSubmitError('')
     try {
       await onPost(formData)
       onClose()
     } catch (err) {
-      alert(err.message)
+      setSubmitError(err.message)
     } finally {
       setLoading(false)
     }
@@ -322,31 +468,45 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
           </button>
         </div>
 
+        <div className="mx-8 mt-6 p-4 rounded-2xl bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-orange-500 p-2 rounded-xl text-white shadow-lg shadow-orange-500/20">
+              <BrainCircuit className="w-4 h-4" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-black text-orange-900 dark:text-orange-400">{t('profile.tokenRewardContribution')}</span>
+              <p className="text-[10px] font-bold text-orange-600/70 dark:text-orange-500/70 uppercase tracking-widest">Community Reward: +200 Energy</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mx-8 mt-3 px-4 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-center gap-2.5">
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <span className="text-xs font-bold text-amber-700 dark:text-amber-400">{t('exp.dailyLimitHint')}</span>
+        </div>
+
         <form onSubmit={handleSubmit} className="p-8 space-y-8">
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('exp.labelType')}</label>
-              <select 
-                value={formData.type} 
-                onChange={e => setFormData({...formData, type: e.target.value})}
-                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
-              >
-                <option value="work">{t('exp.filterWork')}</option>
-                <option value="school">{t('exp.filterSchool')}</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('exp.labelResult')}</label>
-              <select 
-                value={formData.result} 
-                onChange={e => setFormData({...formData, result: e.target.value})}
-                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all cursor-pointer appearance-none"
-                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
-              >
-                <option value="Passed">{t('exp.resultPass')}</option>
-                <option value="Failed">{t('exp.resultFail')}</option>
-              </select>
-            </div>
+            <CustomDropdown 
+              label={t('exp.labelType')}
+              value={formData.type}
+              onChange={val => setFormData({...formData, type: val})}
+              t={t}
+              options={[
+                { value: 'work', label: t('exp.filterWork'), icon: Briefcase },
+                { value: 'school', label: t('exp.filterSchool'), icon: GraduationCap }
+              ]}
+            />
+            <CustomDropdown 
+              label={t('exp.labelResult')}
+              value={formData.result}
+              onChange={val => setFormData({...formData, result: val})}
+              t={t}
+              options={[
+                { value: 'Passed', label: t('exp.resultPass'), icon: CheckCircle2 },
+                { value: 'Failed', label: t('exp.resultFail'), icon: XCircle }
+              ]}
+            />
           </div>
 
           <div className="space-y-4">
@@ -463,6 +623,25 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
              />
           </div>
 
+          <AnimatePresence>
+            {submitError && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20"
+              >
+                <AlertTriangle className="w-4 h-4 text-red-500 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-red-700 dark:text-red-400">{submitError}</p>
+                </div>
+                <button type="button" onClick={() => setSubmitError('')} className="p-0.5 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg transition-colors">
+                  <X className="w-3.5 h-3.5 text-red-400" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <button 
             type="submit" 
             disabled={loading}
@@ -526,17 +705,38 @@ export default function ExperiencesPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.access_token) throw new Error('No valid session found. Please log in again.')
 
+    // SECURITY: Sanitize all string inputs on the frontend before sending to the backend (prevent injection/XSS)
+    const sanitize = (str) => typeof str === 'string' ? str.replace(/<[^>]*>?/gm, '').trim() : str;
+    
+    const sanitizedData = {
+      ...formData,
+      company: sanitize(formData.company),
+      location: sanitize(formData.location),
+      position: sanitize(formData.position),
+      department: sanitize(formData.department),
+      reflection: sanitize(formData.reflection),
+      salary: sanitize(formData.salary),
+      rounds: (formData.rounds || []).map(r => ({
+        ...r,
+        format: sanitize(r.format),
+        questions: (r.questions || []).map(sanitize)
+      }))
+    }
+
     const res = await fetch(`${backendUrl}/api/experiences`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${session.access_token}`
       },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(sanitizedData)
     })
 
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}))
+      if (errBody.error === 'DAILY_LIMIT') {
+        throw new Error(t('exp.dailyLimitReached'))
+      }
       throw new Error(errBody.error || `Server returned ${res.status}: ${res.statusText}`)
     }
     
@@ -561,6 +761,8 @@ export default function ExperiencesPage() {
       }
 
       setExperiences(prev => prev.filter(e => e.id !== id))
+      // Let Navbar / other token UI re-sync immediately after server-side -200.
+      window.dispatchEvent(new Event('tokensChanged'))
     } catch (err) {
       alert(`Delete Error: ${err.message}`)
     }
@@ -617,7 +819,7 @@ export default function ExperiencesPage() {
   ]
   
   if (user) {
-    filterTabs.push({ key: 'mine', label: t('nav.myExperiences'), count: stats.mine })
+    filterTabs.push({ key: 'mine', label: t('exp.filterMine'), count: stats.mine })
   }
 
   return (
@@ -639,15 +841,26 @@ export default function ExperiencesPage() {
           </motion.div>
 
           {user && (
-             <motion.button
-               initial={{ opacity: 0, scale: 0.9 }}
-               animate={{ opacity: 1, scale: 1 }}
-               onClick={() => setPostModalOpen(true)}
-               className="flex items-center gap-2 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2rem] text-sm font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-slate-900/10"
-             >
-               <Plus className="w-4 h-4" />
-               {t('exp.postBtn')}
-             </motion.button>
+             <div className="flex flex-col items-center gap-2">
+               <motion.button
+                 initial={{ opacity: 0, scale: 0.9 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 onClick={() => setPostModalOpen(true)}
+                 className="flex items-center gap-3 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2rem] text-sm font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-slate-900/10"
+               >
+                 <Plus className="w-5 h-5" />
+                 {t('exp.postBtn')}
+               </motion.button>
+               <motion.div 
+                 initial={{ opacity: 0, y: -5 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ delay: 0.2 }}
+                 className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-[10px] font-black tracking-widest uppercase border border-amber-200 dark:border-amber-800/50 shadow-sm"
+               >
+                 <Zap className="w-3 h-3" />
+                 {t('exp.rewardBadge')}
+               </motion.div>
+             </div>
           )}
         </header>
 

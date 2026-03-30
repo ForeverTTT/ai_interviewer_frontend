@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   ChevronRight, 
@@ -11,6 +11,7 @@ import {
   Users,
   Lightbulb,
   ArrowRight,
+  AlertTriangle,
   Gem,
   CheckCircle,
   Dna,
@@ -40,9 +41,29 @@ export default function GallupTestPage() {
   const [results, setResults] = useState(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isLoadingProgress, setIsLoadingProgress] = useState(true)
+  const [tokens, setTokens] = useState(0)
+  const [errorMessage, setErrorMessage] = useState(null)
 
   const [dbQuestions, setDbQuestions] = useState([])
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true)
+
+  const refreshTokens = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const res = await fetch(`${API_URL}/api/profile`, {
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setTokens(data.tokens || 0)
+      }
+    } catch (err) {
+      console.error('Failed to refresh tokens', err)
+    }
+  }
 
   const questions = useMemo(() => {
     if (dbQuestions.length === 0) return []
@@ -104,8 +125,19 @@ export default function GallupTestPage() {
         setIsLoadingProgress(false)
       }
     }
-    if (questions.length > 0) fetchProgress()
-  }, [questions])
+    if (!isLoadingQuestions) {
+      if (questions.length > 0) {
+        fetchProgress()
+      } else {
+        setIsLoadingProgress(false)
+        setErrorMessage(t('common.networkError') || 'Network Error')
+      }
+    }
+  }, [questions, isLoadingQuestions])
+
+  useEffect(() => {
+    void refreshTokens()
+  }, [])
 
   const saveToBackend = async (newAnswers, finalResults = null, isCompleted = false) => {
     setIsSaving(true)
@@ -125,6 +157,10 @@ export default function GallupTestPage() {
   }
 
   const handleAnswer = (questionId, score) => {
+    // Guard: avoid double-click advancing / auto state thrash.
+    const existing = answers[questionId]
+    const existingNum = typeof existing === 'string' ? Number(existing) : existing
+    if (typeof existingNum === 'number' && !Number.isNaN(existingNum)) return
     const newAnswers = { ...answers, [questionId]: score }
     setAnswers(newAnswers)
     saveToBackend(newAnswers)
@@ -165,7 +201,16 @@ export default function GallupTestPage() {
       if (res.ok) {
         const data = await res.json()
         setResults(data.results)
+        // Ensure token UI (Navbar/Profile/Gallup page) stays in sync right after deduction.
+        await refreshTokens()
+        window.dispatchEvent(new Event('tokensChanged'))
       } else {
+        const err = await res.json().catch(() => ({}))
+        if (res.status === 403) {
+          setErrorMessage(t('common.insufficientTokens', 'Insufficient Energy'))
+          setStep('quiz') // Go back to quiz to show error
+          return
+        }
         setResults({ scores: finalResults, analysis: null })
       }
     } catch(e) {
@@ -175,12 +220,31 @@ export default function GallupTestPage() {
     setStep('report')
   }
 
-  const progress = questions.length > 0 ? (Object.keys(answers).length / questions.length) * 100 : 0
+  const answeredCount = questions.length
+    ? questions.reduce((acc, q) => {
+      const v = answers[q.id]
+      const n = typeof v === 'string' ? Number(v) : v
+      return acc + (typeof n === 'number' && !Number.isNaN(n) ? 1 : 0)
+    }, 0)
+    : 0
+
+  const progress = questions.length > 0 ? (answeredCount / questions.length) * 100 : 0
 
   if (isLoadingQuestions || isLoadingProgress) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950">
         <Loader2 className="w-10 h-10 text-primary-600 animate-spin" />
+      </div>
+    )
+  }
+
+  if (errorMessage && questions.length === 0) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-6 text-center">
+        <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Failed to Load</h2>
+        <p className="text-slate-500 max-w-sm">{errorMessage}</p>
+        <button onClick={() => window.location.reload()} className="mt-6 px-6 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold">Try Again</button>
       </div>
     )
   }
@@ -246,13 +310,24 @@ export default function GallupTestPage() {
                 ))}
               </div>
 
-              <button 
-                onClick={() => setStep('quiz')} 
-                className="btn-primary group h-14 px-10 text-sm"
-              >
-                <span>{progress > 0 ? t('gallup.resumeBtn') : t('gallup.startBtn')}</span>
-                <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
-              </button>
+              <div className="mb-10 flex flex-col items-center gap-2">
+                <button 
+                  onClick={() => setStep('quiz')} 
+                  disabled={tokens < 100}
+                  className="btn-primary group h-14 px-10 text-sm disabled:opacity-50"
+                >
+                  <span>{progress > 0 ? t('gallup.resumeBtn') : t('gallup.startBtn')}</span>
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                </button>
+                <p className={`text-[10px] font-black uppercase tracking-widest ${tokens < 100 ? 'text-red-500' : 'text-slate-400'}`}>
+                   {t('profile.tokenUsage')} 100 Energy（{t('profile.tokens')}: {tokens}）
+                </p>
+                {tokens < 100 && (
+                  <Link to="/profile" className="text-[10px] font-black uppercase tracking-widest text-primary-600 underline">
+                    {t('profile.recharge')}
+                  </Link>
+                )}
+              </div>
             </motion.div>
           )}
 
@@ -320,9 +395,9 @@ export default function GallupTestPage() {
                   <div className="h-1.5 flex-grow mx-12 bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden relative">
                     <motion.div className="h-full bg-slate-900 dark:bg-white" animate={{ width: `${progress}%` }} transition={{ duration: 1 }} />
                   </div>
-                  {currentIndex === questions.length - 1 || Object.keys(answers).length === questions.length ? (
+                  {currentIndex === questions.length - 1 && answeredCount === questions.length ? (
                     <button onClick={handleSubmit} className="btn-primary h-12 px-8 text-xs uppercase font-black tracking-widest">
-                      {t('gallup.submitBtn')} <CheckCircle className="w-4 h-4 ml-2" />
+                      {t('gallup.viewResults')} <CheckCircle className="w-4 h-4 ml-2" />
                     </button>
                   ) : (
                     <button onClick={() => setCurrentIndex(currentIndex + 1)} className="btn-primary h-12 px-8 text-xs uppercase font-black tracking-widest">

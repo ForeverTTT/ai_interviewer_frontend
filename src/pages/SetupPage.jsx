@@ -7,6 +7,7 @@ import {
   Briefcase, FileText, Globe2, Clock, ArrowRight,
   Info, Sparkles, Upload, Loader2, X, Check, LayoutTemplate,
   ChevronDown, Copy, RotateCcw, History, Trash2,
+  AlertCircle, Coins, Zap,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -150,11 +151,10 @@ function CategorySelector({ value, options, onChange, placeholder, t }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex w-full items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-sm font-bold transition-all duration-300 ${
-          isOpen
+        className={`flex w-full items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-sm font-bold transition-all duration-300 ${isOpen
             ? 'border-slate-900 bg-white dark:border-white dark:bg-slate-900'
             : 'border-slate-100 bg-slate-50 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-600'
-        }`}
+          }`}
       >
         <div className="flex items-center gap-3 overflow-hidden">
           <LayoutTemplate className={`h-4 w-4 shrink-0 ${value ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`} />
@@ -181,11 +181,10 @@ function CategorySelector({ value, options, onChange, placeholder, t }) {
                     onChange(opt.value)
                     setIsOpen(false)
                   }}
-                  className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-sm font-medium transition-colors ${
-                    value === opt.value
+                  className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-sm font-medium transition-colors ${value === opt.value
                       ? 'bg-primary-50 text-primary-700 dark:bg-primary-950/40 dark:text-primary-300'
                       : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/80'
-                  }`}
+                    }`}
                 >
                   {opt.label}
                   {value === opt.value && <Check className="h-4 w-4" />}
@@ -196,6 +195,15 @@ function CategorySelector({ value, options, onChange, placeholder, t }) {
         )}
       </AnimatePresence>
     </div>
+  )
+}
+
+function EnergyBadge({ amount, label, t }) {
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFF9E6] dark:bg-amber-950/20 border border-[#FFD700] dark:border-amber-500/50 text-[#D97706] dark:text-amber-400 text-[10px] font-black leading-none shadow-sm ring-4 ring-amber-500/5 transition-transform group-hover:scale-105">
+      <Zap className="h-2.5 w-2.5 fill-[#D97706] dark:fill-amber-400" />
+      <span className="whitespace-nowrap uppercase tracking-tighter">{amount} {label || t('nav.tokens')}</span>
+    </span>
   )
 }
 
@@ -221,10 +229,13 @@ export default function SetupPage() {
     language: 'English',
   })
   const [mlResult, setMlResult] = useState('')
+  const [mlError, setMlError] = useState(null)
   const [mlLoading, setMlLoading] = useState(false)
   const [mlCopied, setMlCopied] = useState(false)
   const [jdHistory, setJdHistory] = useState(() => loadJdHistory())
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [tokens, setTokens] = useState(0)
+  const [tokenError, setTokenError] = useState(null)
   const historyRef = useRef(null)
 
   const resumeFileRef = useRef(null)
@@ -245,21 +256,39 @@ export default function SetupPage() {
 
   useEffect(() => {
     let cancelled = false
-    ;(async () => {
+      ; (async () => {
+        try {
+          const backendUrl = getBackendBaseUrl()
+          const { data: { session } } = await supabase.auth.getSession()
+          const token = session?.access_token
+          if (!token) return
+          const res = await fetch(`${backendUrl}/api/profile/resume`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          if (!res.ok || cancelled) return
+          const j = await res.json()
+          if (!cancelled) setProfileResumeText(j.resumeText || '')
+        } catch { /* ignore */ }
+      })()
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    const fetchTokens = async () => {
       try {
         const backendUrl = getBackendBaseUrl()
         const { data: { session } } = await supabase.auth.getSession()
-        const token = session?.access_token
-        if (!token) return
-        const res = await fetch(`${backendUrl}/api/profile/resume`, {
-          headers: { Authorization: `Bearer ${token}` },
+        if (!session) return
+        const res = await fetch(`${backendUrl}/api/profile`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
         })
-        if (!res.ok || cancelled) return
-        const j = await res.json()
-        if (!cancelled) setProfileResumeText(j.resumeText || '')
+        if (res.ok) {
+          const j = await res.json()
+          setTokens(j.tokens || 0)
+        }
       } catch { /* ignore */ }
-    })()
-    return () => { cancelled = true }
+    }
+    fetchTokens()
   }, [])
 
   const languages = useMemo(() => [
@@ -307,10 +336,10 @@ export default function SetupPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     const newErrors = validate()
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
-      
+
       // Auto-scroll to first error
       const firstErrorKey = newErrors.position ? 'setup-position' : 'setup-job-desc'
       const el = document.getElementById(firstErrorKey)
@@ -318,6 +347,12 @@ export default function SetupPage() {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' })
         el.focus()
       }
+      return
+    }
+
+    if (tokens < 300) {
+      setTokenError(t('common.insufficientTokens', 'Insufficient Energy'))
+      window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
 
@@ -409,7 +444,7 @@ export default function SetupPage() {
         jobDescription: !form.jobDescription.trim() ? t('setup.errDesc') : '',
       }
       setErrors(e)
-      
+
       const el = document.getElementById(e.position ? 'setup-position' : 'setup-job-desc')
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -437,11 +472,20 @@ export default function SetupPage() {
           language: mlForm.language,
         }),
       })
+      setMlError(null)
+      if (res.status === 403) {
+        setMlError({ type: 'insufficient_tokens', cost: 100 })
+        return
+      }
       const j = await res.json()
-      if (res.ok) setMlResult(j.text)
-      else throw new Error(j.error)
+      if (res.ok) {
+        setMlResult(j.text)
+        setMlError(null)
+      } else {
+        setMlError({ type: 'error', message: j.error })
+      }
     } catch (err) {
-      setMlResult('Error: ' + err.message)
+      setMlError({ type: 'error', message: err.message })
     } finally {
       setMlLoading(false)
     }
@@ -457,8 +501,26 @@ export default function SetupPage() {
   return (
     <div className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-20">
       <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
+        {tokenError && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <Info className="h-5 w-5 text-red-500" />
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-red-700 dark:text-red-400">{tokenError}</span>
+                <span className="text-[10px] font-bold text-red-500/80 uppercase tracking-widest">{t('profile.tokenUsageInterview')}: 300 ({t('profile.tokens')}: {tokens})</span>
+              </div>
+            </div>
+            <Link to="/profile" className="px-4 py-2 rounded-xl bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-[10px] font-black uppercase tracking-widest hover:bg-red-200 transition-colors">
+              {t('profile.recharge')}
+            </Link>
+          </motion.div>
+        )}
         <header className="mb-20">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="max-w-3xl space-y-6"
@@ -497,11 +559,10 @@ export default function SetupPage() {
                                 setRoleTrack(tab.value)
                                 setSelectedCategory('')
                               }}
-                              className={`rounded-xl px-4 py-3 text-sm font-bold transition-all ${
-                                roleTrack === tab.value
+                              className={`rounded-xl px-4 py-3 text-sm font-bold transition-all ${roleTrack === tab.value
                                   ? 'border border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white shadow-sm'
-                                : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950 text-slate-600'
-                              }`}
+                                  : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950 text-slate-600'
+                                }`}
                             >
                               {tab.label}
                             </button>
@@ -577,11 +638,10 @@ export default function SetupPage() {
                             <button
                               type="button"
                               onClick={() => setHistoryOpen(!historyOpen)}
-                              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-                                historyOpen
+                              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${historyOpen
                                   ? 'border-slate-900 bg-white text-slate-900 dark:border-white dark:bg-slate-900 dark:text-white shadow-sm'
                                   : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-400 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400 dark:hover:border-slate-500 dark:hover:text-white'
-                              }`}
+                                }`}
                             >
                               <History className="h-3.5 w-3.5" />
                               {t('setup.historyTitle')}
@@ -669,17 +729,17 @@ export default function SetupPage() {
                       </div>
                     </div>
                     <div className="space-y-4">
-                        <textarea
-                          id="setup-job-desc"
-                          value={form.jobDescription}
-                          onChange={(e) => {
-                            setForm({ ...form, jobDescription: e.target.value })
-                            setErrors({ ...errors, jobDescription: '' })
-                          }}
-                          placeholder={t('setup.placeholder')}
-                          rows={10}
-                          className={`textarea-field-premium ${errors.jobDescription ? 'border-red-500 ring-4 ring-red-500/10' : ''}`}
-                        />
+                      <textarea
+                        id="setup-job-desc"
+                        value={form.jobDescription}
+                        onChange={(e) => {
+                          setForm({ ...form, jobDescription: e.target.value })
+                          setErrors({ ...errors, jobDescription: '' })
+                        }}
+                        placeholder={t('setup.placeholder')}
+                        rows={10}
+                        className={`textarea-field-premium ${errors.jobDescription ? 'border-red-500 ring-4 ring-red-500/10' : ''}`}
+                      />
                       <div className="flex items-center justify-between">
                         {errors.jobDescription ? (
                           <p className="text-red-500 text-xs font-bold italic">{errors.jobDescription}</p>
@@ -747,11 +807,10 @@ export default function SetupPage() {
                       </div>
 
                       {resumeNote && (
-                        <div className={`p-4 rounded-2xl border text-sm font-bold ${
-                          resumeNote.type === 'ok' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                          resumeNote.type === 'warn' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                          'bg-red-50 text-red-700 border-red-100'
-                        }`}>
+                        <div className={`p-4 rounded-2xl border text-sm font-bold ${resumeNote.type === 'ok' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                            resumeNote.type === 'warn' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                              'bg-red-50 text-red-700 border-red-100'
+                          }`}>
                           {resumeNote.text}
                         </div>
                       )}
@@ -795,11 +854,10 @@ export default function SetupPage() {
                                   key={len}
                                   type="button"
                                   onClick={() => setMlForm({ ...mlForm, length: len })}
-                                  className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-                                    mlForm.length === len
+                                  className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${mlForm.length === len
                                       ? 'bg-slate-50 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-white dark:border-slate-700 shadow-sm'
                                       : 'bg-white dark:bg-slate-950 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-500 font-medium'
-                                  }`}
+                                    }`}
                                 >
                                   {t(`setup.mlLength${len}`)}
                                 </button>
@@ -817,11 +875,10 @@ export default function SetupPage() {
                                   key={lang}
                                   type="button"
                                   onClick={() => setMlForm({ ...mlForm, language: lang })}
-                                  className={`flex-1 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-                                    mlForm.language === lang
+                                  className={`flex-1 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${mlForm.language === lang
                                       ? 'bg-slate-50 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-white dark:border-slate-700 shadow-sm'
                                       : 'bg-white dark:bg-slate-950 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-500 font-medium'
-                                  }`}
+                                    }`}
                                 >
                                   {lang === 'English' ? '🇬🇧 EN' : '🇩🇪 DE'}
                                 </button>
@@ -843,30 +900,79 @@ export default function SetupPage() {
                                 <span>{t('setup.mlGenerating')}</span>
                               </span>
                             ) : (
-                              <span className="flex items-center gap-2">
+                              <span className="flex items-center gap-3">
                                 {mlResult ? <RotateCcw className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
                                 <span>{mlResult ? t('setup.mlBtnNew') : t('setup.mlBtn')}</span>
+                                <EnergyBadge amount="-100" label={t('common.energyShort')} t={t} />
                               </span>
                             )}
                           </button>
 
                           <div className="relative group">
-                            <textarea
-                              readOnly
-                              value={mlResult}
-                              placeholder={t('setup.mlPlaceholder')}
-                              className={`textarea-field-premium transition-all ${
-                                mlResult ? 'h-[500px] shadow-sm' : 'h-[160px] border-dashed'
-                              } scrollbar-hide`}
-                            />
-                            {mlResult && (
-                              <button
-                                type="button"
-                                onClick={handleCopyML}
-                                className="absolute top-4 right-4 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-slate-600 dark:text-slate-500"
+                            {mlError ? (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="h-[500px] flex flex-col items-center justify-center p-8 text-center rounded-2xl bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800"
                               >
-                                {mlCopied ? <Check className="h-5 w-5 text-emerald-600" /> : <Copy className="h-5 w-5" />}
-                              </button>
+                                {mlError.type === 'insufficient_tokens' ? (
+                                  <>
+                                    <div className="p-4 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-600 mb-6">
+                                      <Coins className="h-10 w-10" />
+                                    </div>
+                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                                      {t('common.insufficientTokens')}
+                                    </h4>
+                                    <p className="text-sm text-slate-500 max-w-[280px] mb-8 leading-relaxed">
+                                      {t('common.insufficientTokensDesc', { cost: mlError.cost })}
+                                    </p>
+                                    <Link
+                                      to={{ pathname: "/profile", state: { openRecharge: true } }}
+                                      className="btn-setup-secondary px-8 py-3 bg-amber-600 text-white border-none hover:bg-amber-700 font-bold"
+                                    >
+                                      {t('common.rechargeNow')}
+                                    </Link>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="p-4 rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-600 mb-6">
+                                      <AlertCircle className="h-10 w-10" />
+                                    </div>
+                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                                      {t('common.errorTitle')}
+                                    </h4>
+                                    <p className="text-sm text-slate-500 max-w-[280px] mb-8 leading-relaxed">
+                                      {t('common.errorDesc')}
+                                    </p>
+                                    <button
+                                      type="button"
+                                      onClick={handleGenerateML}
+                                      className="btn-setup-secondary px-8 py-3 font-bold"
+                                    >
+                                      {t('common.tryAgain')}
+                                    </button>
+                                  </>
+                                )}
+                              </motion.div>
+                            ) : (
+                              <>
+                                <textarea
+                                  readOnly
+                                  value={mlResult}
+                                  placeholder={t('setup.mlPlaceholder')}
+                                  className={`textarea-field-premium transition-all ${mlResult ? 'h-[500px] shadow-sm' : 'h-[160px] border-dashed'
+                                    } scrollbar-hide`}
+                                />
+                                {mlResult && (
+                                  <button
+                                    type="button"
+                                    onClick={handleCopyML}
+                                    className="absolute top-4 right-4 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-slate-600 dark:text-slate-500"
+                                  >
+                                    {mlCopied ? <Check className="h-5 w-5 text-emerald-600" /> : <Copy className="h-5 w-5" />}
+                                  </button>
+                                )}
+                              </>
                             )}
                           </div>
                         </div>
@@ -884,11 +990,10 @@ export default function SetupPage() {
                             key={lang.value}
                             type="button"
                             onClick={() => setForm({ ...form, language: lang.value })}
-                            className={`flex flex-col items-start gap-4 p-6 rounded-2xl border transition-all duration-300 ${
-                              form.language === lang.value
+                            className={`flex flex-col items-start gap-4 p-6 rounded-2xl border transition-all duration-300 ${form.language === lang.value
                                 ? 'border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white shadow-sm'
                                 : 'border-slate-100 bg-white hover:border-slate-200 dark:border-slate-800 dark:bg-slate-950'
-                            }`}
+                              }`}
                           >
                             <div className="flex items-center justify-between w-full">
                               <span className={`text-3xl ${form.language === lang.value ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-500'}`}>{lang.flag}</span>
@@ -911,11 +1016,10 @@ export default function SetupPage() {
                             key={dur.value}
                             type="button"
                             onClick={() => setForm({ ...form, duration: dur.value })}
-                            className={`flex flex-col items-center justify-center px-2 py-6 rounded-2xl border transition-all duration-300 ${
-                              form.duration === dur.value
+                            className={`flex flex-col items-center justify-center px-2 py-6 rounded-2xl border transition-all duration-300 ${form.duration === dur.value
                                 ? 'border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white shadow-sm'
                                 : 'border-slate-100 bg-white hover:border-slate-200 dark:border-slate-800 dark:bg-slate-950 text-slate-400'
-                            }`}
+                              }`}
                           >
                             <span className={`text-xl font-black whitespace-nowrap ${form.duration === dur.value ? 'text-slate-900' : 'text-slate-700'}`}>{dur.label}</span>
                             <span className={`text-[10px] uppercase font-bold mt-1 tracking-widest ${form.duration === dur.value ? 'opacity-60' : 'text-slate-500'}`}>{dur.desc}</span>
@@ -957,9 +1061,12 @@ export default function SetupPage() {
                         <Loader2 className="h-6 w-6 animate-spin text-white dark:text-slate-900" />
                       </span>
                     ) : (
-                      <span className="flex items-center justify-center w-full">
-                        <span>{t('setup.submit')}</span>
-                        <ArrowRight className="h-6 w-6 ml-4 group-hover:translate-x-2 transition-transform" />
+                      <span className="flex items-center justify-center w-full gap-4">
+                        <div className="flex items-center gap-4">
+                          <span>{t('setup.submit')}</span>
+                          <EnergyBadge amount="-300" t={t} />
+                        </div>
+                        <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform" />
                       </span>
                     )}
                   </button>
