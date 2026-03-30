@@ -36,10 +36,10 @@
   },
   "landing": {
     "badgePremium": "KI-gesteuerte Karriereentwicklung der nächsten Generation",
-    "headline1": "Meistern Sie Ihr",
-    "headline2": "deutsches Interview mit KI",
+    "headline1": "Jede Übung ist ",
+    "headline2": "Ihr Fundament zum Erfolg",
     "sub": "Basierend auf der neuesten Generation von Sprachmodellen und Sprach-KI: Tiefen-angepasste Interview-Pfade für Ihre Rolle und Ihren JD, mit neuralen Sprach-Sessions für realen Druck.",
-    "subNextGen": "Deutschen Arbeitsmarktes ausgerichtete Deep-Neural-Modelle. Multimodales Echtzeit-Feedback, um jede Bewerbung zu kontrollieren.",
+    "subNextGen": "Die KI-native Plattform, die Ihre Jobsuche in Deutschland beschleunigt, Ihre Interviewfähigkeiten schärft und Ihnen zum Angebot verhilft.",
     "ctaPrimary": "Kostenloses Training starten",
     "ctaSecondary": "So funktioniert es",
     "previewSuccess": "Erfolgsrate-Boost",
@@ -182,9 +182,9 @@
     }
   },
   "offerMarquee": {
-    "offerCount": "1,000+",
-    "line1": "Usern geholfen,",
-    "line1b": "Praktikums- / Vollzeit-Angebote zu erhalten",
+    "offerCount": "",
+    "line1": "Unsere Nutzer erhielten Angebote von diesen Hochschulen & Unternehmen",
+    "line1b": "",
     "sub": "Von deutschen Top-Firmen und Tech-Leadern (symbolisch)"
   },
   "login": {

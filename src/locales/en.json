@@ -36,10 +36,10 @@
   },
   "landing": {
     "badgePremium": "Next-Gen AI-Driven Career Evolution",
-    "headline1": "Master Your",
-    "headline2": "German Interview with AI",
+    "headline1": "Every Practice Session ",
+    "headline2": "Builds Your Path to Success",
     "sub": "Based on the latest generation of LLMs and advanced voice technology: Depth-customized interview paths for your role and JD, with neural-level voice sessions to simulate real-world pressure.",
-    "subNextGen": "Deep neural models precisely aligned with the German job market. Real-time multi-modal feedback to help you take control of every Bewerbungen.",
+    "subNextGen": "Meet the AI-native platform that accelerates your German job search, sharpens your interview skills, and lands you the offer.",
     "ctaPrimary": "Start Practice for Free",
     "ctaSecondary": "Learn How it Works",
     "previewSuccess": "Success Rate Boost",
@@ -182,9 +182,9 @@
     }
   },
   "offerMarquee": {
-    "offerCount": "1,000+",
-    "line1": "Helped users receive",
-    "line1b": "Internship / Full-time Offers",
+    "offerCount": "",
+    "line1": "Helped Users Land Offers from These Schools & Companies",
+    "line1b": "",
     "sub": "From top German firms and tech leaders (Indicative only)"
   },
   "login": {

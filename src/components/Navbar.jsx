@@ -94,8 +94,8 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-100 dark:border-slate-900 transition-all duration-500">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none transition-all duration-500">
+      <div className="pointer-events-auto w-full max-w-[80rem] bg-white/70 dark:bg-slate-950/70 backdrop-blur-2xl rounded-b-2xl border-x border-b border-slate-200/50 dark:border-slate-800/50 shadow-lg shadow-slate-900/[0.04] px-6 lg:px-8 overflow-visible">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 bg-orange-500 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-[1.1] group-hover:rotate-3 shadow-lg shadow-orange-500/20 duration-500 overflow-hidden">
@@ -220,15 +220,15 @@ export default function Navbar() {
                   <span className="text-sm font-bold text-slate-700 dark:text-slate-200 max-w-[100px] truncate">
                      {user.user_metadata?.full_name || user.email.split('@')[0]}
                   </span>
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20">
-                    <BrainCircuit className="w-3 h-3 text-orange-500" />
-                    <span className="text-[10px] font-black text-orange-600 dark:text-orange-400">{tokens}</span>
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
+                    <BrainCircuit className="w-3 h-3 text-emerald-500" />
+                    <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400">{tokens}</span>
                   </div>
                   <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-4 w-64 bg-white dark:bg-slate-950 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-900 py-4 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="absolute right-0 mt-4 w-64 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-950 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-900 py-4 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="px-6 py-4 border-b border-slate-50 dark:border-slate-900 mb-2">
                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{t('nav.profile')}</p>
                        <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
@@ -236,7 +236,7 @@ export default function Navbar() {
                        </p>
                        <div className="mt-2 flex items-center justify-between">
                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('nav.tokens')}</span>
-                         <span className="text-xs font-black text-orange-500">{tokens}</span>
+                         <span className="text-xs font-black text-emerald-500">{tokens}</span>
                        </div>
                     </div>
                     <Link
@@ -317,7 +317,7 @@ export default function Navbar() {
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900 p-8 space-y-6 animate-in slide-in-from-top-4 duration-500 font-chinese-modern uppercase">
+        <div className="pointer-events-auto md:hidden bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900 p-8 space-y-6 animate-in slide-in-from-top-4 duration-500 font-chinese-modern uppercase">
           <Link to="/" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.home')}</Link>
           <Link to="/experiences" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.experiences')}</Link>
           {user ? (

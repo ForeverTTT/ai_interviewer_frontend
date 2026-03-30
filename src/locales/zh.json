@@ -36,10 +36,10 @@
   },
   "landing": {
     "badgePremium": "下一代 AI 驱动的德国求职进化",
-    "headline1": "德国面试，",
-    "headline2": "AI 赋能，练到满分",
+    "headline1": "每一次练习，",
+    "headline2": "都是你通向成功的底气",
     "sub": "基于最新一代大语言模型与先进语音技术：按你的岗位与 JD 深度定制面试路径，神经级语音对练还原真实压力。",
-    "subNextGen": "深层神经模型精准对齐德国求职语境，实时多模态交互反馈，助你在每一场 Bewerbungen 中掌控全局。",
+    "subNextGen": "AI 原生的德国求职训练平台，助你高效备战面试、打磨简历、斩获心仪 Offer。",
     "ctaPrimary": "免费开始练习",
     "ctaSecondary": "了解如何使用",
     "previewSuccess": "全德求职胜率提升",
@@ -182,9 +182,9 @@
     }
   },
   "offerMarquee": {
-    "offerCount": "1000+",
-    "line1": "已帮助用户拿到",
-    "line1b": "份实习 / 全职相关 Offer",
+    "offerCount": "",
+    "line1": "已帮助用户拿到以下学校 / 企业相关 Offer",
+    "line1b": "",
     "sub": "来自德国与欧洲名企，顶尖理工高校（示例展示，不代表官方合作）"
   },
   "login": {

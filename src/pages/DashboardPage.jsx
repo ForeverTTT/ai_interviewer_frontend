@@ -368,12 +368,12 @@ export default function DashboardPage() {
               transition={{ delay: 0.25 }}
               className="card-premium p-8 relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/8 blur-[80px] pointer-events-none" />
+              <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/8 blur-[80px] pointer-events-none" />
               <div className="relative z-10 flex items-center gap-6">
                 <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-500 ${
                   gameStats?.alreadyCheckedIn 
                     ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 border-2 border-emerald-200 dark:border-emerald-800' 
-                    : 'bg-amber-50 dark:bg-amber-950/30 text-amber-500 border-2 border-amber-200 dark:border-amber-800'
+                    : 'bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-500 border-2 border-emerald-200 dark:border-emerald-800'
                 }`}>
                   {gameStats?.alreadyCheckedIn ? <CheckCircle2 className="w-7 h-7" /> : <Flame className="w-7 h-7" />}
                 </div>
@@ -383,7 +383,7 @@ export default function DashboardPage() {
                     <span className="text-xs font-bold text-slate-400">
                       {gameStats?.streak || 0} {t('profile.game.streak')}
                     </span>
-                    <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
+                    <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                       +200 {t('common.energyShort')}
                     </span>
                   </div>

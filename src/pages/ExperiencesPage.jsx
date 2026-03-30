@@ -468,14 +468,14 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
           </button>
         </div>
 
-        <div className="mx-8 mt-6 p-4 rounded-2xl bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 flex items-center justify-between">
+        <div className="mx-8 mt-6 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-orange-500 p-2 rounded-xl text-white shadow-lg shadow-orange-500/20">
+            <div className="bg-emerald-500 p-2 rounded-xl text-white shadow-lg shadow-emerald-500/20">
               <BrainCircuit className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-black text-orange-900 dark:text-orange-400">{t('profile.tokenRewardContribution')}</span>
-              <p className="text-[10px] font-bold text-orange-600/70 dark:text-orange-500/70 uppercase tracking-widest">Community Reward: +200 Energy</p>
+              <span className="text-sm font-black text-emerald-900 dark:text-emerald-400">{t('profile.tokenRewardContribution')}</span>
+              <p className="text-[10px] font-bold text-emerald-600/70 dark:text-emerald-500/70 uppercase tracking-widest">Community Reward: +200 Energy</p>
             </div>
           </div>
         </div>
@@ -855,7 +855,7 @@ export default function ExperiencesPage() {
                  initial={{ opacity: 0, y: -5 }}
                  animate={{ opacity: 1, y: 0 }}
                  transition={{ delay: 0.2 }}
-                 className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-[10px] font-black tracking-widest uppercase border border-amber-200 dark:border-amber-800/50 shadow-sm"
+                 className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-black tracking-widest uppercase border border-emerald-200 dark:border-emerald-800/50 shadow-sm"
                >
                  <Zap className="w-3 h-3" />
                  {t('exp.rewardBadge')}

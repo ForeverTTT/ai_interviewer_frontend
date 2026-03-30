@@ -104,9 +104,7 @@ export default function OfferLogosMarquee() {
           transition={{ delay: 0.1 }}
           className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white font-serif leading-tight"
         >
-          {t('offerMarquee.line1')}{' '}
-          <span className="text-primary-600 dark:text-primary-400">{t('offerMarquee.offerCount')}</span>{' '}
-          {t('offerMarquee.line1b')}
+          {t('offerMarquee.line1')}
         </motion.h3>
       </div>
 

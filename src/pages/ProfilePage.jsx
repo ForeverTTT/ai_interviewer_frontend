@@ -812,17 +812,17 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card-premium p-8 bg-white dark:bg-slate-950 border-orange-100 dark:border-orange-500/20 shadow-xl shadow-orange-500/5 overflow-hidden relative"
+        className="card-premium p-8 bg-white dark:bg-slate-950 border-emerald-100 dark:border-emerald-500/20 shadow-xl shadow-emerald-500/5 overflow-hidden relative"
       >
         <div className="absolute top-0 right-0 p-8 opacity-10">
-          <BrainCircuit className="w-32 h-32 text-orange-500" />
+          <BrainCircuit className="w-32 h-32 text-emerald-500" />
         </div>
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
           <div className="shrink-0 flex flex-col items-center gap-2">
-            <div className="w-20 h-20 rounded-3xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
+            <div className="w-20 h-20 rounded-3xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
               <Zap className="w-10 h-10 text-white fill-current" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500">{t('profile.tokens')}</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">{t('profile.tokens')}</span>
           </div>
           
           <div className="flex-1 space-y-4 text-center md:text-left">
@@ -855,13 +855,13 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
           <div className="shrink-0 flex flex-col gap-3 w-full md:w-auto">
             <button
               onClick={recharge}
-              className="px-8 py-4 bg-orange-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20 active:scale-95 flex items-center justify-center gap-2"
+              className="px-8 py-4 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center justify-center gap-2"
             >
               <Zap className="w-4 h-4" />
               {t('profile.recharge')}
             </button>
-            <div className="px-4 py-2 rounded-xl bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 text-center">
-              <p className="text-[10px] font-bold text-orange-600 dark:text-orange-400">{t('profile.tokenRewardContribution')}</p>
+            <div className="px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-center">
+              <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{t('profile.tokenRewardContribution')}</p>
             </div>
           </div>
         </div>
@@ -1105,9 +1105,9 @@ function RechargeModal({ isOpen, onClose, t }) {
               </Link>
             </div>
 
-            <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-orange-500 transition-all space-y-6 text-left">
+            <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-emerald-500 transition-all space-y-6 text-left">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600">
                   <MessageCircle className="w-6 h-6" />
                 </div>
                 <div>
@@ -1122,7 +1122,7 @@ function RechargeModal({ isOpen, onClose, t }) {
                 </p>
                 <div className="aspect-square w-48 mx-auto rounded-3xl bg-white border-4 border-slate-100 dark:border-slate-800 flex items-center justify-center relative overflow-hidden group/qr">
                   <div className="text-center p-6 space-y-2">
-                    <Zap className="w-8 h-8 text-orange-200 mx-auto" />
+                    <Zap className="w-8 h-8 text-emerald-200 mx-auto" />
                     <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{t('profile.rechargeModal.qrHint')}</p>
                   </div>
                 </div>

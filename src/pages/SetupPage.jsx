@@ -200,8 +200,8 @@ function CategorySelector({ value, options, onChange, placeholder, t }) {
 
 function EnergyBadge({ amount, label, t }) {
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFF9E6] dark:bg-amber-950/20 border border-[#FFD700] dark:border-amber-500/50 text-[#D97706] dark:text-amber-400 text-[10px] font-black leading-none shadow-sm ring-4 ring-amber-500/5 transition-transform group-hover:scale-105">
-      <Zap className="h-2.5 w-2.5 fill-[#D97706] dark:fill-amber-400" />
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-300 dark:border-emerald-500/50 text-emerald-600 dark:text-emerald-400 text-[10px] font-black leading-none shadow-sm ring-4 ring-emerald-500/5 transition-transform group-hover:scale-105">
+      <Zap className="h-2.5 w-2.5 fill-emerald-600 dark:fill-emerald-400" />
       <span className="whitespace-nowrap uppercase tracking-tighter">{amount} {label || t('nav.tokens')}</span>
     </span>
   )
@@ -917,7 +917,7 @@ export default function SetupPage() {
                               >
                                 {mlError.type === 'insufficient_tokens' ? (
                                   <>
-                                    <div className="p-4 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-600 mb-6">
+                                    <div className="p-4 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 mb-6">
                                       <Coins className="h-10 w-10" />
                                     </div>
                                     <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
@@ -928,7 +928,7 @@ export default function SetupPage() {
                                     </p>
                                     <Link
                                       to={{ pathname: "/profile", state: { openRecharge: true } }}
-                                      className="btn-setup-secondary px-8 py-3 bg-amber-600 text-white border-none hover:bg-amber-700 font-bold"
+                                      className="btn-setup-secondary px-8 py-3 bg-emerald-600 text-white border-none hover:bg-emerald-700 font-bold"
                                     >
                                       {t('common.rechargeNow')}
                                     </Link>
