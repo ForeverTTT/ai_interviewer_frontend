@@ -47,6 +47,24 @@ export default function GallupTestPage() {
   const [dbQuestions, setDbQuestions] = useState([])
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true)
 
+  const refreshTokens = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const res = await fetch(`${API_URL}/api/profile`, {
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setTokens(data.tokens || 0)
+      }
+    } catch (err) {
+      console.error('Failed to refresh tokens', err)
+    }
+  }
+
   const questions = useMemo(() => {
     if (dbQuestions.length === 0) return []
     const langKey = (i18n.language || 'zh').split('-')[0] // 'zh-CN' -> 'zh'
@@ -118,22 +136,7 @@ export default function GallupTestPage() {
   }, [questions, isLoadingQuestions])
 
   useEffect(() => {
-    const fetchTokens = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (!session) return
-        const res = await fetch(`${API_URL}/api/profile`, {
-          headers: { 'Authorization': `Bearer ${session.access_token}` }
-        })
-        if (res.ok) {
-          const data = await res.json()
-          setTokens(data.tokens || 0)
-        }
-      } catch (err) {
-        console.error('Failed to fetch tokens', err)
-      }
-    }
-    fetchTokens()
+    void refreshTokens()
   }, [])
 
   const saveToBackend = async (newAnswers, finalResults = null, isCompleted = false) => {
@@ -154,6 +157,10 @@ export default function GallupTestPage() {
   }
 
   const handleAnswer = (questionId, score) => {
+    // Guard: avoid double-click advancing / auto state thrash.
+    const existing = answers[questionId]
+    const existingNum = typeof existing === 'string' ? Number(existing) : existing
+    if (typeof existingNum === 'number' && !Number.isNaN(existingNum)) return
     const newAnswers = { ...answers, [questionId]: score }
     setAnswers(newAnswers)
     saveToBackend(newAnswers)
@@ -194,6 +201,9 @@ export default function GallupTestPage() {
       if (res.ok) {
         const data = await res.json()
         setResults(data.results)
+        // Ensure token UI (Navbar/Profile/Gallup page) stays in sync right after deduction.
+        await refreshTokens()
+        window.dispatchEvent(new Event('tokensChanged'))
       } else {
         const err = await res.json().catch(() => ({}))
         if (res.status === 403) {
@@ -210,7 +220,15 @@ export default function GallupTestPage() {
     setStep('report')
   }
 
-  const progress = questions.length > 0 ? (Object.keys(answers).length / questions.length) * 100 : 0
+  const answeredCount = questions.length
+    ? questions.reduce((acc, q) => {
+      const v = answers[q.id]
+      const n = typeof v === 'string' ? Number(v) : v
+      return acc + (typeof n === 'number' && !Number.isNaN(n) ? 1 : 0)
+    }, 0)
+    : 0
+
+  const progress = questions.length > 0 ? (answeredCount / questions.length) * 100 : 0
 
   if (isLoadingQuestions || isLoadingProgress) {
     return (
@@ -377,9 +395,9 @@ export default function GallupTestPage() {
                   <div className="h-1.5 flex-grow mx-12 bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden relative">
                     <motion.div className="h-full bg-slate-900 dark:bg-white" animate={{ width: `${progress}%` }} transition={{ duration: 1 }} />
                   </div>
-                  {currentIndex === questions.length - 1 || Object.keys(answers).length === questions.length ? (
+                  {currentIndex === questions.length - 1 && answeredCount === questions.length ? (
                     <button onClick={handleSubmit} className="btn-primary h-12 px-8 text-xs uppercase font-black tracking-widest">
-                      {t('gallup.submitBtn')} <CheckCircle className="w-4 h-4 ml-2" />
+                      {t('gallup.viewResults')} <CheckCircle className="w-4 h-4 ml-2" />
                     </button>
                   ) : (
                     <button onClick={() => setCurrentIndex(currentIndex + 1)} className="btn-primary h-12 px-8 text-xs uppercase font-black tracking-widest">

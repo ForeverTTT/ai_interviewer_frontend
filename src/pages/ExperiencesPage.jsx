@@ -9,7 +9,7 @@ import {
   Search, Building2, GraduationCap, Briefcase, MapPin,
   Clock, ChevronDown, ChevronUp, MessageSquareQuote,
   CheckCircle2, XCircle, Award, Globe2, Loader2, Filter,
-  Trash2, Plus, X, Send, BrainCircuit, Zap
+  Trash2, Plus, X, Send, BrainCircuit, Zap, AlertTriangle
 } from 'lucide-react'
 
 function ResultBadge({ result, t }) {
@@ -132,8 +132,61 @@ function CustomDropdown({ label, value, options, onChange, t }) {
   )
 }
 
+function DeleteConfirmModal({ isOpen, onClose, onConfirm }) {
+  if (!isOpen) return null
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={onClose}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 10 }}
+        transition={{ type: 'spring', duration: 0.35, bounce: 0.2 }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-sm bg-white dark:bg-slate-950 rounded-3xl shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800"
+      >
+        <div className="flex flex-col items-center px-8 pt-8 pb-6 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-950/30 flex items-center justify-center mb-5 border border-red-100 dark:border-red-900/50">
+            <AlertTriangle className="w-7 h-7 text-red-500" />
+          </div>
+          <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">
+            确定要删除这条面经吗？
+          </h3>
+          <p className="mt-2.5 text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+            删除后能量值
+            <span className="inline-flex items-center gap-0.5 font-black text-red-500">
+              <Zap className="w-3.5 h-3.5" />-200
+            </span>
+          </p>
+        </div>
+        <div className="flex border-t border-slate-100 dark:border-slate-800">
+          <button
+            onClick={onClose}
+            className="flex-1 py-4 text-sm font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
+          >
+            取消
+          </button>
+          <div className="w-px bg-slate-100 dark:bg-slate-800" />
+          <button
+            onClick={onConfirm}
+            className="flex-1 py-4 text-sm font-black text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+          >
+            删除
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 function ExperienceCard({ exp, t, user, onDelete }) {
   const [expanded, setExpanded] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const isOwner = user && exp.user_id === user.id
 
   return (
@@ -145,15 +198,29 @@ function ExperienceCard({ exp, t, user, onDelete }) {
       className="bg-white dark:bg-slate-950 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden group relative"
     >
       {isOwner && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            if (window.confirm(t('exp.confirmDelete'))) onDelete(exp.id)
-          }}
-          className="absolute top-6 right-16 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all opacity-0 group-hover:opacity-100 z-10"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowDeleteConfirm(true)
+            }}
+            className="absolute top-6 right-16 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all opacity-0 group-hover:opacity-100 z-10"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+          <AnimatePresence>
+            {showDeleteConfirm && (
+              <DeleteConfirmModal
+                isOpen={showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(false)}
+                onConfirm={() => {
+                  setShowDeleteConfirm(false)
+                  onDelete(exp.id)
+                }}
+              />
+            )}
+          </AnimatePresence>
+        </>
       )}
       <button
         type="button"
@@ -665,6 +732,8 @@ export default function ExperiencesPage() {
       }
 
       setExperiences(prev => prev.filter(e => e.id !== id))
+      // Let Navbar / other token UI re-sync immediately after server-side -200.
+      window.dispatchEvent(new Event('tokensChanged'))
     } catch (err) {
       alert(`Delete Error: ${err.message}`)
     }

@@ -1226,6 +1226,34 @@ export default function ProfilePage() {
 
   useEffect(() => { void load() }, [load])
 
+  const refreshTokens = useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      if (!token) return
+
+      const res = await fetch(`${backendUrl}/api/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) return
+
+      const j = await res.json()
+      setTokens(j.tokens || 0)
+    } catch (err) {
+      // Non-fatal: tokens may temporarily be stale.
+      console.error('[Profile] Failed to refresh tokens', err)
+    }
+  }, [backendUrl])
+
+  // Keep token UI in sync across pages (Gallup / Experiences delete / Recharge).
+  useEffect(() => {
+    const onTokensChanged = () => {
+      void refreshTokens()
+    }
+    window.addEventListener('tokensChanged', onTokensChanged)
+    return () => window.removeEventListener('tokensChanged', onTokensChanged)
+  }, [refreshTokens])
+
   useEffect(() => {
     const onScroll = () => {
       setShowFloatingQuickSwitch(window.scrollY > 280)
@@ -1330,6 +1358,7 @@ export default function ProfilePage() {
       })
       if (res.ok) {
         setTokens(prev => prev + amount)
+        window.dispatchEvent(new Event('tokensChanged'))
         setNote({ type: 'ok', text: t('profile.rechargeModal.success') })
         setTimeout(() => setNote(null), 2000)
       }

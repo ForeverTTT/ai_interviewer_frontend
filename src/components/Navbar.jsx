@@ -26,7 +26,7 @@ export default function Navbar() {
           const { data: { session } } = await supabase.auth.getSession()
           const token = session?.access_token
           if (!token) return
-          
+
           const backendUrl = getBackendBaseUrl()
           const res = await fetch(`${backendUrl}/api/profile`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -47,7 +47,14 @@ export default function Navbar() {
           console.error('Failed to fetch job status', err)
         }
       }
+
+      const onTokensChanged = () => {
+        void fetchStatus()
+      }
+
       fetchStatus()
+      window.addEventListener('tokensChanged', onTokensChanged)
+      return () => window.removeEventListener('tokensChanged', onTokensChanged)
     }
   }, [user])
 
