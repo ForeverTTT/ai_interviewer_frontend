@@ -1325,17 +1325,21 @@ export default function ProfilePage() {
 
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
-        throw new Error(errBody.error || 'save');
+        console.error('[Profile save] Backend error response:', res.status, errBody)
+        const details = Array.isArray(errBody.details) ? errBody.details : []
+        const detailsText = details.length
+          ? details.map((d) => `${d?.path ? d.path + ': ' : ''}${d?.message || ''}`.trim()).join('; ')
+          : ''
+        throw new Error(`${errBody.error || 'save'}${detailsText ? `: ${detailsText}` : ''}`)
       }
 
       const data = await res.json()
-      setResumeUpdatedAt(data.resumeUpdatedAt || null)
       setUpdatedAt(data.resumeUpdatedAt || null)
       setNote({ type: 'ok', text: t('profile.saveSuccess') })
       setTimeout(() => setNote(null), 3000)
     } catch (err) {
       console.error('[Profile save]', err);
-      setNote({ type: 'err', text: t('profile.saveErr') })
+      setNote({ type: 'err', text: err?.message || t('profile.saveErr') })
       setTimeout(() => setNote(null), 3000)
     } finally {
       setSaving(false)
@@ -1412,14 +1416,19 @@ export default function ProfilePage() {
   }
 
   const runExtractCv = async () => {
-    const src = (pendingRaw || resumeText).trim()
-    if (src.length < 80) {
+    console.log('[runExtractCv] clicked');
+    const src = (pendingRaw || resumeText || '').trim()
+    console.log('[runExtractCv] src length:', src.length);
+    if (src.length < 50) {
+      console.warn('[runExtractCv] text too short');
       setNote({ type: 'err', text: t('profile.cv.extractNeedText') })
+      setTimeout(() => setNote(null), 5000)
       return
     }
     setExtractBusy(true)
     setNote(null)
     try {
+      console.log('[runExtractCv] calling backend...');
       const { data: { session } } = await supabase.auth.getSession()
       const token = session?.access_token
       if (!token) throw new Error('auth')
@@ -1485,8 +1494,9 @@ export default function ProfilePage() {
       setPendingPreviewOpen(false)
       setNote({ type: 'ok', text: t('profile.cv.pdfExtractOk', { n: j.charCount ?? 0 }) })
       setTimeout(() => setNote(null), 2000)
-    } catch {
-      setNote({ type: 'err', text: t('profile.parseErr') })
+    } catch (err) {
+      console.error('[onPdf] error:', err)
+      setNote({ type: 'err', text: err?.message || t('profile.parseErr') })
       setTimeout(() => setNote(null), 3000)
     } finally {
       setParseBusy(false)
@@ -1638,7 +1648,7 @@ export default function ProfilePage() {
           cvProfile={cvProfile} setCvProfile={setCvProfile} resumeText={resumeText} setResumeText={setResumeText}
           resumeNotes={resumeNotes} setResumeNotes={setResumeNotes} targetRole={targetRole} setTargetRole={setTargetRole}
           coach={coach} coachGenerating={coachGenerating} coachErr={coachErr} runCoach={runCoach}
-          save={save} saving={saving} note={note} parseBusy={parseBusy} extractBusy={extractBusy} onPdf={onPdf} fileRef={fileRef}
+          save={save} saving={saving} note={note} parseBusy={parseBusy} extractBusy={extractBusy} onPdf={onPdf} fileRef={fileRef} runExtractCv={runExtractCv}
           pendingRaw={pendingRaw} setPendingRaw={setPendingRaw} pendingPreviewOpen={pendingPreviewOpen} setPendingPreviewOpen={setPendingPreviewOpen}
           applyPendingToResume={applyPendingToResume} jobSearchStatus={jobSearchStatus} setJobSearchStatus={setJobSearchStatus}
           avatarId={avatarId} setAvatarId={setAvatarId} t={t}
@@ -1660,7 +1670,7 @@ export default function ProfilePage() {
 function ProfileEditView({
   cvProfile, setCvProfile, resumeText, setResumeText, resumeNotes, setResumeNotes,
   targetRole, setTargetRole, coach, coachGenerating, coachErr, runCoach,
-  save, saving, note, parseBusy, extractBusy, onPdf, fileRef,
+  save, saving, note, parseBusy, extractBusy, onPdf, fileRef, runExtractCv,
   pendingRaw, setPendingRaw, pendingPreviewOpen, setPendingPreviewOpen, applyPendingToResume,
   jobSearchStatus, setJobSearchStatus, avatarId, setAvatarId, t
 }) {
@@ -1730,7 +1740,11 @@ function ProfileEditView({
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
-                  className={`absolute left-full ml-4 whitespace-nowrap px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${note.type === 'ok' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20' : 'bg-red-50 text-red-600 dark:bg-red-950/20'}`}
+                  className={`absolute top-full right-0 mt-3 px-4 py-3 rounded-2xl text-[11px] font-bold leading-snug max-w-[280px] whitespace-normal break-words shadow-lg ring-1 ring-black/5 backdrop-blur ${
+                    note.type === 'ok'
+                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-200'
+                      : 'bg-red-50 text-red-700 dark:bg-red-950/20 dark:text-red-200'
+                  }`}
                 >
                   {note.text}
                 </motion.div>
@@ -1788,7 +1802,7 @@ function ProfileEditView({
                       </button>
                       <button
                         onClick={() => void runExtractCv()}
-                        disabled={extractBusy || ((pendingRaw || resumeText).trim().length < 80)}
+                        disabled={extractBusy || parseBusy || !(pendingRaw || resumeText || '').trim()}
                         className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 dark:bg-primary-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-primary-700 transition-all disabled:opacity-50 shadow-lg shadow-slate-900/10 dark:shadow-primary-600/20"
                       >
                         {extractBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
@@ -1817,13 +1831,14 @@ function ProfileEditView({
                         </div>
                       </div>
                       {pendingPreviewOpen && (
-                        <motion.pre
+                        <motion.textarea
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
-                          className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-primary-100 dark:border-primary-900/30 text-xs font-mono text-slate-600 dark:text-slate-400 overflow-auto max-h-60 leading-relaxed"
-                        >
-                          {pendingRaw}
-                        </motion.pre>
+                          value={pendingRaw}
+                          onChange={(e) => setPendingRaw(e.target.value)}
+                          spellCheck={false}
+                          className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-primary-100 dark:border-primary-900/30 text-xs font-mono text-slate-600 dark:text-slate-400 overflow-auto max-h-60 leading-relaxed resize-y min-h-[120px] w-full"
+                        />
                       )}
                     </div>
                   )}

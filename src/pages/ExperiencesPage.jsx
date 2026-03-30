@@ -377,6 +377,7 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
     rounds: [{ round: 1, format: '', duration_min: 30, questions: [''] }]
   })
   const [loading, setLoading] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   if (!isOpen) return null
 
@@ -410,11 +411,12 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
+    setSubmitError('')
     try {
       await onPost(formData)
       onClose()
     } catch (err) {
-      alert(err.message)
+      setSubmitError(err.message)
     } finally {
       setLoading(false)
     }
@@ -476,6 +478,11 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
               <p className="text-[10px] font-bold text-orange-600/70 dark:text-orange-500/70 uppercase tracking-widest">Community Reward: +200 Energy</p>
             </div>
           </div>
+        </div>
+
+        <div className="mx-8 mt-3 px-4 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-center gap-2.5">
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <span className="text-xs font-bold text-amber-700 dark:text-amber-400">{t('exp.dailyLimitHint')}</span>
         </div>
 
         <form onSubmit={handleSubmit} className="p-8 space-y-8">
@@ -616,6 +623,25 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
              />
           </div>
 
+          <AnimatePresence>
+            {submitError && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20"
+              >
+                <AlertTriangle className="w-4 h-4 text-red-500 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-red-700 dark:text-red-400">{submitError}</p>
+                </div>
+                <button type="button" onClick={() => setSubmitError('')} className="p-0.5 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg transition-colors">
+                  <X className="w-3.5 h-3.5 text-red-400" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <button 
             type="submit" 
             disabled={loading}
@@ -708,6 +734,9 @@ export default function ExperiencesPage() {
 
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}))
+      if (errBody.error === 'DAILY_LIMIT') {
+        throw new Error(t('exp.dailyLimitReached'))
+      }
       throw new Error(errBody.error || `Server returned ${res.status}: ${res.statusText}`)
     }
     

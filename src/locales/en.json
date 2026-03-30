@@ -284,6 +284,7 @@
     "tokens": "Energy Points Balance",
     "recharge": "Get More Energy",
     "initialTokensHint": "Full access enabled: AI career tools and deep diagnostics.",
+    "tokenUsage": "Cost",
     "tokenUsageInterview": "Interview (300)",
     "tokenUsageCoach": "Resume Coach (200)",
     "tokenUsageExtract": "Resume Parse (50)",
@@ -526,7 +527,7 @@
     "viewImportHint": "PDF upload and AI parsing available in 'Edit' mode.",
     "viewSectionEmpty": "Not filled",
     "viewEmptyTitle": "Profile is Empty",
-    "viewEmptySub": "Click 'Edit Profile' to fill or import; saved data acts as your resume context for sessions.",
+    "viewEmptySub": "No profile info yet. Click 'Edit' to fill or upload a PDF; these details will contextualize your mock interviews.",
     "cv": {
       "pageSub": "Fill structured data first; PDF upload puts text in review area before importing. The 'Final Resume' section is used for session context.",
       "structuredTitle": "Structured User Data",
@@ -625,11 +626,19 @@
     "deleteModalConfirm": "Delete",
     "deleteFailed": "Delete failed. Try again later.",
     "durMin": "min",
+    "checkIn": {
+      "title": "Daily Check-in",
+      "btn": "Check In",
+      "done": "Checked In",
+      "reward": "Check-in successful! +200 energy credited"
+    },
     "bannerTitle": "Consistency is Key!",
     "bannerSub": "10 minutes a day keeps the jitters away",
     "bannerBtn": "Start Session",
     "aiInsight": "AI Career Insight",
     "achievements": "Achievement Wall",
+    "roleAssistant": "Interviewer",
+    "roleUser": "Your Answer",
     "insights": {
       "language": "Your German vocabulary has room for improvement. We recommend targeted mocks to enhance your expression.",
       "softSkills": "Your soft skills scored very high, showing strong communication potential.",
@@ -877,6 +886,8 @@
     "phRoundsDuration": "Duration (min)",
     "phRoundsQuestion": "Question",
     "labelRemove": "Remove",
+    "dailyLimitHint": "Each user can share up to 1 experience per day. Make it count!",
+    "dailyLimitReached": "You have already shared an experience today. Please come back tomorrow!",
     "securityNotice": "Secured via Encrypted Transfer · Input Sanitization Active",
     "securityTip": "Your experience is shared anonymously or via nickname. Our system filters sensitive data to keep you safe."
   },

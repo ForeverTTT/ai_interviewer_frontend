@@ -284,6 +284,7 @@
     "tokens": "Energie-Guthaben",
     "recharge": "Energie erhalten",
     "initialTokensHint": "Vollzugriff aktiv: Alle KI-Tools und Diagnosefunktionen sind freigeschaltet.",
+    "tokenUsage": "Kosten",
     "tokenUsageInterview": "Interview (300)",
     "tokenUsageCoach": "Lebenslauf-Coach (200)",
     "tokenUsageExtract": "CV Extraktion (50)",
@@ -616,11 +617,19 @@
     "deleteModalConfirm": "Löschen",
     "deleteFailed": "Failed.",
     "durMin": "min",
+    "checkIn": {
+      "title": "Täglicher Check-in",
+      "btn": "Einchecken",
+      "done": "Eingecheckt",
+      "reward": "Check-in erfolgreich! +200 Energie gutgeschrieben"
+    },
     "bannerTitle": "Dranbleiben!",
     "bannerSub": "10 Minuten täglich helfen.",
     "bannerBtn": "Start",
     "aiInsight": "KI Karriere-Analyse",
     "achievements": "Medaillenwand",
+    "roleAssistant": "Interviewer",
+    "roleUser": "Ihre Antwort",
     "insights": {
       "language": "Ihr deutscher Wortschatz ist ausbaufähig. Wir empfehlen Simulationen zur Ausdrucksstärkung.",
       "softSkills": "Ihre Soft Skills sind top-bewertet mit starkem Kommunikationspotenzial.",
@@ -868,6 +877,8 @@
     "phRoundsDuration": "Dauer (Min)",
     "phRoundsQuestion": "Interviewfrage",
     "labelRemove": "Löschen",
+    "dailyLimitHint": "Jeder Nutzer kann maximal 1 Erfahrung pro Tag teilen. Nutzen Sie die Chance!",
+    "dailyLimitReached": "Sie haben heute bereits eine Erfahrung geteilt. Bitte versuchen Sie es morgen erneut!",
     "securityNotice": "Verschlüsselt übertragen · Injektionsschutz aktiv",
     "securityTip": "Ihre Erfahrungen werden anonymisiert oder mit Nickname geteilt. Sensitive Daten werden gefiltert."
   },

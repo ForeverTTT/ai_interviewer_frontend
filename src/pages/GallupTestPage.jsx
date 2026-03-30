@@ -320,7 +320,7 @@ export default function GallupTestPage() {
                   <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
                 </button>
                 <p className={`text-[10px] font-black uppercase tracking-widest ${tokens < 100 ? 'text-red-500' : 'text-slate-400'}`}>
-                   {t('profile.tokenUsage')} : 100 Energy ( {t('profile.tokens')}: {tokens} )
+                   {t('profile.tokenUsage')} 100 Energy（{t('profile.tokens')}: {tokens}）
                 </p>
                 {tokens < 100 && (
                   <Link to="/profile" className="text-[10px] font-black uppercase tracking-widest text-primary-600 underline">

@@ -284,6 +284,7 @@
     "tokens": "当前能量值余额",
     "recharge": "获取更多能量",
     "initialTokensHint": "满盈状态已开启：全量使用 AI 赋能求职工具与深度诊断。",
+    "tokenUsage": "消耗",
     "tokenUsageInterview": "模拟面试 (300)",
     "tokenUsageCoach": "简历诊断 (200)",
     "tokenUsageExtract": "简历解析 (50)",
@@ -626,11 +627,19 @@
     "deleteModalConfirm": "确认删除",
     "deleteFailed": "删除失败，请稍后重试",
     "durMin": "分钟",
+    "checkIn": {
+      "title": "每日打卡",
+      "btn": "立即打卡",
+      "done": "今日已打卡",
+      "reward": "打卡成功！+200 能量已到账"
+    },
     "bannerTitle": "继续练习，保持手感！",
     "bannerSub": "每天 10 分钟，面试不再发慌",
     "bannerBtn": "再来一次",
     "aiInsight": "AI 职场诊断",
     "achievements": "勋章墙",
+    "roleAssistant": "面试官",
+    "roleUser": "你的回答",
     "insights": {
       "language": "德语词汇量尚有提升空间，建议针对性进行模拟面试以加强表达。",
       "softSkills": "您的软技能得分很高，表现出极强的沟通潜力。",
@@ -878,6 +887,8 @@
     "phRoundsDuration": "时长 (分钟)",
     "phRoundsQuestion": "面试真题",
     "labelRemove": "删除",
+    "dailyLimitHint": "每位用户每天最多可分享 1 篇面经，请珍惜每次分享机会。",
+    "dailyLimitReached": "您今天已经分享过面经了，请明天再来吧！",
     "securityNotice": "数据加密传输中 · 已开启防注入过滤",
     "securityTip": "您的面试经验将以匿名方式或仅显示昵称共享，敏感数据会被自动过滤。"
   },
