@@ -29,7 +29,9 @@ import Navbar from '../components/Navbar'
 import GallupReport from '../components/GallupReport'
 import heroBg from '../assets/background.jpg'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+import { getBackendBaseUrl } from '../lib/backendBase'
+
+const API_URL = getBackendBaseUrl()
 
 export default function GallupTestPage() {
   const { t, i18n } = useTranslation()
