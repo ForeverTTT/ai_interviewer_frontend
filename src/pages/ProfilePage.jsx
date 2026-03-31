@@ -22,6 +22,7 @@ import {
   Pencil, Eye, ArrowUpRight, Zap, ArrowRight, BrainCircuit, Share2, MessageCircle, ExternalLink,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import xiaohongshuQr from '../assets/xiaohongshu_qr.png'
 
 function fileToBase64Data(file) {
   return new Promise((resolve, reject) => {
@@ -812,19 +813,19 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card-premium p-8 bg-white dark:bg-slate-950 border-orange-100 dark:border-orange-500/20 shadow-xl shadow-orange-500/5 overflow-hidden relative"
+        className="card-premium p-8 bg-white dark:bg-slate-950 border-emerald-100 dark:border-emerald-500/20 shadow-xl shadow-emerald-500/5 overflow-hidden relative"
       >
         <div className="absolute top-0 right-0 p-8 opacity-10">
-          <BrainCircuit className="w-32 h-32 text-orange-500" />
+          <BrainCircuit className="w-32 h-32 text-emerald-500" />
         </div>
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
           <div className="shrink-0 flex flex-col items-center gap-2">
-            <div className="w-20 h-20 rounded-3xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
+            <div className="w-20 h-20 rounded-3xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
               <Zap className="w-10 h-10 text-white fill-current" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500">{t('profile.tokens')}</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">{t('profile.tokens')}</span>
           </div>
-          
+
           <div className="flex-1 space-y-4 text-center md:text-left">
             <div>
               <div className="flex items-baseline justify-center md:justify-start gap-2">
@@ -835,7 +836,7 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
                 {t('profile.initialTokensHint', 'Full access to AI-powered career tools.')}
               </p>
             </div>
-            
+
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -855,13 +856,13 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
           <div className="shrink-0 flex flex-col gap-3 w-full md:w-auto">
             <button
               onClick={recharge}
-              className="px-8 py-4 bg-orange-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20 active:scale-95 flex items-center justify-center gap-2"
+              className="px-8 py-4 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center justify-center gap-2"
             >
               <Zap className="w-4 h-4" />
               {t('profile.recharge')}
             </button>
-            <div className="px-4 py-2 rounded-xl bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 text-center">
-              <p className="text-[10px] font-bold text-orange-600 dark:text-orange-400">{t('profile.tokenRewardContribution')}</p>
+            <div className="px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-center">
+              <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{t('profile.tokenRewardContribution')}</p>
             </div>
           </div>
         </div>
@@ -873,7 +874,7 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-100 dark:border-slate-800">
                 {avatarId ? (
-                  <img src={`/avatars/${avatarId}.png`} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={avatarId} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-slate-300">
                     <User className="w-10 h-10" />
@@ -1081,9 +1082,9 @@ function RechargeModal({ isOpen, onClose, t }) {
           </div>
 
           <div className="grid gap-6">
-            <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-primary-500 transition-all space-y-4 text-left">
+            <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-emerald-500 transition-all space-y-4 text-left">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600">
                   <Share2 className="w-6 h-6" />
                 </div>
                 <div>
@@ -1098,17 +1099,17 @@ function RechargeModal({ isOpen, onClose, t }) {
               <Link
                 to="/experiences"
                 onClick={onClose}
-                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary-600 hover:gap-4 transition-all"
+                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 hover:gap-4 transition-all"
               >
                 {t('profile.rechargeModal.method1Btn')}
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
 
-            <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-orange-500 transition-all space-y-6 text-left">
+            <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-emerald-500 transition-all space-y-6 text-left">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600">
-                  <MessageCircle className="w-6 h-6" />
+                <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500">
+                  <ExternalLink className="w-6 h-6" />
                 </div>
                 <div>
                   <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-sm">
@@ -1120,11 +1121,8 @@ function RechargeModal({ isOpen, onClose, t }) {
                 <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                   {t('profile.rechargeModal.method2Desc')}
                 </p>
-                <div className="aspect-square w-48 mx-auto rounded-3xl bg-white border-4 border-slate-100 dark:border-slate-800 flex items-center justify-center relative overflow-hidden group/qr">
-                  <div className="text-center p-6 space-y-2">
-                    <Zap className="w-8 h-8 text-orange-200 mx-auto" />
-                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{t('profile.rechargeModal.qrHint')}</p>
-                  </div>
+                <div className="w-48 mx-auto rounded-3xl overflow-hidden shadow-lg">
+                  <img src={xiaohongshuQr} alt="Xiaohongshu QR Code" className="w-full h-full object-cover" />
                 </div>
               </div>
             </div>
@@ -1143,10 +1141,11 @@ function RechargeModal({ isOpen, onClose, t }) {
 }
 
 const avatars = [
-  'professional_male_1',
-  'professional_female_1',
-  'tech_engineer_1',
-  'creative_innovator_1'
+  'https://api.dicebear.com/7.x/identicon/svg?seed=Aneka',
+  'https://api.dicebear.com/7.x/identicon/svg?seed=Milo',
+  'https://api.dicebear.com/7.x/identicon/svg?seed=Toby',
+  'https://api.dicebear.com/7.x/identicon/svg?seed=Luna',
+  'https://api.dicebear.com/7.x/identicon/svg?seed=Jack'
 ]
 
 export default function ProfilePage() {
@@ -1172,6 +1171,7 @@ export default function ProfilePage() {
   const [note, setNote] = useState(null)
   const [jobSearchStatus, setJobSearchStatus] = useState('seeking')
   const [avatarId, setAvatarId] = useState(null)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [tokens, setTokens] = useState(0)
   const [updatedAt, setUpdatedAt] = useState(null)
   const [pendingRaw, setPendingRaw] = useState('')
@@ -1644,35 +1644,35 @@ export default function ProfilePage() {
       className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-24"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <ProfileEditView
-          cvProfile={cvProfile} setCvProfile={setCvProfile} resumeText={resumeText} setResumeText={setResumeText}
-          resumeNotes={resumeNotes} setResumeNotes={setResumeNotes} targetRole={targetRole} setTargetRole={setTargetRole}
-          coach={coach} coachGenerating={coachGenerating} coachErr={coachErr} runCoach={runCoach}
-          save={save} saving={saving} note={note} parseBusy={parseBusy} extractBusy={extractBusy} onPdf={onPdf} fileRef={fileRef} runExtractCv={runExtractCv}
-          pendingRaw={pendingRaw} setPendingRaw={setPendingRaw} pendingPreviewOpen={pendingPreviewOpen} setPendingPreviewOpen={setPendingPreviewOpen}
-          applyPendingToResume={applyPendingToResume} jobSearchStatus={jobSearchStatus} setJobSearchStatus={setJobSearchStatus}
-          avatarId={avatarId} setAvatarId={setAvatarId} t={t}
-        />
+          <ProfileEditView
+            cvProfile={cvProfile} setCvProfile={setCvProfile} resumeText={resumeText} setResumeText={setResumeText}
+            resumeNotes={resumeNotes} setResumeNotes={setResumeNotes} targetRole={targetRole} setTargetRole={setTargetRole}
+            coach={coach} coachGenerating={coachGenerating} coachErr={coachErr} runCoach={runCoach}
+            save={save} saving={saving} note={note} setNote={setNote} parseBusy={parseBusy} extractBusy={extractBusy} onPdf={onPdf} fileRef={fileRef} runExtractCv={runExtractCv}
+            pendingRaw={pendingRaw} setPendingRaw={setPendingRaw} pendingPreviewOpen={pendingPreviewOpen} setPendingPreviewOpen={setPendingPreviewOpen}
+            applyPendingToResume={applyPendingToResume} jobSearchStatus={jobSearchStatus} setJobSearchStatus={setJobSearchStatus}
+            avatarId={avatarId} setAvatarId={setAvatarId} uploadingAvatar={uploadingAvatar} setUploadingAvatar={setUploadingAvatar} t={t}
+          />
       </div>
-        <AnimatePresence>
-          {showRechargeModal && (
-            <RechargeModal
-              isOpen={showRechargeModal}
-              onClose={() => setShowRechargeModal(false)}
-              t={t}
-            />
-          )}
-        </AnimatePresence>
-      </motion.div>
+      <AnimatePresence>
+        {showRechargeModal && (
+          <RechargeModal
+            isOpen={showRechargeModal}
+            onClose={() => setShowRechargeModal(false)}
+            t={t}
+          />
+        )}
+      </AnimatePresence>
+    </motion.div>
   )
 }
 
 function ProfileEditView({
   cvProfile, setCvProfile, resumeText, setResumeText, resumeNotes, setResumeNotes,
   targetRole, setTargetRole, coach, coachGenerating, coachErr, runCoach,
-  save, saving, note, parseBusy, extractBusy, onPdf, fileRef, runExtractCv,
+  save, saving, note, setNote, parseBusy, extractBusy, onPdf, fileRef, runExtractCv,
   pendingRaw, setPendingRaw, pendingPreviewOpen, setPendingPreviewOpen, applyPendingToResume,
-  jobSearchStatus, setJobSearchStatus, avatarId, setAvatarId, t
+  jobSearchStatus, setJobSearchStatus, avatarId, setAvatarId, uploadingAvatar, setUploadingAvatar, t
 }) {
   const [activeTab, setActiveTab] = useState('basic')
 
@@ -1723,7 +1723,7 @@ function ProfileEditView({
             className="btn-setup-action-pill px-6 py-3"
           >
             {coachGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-emerald-500" />}
-            <span className="font-bold">{coachGenerating ? t('profile.running') : t('profile.coachRun')}</span>
+            <span className="font-bold">{coachGenerating ? t('profile.coachRunning') : t('profile.coachRun')}</span>
           </button>
           <div className="flex items-center gap-4 relative">
             <button
@@ -1740,11 +1740,10 @@ function ProfileEditView({
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
-                  className={`absolute top-full right-0 mt-3 px-4 py-3 rounded-2xl text-[11px] font-bold leading-snug max-w-[280px] whitespace-normal break-words shadow-lg ring-1 ring-black/5 backdrop-blur ${
-                    note.type === 'ok'
+                  className={`absolute top-full right-0 mt-3 px-4 py-3 rounded-2xl text-[11px] font-bold leading-snug max-w-[280px] whitespace-normal break-words shadow-lg ring-1 ring-black/5 backdrop-blur ${note.type === 'ok'
                       ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-200'
                       : 'bg-red-50 text-red-700 dark:bg-red-950/20 dark:text-red-200'
-                  }`}
+                    }`}
                 >
                   {note.text}
                 </motion.div>
@@ -1846,28 +1845,109 @@ function ProfileEditView({
 
                 {/* Avatar Selection */}
                 <div className="space-y-6">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.chooseAvatar')}</label>
-                  <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-4">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.chooseAvatar')}</label>
+                  </div>
+                  <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-4">
+                    {/* Default User Icon */}
                     <button
                       onClick={() => setAvatarId(null)}
-                      className={`relative flex items-center justify-center h-20 rounded-2xl border-2 transition-all ${!avatarId ? 'border-slate-900 dark:border-white rotate-3' : 'border-slate-100 dark:border-slate-800 grayscale hover:grayscale-0'}`}
+                      className={`relative flex items-center justify-center h-20 rounded-2xl border-2 transition-all ${!avatarId
+                          ? 'border-slate-900 dark:border-white shadow-xl shadow-slate-900/10 dark:shadow-white/5 ring-4 ring-slate-900/5 dark:ring-white/5'
+                          : 'border-slate-100 dark:border-slate-800 grayscale opacity-40 hover:opacity-100 hover:grayscale-0 hover:border-slate-300'
+                        }`}
                     >
-                      <User className="w-6 h-6 text-slate-300" />
+                      <User className="w-6 h-6 text-slate-400" />
                     </button>
-                    {avatars.map((id) => (
+
+                    {/* Presets */}
+                    {avatars.map((url) => (
                       <button
-                        key={id}
-                        onClick={() => setAvatarId(id)}
-                        className={`relative group h-20 rounded-2xl overflow-hidden border-2 transition-all ${avatarId === id ? 'border-slate-900 dark:border-white scale-[1.1] z-10' : 'border-slate-100 dark:border-slate-800 grayscale hover:grayscale-0 hover:scale-[1.05]'}`}
+                        key={url}
+                        onClick={() => setAvatarId(url)}
+                        className={`relative group h-20 rounded-2xl overflow-hidden border-2 transition-all ${avatarId === url
+                            ? 'border-slate-900 dark:border-white scale-[1.05] z-10 shadow-xl'
+                            : 'border-slate-100 dark:border-slate-800 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 hover:scale-[1.05]'
+                          }`}
                       >
-                        <img src={`/avatars/${id}.png`} alt={id} className="w-full h-full object-cover" />
-                        {avatarId === id && (
-                          <div className="absolute top-1 right-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 p-0.5 rounded-full shadow-lg">
+                        <img src={url} alt="Avatar" className="w-full h-full object-cover" />
+                        {avatarId === url && (
+                          <div className="absolute top-1 right-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 p-1 rounded-full shadow-lg">
                             <CheckCircle2 className="w-3 h-3" />
                           </div>
                         )}
                       </button>
                     ))}
+
+                    {/* Custom Upload Button */}
+                    <input
+                      type="file"
+                      id="avatar-upload"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        if (file.size > 2 * 1024 * 1024) {
+                          setNote({ type: 'err', text: t('profile.cv.fileTooLarge') })
+                          setTimeout(() => setNote(null), 5000)
+                          return
+                        }
+
+                        setUploadingAvatar(true)
+                        try {
+                          const { data: { user } } = await supabase.auth.getUser()
+                          if (!user) throw new Error('No user')
+
+                          const fileExt = file.name.split('.').pop()
+                          const fileName = `${user.id}-${Date.now()}.${fileExt}`
+                          const filePath = `user_avatars/${fileName}`
+
+                          const { error: uploadError } = await supabase.storage
+                            .from('avatars')
+                            .upload(filePath, file, { upsert: true })
+
+                          if (uploadError) throw uploadError
+
+                          const { data: { publicUrl } } = supabase.storage
+                            .from('avatars')
+                            .getPublicUrl(filePath)
+
+                          setAvatarId(publicUrl)
+                          setNote({ type: 'ok', text: 'Avatar uploaded' })
+                          setTimeout(() => setNote(null), 3000)
+                        } catch (err) {
+                          console.error('Error uploading avatar:', err)
+                          setNote({ type: 'err', text: err?.message || 'Upload failed' })
+                          setTimeout(() => setNote(null), 5000)
+                        } finally {
+                          setUploadingAvatar(false)
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor="avatar-upload"
+                      className={`relative flex flex-col items-center justify-center h-20 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${uploadingAvatar ? 'opacity-50 pointer-events-none' : ''} ${(avatarId && !avatars.includes(avatarId))
+                          ? 'border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-900'
+                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900'
+                        }`}
+                    >
+                      {uploadingAvatar ? (
+                        <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+                      ) : (avatarId && !avatars.includes(avatarId)) ? (
+                        <div className="relative w-full h-full rounded-2xl overflow-hidden">
+                          <img src={avatarId} alt="Custom" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-slate-900/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
+                            <Upload className="w-5 h-5 text-white" />
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <Plus className="w-5 h-5 text-slate-400" />
+                          <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-1">{t('common.upload') || 'Upload'}</span>
+                        </>
+                      )}
+                    </label>
                   </div>
                 </div>
 

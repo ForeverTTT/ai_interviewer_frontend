@@ -14,7 +14,8 @@ import {
 } from 'lucide-react'
 
 import darkInterviewMockup from '../assets/dark_interview_mockup.png'
-import darkResumeMockup from '../assets/dark_resume_mockup.png'
+import darkResumeMockup from '../assets/resume_mockup_sage.png'
+import heroBg from '../assets/background.jpg'
 
 const positions = [
   'Werkstudent Software Engineer', 'Praktikum Data Science',
@@ -87,128 +88,76 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
-      <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-dot-grid opacity-[0.4] dark:opacity-[0.1]" />
+      <section className="relative min-h-[100vh] flex flex-col justify-end overflow-hidden">
+        {/* Full-bleed background illustration */}
+        <div className="absolute inset-0">
+          <img src={heroBg} alt="" className="w-full h-full object-cover object-center" />
+          {/* Gradient overlays for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#e8e4dd]/95 via-[#e8e4dd]/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-transparent h-32" />
+        </div>
 
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
-            {/* Left Content */}
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={containerVariants}
-              className="flex flex-col space-y-12 lg:pr-12 relative z-10"
-            >
-              <div className="space-y-8">
-                <motion.div variants={itemVariants} className="section-badge w-fit bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 backdrop-blur-md">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  {t('landing.badgePremium')}
-                </motion.div>
 
-                <motion.h1
-                  variants={itemVariants}
-                  className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white leading-[1.2] tracking-tight font-chinese-modern"
-                >
-                  {t('landing.headline1')}
-                  <span className="gradient-text font-black tracking-normal">
-                    {t('landing.headline2')}
-                  </span>
-                </motion.h1>
-
-                <div className="relative">
-                  <div className="absolute -left-8 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-500 to-transparent opacity-30 hidden sm:block" />
-                  <motion.p variants={itemVariants} className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl font-medium font-display pl-0 sm:pl-8">
-                    {t('landing.subNextGen')}
-                  </motion.p>
-                </div>
-              </div>
-
-              <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-4">
-                <Link
-                  to={ctaLink}
-                  className="btn-primary text-xl px-12 py-5 w-full sm:w-auto rounded-3xl"
-                >
-                  {t('landing.ctaPrimary')}
-                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                </Link>
-                <a
-                  href="#how-it-works"
-                  className="btn-secondary text-xl px-12 py-5 w-full sm:w-auto rounded-3xl"
-                >
-                  {t('landing.ctaSecondary')}
-                </a>
-              </motion.div>
-
-              <motion.div variants={itemVariants} className="flex flex-wrap gap-3">
-                {positions.map((pos) => (
-                  <span
-                    key={pos}
-                    className="px-4 py-2 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-slate-100 dark:border-slate-800"
-                  >
-                    {pos}
-                  </span>
-                ))}
-              </motion.div>
+        {/* Center content overlay */}
+        <div className="relative z-10 max-w-5xl mx-auto text-center px-6 pb-16 pt-48">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+            className="space-y-8"
+          >
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-[11px] font-semibold tracking-wider bg-white/60 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 backdrop-blur-xl border border-white/40 shadow-sm">
+              {t('landing.badgePremium')}
             </motion.div>
 
-            {/* Right Preview Card (Premium Image) */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
-              className="relative hidden lg:flex items-center justify-center group"
+            <motion.h1
+              variants={itemVariants}
+              className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.1] tracking-tight font-serif"
             >
-              <div className="absolute inset-0 bg-primary-500/20 blur-[160px] rounded-full group-hover:bg-primary-500/30 transition-colors duration-1000" />
-              <div className="relative p-2 rounded-[3.5rem] bg-gradient-to-br from-white/10 to-transparent backdrop-blur-3xl border border-white/20 shadow-2xl overflow-hidden scale-100 group-hover:scale-[1.02] transition-transform duration-1000 image-glow-primary">
-                <div className="hero-image-overlay" />
-                <img
-                  src={darkInterviewMockup}
-                  alt="AI Interview Premium Interface"
-                  className="relative z-10 w-[640px] rounded-[3rem] shadow-2xl border border-slate-800/50"
-                />
-              </div>
+              {t('landing.headline1')}
+              {t('landing.headline2')}
+            </motion.h1>
 
-              {/* Floating Performance Indicator */}
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-6 -right-6 z-20 p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-2xl space-y-2 hidden xl:block"
+            <motion.p
+              variants={itemVariants}
+              className="text-base sm:text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto font-medium"
+            >
+              {t('landing.subNextGen')}
+            </motion.p>
+
+            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+              <Link
+                to={ctaLink}
+                className="inline-flex items-center justify-center gap-3 text-base px-10 py-4 w-full sm:w-auto rounded-full font-bold text-white bg-slate-800 hover:bg-slate-900 transition-all shadow-xl hover:-translate-y-0.5 active:scale-[0.97]"
               >
-                <div className="flex items-center gap-2 text-emerald-500 font-bold text-xs">
-                  <Zap className="w-4 h-4 fill-current" />
-                  {t('landing.previewSuccess')}
-                </div>
-                <div className="text-2xl font-black text-slate-900 dark:text-white">98%</div>
-                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('landing.previewMatchRate')}</div>
-              </motion.div>
+                {t('landing.ctaPrimary')}
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <a
+                href="#how-it-works"
+                className="inline-flex items-center gap-2 text-base px-10 py-4 w-full sm:w-auto rounded-full font-bold text-slate-600 bg-white/50 backdrop-blur-xl border border-slate-200/80 hover:bg-white/80 transition-all shadow-sm"
+              >
+                {t('landing.ctaSecondary')}
+              </a>
             </motion.div>
-          </div>
+
+            <motion.div variants={itemVariants} className="flex flex-nowrap justify-center gap-2 pt-4 overflow-x-auto">
+              {positions.map((pos) => (
+                <span
+                  key={pos}
+                  className="px-3 py-1 bg-white/40 text-slate-500 text-[9px] font-medium tracking-wider rounded-full border border-slate-200/40 backdrop-blur-md whitespace-nowrap shrink-0"
+                >
+                  {pos}
+                </span>
+              ))}
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       <OfferLogosMarquee />
 
-      <section className="pt-12 pb-24 bg-white dark:bg-slate-950 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, idx) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="text-center"
-              >
-                <div className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white mb-2 font-display">{stat.value}</div>
-                <div className="text-slate-500 dark:text-slate-500 text-sm font-semibold uppercase tracking-wider">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800">
+      <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-[#e3ebe5] dark:bg-slate-900 border-y border-[#cdd8cf] dark:border-slate-800">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
@@ -230,7 +179,7 @@ export default function LandingPage() {
 
               <div className="grid sm:grid-cols-2 gap-6">
                 {features.map((feature, i) => (
-                  <div key={i} className="p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                  <div key={i} className="p-6 bg-[#f2f7f3] dark:bg-slate-800 rounded-2xl border border-[#cdd8cf] dark:border-slate-700 shadow-sm space-y-3">
                     <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900">
                       {feature.icon}
                     </div>
@@ -245,17 +194,12 @@ export default function LandingPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="relative group lg:pl-16"
             >
-              <div className="absolute inset-0 bg-primary-500/15 rounded-[3rem] blur-[120px] group-hover:bg-primary-500/25 transition-colors duration-1000" />
-              <div className="relative p-4 rounded-[4rem] bg-gradient-to-tr from-white/5 to-white/10 backdrop-blur-2xl border border-white/10 shadow-2xl overflow-hidden hover:scale-[1.02] transition-transform duration-1000 image-glow-primary">
-                <div className="hero-image-overlay" />
-                <img
-                  src={darkResumeMockup}
-                  alt="Premium Resume Analytics"
-                  className="w-full rounded-[3rem] border border-slate-800/50 shadow-2xl"
-                />
-              </div>
+              <img
+                src={darkResumeMockup}
+                alt="Premium Resume Analytics"
+                className="w-full max-w-[640px] mx-auto rounded-2xl shadow-lg"
+              />
             </motion.div>
           </div>
         </div>
@@ -269,22 +213,22 @@ export default function LandingPage() {
 
       <TestimonialsMarquee />
 
-      <section className="py-32 px-4 bg-slate-900 dark:bg-white relative overflow-hidden">
+      <section className="py-32 px-4 bg-[#f3eef9] dark:bg-slate-950 relative overflow-hidden">
         <div className="max-w-4xl mx-auto text-center relative z-10 space-y-12">
-          <h2 className="text-3xl sm:text-5xl font-black text-white dark:text-slate-900 leading-[1.2] font-chinese-modern uppercase">
+          <h2 className="text-3xl sm:text-5xl font-black text-slate-800 dark:text-white leading-[1.2] font-serif">
             {t('landing.ctaEndTitle')}
           </h2>
-          <p className="text-xl text-slate-400 dark:text-slate-600 max-w-2xl mx-auto">
+          <p className="text-xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
             {t('landing.ctaEndSub')}
           </p>
           <Link
             to={ctaLink}
-            className="btn-primary bg-white text-slate-900 dark:bg-slate-900 dark:text-white border-0 hover:bg-slate-100 dark:hover:bg-slate-800 text-xl px-12 py-5 rounded-2xl inline-flex items-center gap-3 shadow-2xl"
+            className="btn-primary text-xl px-12 py-5 rounded-2xl inline-flex items-center gap-3"
           >
             {t('landing.ctaEndBtn')}
             <ArrowRight className="w-6 h-6" />
           </Link>
-          <div className="text-slate-500 text-sm italic opacity-60">
+          <div className="text-slate-400 text-sm italic opacity-60">
             {t('landing.ctaEndFoot')}
           </div>
         </div>

@@ -13,8 +13,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12">
           <div>
             <Link to="/" className="inline-flex items-center gap-2.5 mb-5 group">
-              <div className="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg ring-1 ring-white/10 group-hover:ring-orange-400/30 transition-all overflow-hidden">
-                <img src="/crab_logo.png" alt="OfferClaw Logo" className="w-7 h-7 object-contain" />
+              <div className="w-9 h-9 overflow-hidden flex items-center justify-center">
+                <img 
+                  src="/crab_logo.png" 
+                  alt="OfferClaw Logo" 
+                  className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500" 
+                />
               </div>
               <span className="font-bold text-lg tracking-tight text-slate-900 dark:text-white">
                 Offer<span className="text-orange-500">Claw</span>

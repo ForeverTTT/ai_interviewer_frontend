@@ -27,6 +27,7 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import Navbar from '../components/Navbar'
 import GallupReport from '../components/GallupReport'
+import heroBg from '../assets/background.jpg'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
@@ -232,46 +233,57 @@ export default function GallupTestPage() {
 
   if (isLoadingQuestions || isLoadingProgress) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950">
-        <Loader2 className="w-10 h-10 text-primary-600 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center relative">
+        <img src={heroBg} alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
+        <div className="absolute inset-0 bg-white/40" />
+        <Loader2 className="w-10 h-10 text-primary-600 animate-spin relative z-10" />
       </div>
     )
   }
 
   if (errorMessage && questions.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-6 text-center">
-        <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
-        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Failed to Load</h2>
-        <p className="text-slate-500 max-w-sm">{errorMessage}</p>
-        <button onClick={() => window.location.reload()} className="mt-6 px-6 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold">Try Again</button>
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center relative">
+        <img src={heroBg} alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
+        <div className="absolute inset-0 bg-white/50" />
+        <div className="relative z-10">
+          <AlertTriangle className="w-12 h-12 text-red-500 mb-4 mx-auto" />
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Failed to Load</h2>
+          <p className="text-slate-500 max-w-sm">{errorMessage}</p>
+          <button onClick={() => window.location.reload()} className="mt-6 px-6 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold">Try Again</button>
+        </div>
       </div>
     )
   }
 
   if (step === 'report' && results) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-all duration-700">
+      <div className="min-h-screen transition-all duration-700" style={{ backgroundImage: `url(${heroBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
+        <div className="min-h-screen bg-white/30">
         <GallupReport results={results} onRetake={() => {
           setAnswers({}); setResults(null); setCurrentIndex(0); setStep('intro');
           saveToBackend({}, null, false);
         }} />
+        </div>
       </div>
     )
   }
 
   if (step === 'loading') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-slate-950 space-y-6">
-        <Sparkles className="w-12 h-12 text-primary-500 animate-pulse" />
-        <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-widest">{t('gallup.loading')}</h2>
-        <p className="text-slate-500 text-sm">Fetching and assembling your structured dimension analysis...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center space-y-6 relative">
+        <img src={heroBg} alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
+        <div className="absolute inset-0 bg-white/40" />
+        <Sparkles className="w-12 h-12 text-primary-500 animate-pulse relative z-10" />
+        <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-widest relative z-10">{t('gallup.loading')}</h2>
+        <p className="text-slate-500 text-sm relative z-10">Fetching and assembling your structured dimension analysis...</p>
       </div>
     )
   }
 
   return (
-    <div className="relative overflow-hidden py-12">
+    <div className="py-12 min-h-screen" style={{ backgroundImage: `url(${heroBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
+      <div className="min-h-screen bg-gradient-to-b from-white/40 via-white/20 to-white/60">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 font-chinese-modern">
         <AnimatePresence mode="wait">
           {step === 'intro' && (
@@ -297,7 +309,7 @@ export default function GallupTestPage() {
                   <motion.div 
                     key={key} 
                     initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-                    className="p-8 rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 group transition-all hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.05)] hover:-translate-y-1"
+                    className="p-8 rounded-[2rem] bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/60 dark:border-white/5 group transition-all hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.08)] hover:-translate-y-1"
                   >
                     <div className="w-12 h-12 mx-auto rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/5 flex items-center justify-center mb-4 shadow-inner group-hover:rotate-12 transition-transform">
                       {key === 'executing' ? <Target className="w-6 h-6 text-emerald-500" /> : 
@@ -333,7 +345,7 @@ export default function GallupTestPage() {
 
           {step === 'quiz' && (
             <motion.div key="quiz" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.6, ease: "anticipate" }} className="py-8">
-              <div className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-white/5 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] dark:shadow-2xl overflow-hidden relative">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[3rem] border border-white/60 dark:border-white/5 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] dark:shadow-2xl overflow-hidden relative">
                 {/* Visual Progress Header */}
                 <div className="px-10 pt-10 pb-6 flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -348,7 +360,7 @@ export default function GallupTestPage() {
                         <div className="text-xl font-black text-slate-900 dark:text-white tabular-nums">{Math.round(progress)}%</div>
                         <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('gallup.completion')}</div>
                      </div>
-                     <button onClick={() => navigate('/profile')} className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all group">
+                     <button onClick={() => setStep('intro')} className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all group">
                         <X className="w-5 h-5 group-hover:rotate-90 transition-transform" />
                      </button>
                   </div>
@@ -388,14 +400,14 @@ export default function GallupTestPage() {
                   </div>
                 </div>
 
-                <div className="px-10 py-8 bg-slate-50 dark:bg-black/20 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+                <div className="px-10 py-8 bg-white/50 dark:bg-black/20 border-t border-white/60 dark:border-white/5 flex items-center justify-between">
                   <button disabled={currentIndex === 0} onClick={() => setCurrentIndex(currentIndex - 1)} className="btn-secondary h-12 px-6 text-xs uppercase font-black tracking-widest">
                     <ChevronLeft className="w-4 h-4 mr-2" /> {t('gallup.prevBtn')}
                   </button>
                   <div className="h-1.5 flex-grow mx-12 bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden relative">
                     <motion.div className="h-full bg-slate-900 dark:bg-white" animate={{ width: `${progress}%` }} transition={{ duration: 1 }} />
                   </div>
-                  {currentIndex === questions.length - 1 && answeredCount === questions.length ? (
+                  {answeredCount === questions.length ? (
                     <button onClick={handleSubmit} className="btn-primary h-12 px-8 text-xs uppercase font-black tracking-widest">
                       {t('gallup.viewResults')} <CheckCircle className="w-4 h-4 ml-2" />
                     </button>
@@ -409,6 +421,7 @@ export default function GallupTestPage() {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
       </div>
     </div>
   )

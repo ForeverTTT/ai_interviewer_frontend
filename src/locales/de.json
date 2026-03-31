@@ -36,10 +36,10 @@
   },
   "landing": {
     "badgePremium": "KI-gesteuerte Karriereentwicklung der nächsten Generation",
-    "headline1": "Meistern Sie Ihr",
-    "headline2": "deutsches Interview mit KI",
+    "headline1": "Jede Übung ist ",
+    "headline2": "Ihr Fundament zum Erfolg",
     "sub": "Basierend auf der neuesten Generation von Sprachmodellen und Sprach-KI: Tiefen-angepasste Interview-Pfade für Ihre Rolle und Ihren JD, mit neuralen Sprach-Sessions für realen Druck.",
-    "subNextGen": "Deutschen Arbeitsmarktes ausgerichtete Deep-Neural-Modelle. Multimodales Echtzeit-Feedback, um jede Bewerbung zu kontrollieren.",
+    "subNextGen": "Die KI-native Plattform, die Ihre Jobsuche in Deutschland beschleunigt, Ihre Interviewfähigkeiten schärft und Ihnen zum Angebot verhilft.",
     "ctaPrimary": "Kostenloses Training starten",
     "ctaSecondary": "So funktioniert es",
     "previewSuccess": "Erfolgsrate-Boost",
@@ -182,9 +182,9 @@
     }
   },
   "offerMarquee": {
-    "offerCount": "1,000+",
-    "line1": "Usern geholfen,",
-    "line1b": "Praktikums- / Vollzeit-Angebote zu erhalten",
+    "offerCount": "",
+    "line1": "Unsere Nutzer erhielten Angebote von diesen Hochschulen & Unternehmen",
+    "line1b": "",
     "sub": "Von deutschen Top-Firmen und Tech-Leadern (symbolisch)"
   },
   "login": {
@@ -297,8 +297,8 @@
       "method1Title": "Erfahrungen teilen (+200)",
       "method1Desc": "Teilen Sie Ihre echten Interview-Erfahrungen. Jede verifizierte Erfahrung bringt Ihnen +200 Energie.",
       "method1Btn": "Zum Erfahrungsportal",
-      "method2Title": "Support kontaktieren",
-      "method2Desc": "Scannen Sie den QR-Code, um unseren Support für eine manuelle Aufladung hinzuzufügen.",
+      "method2Title": "Folge uns auf Xiaohongshu",
+      "method2Desc": "Scannen Sie den QR-Code, um uns auf Xiaohongshu zu folgen und Interview-Tipps zu erhalten.",
       "qrHint": "Long press or scan to add",
       "cancel": "Zurück",
       "success": "Synchronisierung läuft, bitte warten..."
@@ -470,7 +470,7 @@
     "coachTargetRole": "Zielrolle (Optional)",
     "coachTargetPh": "z.B. Backend Werkstudent Deutschland",
     "coachRun": "Diagnose-Bericht erstellen",
-    "coachRunning": "Analyse...",
+    "coachRunning": "Diagnosebericht wird erstellt...",
     "coachFallbackHint": "Nutzt aktuellen Text (min 80 Zeichen).",
     "coachErr": "Diagnose fehlgeschlagen.",
     "coach503": "KI-Key nicht konfiguriert.",
@@ -521,6 +521,7 @@
     "viewEmptySub": "Daten füllen — Basis für Mock-Interviews.",
     "cv": {
       "pageSub": "Daten füllen; PDF Upload zur Review. 'Final Resume' ist Interview-Kontext.",
+      "fileTooLarge": "Datei zu groß (max. 2MB)",
       "structuredTitle": "Strukturierte Daten",
       "structuredHint": "Extract → Import/Fill.",
       "viewExtracted": "Text ansehen",
@@ -802,6 +803,7 @@
     "loading": "Lädt..."
   },
   "common": {
+    "upload": "Hochladen",
     "uiLanguage": "Sprache",
     "themeToggle": "Theme",
     "interviewThemeToggle": "Interview Theme",
