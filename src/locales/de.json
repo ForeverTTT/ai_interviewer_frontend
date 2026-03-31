@@ -470,7 +470,7 @@
     "coachTargetRole": "Zielrolle (Optional)",
     "coachTargetPh": "z.B. Backend Werkstudent Deutschland",
     "coachRun": "Diagnose-Bericht erstellen",
-    "coachRunning": "Analyse...",
+    "coachRunning": "Diagnosebericht wird erstellt...",
     "coachFallbackHint": "Nutzt aktuellen Text (min 80 Zeichen).",
     "coachErr": "Diagnose fehlgeschlagen.",
     "coach503": "KI-Key nicht konfiguriert.",

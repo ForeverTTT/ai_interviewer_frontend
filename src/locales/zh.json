@@ -458,7 +458,7 @@
     "coachTargetRole": "目标岗位 / 方向（可选）",
     "coachTargetPh": "例如：德国 Werkstudent 后端 · 应届生算法岗",
     "coachRun": "生成诊断报告",
-    "coachRunning": "分析中…",
+    "coachRunning": "诊断报告生成中...",
     "coachFallbackHint": "生成诊断时优先使用「面试用简历原文」中的当前内容（至少约 80 字）；不足时则使用上次保存的正文向。请先将 PDF 提取结果「导入至面试用简历原文」或粘贴后再运行诊断。",
     "coachErr": "诊断失败，请稍后重试。",
     "coach503": "服务器未配置 GEMINI_API_KEY，无法使用简历诊断。",

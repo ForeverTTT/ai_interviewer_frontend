@@ -458,7 +458,7 @@
     "coachTargetRole": "Target Role / Direction (Optional)",
     "coachTargetPh": "e.g., Backend Werkstudent Germany · Algorithm Intern",
     "coachRun": "Generate Diagnostic Report",
-    "coachRunning": "Analyzing...",
+    "coachRunning": "Generating Diagnostic Report...",
     "coachFallbackHint": "Uses current 'Review Content' (min 80 chars); fallbacks to last saved. Import PDF extraction first.",
     "coachErr": "Diagnostic failed. Please try again.",
     "coach503": "Server GEMINI_API_KEY not configured.",

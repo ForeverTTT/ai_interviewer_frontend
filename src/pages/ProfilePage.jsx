@@ -825,7 +825,7 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
             </div>
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">{t('profile.tokens')}</span>
           </div>
-          
+
           <div className="flex-1 space-y-4 text-center md:text-left">
             <div>
               <div className="flex items-baseline justify-center md:justify-start gap-2">
@@ -836,7 +836,7 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
                 {t('profile.initialTokensHint', 'Full access to AI-powered career tools.')}
               </p>
             </div>
-            
+
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -874,7 +874,7 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-100 dark:border-slate-800">
                 {avatarId ? (
-                  <img src={`/avatars/${avatarId}.png`} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={avatarId} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-slate-300">
                     <User className="w-10 h-10" />
@@ -1171,6 +1171,7 @@ export default function ProfilePage() {
   const [note, setNote] = useState(null)
   const [jobSearchStatus, setJobSearchStatus] = useState('seeking')
   const [avatarId, setAvatarId] = useState(null)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [tokens, setTokens] = useState(0)
   const [updatedAt, setUpdatedAt] = useState(null)
   const [pendingRaw, setPendingRaw] = useState('')
@@ -1643,35 +1644,35 @@ export default function ProfilePage() {
       className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-24"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <ProfileEditView
-          cvProfile={cvProfile} setCvProfile={setCvProfile} resumeText={resumeText} setResumeText={setResumeText}
-          resumeNotes={resumeNotes} setResumeNotes={setResumeNotes} targetRole={targetRole} setTargetRole={setTargetRole}
-          coach={coach} coachGenerating={coachGenerating} coachErr={coachErr} runCoach={runCoach}
-          save={save} saving={saving} note={note} parseBusy={parseBusy} extractBusy={extractBusy} onPdf={onPdf} fileRef={fileRef} runExtractCv={runExtractCv}
-          pendingRaw={pendingRaw} setPendingRaw={setPendingRaw} pendingPreviewOpen={pendingPreviewOpen} setPendingPreviewOpen={setPendingPreviewOpen}
-          applyPendingToResume={applyPendingToResume} jobSearchStatus={jobSearchStatus} setJobSearchStatus={setJobSearchStatus}
-          avatarId={avatarId} setAvatarId={setAvatarId} t={t}
-        />
+          <ProfileEditView
+            cvProfile={cvProfile} setCvProfile={setCvProfile} resumeText={resumeText} setResumeText={setResumeText}
+            resumeNotes={resumeNotes} setResumeNotes={setResumeNotes} targetRole={targetRole} setTargetRole={setTargetRole}
+            coach={coach} coachGenerating={coachGenerating} coachErr={coachErr} runCoach={runCoach}
+            save={save} saving={saving} note={note} setNote={setNote} parseBusy={parseBusy} extractBusy={extractBusy} onPdf={onPdf} fileRef={fileRef} runExtractCv={runExtractCv}
+            pendingRaw={pendingRaw} setPendingRaw={setPendingRaw} pendingPreviewOpen={pendingPreviewOpen} setPendingPreviewOpen={setPendingPreviewOpen}
+            applyPendingToResume={applyPendingToResume} jobSearchStatus={jobSearchStatus} setJobSearchStatus={setJobSearchStatus}
+            avatarId={avatarId} setAvatarId={setAvatarId} uploadingAvatar={uploadingAvatar} setUploadingAvatar={setUploadingAvatar} t={t}
+          />
       </div>
-        <AnimatePresence>
-          {showRechargeModal && (
-            <RechargeModal
-              isOpen={showRechargeModal}
-              onClose={() => setShowRechargeModal(false)}
-              t={t}
-            />
-          )}
-        </AnimatePresence>
-      </motion.div>
+      <AnimatePresence>
+        {showRechargeModal && (
+          <RechargeModal
+            isOpen={showRechargeModal}
+            onClose={() => setShowRechargeModal(false)}
+            t={t}
+          />
+        )}
+      </AnimatePresence>
+    </motion.div>
   )
 }
 
 function ProfileEditView({
   cvProfile, setCvProfile, resumeText, setResumeText, resumeNotes, setResumeNotes,
   targetRole, setTargetRole, coach, coachGenerating, coachErr, runCoach,
-  save, saving, note, parseBusy, extractBusy, onPdf, fileRef, runExtractCv,
+  save, saving, note, setNote, parseBusy, extractBusy, onPdf, fileRef, runExtractCv,
   pendingRaw, setPendingRaw, pendingPreviewOpen, setPendingPreviewOpen, applyPendingToResume,
-  jobSearchStatus, setJobSearchStatus, avatarId, setAvatarId, t
+  jobSearchStatus, setJobSearchStatus, avatarId, setAvatarId, uploadingAvatar, setUploadingAvatar, t
 }) {
   const [activeTab, setActiveTab] = useState('basic')
 
@@ -1722,7 +1723,7 @@ function ProfileEditView({
             className="btn-setup-action-pill px-6 py-3"
           >
             {coachGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-emerald-500" />}
-            <span className="font-bold">{coachGenerating ? t('profile.running') : t('profile.coachRun')}</span>
+            <span className="font-bold">{coachGenerating ? t('profile.coachRunning') : t('profile.coachRun')}</span>
           </button>
           <div className="flex items-center gap-4 relative">
             <button
@@ -1739,11 +1740,10 @@ function ProfileEditView({
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
-                  className={`absolute top-full right-0 mt-3 px-4 py-3 rounded-2xl text-[11px] font-bold leading-snug max-w-[280px] whitespace-normal break-words shadow-lg ring-1 ring-black/5 backdrop-blur ${
-                    note.type === 'ok'
+                  className={`absolute top-full right-0 mt-3 px-4 py-3 rounded-2xl text-[11px] font-bold leading-snug max-w-[280px] whitespace-normal break-words shadow-lg ring-1 ring-black/5 backdrop-blur ${note.type === 'ok'
                       ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-200'
                       : 'bg-red-50 text-red-700 dark:bg-red-950/20 dark:text-red-200'
-                  }`}
+                    }`}
                 >
                   {note.text}
                 </motion.div>
@@ -1852,11 +1852,10 @@ function ProfileEditView({
                     {/* Default User Icon */}
                     <button
                       onClick={() => setAvatarId(null)}
-                      className={`relative flex items-center justify-center h-20 rounded-2xl border-2 transition-all ${
-                        !avatarId 
-                          ? 'border-slate-900 dark:border-white shadow-xl shadow-slate-900/10 dark:shadow-white/5 ring-4 ring-slate-900/5 dark:ring-white/5' 
+                      className={`relative flex items-center justify-center h-20 rounded-2xl border-2 transition-all ${!avatarId
+                          ? 'border-slate-900 dark:border-white shadow-xl shadow-slate-900/10 dark:shadow-white/5 ring-4 ring-slate-900/5 dark:ring-white/5'
                           : 'border-slate-100 dark:border-slate-800 grayscale opacity-40 hover:opacity-100 hover:grayscale-0 hover:border-slate-300'
-                      }`}
+                        }`}
                     >
                       <User className="w-6 h-6 text-slate-400" />
                     </button>
@@ -1866,11 +1865,10 @@ function ProfileEditView({
                       <button
                         key={url}
                         onClick={() => setAvatarId(url)}
-                        className={`relative group h-20 rounded-2xl overflow-hidden border-2 transition-all ${
-                          avatarId === url 
-                            ? 'border-slate-900 dark:border-white scale-[1.05] z-10 shadow-xl' 
+                        className={`relative group h-20 rounded-2xl overflow-hidden border-2 transition-all ${avatarId === url
+                            ? 'border-slate-900 dark:border-white scale-[1.05] z-10 shadow-xl'
                             : 'border-slate-100 dark:border-slate-800 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 hover:scale-[1.05]'
-                        }`}
+                          }`}
                       >
                         <img src={url} alt="Avatar" className="w-full h-full object-cover" />
                         {avatarId === url && (
@@ -1892,27 +1890,51 @@ function ProfileEditView({
                         if (!file) return
                         if (file.size > 2 * 1024 * 1024) {
                           setNote({ type: 'err', text: t('profile.cv.fileTooLarge') })
-                          setTimeout(() => setNote(null), 3000)
+                          setTimeout(() => setNote(null), 5000)
                           return
                         }
 
-                        const reader = new FileReader()
-                        reader.onload = (ev) => {
-                          const base64 = ev.target.result
-                          setAvatarId(base64)
+                        setUploadingAvatar(true)
+                        try {
+                          const { data: { user } } = await supabase.auth.getUser()
+                          if (!user) throw new Error('No user')
+
+                          const fileExt = file.name.split('.').pop()
+                          const fileName = `${user.id}-${Date.now()}.${fileExt}`
+                          const filePath = `user_avatars/${fileName}`
+
+                          const { error: uploadError } = await supabase.storage
+                            .from('avatars')
+                            .upload(filePath, file, { upsert: true })
+
+                          if (uploadError) throw uploadError
+
+                          const { data: { publicUrl } } = supabase.storage
+                            .from('avatars')
+                            .getPublicUrl(filePath)
+
+                          setAvatarId(publicUrl)
+                          setNote({ type: 'ok', text: 'Avatar uploaded' })
+                          setTimeout(() => setNote(null), 3000)
+                        } catch (err) {
+                          console.error('Error uploading avatar:', err)
+                          setNote({ type: 'err', text: err?.message || 'Upload failed' })
+                          setTimeout(() => setNote(null), 5000)
+                        } finally {
+                          setUploadingAvatar(false)
                         }
-                        reader.readAsDataURL(file)
                       }}
                     />
                     <label
                       htmlFor="avatar-upload"
-                      className={`relative flex flex-col items-center justify-center h-20 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${
-                        avatarId?.startsWith('data:') 
-                          ? 'border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-900' 
+                      className={`relative flex flex-col items-center justify-center h-20 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${uploadingAvatar ? 'opacity-50 pointer-events-none' : ''} ${(avatarId && !avatars.includes(avatarId))
+                          ? 'border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-900'
                           : 'border-slate-200 dark:border-slate-800 hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900'
-                      }`}
+                        }`}
                     >
-                      {avatarId?.startsWith('data:') ? (
+                      {uploadingAvatar ? (
+                        <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+                      ) : (avatarId && !avatars.includes(avatarId)) ? (
                         <div className="relative w-full h-full rounded-2xl overflow-hidden">
                           <img src={avatarId} alt="Custom" className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-slate-900/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
@@ -1922,7 +1944,7 @@ function ProfileEditView({
                       ) : (
                         <>
                           <Plus className="w-5 h-5 text-slate-400" />
-                          <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-1">{t('common.upload')}</span>
+                          <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-1">{t('common.upload') || 'Upload'}</span>
                         </>
                       )}
                     </label>
