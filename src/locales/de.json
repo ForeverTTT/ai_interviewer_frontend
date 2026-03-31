@@ -521,6 +521,7 @@
     "viewEmptySub": "Daten füllen — Basis für Mock-Interviews.",
     "cv": {
       "pageSub": "Daten füllen; PDF Upload zur Review. 'Final Resume' ist Interview-Kontext.",
+      "fileTooLarge": "Datei zu groß (max. 2MB)",
       "structuredTitle": "Strukturierte Daten",
       "structuredHint": "Extract → Import/Fill.",
       "viewExtracted": "Text ansehen",
@@ -802,6 +803,7 @@
     "loading": "Lädt..."
   },
   "common": {
+    "upload": "Hochladen",
     "uiLanguage": "Sprache",
     "themeToggle": "Theme",
     "interviewThemeToggle": "Interview Theme",

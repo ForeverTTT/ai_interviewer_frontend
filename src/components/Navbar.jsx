@@ -98,8 +98,12 @@ export default function Navbar() {
       <div className="pointer-events-auto w-full max-w-[80rem] bg-white/70 dark:bg-slate-950/70 backdrop-blur-2xl rounded-b-2xl border-x border-b border-slate-200/50 dark:border-slate-800/50 shadow-lg shadow-slate-900/[0.04] px-6 lg:px-8 overflow-visible">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-orange-500 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-[1.1] group-hover:rotate-3 shadow-lg shadow-orange-500/20 duration-500 overflow-hidden">
-              <img src="/crab_logo.png" alt="OfferClaw Logo" className="w-8 h-8 object-contain" />
+            <div className="w-10 h-10 overflow-hidden flex items-center justify-center">
+              <img 
+                src="/crab_logo.png" 
+                alt="OfferClaw Logo" 
+                className="w-full h-full object-contain mix-blend-multiply transition-transform group-hover:scale-[1.1] group-hover:rotate-3 duration-500" 
+              />
             </div>
             <span className="font-black text-xl tracking-tighter text-slate-900 dark:text-white uppercase leading-none">
               Offer<span className="text-orange-500">Claw</span>
@@ -109,11 +113,10 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-2">
             <Link
               to="/"
-              className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${
-                isActive('/') 
-                  ? 'text-primary-600 dark:text-primary-400' 
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-              }`}
+              className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isActive('/')
+                ? 'text-primary-600 dark:text-primary-400'
+                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                }`}
             >
               {t('nav.home')}
               {isActive('/') && (
@@ -124,11 +127,10 @@ export default function Navbar() {
               <>
                 <Link
                   to="/setup"
-                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${
-                    isActive('/setup') 
-                      ? 'text-primary-600 dark:text-primary-400' 
-                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                  }`}
+                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isActive('/setup')
+                    ? 'text-primary-600 dark:text-primary-400'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    }`}
                 >
                   {t('nav.startInterview')}
                   {isActive('/setup') && (
@@ -137,11 +139,10 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/dashboard"
-                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${
-                    isActive('/dashboard') 
-                      ? 'text-primary-600 dark:text-primary-400' 
-                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                  }`}
+                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isActive('/dashboard')
+                    ? 'text-primary-600 dark:text-primary-400'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    }`}
                 >
                   {t('nav.history')}
                   {isActive('/dashboard') && (
@@ -150,11 +151,10 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/profile"
-                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${
-                    isActive('/profile') 
-                      ? 'text-primary-600 dark:text-primary-400' 
-                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                  }`}
+                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isActive('/profile')
+                    ? 'text-primary-600 dark:text-primary-400'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    }`}
                 >
                   {t('nav.profile')}
                   {isActive('/profile') && (
@@ -165,11 +165,10 @@ export default function Navbar() {
             )}
             <Link
               to="/experiences"
-              className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${
-                isActive('/experiences') 
-                  ? 'text-primary-600 dark:text-primary-400' 
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-              }`}
+              className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isActive('/experiences')
+                ? 'text-primary-600 dark:text-primary-400'
+                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                }`}
             >
               {t('nav.experiences')}
               {isActive('/experiences') && (
@@ -180,11 +179,10 @@ export default function Navbar() {
               <>
                 <Link
                   to="/gallup"
-                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${
-                    isActive('/gallup') 
-                      ? 'text-primary-600 dark:text-primary-400' 
-                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                  }`}
+                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isActive('/gallup')
+                    ? 'text-primary-600 dark:text-primary-400'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    }`}
                 >
                   {t('nav.gallup')}
                   {isActive('/gallup') && (
@@ -200,7 +198,7 @@ export default function Navbar() {
               <LanguageSwitcher />
               <AppThemeToggle />
             </div>
-            
+
             {user ? (
               <div className="relative">
                 <button
@@ -210,7 +208,7 @@ export default function Navbar() {
                   <div className="relative">
                     <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-black overflow-hidden">
                       {avatarId ? (
-                        <img src={`/avatars/${avatarId}.png`} alt="Avatar" className="w-full h-full object-cover" />
+                        <img src={avatarId.startsWith('data:') || avatarId.startsWith('http') ? avatarId : `/avatars/${avatarId}.png`} alt="Avatar" className="w-full h-full object-cover" />
                       ) : (
                         user.user_metadata?.full_name?.[0] || user.email?.[0]?.toUpperCase() || 'U'
                       )}
@@ -218,7 +216,7 @@ export default function Navbar() {
                     <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-950 ${jobStatus === 'seeking' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
                   </div>
                   <span className="text-sm font-bold text-slate-700 dark:text-slate-200 max-w-[100px] truncate">
-                     {user.user_metadata?.full_name || user.email.split('@')[0]}
+                    {user.user_metadata?.full_name || user.email.split('@')[0]}
                   </span>
                   <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
                     <BrainCircuit className="w-3 h-3 text-emerald-500" />
@@ -230,14 +228,14 @@ export default function Navbar() {
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-4 w-64 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-950 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-900 py-4 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="px-6 py-4 border-b border-slate-50 dark:border-slate-900 mb-2">
-                       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{t('nav.profile')}</p>
-                       <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
-                         {user.user_metadata?.full_name || user.email}
-                       </p>
-                       <div className="mt-2 flex items-center justify-between">
-                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('nav.tokens')}</span>
-                         <span className="text-xs font-black text-emerald-500">{tokens}</span>
-                       </div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{t('nav.profile')}</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                        {user.user_metadata?.full_name || user.email}
+                      </p>
+                      <div className="mt-2 flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('nav.tokens')}</span>
+                        <span className="text-xs font-black text-emerald-500">{tokens}</span>
+                      </div>
                     </div>
                     <Link
                       to="/dashboard"
@@ -274,9 +272,8 @@ export default function Navbar() {
                         <Briefcase className="w-4 h-4" />
                         <span>{t('profile.status')}</span>
                       </div>
-                      <span className={`px-2 py-1 rounded-lg ${
-                        jobStatus === 'seeking' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
-                      }`}>
+                      <span className={`px-2 py-1 rounded-lg ${jobStatus === 'seeking' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
+                        }`}>
                         {jobStatus === 'seeking' ? t('profile.statusSeeking') : t('profile.statusHired')}
                       </span>
                     </button>
@@ -334,8 +331,8 @@ export default function Navbar() {
             </>
           )}
           <div className="pt-8 flex items-center justify-between border-t border-slate-100 dark:border-slate-900">
-             <LanguageSwitcher />
-             <AppThemeToggle />
+            <LanguageSwitcher />
+            <AppThemeToggle />
           </div>
         </div>
       )}

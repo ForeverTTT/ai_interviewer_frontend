@@ -1141,10 +1141,11 @@ function RechargeModal({ isOpen, onClose, t }) {
 }
 
 const avatars = [
-  'professional_male_1',
-  'professional_female_1',
-  'tech_engineer_1',
-  'creative_innovator_1'
+  'https://api.dicebear.com/7.x/identicon/svg?seed=Aneka',
+  'https://api.dicebear.com/7.x/identicon/svg?seed=Milo',
+  'https://api.dicebear.com/7.x/identicon/svg?seed=Toby',
+  'https://api.dicebear.com/7.x/identicon/svg?seed=Luna',
+  'https://api.dicebear.com/7.x/identicon/svg?seed=Jack'
 ]
 
 export default function ProfilePage() {
@@ -1844,28 +1845,87 @@ function ProfileEditView({
 
                 {/* Avatar Selection */}
                 <div className="space-y-6">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.chooseAvatar')}</label>
-                  <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-4">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.chooseAvatar')}</label>
+                  </div>
+                  <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-4">
+                    {/* Default User Icon */}
                     <button
                       onClick={() => setAvatarId(null)}
-                      className={`relative flex items-center justify-center h-20 rounded-2xl border-2 transition-all ${!avatarId ? 'border-slate-900 dark:border-white rotate-3' : 'border-slate-100 dark:border-slate-800 grayscale hover:grayscale-0'}`}
+                      className={`relative flex items-center justify-center h-20 rounded-2xl border-2 transition-all ${
+                        !avatarId 
+                          ? 'border-slate-900 dark:border-white shadow-xl shadow-slate-900/10 dark:shadow-white/5 ring-4 ring-slate-900/5 dark:ring-white/5' 
+                          : 'border-slate-100 dark:border-slate-800 grayscale opacity-40 hover:opacity-100 hover:grayscale-0 hover:border-slate-300'
+                      }`}
                     >
-                      <User className="w-6 h-6 text-slate-300" />
+                      <User className="w-6 h-6 text-slate-400" />
                     </button>
-                    {avatars.map((id) => (
+
+                    {/* Presets */}
+                    {avatars.map((url) => (
                       <button
-                        key={id}
-                        onClick={() => setAvatarId(id)}
-                        className={`relative group h-20 rounded-2xl overflow-hidden border-2 transition-all ${avatarId === id ? 'border-slate-900 dark:border-white scale-[1.1] z-10' : 'border-slate-100 dark:border-slate-800 grayscale hover:grayscale-0 hover:scale-[1.05]'}`}
+                        key={url}
+                        onClick={() => setAvatarId(url)}
+                        className={`relative group h-20 rounded-2xl overflow-hidden border-2 transition-all ${
+                          avatarId === url 
+                            ? 'border-slate-900 dark:border-white scale-[1.05] z-10 shadow-xl' 
+                            : 'border-slate-100 dark:border-slate-800 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 hover:scale-[1.05]'
+                        }`}
                       >
-                        <img src={`/avatars/${id}.png`} alt={id} className="w-full h-full object-cover" />
-                        {avatarId === id && (
-                          <div className="absolute top-1 right-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 p-0.5 rounded-full shadow-lg">
+                        <img src={url} alt="Avatar" className="w-full h-full object-cover" />
+                        {avatarId === url && (
+                          <div className="absolute top-1 right-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 p-1 rounded-full shadow-lg">
                             <CheckCircle2 className="w-3 h-3" />
                           </div>
                         )}
                       </button>
                     ))}
+
+                    {/* Custom Upload Button */}
+                    <input
+                      type="file"
+                      id="avatar-upload"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        if (file.size > 2 * 1024 * 1024) {
+                          setNote({ type: 'err', text: t('profile.cv.fileTooLarge') })
+                          setTimeout(() => setNote(null), 3000)
+                          return
+                        }
+
+                        const reader = new FileReader()
+                        reader.onload = (ev) => {
+                          const base64 = ev.target.result
+                          setAvatarId(base64)
+                        }
+                        reader.readAsDataURL(file)
+                      }}
+                    />
+                    <label
+                      htmlFor="avatar-upload"
+                      className={`relative flex flex-col items-center justify-center h-20 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${
+                        avatarId?.startsWith('data:') 
+                          ? 'border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-900' 
+                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900'
+                      }`}
+                    >
+                      {avatarId?.startsWith('data:') ? (
+                        <div className="relative w-full h-full rounded-2xl overflow-hidden">
+                          <img src={avatarId} alt="Custom" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-slate-900/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
+                            <Upload className="w-5 h-5 text-white" />
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <Plus className="w-5 h-5 text-slate-400" />
+                          <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-1">{t('common.upload')}</span>
+                        </>
+                      )}
+                    </label>
                   </div>
                 </div>
 

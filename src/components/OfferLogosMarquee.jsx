@@ -1,12 +1,16 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
+import sapLogo from '../assets/logos/sap.png'
+import boschLogo from '../assets/logos/bosch.png'
+import schaefflerLogo from '../assets/logos/schaeffler.png'
 
 const BRAND_META = {
   bmw: { name: 'BMW', slug: 'bmw', color: '0066B1' },
   siemens: { name: 'Siemens', slug: 'siemens', color: '009999' },
-  sap: { name: 'SAP', slug: 'sap', color: '0FAA08' },
-  bosch: { name: 'Bosch', slug: 'bosch', color: 'EA0016' },
+  sap: { name: 'SAP', image: sapLogo },
+  bosch: { name: 'Bosch', image: boschLogo },
+  schaeffler: { name: 'Schaeffler', image: schaefflerLogo },
 }
 
 const UNI_META = {
@@ -22,6 +26,7 @@ const MARQUEE_SEQUENCE = [
   { kind: 'brand', id: 'siemens' },
   { kind: 'brand', id: 'sap' },
   { kind: 'brand', id: 'bosch' },
+  { kind: 'brand', id: 'schaeffler' },
   { kind: 'uni', id: 'tum' },
   { kind: 'uni', id: 'rwth' },
   { kind: 'uni', id: 'eth' },
@@ -45,7 +50,7 @@ function LogoRow({ broken, setBroken, rowIndex }) {
         const uniqueKey = `marquee-${rowIndex}-${item.kind}-${item.id}-${idx}`
         if (item.kind === 'brand') {
           const b = BRAND_META[item.id]
-          const src = `https://cdn.simpleicons.org/${b.slug}/${b.color}`
+          const src = b.image || `https://cdn.simpleicons.org/${b.slug}/${b.color}`
           return (
             <LogoItem key={uniqueKey} title={b.name}>
               {broken[uniqueKey] ? (

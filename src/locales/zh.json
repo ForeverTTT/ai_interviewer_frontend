@@ -531,6 +531,7 @@
     },
     "cv": {
       "pageSub": "先填写结构化资料；上传 PDF 后不会直接铺满屏幕，可点击查看提取原文，再用 AI 一键填入表单。折叠区内的「简历原文」会用于模拟面试上下文。",
+      "fileTooLarge": "文件过大（限制 2MB）",
       "structuredTitle": "结构化用户资料",
       "structuredHint": "上传 PDF 仅保存提取结果到待处理区；点「查看提取正文」再核对，「导入至面试简历」写入下方折叠的原文区，「AI 填入资料」解析到本表单。",
       "viewExtracted": "查看提取正文",
@@ -812,6 +813,7 @@
     "loading": "加载中..."
   },
   "common": {
+    "upload": "上传",
     "uiLanguage": "界面语言",
     "themeToggle": "切换浅色或深色主题",
     "interviewThemeToggle": "切换面试界面浅色或深色",

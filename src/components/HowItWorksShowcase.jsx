@@ -62,12 +62,11 @@ export default function HowItWorksShowcase({ ctaLink }) {
               </div>
             </div>
 
-            <div className="relative h-full lg:min-h-[500px] bg-slate-50 dark:bg-slate-950 overflow-hidden flex items-center justify-center p-6 sm:p-10">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-violet-500/10 blur-3xl opacity-50" />
+            <div className="relative h-full lg:min-h-[700px] bg-sky-50/50 dark:bg-sky-950/20 overflow-hidden flex items-center justify-start p-0 pl-1">
               <img
                 src={mockupImg}
                 alt="AI Interview Session"
-                className="relative z-10 w-full max-w-[500px] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 hover:scale-[1.02] transition-transform duration-700"
+                className="relative z-10 w-full h-full object-contain hover:scale-[1.05] transition-transform duration-1000"
               />
             </div>
           </div>

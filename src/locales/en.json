@@ -530,6 +530,7 @@
     "viewEmptySub": "No profile info yet. Click 'Edit' to fill or upload a PDF; these details will contextualize your mock interviews.",
     "cv": {
       "pageSub": "Fill structured data first; PDF upload puts text in review area before importing. The 'Final Resume' section is used for session context.",
+      "fileTooLarge": "File too large (limit 2MB)",
       "structuredTitle": "Structured User Data",
       "structuredHint": "PDF upload extracts text to review area; Click 'Import to Resume' or 'AI Fill' to populate.",
       "viewExtracted": "View Extracted Text",
@@ -811,6 +812,7 @@
     "loading": "Loading..."
   },
   "common": {
+    "upload": "Upload",
     "uiLanguage": "UI Language",
     "themeToggle": "Toggle Light/Dark Theme",
     "interviewThemeToggle": "Toggle Interview Theme",
