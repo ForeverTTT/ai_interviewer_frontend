@@ -1829,7 +1829,7 @@ function ProfileEditView({
                           <div className="relative group/tip">
                             <button
                               onClick={applyPendingToResume}
-                              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 dark:bg-primary-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-primary-700 dark:hover:bg-primary-700 transition-all shadow-lg shadow-primary-600/20"
+                              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#E8A832] dark:bg-[#E8A832] text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#d49a2b] dark:hover:bg-[#d49a2b] transition-all shadow-lg shadow-[#E8A832]/20"
                             >
                               <ArrowRight className="w-4 h-4" />
                               {t('profile.cv.applyToInterviewResume')}
