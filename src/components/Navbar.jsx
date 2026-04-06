@@ -120,14 +120,17 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 overflow-hidden flex items-center justify-center">
-              <img 
-                src="/crab_logo.png" 
-                alt="OfferClaw Logo" 
-                className="w-full h-full object-contain mix-blend-multiply transition-transform group-hover:scale-[1.1] group-hover:rotate-3 duration-500" 
-              />
+              <picture>
+                <source srcSet="/landit-icon-light.png" media="(prefers-color-scheme: dark)" />
+                <img
+                  src="/landit-icon-dark.png"
+                  alt="LandIt Logo"
+                  className="w-full h-full object-contain transition-transform group-hover:scale-[1.1] group-hover:rotate-3 duration-500"
+                />
+              </picture>
             </div>
             <span className="font-black text-xl tracking-tighter text-slate-900 dark:text-white uppercase leading-none">
-              Offer<span className="text-orange-500">Claw</span>
+              Land<span className="text-[#E8A832] italic">It</span>
             </span>
           </Link>
 

@@ -197,7 +197,7 @@ function CoachReport({ coach, t }) {
                   <FileText className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black font-serif tracking-tight text-slate-900 dark:text-white leading-tight">OfferClaw Resume Score</h3>
+                  <h3 className="text-2xl font-black font-serif tracking-tight text-slate-900 dark:text-white leading-tight">LandIt Resume Score</h3>
                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1">AI Diagnostic Engine</p>
                 </div>
               </div>

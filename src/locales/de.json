@@ -1,6 +1,6 @@
-{
+﻿{
   "meta": {
-    "title": "OfferClaw - KI-gestütztes Interview-Training für Deutschland"
+    "title": "LandIt - KI-gestütztes Interview-Training für Deutschland"
   },
   "lang": {
     "zh": "中文",
@@ -31,7 +31,7 @@
     "loginRegister": "Login/Registrierung",
     "supportLang": "Deutsch & Englisch Support",
     "roles": "Für Werkstudenten / Praktika",
-    "copyright": "© 2025 OfferClaw. Alle Rechte vorbehalten.",
+    "copyright": "© 2025 LandIt. Alle Rechte vorbehalten.",
     "powered": "KI-getrieben · Modernste Modelle & Stimme · Gebaut für Talente in Deutschland"
   },
   "landing": {
@@ -44,7 +44,7 @@
     "ctaSecondary": "So funktioniert es",
     "previewSuccess": "Erfolgsrate-Boost",
     "previewMatchRate": "KI-Präzisionsabgleich",
-    "previewTitle": "OfferClaw — Mock-Interview läuft",
+    "previewTitle": "LandIt — Mock-Interview läuft",
     "you": "Ich",
     "coachBannerKicker": "NEU",
     "coachBannerTitle": "KI-Lebenslauf-Diagnostik integriert",
@@ -91,7 +91,7 @@
     "featuresTitle": "Alles, was Sie für den Job brauchen",
     "featuresSub": "Vom JD-Parsing bis zu Multi-Agenten-Roleplay und Echtzeit-Feedback – modernste KI trifft auf bewährte Methodik.",
     "howBadge": "Unser Prozess",
-    "howTitle": "So funktioniert OfferClaw",
+    "howTitle": "So funktioniert LandIt",
     "howSub": "Vom Einstellen des JD zum Sprachtraining – alles im Browser: Multi-Agenten-Orchestrierung und Echtzeit-Schleifen.",
     "howCta": "Kostenlos starten",
     "howMainTitle": "Smart Interview Workflow im Überblick",
@@ -151,7 +151,7 @@
     "ctaEndFoot": "✓ Komplett kostenlos   ✓ Google Login   ✓ Keine Installation",
     "advantages": {
       "badge": "Unsere Vorteile",
-      "title": "Warum OfferClaw wählen",
+      "title": "Warum LandIt wählen",
       "sub": "Lösung der Lücken aktueller KI-Interview-Tools durch detailliertere, vertikale und mentorgesteuerte Erfahrungen.",
       "v1t": "Vertikale und personalisierte Anpassung",
       "v1d": "Löst die aktuellen Probleme von KI-Mock-Interviews, denen es an vertikalem Fokus und Zielgenauigkeit mangelt. Wir stellen tiefgehende Fragen basierend auf Ihrem Lebenslauf und Ihrer spezifischen Rolle, um ein hochwertiges, individuelles Interviewerlebnis zu bieten.",
@@ -168,11 +168,11 @@
       "badge": "Kerntechnologie",
       "title": "Elite-Hintergrund trifft auf Spitzen-KI",
       "teamT": "Elite-Kernteam",
-      "teamD": "Unsere technischen Kernmitglieder verfügen über Hintergründe von Spitzenuniversitäten wie Oxford, der TUM und dem KIT und haben Schlüsselpositionen bei deutschen Industriegiganten wie Infineon, Siemens und BMW besetzt. Wir haben diese Vorstellungsgespräche nicht nur bestanden – wir haben die zugrunde liegende Logik der deutschen Unternehmenskultur analysiert und in KI-Algorithmen überführt, die OfferClaw seine Seele verleihen.",
+      "teamD": "Unsere technischen Kernmitglieder verfügen über Hintergründe von Spitzenuniversitäten wie Oxford, der TUM und dem KIT und haben Schlüsselpositionen bei deutschen Industriegiganten wie Infineon, Siemens und BMW besetzt. Wir haben diese Vorstellungsgespräche nicht nur bestanden – wir haben die zugrunde liegende Logik der deutschen Unternehmenskultur analysiert und in KI-Algorithmen überführt, die LandIt seine Seele verleihen.",
       "agentT": "Multi-Agenten-Architektur",
       "agentD": "Unser eigenentwickeltes Multi-Agenten-System kann innerhalb einer Sitzung dynamisch zwischen Rollen wie „Strenger technischer Leiter“ und „Scharfsinniger HR-Experte“ wechseln. Die KI agiert nicht mehr mechanisch, sondern hakt bei jeder Ihrer Antworten mit logisch präzisen Stress-Tests (Stress Test) nach, um die Hochdruckatmosphäre deutscher Vorstellungsgespräche authentisch nachzustellen.",
       "fineTuneT": "大模型监督微调 (SFT)",
-      "fineTuneD": "Wir beherrschen modernste LLM-Fine-Tuning-Methoden und haben über 10.000 Iterationen speziell für den deutschen Bewerbungskontext durchgeführt. Ob es um die Nuancen eines deutschen Vorstellungsgesprächs oder die präzise technische Prüfung geht, OfferClaw liefert Antworten, die exakt den Anforderungen entsprechen.",
+      "fineTuneD": "Wir beherrschen modernste LLM-Fine-Tuning-Methoden und haben über 10.000 Iterationen speziell für den deutschen Bewerbungskontext durchgeführt. Ob es um die Nuancen eines deutschen Vorstellungsgesprächs oder die präzise technische Prüfung geht, LandIt liefert Antworten, die exakt den Anforderungen entsprechen.",
       "voiceT": "Absolute Sprachpräsenz",
       "voiceD": "Durch High-Fidelity Neural Voice Synthesis simulieren wir Sprechgeschwindigkeit, Pausen und Akzente echter Interviewpartner. Verwandeln Sie Prüfungsangst in „Muscle Memory“.",
       "simT": "Authentisches Interface",
@@ -189,7 +189,7 @@
   },
   "login": {
     "back": "Zurück",
-    "welcome": "Willkommen bei OfferClaw",
+    "welcome": "Willkommen bei LandIt",
     "subtitle": "Anmelden für KI-gestütztes Training",
     "google": "Login mit Google",
     "linkedin": "Login mit LinkedIn",

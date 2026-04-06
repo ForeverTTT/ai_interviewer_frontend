@@ -14,14 +14,17 @@ export default function Footer() {
           <div>
             <Link to="/" className="inline-flex items-center gap-2.5 mb-5 group">
               <div className="w-9 h-9 overflow-hidden flex items-center justify-center">
-                <img 
-                  src="/crab_logo.png" 
-                  alt="OfferClaw Logo" 
-                  className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500" 
-                />
+                <picture>
+                  <source srcSet="/landit-icon-light.png" media="(prefers-color-scheme: dark)" />
+                  <img
+                    src="/landit-icon-dark.png"
+                    alt="LandIt Logo"
+                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                  />
+                </picture>
               </div>
               <span className="font-bold text-lg tracking-tight text-slate-900 dark:text-white">
-                Offer<span className="text-orange-500">Claw</span>
+                Land<span className="text-[#E8A832] italic">It</span>
               </span>
             </Link>
             <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 max-w-sm">
@@ -45,7 +48,7 @@ export default function Footer() {
             <ul className="space-y-2.5 text-sm">
               <li className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
                 <Mail className="w-4 h-4 shrink-0 text-slate-500 dark:text-slate-500" />
-                <span>support@offerclaw.com</span>
+                <span>support@landit.app</span>
               </li>
               <li><span className="text-slate-500 dark:text-slate-500">{t('footer.supportLang')}</span></li>
               <li><span className="text-slate-500 dark:text-slate-500">{t('footer.roles')}</span></li>
