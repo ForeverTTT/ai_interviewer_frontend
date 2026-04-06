@@ -66,7 +66,7 @@ export default function AdvantagesShowcase() {
             transition={{ delay: 0.1 }}
             className="text-4xl sm:text-6xl font-black text-slate-900 dark:text-white font-serif tracking-tight"
           >
-            {t('landing.advantages.titlePre')}<span className="inline whitespace-nowrap">Land<span className="text-[#E8A832] italic">It</span></span>{t('landing.advantages.titlePost')}
+            {t('landing.advantages.titlePre')}<span className="inline whitespace-nowrap font-sans tracking-tighter">Land<span className="text-[#E8A832] italic">It</span></span>{t('landing.advantages.titlePost')}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 10 }}

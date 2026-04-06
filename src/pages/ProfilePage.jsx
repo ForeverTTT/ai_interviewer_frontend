@@ -197,7 +197,7 @@ function CoachReport({ coach, t }) {
                   <FileText className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black font-serif tracking-tight text-slate-900 dark:text-white leading-tight">LandIt Resume Score</h3>
+                  <h3 className="text-2xl font-black font-serif tracking-tight text-slate-900 dark:text-white leading-tight">Land<span className="text-[#E8A832] italic">It</span> Resume Score</h3>
                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1">AI Diagnostic Engine</p>
                 </div>
               </div>
@@ -414,7 +414,7 @@ function CoachReport({ coach, t }) {
             {coach.actionChecklist.map((a, i) => (
               <div key={i} className="flex gap-4 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 items-start">
                 <div className="w-8 h-8 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center text-xs font-black shrink-0">
-                  {a.priority ?? i + 1}
+                  {i + 1}
                 </div>
                 <div className="min-w-0 flex-1 space-y-2">
                   <p className="font-bold text-slate-900 dark:text-white leading-tight">{a.title}</p>
