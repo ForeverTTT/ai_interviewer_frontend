@@ -1700,13 +1700,6 @@ function ProfileEditView({
     <div className="space-y-12">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-slate-200 dark:border-slate-800">
         <div className="space-y-4">
-          <Link
-            to="/profile"
-            className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
-          >
-            <ArrowRight className="w-3 h-3 rotate-180" />
-            {t('common.back')}
-          </Link>
           <h1 className="text-5xl font-black font-serif tracking-tight text-slate-900 dark:text-white uppercase leading-none">
             {t('profile.editProfile')}
           </h1>
@@ -1729,6 +1722,13 @@ function ProfileEditView({
             {coachGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-emerald-500" />}
             <span className="font-bold">{coachGenerating ? t('profile.coachRunning') : t('profile.coachRun')}</span>
           </button>
+          <Link
+            to="/profile"
+            className="btn-setup-action-pill px-6 py-3 shrink-0"
+          >
+            <ArrowRight className="w-4 h-4 rotate-180" />
+            <span className="font-bold">{t('common.back')}</span>
+          </Link>
           <div className="flex items-center gap-4 relative">
             <button
               onClick={save}
