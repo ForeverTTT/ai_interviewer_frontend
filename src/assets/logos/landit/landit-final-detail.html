@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LandIt — Variant 01 Final</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F0F4F2;
+    --dark: #2D3E4A;
+    --blue: #6B8FA3;
+    --yellow: #E8A832;
+    --green: #7FA688;
+    --white: #FAFCFB;
+    --muted: #8A9BA5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    padding: 36px 20px 80px;
+    color: var(--dark);
+  }
+
+  .page-title { text-align: center; margin-bottom: 32px; }
+  .page-title h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 4px; }
+  .page-title p { font-size: 12px; color: var(--muted); }
+
+  .wrap { max-width: 660px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 24px 22px 20px;
+    box-shadow: 0 2px 16px rgba(45,62,74,0.07);
+  }
+
+  .label {
+    font-size: 10px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  /* hero blocks */
+  .hero {
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    margin-bottom: 16px;
+  }
+  .hero-dark   { background: #2D3E4A; }
+  .hero-light  { background: #FAFCFB; border: 1px solid #E8EDE8; }
+  .hero-bg     { background: #F0F4F2; }
+  .hero-yellow { background: #E8A832; }
+
+  /* size row */
+  .size-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 20px 0 4px;
+    border-top: 1px solid rgba(45,62,74,0.07);
+  }
+
+  .size-item { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .size-item span { font-size: 9px; color: var(--muted); letter-spacing: 0.05em; }
+
+  /* icon grid */
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  /* anatomy */
+  .anatomy {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .anatomy-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .anatomy-row strong { color: var(--dark); font-size: 12px; }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  /* color chips */
+  .chips { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+  .chip { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .chip-block { width: 48px; height: 48px; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.12); }
+  .chip span { font-size: 9px; color: var(--muted); text-align: center; line-height: 1.4; }
+
+  .divider { height: 1px; background: rgba(45,62,74,0.07); margin: 16px 0; }
+
+  .note { font-size: 11.5px; color: var(--muted); line-height: 1.7; }
+  .note strong { color: var(--dark); }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>LandIt · Variant 01 · Final</h1>
+  <p>实心箭头 — 完整细节图</p>
+</div>
+
+<div class="wrap">
+
+  <!-- DARK VERSION HERO -->
+  <div class="card">
+    <div class="label">深色版 · Dark Version</div>
+    <div class="hero hero-dark">
+      <svg width="220" height="62" viewBox="0 0 220 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 14 C10 14 10 38 26 38 L46 38" stroke="#7FA688" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <polygon points="43,27 59,38 43,49" fill="#E8A832"/>
+        <text x="68" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-size="26" fill="#FAFCFB" letter-spacing="-0.6">Land</text>
+        <text x="140" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-style="italic" font-size="26" fill="#E8A832" letter-spacing="-0.6">It</text>
+      </svg>
+    </div>
+
+    <!-- sizes -->
+    <div class="size-row">
+      <div class="size-item">
+        <svg width="200" height="54" viewBox="0 0 220 62" fill="none">
+          <path d="M10 14 C10 14 10 38 26 38 L46 38" stroke="#7FA688" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <polygon points="43,27 59,38 43,49" fill="#E8A832"/>
+          <text x="68" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-size="26" fill="#2D3E4A" letter-spacing="-0.6">Land</text>
+          <text x="140" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-style="italic" font-size="26" fill="#E8A832" letter-spacing="-0.6">It</text>
+        </svg>
+        <span>XL · 导航 / 官网 Header</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="size-row">
+      <div class="size-item">
+        <svg width="148" height="42" viewBox="0 0 220 62" fill="none">
+          <path d="M10 14 C10 14 10 38 26 38 L46 38" stroke="#7FA688" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <polygon points="43,27 59,38 43,49" fill="#E8A832"/>
+          <text x="68" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-size="26" fill="#2D3E4A" letter-spacing="-0.6">Land</text>
+          <text x="140" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-style="italic" font-size="26" fill="#E8A832" letter-spacing="-0.6">It</text>
+        </svg>
+        <span>M · 名片 / 小红书封面</span>
+      </div>
+      <div class="size-item">
+        <svg width="100" height="28" viewBox="0 0 220 62" fill="none">
+          <path d="M10 14 C10 14 10 38 26 38 L46 38" stroke="#7FA688" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <polygon points="43,27 59,38 43,49" fill="#E8A832"/>
+          <text x="68" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-size="26" fill="#2D3E4A" letter-spacing="-0.6">Land</text>
+          <text x="140" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-style="italic" font-size="26" fill="#E8A832" letter-spacing="-0.6">It</text>
+        </svg>
+        <span>S · 页脚 / 水印</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHT VERSION HERO -->
+  <div class="card">
+    <div class="label">浅色版 · Light Version</div>
+    <div class="hero hero-light">
+      <svg width="220" height="62" viewBox="0 0 220 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 14 C10 14 10 38 26 38 L46 38" stroke="#7FA688" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <polygon points="43,27 59,38 43,49" fill="#E8A832"/>
+        <text x="68" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-size="26" fill="#2D3E4A" letter-spacing="-0.6">Land</text>
+        <text x="140" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-style="italic" font-size="26" fill="#E8A832" letter-spacing="-0.6">It</text>
+      </svg>
+    </div>
+
+    <div class="hero hero-bg" style="margin-bottom:0;">
+      <svg width="220" height="62" viewBox="0 0 220 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 14 C10 14 10 38 26 38 L46 38" stroke="#7FA688" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <polygon points="43,27 59,38 43,49" fill="#E8A832"/>
+        <text x="68" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-size="26" fill="#2D3E4A" letter-spacing="-0.6">Land</text>
+        <text x="140" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-style="italic" font-size="26" fill="#E8A832" letter-spacing="-0.6">It</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- APP ICONS -->
+  <div class="card">
+    <div class="label">App Icon · 全尺寸</div>
+    <div class="icon-grid">
+
+      <div class="size-item">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="#2D3E4A"/>
+          <path d="M16 18 C16 18 16 48 30 48 L50 48" stroke="#7FA688" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <polygon points="46,35 64,48 46,61" fill="#E8A832"/>
+        </svg>
+        <span>80px</span>
+      </div>
+
+      <div class="size-item">
+        <svg width="64" height="64" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="#2D3E4A"/>
+          <path d="M16 18 C16 18 16 48 30 48 L50 48" stroke="#7FA688" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <polygon points="46,35 64,48 46,61" fill="#E8A832"/>
+        </svg>
+        <span>64px</span>
+      </div>
+
+      <div class="size-item">
+        <svg width="48" height="48" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="#2D3E4A"/>
+          <path d="M16 18 C16 18 16 48 30 48 L50 48" stroke="#7FA688" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <polygon points="46,35 64,48 46,61" fill="#E8A832"/>
+        </svg>
+        <span>48px</span>
+      </div>
+
+      <div class="size-item">
+        <svg width="32" height="32" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="#2D3E4A"/>
+          <path d="M16 18 C16 18 16 48 30 48 L50 48" stroke="#7FA688" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+          <polygon points="46,35 64,48 46,61" fill="#E8A832"/>
+        </svg>
+        <span>32px</span>
+      </div>
+
+      <div class="size-item">
+        <svg width="20" height="20" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="#2D3E4A"/>
+          <path d="M16 18 C16 18 16 48 30 48 L50 48" stroke="#7FA688" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <polygon points="46,35 64,48 46,61" fill="#E8A832"/>
+        </svg>
+        <span>20px</span>
+      </div>
+
+      <!-- light icons -->
+      <div class="size-item">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="#F0F4F2"/>
+          <path d="M16 18 C16 18 16 48 30 48 L50 48" stroke="#7FA688" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <polygon points="46,35 64,48 46,61" fill="#E8A832"/>
+        </svg>
+        <span>浅色 80px</span>
+      </div>
+
+      <div class="size-item">
+        <svg width="64" height="64" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="#F0F4F2"/>
+          <path d="M16 18 C16 18 16 48 30 48 L50 48" stroke="#7FA688" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <polygon points="46,35 64,48 46,61" fill="#E8A832"/>
+        </svg>
+        <span>浅色 64px</span>
+      </div>
+
+      <div class="size-item">
+        <svg width="48" height="48" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="#F0F4F2"/>
+          <path d="M16 18 C16 18 16 48 30 48 L50 48" stroke="#7FA688" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <polygon points="46,35 64,48 46,61" fill="#E8A832"/>
+        </svg>
+        <span>浅色 48px</span>
+      </div>
+
+      <div class="size-item">
+        <svg width="32" height="32" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="#F0F4F2"/>
+          <path d="M16 18 C16 18 16 48 30 48 L50 48" stroke="#7FA688" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+          <polygon points="46,35 64,48 46,61" fill="#E8A832"/>
+        </svg>
+        <span>浅色 32px</span>
+      </div>
+
+      <div class="size-item">
+        <svg width="20" height="20" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="#F0F4F2"/>
+          <path d="M16 18 C16 18 16 48 30 48 L50 48" stroke="#7FA688" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <polygon points="46,35 64,48 46,61" fill="#E8A832"/>
+        </svg>
+        <span>浅色 20px</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ANATOMY -->
+  <div class="card">
+    <div class="label">构成解析 · Anatomy</div>
+    <div class="anatomy">
+      <div class="anatomy-row">
+        <div class="dot" style="background:#7FA688;"></div>
+        <div><strong>Sage Green #7FA688</strong> — 曲线路径，代表求职旅程</div>
+      </div>
+      <div class="anatomy-row">
+        <div class="dot" style="background:#E8A832;"></div>
+        <div><strong>Amber Gold #E8A832</strong> — 实心箭头 + 斜体 It，代表到达终点的瞬间</div>
+      </div>
+      <div class="anatomy-row">
+        <div class="dot" style="background:#2D3E4A;"></div>
+        <div><strong>Deep Navy #2D3E4A</strong> — 文字 Land，稳定可信</div>
+      </div>
+      <div class="anatomy-row">
+        <div class="dot" style="background:#FAFCFB; border:1px solid #ddd;"></div>
+        <div><strong>#FAFCFB</strong> — 深色版文字，柔白不刺眼</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="chips">
+      <div class="chip">
+        <div class="chip-block" style="background:#2D3E4A;"></div>
+        <span>#2D3E4A<br>Deep Navy</span>
+      </div>
+      <div class="chip">
+        <div class="chip-block" style="background:#7FA688;"></div>
+        <span>#7FA688<br>Sage Green</span>
+      </div>
+      <div class="chip">
+        <div class="chip-block" style="background:#E8A832;"></div>
+        <span>#E8A832<br>Amber Gold</span>
+      </div>
+      <div class="chip">
+        <div class="chip-block" style="background:#F0F4F2; border:1px solid #dde6e2;"></div>
+        <span>#F0F4F2<br>Morning Mist</span>
+      </div>
+      <div class="chip">
+        <div class="chip-block" style="background:#FAFCFB; border:1px solid #eee;"></div>
+        <span>#FAFCFB<br>Soft White</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- USAGE GUIDE -->
+  <div class="card">
+    <div class="label">使用场景 · Usage</div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+
+      <div style="display:flex; align-items:center; gap:16px; padding:14px 16px; background:#F0F4F2; border-radius:10px;">
+        <svg width="120" height="34" viewBox="0 0 220 62" fill="none">
+          <path d="M10 14 C10 14 10 38 26 38 L46 38" stroke="#7FA688" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <polygon points="43,27 59,38 43,49" fill="#E8A832"/>
+          <text x="68" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-size="26" fill="#2D3E4A" letter-spacing="-0.6">Land</text>
+          <text x="140" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-style="italic" font-size="26" fill="#E8A832" letter-spacing="-0.6">It</text>
+        </svg>
+        <span style="font-size:12px; color:var(--muted);">网站导航栏 / 浅色背景</span>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:16px; padding:14px 16px; background:#2D3E4A; border-radius:10px;">
+        <svg width="120" height="34" viewBox="0 0 220 62" fill="none">
+          <path d="M10 14 C10 14 10 38 26 38 L46 38" stroke="#7FA688" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <polygon points="43,27 59,38 43,49" fill="#E8A832"/>
+          <text x="68" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-size="26" fill="#FAFCFB" letter-spacing="-0.6">Land</text>
+          <text x="140" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-style="italic" font-size="26" fill="#E8A832" letter-spacing="-0.6">It</text>
+        </svg>
+        <span style="font-size:12px; color:#7FA688;">深色模式 / 登录页 / 名片</span>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:16px; padding:14px 16px; background:#E8A832; border-radius:10px;">
+        <svg width="120" height="34" viewBox="0 0 220 62" fill="none">
+          <path d="M10 14 C10 14 10 38 26 38 L46 38" stroke="#2D3E4A" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.5"/>
+          <polygon points="43,27 59,38 43,49" fill="#2D3E4A"/>
+          <text x="68" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-size="26" fill="#2D3E4A" letter-spacing="-0.6">Land</text>
+          <text x="140" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-style="italic" font-size="26" fill="#2D3E4A" letter-spacing="-0.6">It</text>
+        </svg>
+        <span style="font-size:12px; color:#2D3E4A; opacity:0.7;">Accent背景 / 特殊用途</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

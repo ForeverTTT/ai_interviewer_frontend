@@ -121,9 +121,9 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 overflow-hidden flex items-center justify-center">
               <picture>
-                <source srcSet="/landit-icon-light.png" media="(prefers-color-scheme: dark)" />
+                <source srcSet="/landit-icon-light.svg" media="(prefers-color-scheme: dark)" />
                 <img
-                  src="/landit-icon-dark.png"
+                  src="/landit-icon-dark.svg"
                   alt="LandIt Logo"
                   className="w-full h-full object-contain transition-transform group-hover:scale-[1.1] group-hover:rotate-3 duration-500"
                 />

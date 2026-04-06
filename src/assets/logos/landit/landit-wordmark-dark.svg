@@ -1,0 +1,11 @@
+<svg width="220" height="62" viewBox="0 0 220 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- background: remove this rect if you want transparent bg -->
+  <!-- curved path -->
+  <path d="M10 14 C10 14 10 38 26 38 L46 38" stroke="#7FA688" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <!-- filled arrowhead -->
+  <polygon points="43,27 59,38 43,49" fill="#E8A832"/>
+  <!-- wordmark Land -->
+  <text x="68" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-size="26" fill="#FAFCFB" letter-spacing="-0.6">Land</text>
+  <!-- wordmark It italic -->
+  <text x="140" y="40" font-family="DM Sans, sans-serif" font-weight="700" font-style="italic" font-size="26" fill="#E8A832" letter-spacing="-0.6">It</text>
+</svg>

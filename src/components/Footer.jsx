@@ -15,9 +15,9 @@ export default function Footer() {
             <Link to="/" className="inline-flex items-center gap-2.5 mb-5 group">
               <div className="w-9 h-9 overflow-hidden flex items-center justify-center">
                 <picture>
-                  <source srcSet="/landit-icon-light.png" media="(prefers-color-scheme: dark)" />
+                  <source srcSet="/landit-icon-light.svg" media="(prefers-color-scheme: dark)" />
                   <img
-                    src="/landit-icon-dark.png"
+                    src="/landit-icon-dark.svg"
                     alt="LandIt Logo"
                     className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                   />
