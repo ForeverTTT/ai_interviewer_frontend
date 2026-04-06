@@ -1,4 +1,4 @@
-﻿{
+{
   "meta": {
     "title": "LandIt - KI-gestütztes Interview-Training für Deutschland"
   },
@@ -92,6 +92,8 @@
     "featuresSub": "Vom JD-Parsing bis zu Multi-Agenten-Roleplay und Echtzeit-Feedback – modernste KI trifft auf bewährte Methodik.",
     "howBadge": "Unser Prozess",
     "howTitle": "So funktioniert LandIt",
+    "howTitlePre": "So funktioniert ",
+    "howTitlePost": "",
     "howSub": "Vom Einstellen des JD zum Sprachtraining – alles im Browser: Multi-Agenten-Orchestrierung und Echtzeit-Schleifen.",
     "howCta": "Kostenlos starten",
     "howMainTitle": "Smart Interview Workflow im Überblick",
@@ -152,6 +154,8 @@
     "advantages": {
       "badge": "Unsere Vorteile",
       "title": "Warum LandIt wählen",
+      "titlePre": "Warum ",
+      "titlePost": " wählen",
       "sub": "Lösung der Lücken aktueller KI-Interview-Tools durch detailliertere, vertikale und mentorgesteuerte Erfahrungen.",
       "v1t": "Vertikale und personalisierte Anpassung",
       "v1d": "Löst die aktuellen Probleme von KI-Mock-Interviews, denen es an vertikalem Fokus und Zielgenauigkeit mangelt. Wir stellen tiefgehende Fragen basierend auf Ihrem Lebenslauf und Ihrer spezifischen Rolle, um ein hochwertiges, individuelles Interviewerlebnis zu bieten.",

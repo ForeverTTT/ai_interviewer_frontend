@@ -66,7 +66,10 @@ export default function AdvantagesShowcase() {
             transition={{ delay: 0.1 }}
             className="text-4xl sm:text-6xl font-black text-slate-900 dark:text-white font-serif tracking-tight"
           >
-            {t('landing.advantages.title')}
+            {t('landing.advantages.titlePre')}
+            <img src="/landit-logo-light.png" alt="LandIt" className="inline-block align-middle mix-blend-multiply dark:hidden" style={{ height: '0.85em', verticalAlign: 'middle' }} />
+            <img src="/landit-logo-dark.png" alt="LandIt" className="hidden dark:inline-block align-middle mix-blend-screen" style={{ height: '0.85em', verticalAlign: 'middle' }} />
+            {t('landing.advantages.titlePost')}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 10 }}

@@ -1,4 +1,4 @@
-﻿{
+{
   "meta": {
     "title": "LandIt - AI-Powered Interview Training for Germany"
   },
@@ -92,6 +92,8 @@
     "featuresSub": "From JD parsing to multi-agent roleplay and real-time feedback—cutting-edge AI meets proven interview methodology.",
     "howBadge": "Our Process",
     "howTitle": "How LandIt Works",
+    "howTitlePre": "How ",
+    "howTitlePost": " Works",
     "howSub": "From JD pasting to voice training, all in your browser: Multi-agent orchestration, neural voice, and real-time feedback loops.",
     "howCta": "Start Practice for Free",
     "howMainTitle": "Smart Interview Workflow at a Glance",
@@ -152,6 +154,8 @@
     "advantages": {
       "badge": "Our Advantages",
       "title": "Why Choose LandIt",
+      "titlePre": "Why Choose ",
+      "titlePost": "",
       "sub": "Addressing the gaps of current AI interview tools with more detailed, vertical, and mentor-led experiences.",
       "v1t": "Vertical and Personalized Customization",
       "v1d": "Solves the current issues of AI mock interviews lacking vertical focus and targeting. We ask deep questions based on your CV and specific role to provide a high-quality, customized interview experience.",

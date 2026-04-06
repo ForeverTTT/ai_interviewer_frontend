@@ -129,7 +129,7 @@ export default function Navbar() {
                 />
               </picture>
             </div>
-            <span className="font-black text-xl tracking-tighter text-slate-900 dark:text-white uppercase leading-none">
+            <span className="font-black text-xl tracking-tighter text-slate-900 dark:text-white leading-none">
               Land<span className="text-[#E8A832] italic">It</span>
             </span>
           </Link>
