@@ -48,7 +48,7 @@ export default function InterviewPage() {
   const { t, i18n } = useTranslation()
   const location = useLocation()
   const navigate  = useNavigate()
-  const { position, jobDescription, language, duration, interviewId, resumeContext } = location.state || {}
+  const { position, jobDescription, language, duration, interviewId, resumeContext, roleTrack } = location.state || {}
 
   useEffect(() => {
     document.title = t('meta.title')
@@ -562,6 +562,7 @@ export default function InterviewPage() {
                 language={language}
                 duration={duration}
                 resumeContext={typeof resumeContext === 'string' ? resumeContext : ''}
+                roleTrack={roleTrack || 'work'}
                 persistInterviewId={interviewId || undefined}
                 deferFirstAudioGate
                 interviewUiVisible={chatPhase === 'live' && !timer.finished}

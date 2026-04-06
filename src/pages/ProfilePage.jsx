@@ -1408,6 +1408,8 @@ export default function ProfilePage() {
       if (j.coach?.generatedAt) {
         setUpdatedAt(j.coach.generatedAt)
       }
+      setNote({ type: 'ok', text: t('profile.coachGenOk') })
+      setTimeout(() => setNote(null), 3000)
     } catch {
       setCoachErr(t('profile.coachErr'))
     } finally {

@@ -494,6 +494,8 @@ const ChatInterface = forwardRef(function ChatInterface({
   duration,
   /** 简历正文快照，供「经历/项目」阶段追问 */
   resumeContext = '',
+  /** 'school' | 'work' — 用于让面试官身份匹配场景 */
+  roleTrack = 'work',
   /** 有值时：防抖将当前对话 POST 到 /api/interviews/:id/transcript */
   persistInterviewId,
   /** 为 true 时：首条 SSE 完成后先预加载 TTS，再调用 onInterviewUiReady */
@@ -704,6 +706,7 @@ const ChatInterface = forwardRef(function ChatInterface({
             language,
             duration,
             resumeSnapshot,
+            roleTrack,
           }),
           signal,
         })
@@ -737,6 +740,7 @@ const ChatInterface = forwardRef(function ChatInterface({
           language,
           duration,
           resumeSnapshot,
+          roleTrack,
           sessionId: needsReset ? 'new' : undefined,
         }),
         signal,
@@ -867,7 +871,7 @@ const ChatInterface = forwardRef(function ChatInterface({
         setMessages(prev => prev.map(m => m.id === aiId ? { ...m, streaming: false } : m))
       }
     }
-  }, [position, jobDescription, language, duration, resumeSnapshot, tts, stt, t])
+  }, [position, jobDescription, language, duration, resumeSnapshot, roleTrack, tts, stt, t])
 
   // ── Send message ──────────────────────────────────────────────
   const sendMessage = useCallback(async (text) => {

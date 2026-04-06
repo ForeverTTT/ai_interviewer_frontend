@@ -38,7 +38,7 @@ function saveJdHistory(entries) {
   try { localStorage.setItem(JD_HISTORY_KEY, JSON.stringify(entries.slice(0, JD_HISTORY_MAX))) } catch { /* ignore */ }
 }
 
-function addJdHistoryEntry(position, jobDescription) {
+function addJdHistoryEntry(position, jobDescription, roleTrack) {
   if (!position?.trim() || !jobDescription?.trim()) return
   const entries = loadJdHistory()
   const deduped = entries.filter(e =>
@@ -48,6 +48,7 @@ function addJdHistoryEntry(position, jobDescription) {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     position: position.trim(),
     jobDescription: jobDescription.trim(),
+    roleTrack: roleTrack || 'work',
     createdAt: Date.now(),
   })
   saveJdHistory(deduped)
@@ -388,13 +389,14 @@ export default function SetupPage() {
       // non-blocking
     }
 
-    addJdHistoryEntry(form.position, form.jobDescription)
+    addJdHistoryEntry(form.position, form.jobDescription, roleTrack)
     setJdHistory(loadJdHistory())
 
     setLoading(false)
     navigate('/interview', {
       state: {
         ...form,
+        roleTrack,
         interviewId,
         resumeContext: effectiveResume,
       },
@@ -689,6 +691,7 @@ export default function SetupPage() {
                                               position: entry.position,
                                               jobDescription: entry.jobDescription,
                                             }))
+                                            if (entry.roleTrack) setRoleTrack(entry.roleTrack)
                                             setErrors({})
                                             setHistoryOpen(false)
                                           }}

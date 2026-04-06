@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -184,13 +184,14 @@ function DeleteConfirmModal({ isOpen, onClose, onConfirm }) {
   )
 }
 
-function ExperienceCard({ exp, t, user, onDelete }) {
+const ExperienceCard = forwardRef(function ExperienceCard({ exp, t, user, onDelete }, ref) {
   const [expanded, setExpanded] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const isOwner = user && exp.user_id === user.id
 
   return (
     <motion.div
+      ref={ref}
       layout
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
@@ -360,7 +361,7 @@ function ExperienceCard({ exp, t, user, onDelete }) {
       </AnimatePresence>
     </motion.div>
   )
-}
+})
 
 function PostModal({ isOpen, onClose, t, onPost, user }) {
   const [formData, setFormData] = useState({
