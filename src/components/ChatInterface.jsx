@@ -87,7 +87,7 @@ const TTS_MIN_CHUNK_BYTES = 4800 // ~100ms of 16-bit mono @ 24kHz
  * Anti-pop V2: full-buffer playback for Vertex TTS + fade-out on chunks.
  * Set to false to revert to the original chunked-only behavior.
  */
-const TTS_ANTI_POP_V2 = true
+const TTS_ANTI_POP_V2 = false
 
 function useStreamingTTS(language, enabled) {
   const ctxRef = useRef(null)
