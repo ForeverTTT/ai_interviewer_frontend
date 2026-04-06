@@ -1722,13 +1722,6 @@ function ProfileEditView({
             {coachGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-emerald-500" />}
             <span className="font-bold">{coachGenerating ? t('profile.coachRunning') : t('profile.coachRun')}</span>
           </button>
-          <Link
-            to="/profile"
-            className="btn-setup-action-pill px-6 py-3 shrink-0"
-          >
-            <ArrowRight className="w-4 h-4 rotate-180" />
-            <span className="font-bold">{t('common.back')}</span>
-          </Link>
           <div className="flex items-center gap-4 relative">
             <button
               onClick={save}
@@ -1754,6 +1747,13 @@ function ProfileEditView({
               )}
             </AnimatePresence>
           </div>
+          <Link
+            to="/profile"
+            className="btn-setup-action-pill px-6 py-3 shrink-0"
+          >
+            <ArrowRight className="w-4 h-4 rotate-180" />
+            <span className="font-bold">{t('common.back')}</span>
+          </Link>
         </div>
       </header>
 
