@@ -83,6 +83,12 @@ function WaveIcon({ active }) {
 const TTS_SAMPLE_RATE = 24000
 const TTS_MIN_CHUNK_BYTES = 4800 // ~100ms of 16-bit mono @ 24kHz
 
+/**
+ * Anti-pop V2: full-buffer playback for Vertex TTS + fade-out on chunks.
+ * Set to false to revert to the original chunked-only behavior.
+ */
+const TTS_ANTI_POP_V2 = false
+
 function useStreamingTTS(language, enabled) {
   const ctxRef = useRef(null)
   const enabledRef = useRef(enabled)
@@ -138,10 +144,15 @@ function useStreamingTTS(language, enabled) {
     const now = ctx.currentTime
     const startAt = Math.max(nextTimeRef.current, now + 0.005)
     
-    // --- Precise Anti-Pop Ramp (Synced to startAt) ---
-    const fadeTime = 0.020 // 20ms fade-in window
+    const fadeTime = 0.020
     gainNode.gain.setValueAtTime(0, startAt)
     gainNode.gain.linearRampToValueAtTime(1, startAt + fadeTime)
+
+    if (TTS_ANTI_POP_V2 && audioBuf.duration > fadeTime * 2) {
+      const fadeOutStart = startAt + audioBuf.duration - fadeTime
+      gainNode.gain.setValueAtTime(1, fadeOutStart)
+      gainNode.gain.linearRampToValueAtTime(0, fadeOutStart + fadeTime)
+    }
 
     src.start(startAt)
     nextTimeRef.current = startAt + audioBuf.duration
@@ -254,41 +265,58 @@ function useStreamingTTS(language, enabled) {
           quotaExhaustedRef.current = true
         } else if (res.ok && res.body) {
           handled = true
-          const reader = res.body.getReader()
-          let accum = new Uint8Array(0)
-          let orderedIn = false
+          const isFullBuffer = TTS_ANTI_POP_V2 && (
+            res.headers.get('X-TTS-Source') === 'VertexAI' ||
+            !!res.headers.get('Content-Length')
+          )
 
-          while (true) {
-            const { done, value } = await reader.read()
-            if (gen !== playGenRef.current) { reader.cancel(); return }
-            if (done) break
+          if (isFullBuffer) {
+            const arrayBuf = await res.arrayBuffer()
+            if (gen !== playGenRef.current) return
+            await waitPrev
+            if (gen !== playGenRef.current) return
+            const usable = arrayBuf.byteLength & ~1
+            if (usable >= 2) {
+              const int16 = new Int16Array(arrayBuf.slice(0, usable))
+              scheduleChunk(ctx, int16, gen)
+            }
+          } else {
+            const reader = res.body.getReader()
+            let accum = new Uint8Array(0)
+            let orderedIn = false
 
-            const merged = new Uint8Array(accum.length + value.length)
-            merged.set(accum)
-            merged.set(value, accum.length)
-            accum = merged
+            while (true) {
+              const { done, value } = await reader.read()
+              if (gen !== playGenRef.current) { reader.cancel(); return }
+              if (done) break
 
-            if (accum.length >= TTS_MIN_CHUNK_BYTES) {
+              const merged = new Uint8Array(accum.length + value.length)
+              merged.set(accum)
+              merged.set(value, accum.length)
+              accum = merged
+
+              if (accum.length >= TTS_MIN_CHUNK_BYTES) {
+                if (!orderedIn) {
+                  await waitPrev
+                  if (gen !== playGenRef.current) return
+                  orderedIn = true
+                }
+                const usable = accum.length & ~1
+                const int16 = new Int16Array(accum.buffer.slice(0, usable))
+                scheduleChunk(ctx, int16, gen)
+                accum = accum.slice(usable)
+              }
+            }
+
+            if (accum.length >= 2 && gen === playGenRef.current) {
               if (!orderedIn) {
                 await waitPrev
                 if (gen !== playGenRef.current) return
-                orderedIn = true
               }
               const usable = accum.length & ~1
               const int16 = new Int16Array(accum.buffer.slice(0, usable))
               scheduleChunk(ctx, int16, gen)
-              accum = accum.slice(usable)
             }
-          }
-
-          if (accum.length >= 2 && gen === playGenRef.current) {
-            if (!orderedIn) {
-              await waitPrev
-              if (gen !== playGenRef.current) return
-            }
-            const usable = accum.length & ~1
-            const int16 = new Int16Array(accum.buffer.slice(0, usable))
-            scheduleChunk(ctx, int16, gen)
           }
         }
       } catch (streamErr) {
