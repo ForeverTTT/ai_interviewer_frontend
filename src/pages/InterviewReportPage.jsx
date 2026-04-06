@@ -665,6 +665,7 @@ export default function InterviewReportPage() {
       }
       const j = await res.json()
       setInterview(j.interview)
+      window.dispatchEvent(new Event('tokensChanged'))
     } catch {
       setErr(t('report.finalizeNetwork'))
     } finally {

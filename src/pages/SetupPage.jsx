@@ -483,6 +483,7 @@ export default function SetupPage() {
       if (res.ok) {
         setMlResult(j.text)
         setMlError(null)
+        window.dispatchEvent(new Event('tokensChanged'))
       } else {
         setMlError({ type: 'error', message: j.error })
       }

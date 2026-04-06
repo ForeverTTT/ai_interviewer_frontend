@@ -20,41 +20,62 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
   useEffect(() => {
-    if (user) {
-      const fetchStatus = async () => {
-        try {
-          const { data: { session } } = await supabase.auth.getSession()
-          const token = session?.access_token
-          if (!token) return
+    if (!user) return
 
-          const backendUrl = getBackendBaseUrl()
-          const res = await fetch(`${backendUrl}/api/profile`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          if (res.ok) {
-            const j = await res.json()
-            if (j.jobSearchStatus !== undefined && j.jobSearchStatus !== null) {
-              setJobStatus(j.jobSearchStatus)
-            }
-            if (j.avatarId) {
-              setAvatarId(j.avatarId)
-            }
-            if (j.tokens !== undefined) {
-              setTokens(j.tokens)
-            }
+    const fetchStatus = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const token = session?.access_token
+        if (!token) return
+
+        const backendUrl = getBackendBaseUrl()
+        const res = await fetch(`${backendUrl}/api/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (res.ok) {
+          const j = await res.json()
+          if (j.jobSearchStatus !== undefined && j.jobSearchStatus !== null) {
+            setJobStatus(j.jobSearchStatus)
           }
-        } catch (err) {
-          console.error('Failed to fetch job status', err)
+          if (j.avatarId) {
+            setAvatarId(j.avatarId)
+          }
+          if (j.tokens !== undefined) {
+            setTokens(j.tokens)
+          }
         }
+      } catch (err) {
+        console.error('Failed to fetch job status', err)
       }
+    }
 
-      const onTokensChanged = () => {
-        void fetchStatus()
-      }
+    const onTokensChanged = () => { void fetchStatus() }
 
-      fetchStatus()
-      window.addEventListener('tokensChanged', onTokensChanged)
-      return () => window.removeEventListener('tokensChanged', onTokensChanged)
+    fetchStatus()
+    window.addEventListener('tokensChanged', onTokensChanged)
+
+    // Supabase Realtime: instantly reflect token changes from DB (cross-tab, cross-device)
+    const channel = supabase
+      .channel(`navbar-tokens-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`,
+        },
+        (payload) => {
+          if (payload.new?.tokens !== undefined) {
+            setTokens(payload.new.tokens)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      window.removeEventListener('tokensChanged', onTokensChanged)
+      supabase.removeChannel(channel)
     }
   }, [user])
 

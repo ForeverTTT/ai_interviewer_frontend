@@ -1408,6 +1408,7 @@ export default function ProfilePage() {
       if (j.coach?.generatedAt) {
         setUpdatedAt(j.coach.generatedAt)
       }
+      window.dispatchEvent(new Event('tokensChanged'))
       setNote({ type: 'ok', text: t('profile.coachGenOk') })
       setTimeout(() => setNote(null), 3000)
     } catch {
@@ -1454,6 +1455,7 @@ export default function ProfilePage() {
         return
       }
       setCvProfile(mergeCvProfileFromApi(j.cvProfile))
+      window.dispatchEvent(new Event('tokensChanged'))
       setNote({ type: 'ok', text: t('profile.cv.extractOk') })
       setTimeout(() => setNote(null), 2000)
     } catch {
