@@ -197,7 +197,7 @@ function CoachReport({ coach, t }) {
                   <FileText className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black font-serif tracking-tight text-slate-900 dark:text-white leading-tight">Land<span className="text-[#E8A832] italic">It</span> Resume Score</h3>
+                  <h3 className="text-2xl font-black font-serif tracking-tight text-slate-900 dark:text-white leading-tight"><span className="font-sans tracking-tighter">Land<span className="text-[#E8A832] italic">It</span></span> Resume Score</h3>
                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1">AI Diagnostic Engine</p>
                 </div>
               </div>
@@ -1816,21 +1816,29 @@ function ProfileEditView({
 
                   {pendingRaw.trim() && (
                     <div className="pt-6 border-t border-primary-100 dark:border-primary-900/30 space-y-4">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between flex-wrap gap-3">
                         <p className="text-[10px] font-black uppercase tracking-widest text-primary-600 dark:text-primary-400">{t('profile.cv.extractedPreviewLabel')}</p>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                           <button
                             onClick={() => setPendingPreviewOpen(!pendingPreviewOpen)}
-                            className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
                           >
+                            <Eye className="w-4 h-4" />
                             {pendingPreviewOpen ? t('common.hide') : t('common.show')}
                           </button>
-                          <button
-                            onClick={applyPendingToResume}
-                            className="text-[10px] font-black uppercase tracking-widest text-primary-600 dark:text-primary-400 hover:underline"
-                          >
-                            {t('profile.cv.applyToInterviewResume')}
-                          </button>
+                          <div className="relative group/tip">
+                            <button
+                              onClick={applyPendingToResume}
+                              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 dark:bg-primary-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-primary-700 dark:hover:bg-primary-700 transition-all shadow-lg shadow-primary-600/20"
+                            >
+                              <ArrowRight className="w-4 h-4" />
+                              {t('profile.cv.applyToInterviewResume')}
+                            </button>
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-medium leading-relaxed w-64 text-center opacity-0 pointer-events-none group-hover/tip:opacity-100 transition-opacity duration-200 shadow-xl z-50">
+                              {t('profile.cv.applyToInterviewResumeHint')}
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-2 h-2 rotate-45 bg-slate-900 dark:bg-white" />
+                            </div>
+                          </div>
                         </div>
                       </div>
                       {pendingPreviewOpen && (

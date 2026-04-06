@@ -541,6 +541,7 @@
       "structuredHint": "上传 PDF 仅保存提取结果到待处理区；点「查看提取正文」再核对，「导入至面试简历」写入下方折叠的原文区，「AI 填入资料」解析到本表单。",
       "viewExtracted": "查看提取正文",
       "applyToInterviewResume": "导入至面试用简历原文",
+      "applyToInterviewResumeHint": "导入后将同步到「开始面试」界面所用的简历原文，AI 面试官会根据你的简历提出更有针对性的问题。",
       "extractBtn": "AI 填入资料",
       "extracting": "正在解析…",
       "extractOk": "已根据简历文本填充表单，请核对后保存。",

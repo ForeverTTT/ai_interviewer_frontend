@@ -531,6 +531,7 @@
       "structuredHint": "Extract → Import/Fill.",
       "viewExtracted": "Text ansehen",
       "applyToInterviewResume": "In Resume übernehmen",
+      "applyToInterviewResumeHint": "Dies wird mit dem im Interview verwendeten Lebenslauf synchronisiert. Der KI-Interviewer stellt gezieltere Fragen basierend auf Ihrem Lebenslauf.",
       "extractBtn": "KI Fill",
       "extracting": "Analyse...",
       "extractOk": "Gefüllt. Bitte prüfen.",
