@@ -23,10 +23,7 @@ export default function HowItWorksShowcase({ ctaLink }) {
             viewport={{ once: true }}
             className="text-4xl sm:text-6xl font-black text-slate-900 dark:text-white font-serif tracking-tight"
           >
-            {t('landing.howTitlePre')}
-            <img src="/landit-logo-light.png" alt="LandIt" className="inline-block align-middle mix-blend-multiply dark:hidden" style={{ height: '0.85em', verticalAlign: 'middle' }} />
-            <img src="/landit-logo-dark.png" alt="LandIt" className="hidden dark:inline-block align-middle mix-blend-screen" style={{ height: '0.85em', verticalAlign: 'middle' }} />
-            {t('landing.howTitlePost')}
+            {t('landing.howTitlePre')}<span className="inline whitespace-nowrap">Land<span className="text-[#E8A832] italic">It</span></span>{t('landing.howTitlePost')}
             <span className="block h-1 w-16 bg-primary-600 dark:bg-primary-400 mx-auto mt-6 rounded-full" />
           </motion.h2>
           <motion.p
