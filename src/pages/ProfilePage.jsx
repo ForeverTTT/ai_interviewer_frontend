@@ -1806,7 +1806,7 @@ function ProfileEditView({
                       <button
                         onClick={() => void runExtractCv()}
                         disabled={extractBusy || parseBusy || !(pendingRaw || resumeText || '').trim()}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 dark:bg-primary-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-primary-700 transition-all disabled:opacity-50 shadow-lg shadow-slate-900/10 dark:shadow-primary-600/20"
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 dark:bg-[#E8A832] text-white text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-[#d49a2b] transition-all disabled:opacity-50 shadow-lg shadow-slate-900/10 dark:shadow-[#E8A832]/20"
                       >
                         {extractBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
                         {extractBusy ? t('profile.cv.extracting') : t('profile.cv.extractBtn')}
@@ -1817,7 +1817,7 @@ function ProfileEditView({
                   {pendingRaw.trim() && (
                     <div className="pt-6 border-t border-primary-100 dark:border-primary-900/30 space-y-4">
                       <div className="flex items-center justify-between flex-wrap gap-3">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-primary-600 dark:text-primary-400">{t('profile.cv.extractedPreviewLabel')}</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">{t('profile.cv.extractedPreviewLabel')}</p>
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => setPendingPreviewOpen(!pendingPreviewOpen)}
