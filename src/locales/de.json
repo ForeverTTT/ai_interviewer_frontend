@@ -175,12 +175,12 @@
       "teamD": "Unsere technischen Kernmitglieder verfügen über Hintergründe von Spitzenuniversitäten wie Oxford, der TUM und dem KIT und haben Schlüsselpositionen bei deutschen Industriegiganten wie Infineon, Siemens und BMW besetzt. Wir haben diese Vorstellungsgespräche nicht nur bestanden – wir haben die zugrunde liegende Logik der deutschen Unternehmenskultur analysiert und in KI-Algorithmen überführt, die LandIt seine Seele verleihen.",
       "agentT": "Multi-Agenten-Architektur",
       "agentD": "Unser eigenentwickeltes Multi-Agenten-System kann innerhalb einer Sitzung dynamisch zwischen Rollen wie „Strenger technischer Leiter“ und „Scharfsinniger HR-Experte“ wechseln. Die KI agiert nicht mehr mechanisch, sondern hakt bei jeder Ihrer Antworten mit logisch präzisen Stress-Tests (Stress Test) nach, um die Hochdruckatmosphäre deutscher Vorstellungsgespräche authentisch nachzustellen.",
-      "fineTuneT": "大模型监督微调 (SFT)",
-      "fineTuneD": "Wir beherrschen modernste LLM-Fine-Tuning-Methoden und haben über 10.000 Iterationen speziell für den deutschen Bewerbungskontext durchgeführt. Ob es um die Nuancen eines deutschen Vorstellungsgesprächs oder die präzise technische Prüfung geht, LandIt liefert Antworten, die exakt den Anforderungen entsprechen.",
+      "fineTuneT": "Überwachtes Feintuning (SFT)",
+      "fineTuneD": "Modernste LLM-Fine-Tuning-Methoden, speziell für den deutschen Bewerbungskontext optimiert. Ob Nuancen im deutschen Vorstellungsgespräch oder detaillierte technische Prüfung – LandIt liefert Antworten, die den Erwartungen der Interviewer entsprechen.",
       "voiceT": "Absolute Sprachpräsenz",
-      "voiceD": "Durch High-Fidelity Neural Voice Synthesis simulieren wir Sprechgeschwindigkeit, Pausen und Akzente echter Interviewpartner. Verwandeln Sie Prüfungsangst in „Muscle Memory“.",
+      "voiceD": "Hochpräzise neuronale Sprachsynthese simuliert das reale Sprechtempo deutscher Interviewer und verwandelt Prüfungsangst in Routine.",
       "simT": "Authentisches Interface",
-      "simD": "Integration eines modernen Zoom-Style-Interfaces. Echtzeit-Kamerakopplung und realistische Layouts simulieren das authentische Bewerbungsumfeld deutsches Unternehmen.",
+      "simD": "Zoom-ähnliches Interview-Interface mit Echtzeit-Kamerainteraktion bildet die authentische Atmosphäre deutscher Vorstellungsgespräche ab. Kombiniert mit fortschrittlichen TTS-Modellen für ein immersives Übungserlebnis.",
       "privacyT": "Datenschutz nach deutschem Standard",
       "privacyD": "Wir verstehen die Bedeutung Ihrer Privatsphäre. Alle Daten werden nach GDPR-Vorgaben anonymisiert verarbeitet. Sicherheit, die Ihren Fortschritt ermutigt."
     }

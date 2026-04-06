@@ -176,11 +176,11 @@
       "agentT": "Multi-Agent Architecture",
       "agentD": "Our self-developed Multi-Agent system dynamically switches between roles like 'Rigorous Technical Lead' and 'Perceptive HR Expert' within a single session. The AI doesn't just ask questions; it conducts logically rigorous Stress Tests based on your every response, authentically recreating the high-pressure environment of German corporate interviews.",
       "fineTuneT": "Supervised Fine-Tuning (SFT)",
-      "fineTuneD": "Mastering the latest LLM fine-tuning techniques, we've performed over 10,000 iterations specifically for the German job market context. Whether it's the unique nuances of a German interview or the precise technical scrutiny of a technical round, LandIt delivers answers that perfectly align with recruiter expectations.",
+      "fineTuneD": "Leveraging cutting-edge LLM fine-tuning techniques with supervised tuning for the German job market. Whether it's the nuances of a German-language interview or in-depth technical scrutiny, LandIt delivers answers aligned with interviewer expectations.",
       "voiceT": "High-Fidelity Neural Voice",
-      "voiceD": "Utilizing high-fidelity neural voice synthesis, we simulate the actual speaking speed, pauses, and even accents of German interviewers. Through hundreds of voice-based stress training sessions, we transform 'stage fright' into 'muscle memory'.",
+      "voiceD": "High-fidelity neural voice synthesis simulates the real speaking pace of German interviewers, turning stage fright into muscle memory.",
       "simT": "Full Simulation Window",
-      "simD": "Integrating state-of-the-art Zoom-style interview interfaces. Real-time camera interactions and realistic layouts replicate the German corporate interview environment. Combined with advanced TTS for a truly immersive experience.",
+      "simD": "State-of-the-art Zoom-style interview interface with real-time camera interaction replicates the authentic German corporate interview setting. Paired with advanced TTS models for a truly immersive practice experience.",
       "privacyT": "German-Standard Security",
       "privacyD": "We understand the paramount importance of privacy. All resume data and interview transcripts are processed in de-identified environments strictly compliant with GDPR. Your practice remains private—security that empowers your progress."
     }
