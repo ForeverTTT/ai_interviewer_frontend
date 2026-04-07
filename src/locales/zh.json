@@ -544,6 +544,7 @@
       "viewExtracted": "查看提取正文",
       "applyToInterviewResume": "导入至面试用简历原文",
       "applyToInterviewResumeHint": "导入后将同步到「开始面试」界面所用的简历原文，AI 面试官会根据你的简历提出更有针对性的问题。",
+      "applySuccess": "导入成功",
       "extractBtn": "AI 填入资料",
       "extracting": "正在解析…",
       "extractOk": "已根据简历文本填充表单，请核对后保存。",

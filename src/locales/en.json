@@ -543,6 +543,7 @@
       "viewExtracted": "View Extracted Text",
       "applyToInterviewResume": "Import to Final Resume",
       "applyToInterviewResumeHint": "This will sync to the resume used in the interview. The AI interviewer will ask more targeted questions based on your resume.",
+      "applySuccess": "Imported successfully",
       "extractBtn": "AI Fill Data",
       "extracting": "Analyzing...",
       "extractOk": "Populated form based on text. Please verify and save.",

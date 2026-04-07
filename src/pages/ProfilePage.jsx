@@ -1529,14 +1529,14 @@ export default function ProfilePage() {
     }
   }
 
+  const [pendingApplied, setPendingApplied] = useState(false)
+
   const applyPendingToResume = () => {
     if (!pendingRaw.trim()) return
     const clean = pendingRaw.replace(/[●•⚫🌑⦿★■◾▪]/g, '').trim()
     setResumeText(clean)
-    setPendingRaw('')
-    setPendingPreviewOpen(false)
-    setNote({ type: 'ok', text: t('profile.cv.appliedResumeOk') })
-    setTimeout(() => setNote(null), 2000)
+    setPendingApplied(true)
+    setTimeout(() => setPendingApplied(false), 3000)
   }
 
 
@@ -1875,6 +1875,19 @@ function ProfileEditView({
                               <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-2 h-2 rotate-45 bg-slate-900 dark:bg-white" />
                             </div>
                           </div>
+                          <AnimatePresence>
+                            {pendingApplied && (
+                              <motion.div
+                                initial={{ opacity: 0, x: -8 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -8 }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                {t('profile.cv.applySuccess')}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
                       </div>
                       {pendingPreviewOpen && (
