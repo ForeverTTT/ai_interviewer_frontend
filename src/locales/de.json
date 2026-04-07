@@ -464,6 +464,8 @@
     "save": "Im Konto speichern",
     "saveSuccess": "Gespeichert",
     "coachGenOk": "Diagnosebericht erstellt",
+    "coachGeneratingHint": "Bericht wird erstellt, bitte verlassen Sie diese Seite nicht...",
+    "coachViewReport": "Diagnosebericht ansehen",
     "saveErr": "Fehler beim Speichern.",
     "loadErr": "Profil konnte nicht geladen werden.",
     "pdfOnly": "Nur PDF.",

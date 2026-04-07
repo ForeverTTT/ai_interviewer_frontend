@@ -452,6 +452,8 @@
     "save": "Save to Account",
     "saveSuccess": "Saved successfully",
     "coachGenOk": "Diagnostic report generated",
+    "coachGeneratingHint": "Report is being generated, please do not leave this page...",
+    "coachViewReport": "View Diagnostic Report",
     "saveErr": "Save failed, please try again.",
     "loadErr": "Could not load profile.",
     "pdfOnly": "PDF files only.",

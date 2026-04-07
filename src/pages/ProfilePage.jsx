@@ -790,6 +790,8 @@ function ProfileSectionsView({ cvProfile, t }) {
 function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, coach, t, i18n, timeStr, showFloatingEditButton, coachTranslating, coachGenerating, runCoach, jobSearchStatus, avatarId, tokens, recharge }) {
   const hasData = profileHasVisibleData(cvProfile, resumeText, resumeNotes)
   const tr = String(targetRole || '').trim()
+  const coachRef = useRef(null)
+  const scrollToCoach = () => coachRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   return (
     <div className="space-y-12">
@@ -797,8 +799,17 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="fixed bottom-8 right-8 z-40"
+          className="fixed bottom-8 right-8 z-40 flex flex-col gap-3 items-end"
         >
+          {coach && (
+            <button
+              onClick={scrollToCoach}
+              className="btn-setup-action-pill px-8 py-4 shadow-2xl"
+            >
+              <BarChart3 className="h-4 w-4 text-indigo-500" />
+              <span className="font-bold">{t('profile.coachViewReport')}</span>
+            </button>
+          )}
           <Link
             to="/profile/edit"
             className="btn-setup-action-pill px-8 py-4 shadow-2xl"
@@ -903,6 +914,15 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
               <Pencil className="h-4 w-4" />
               <span className="font-bold">{t('profile.editProfile')}</span>
             </Link>
+            {coach && (
+              <button
+                onClick={scrollToCoach}
+                className="btn-setup-action-pill px-8 py-4"
+              >
+                <BarChart3 className="h-4 w-4 text-indigo-500" />
+                <span className="font-bold">{t('profile.coachViewReport')}</span>
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -944,7 +964,7 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
 
             {/* Moved to top: AI Diagnostic & Resume Score */}
             {coach ? (
-              <div className="space-y-12">
+              <div ref={coachRef} className="space-y-12">
                 <CoachReport coach={coach} t={t} />
                 {timeStr && (
                   <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 pt-6 border-t border-slate-100 dark:border-slate-800">
@@ -1164,6 +1184,7 @@ export default function ProfilePage() {
   const [targetRole, setTargetRole] = useState('')
   const [coach, setCoach] = useState(null)
   const [coachGenerating, setCoachGenerating] = useState(false)
+  const [coachJustGenerated, setCoachJustGenerated] = useState(false)
   const [coachTranslating, setCoachTranslating] = useState(false)
   const [coachErr, setCoachErr] = useState(null)
   const [parseBusy, setParseBusy] = useState(false)
@@ -1404,6 +1425,7 @@ export default function ProfilePage() {
         return
       }
       setCoach(j.coach)
+      setCoachJustGenerated(true)
       coachLangRef.current = i18n.language
       if (j.coach?.generatedAt) {
         setUpdatedAt(j.coach.generatedAt)
@@ -1651,7 +1673,7 @@ export default function ProfilePage() {
           <ProfileEditView
             cvProfile={cvProfile} setCvProfile={setCvProfile} resumeText={resumeText} setResumeText={setResumeText}
             resumeNotes={resumeNotes} setResumeNotes={setResumeNotes} targetRole={targetRole} setTargetRole={setTargetRole}
-            coach={coach} coachGenerating={coachGenerating} coachErr={coachErr} runCoach={runCoach}
+            coach={coach} coachGenerating={coachGenerating} coachJustGenerated={coachJustGenerated} coachErr={coachErr} runCoach={runCoach}
             save={save} saving={saving} note={note} setNote={setNote} parseBusy={parseBusy} extractBusy={extractBusy} onPdf={onPdf} fileRef={fileRef} runExtractCv={runExtractCv}
             pendingRaw={pendingRaw} setPendingRaw={setPendingRaw} pendingPreviewOpen={pendingPreviewOpen} setPendingPreviewOpen={setPendingPreviewOpen}
             applyPendingToResume={applyPendingToResume} jobSearchStatus={jobSearchStatus} setJobSearchStatus={setJobSearchStatus}
@@ -1673,7 +1695,7 @@ export default function ProfilePage() {
 
 function ProfileEditView({
   cvProfile, setCvProfile, resumeText, setResumeText, resumeNotes, setResumeNotes,
-  targetRole, setTargetRole, coach, coachGenerating, coachErr, runCoach,
+  targetRole, setTargetRole, coach, coachGenerating, coachJustGenerated, coachErr, runCoach,
   save, saving, note, setNote, parseBusy, extractBusy, onPdf, fileRef, runExtractCv,
   pendingRaw, setPendingRaw, pendingPreviewOpen, setPendingPreviewOpen, applyPendingToResume,
   jobSearchStatus, setJobSearchStatus, avatarId, setAvatarId, uploadingAvatar, setUploadingAvatar, t
@@ -1722,6 +1744,20 @@ function ProfileEditView({
             {coachGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-emerald-500" />}
             <span className="font-bold">{coachGenerating ? t('profile.coachRunning') : t('profile.coachRun')}</span>
           </button>
+          {coachGenerating && (
+            <div className="text-[11px] font-bold text-amber-600 dark:text-amber-400 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/20 rounded-xl animate-pulse">
+              {t('profile.coachGeneratingHint')}
+            </div>
+          )}
+          {!coachGenerating && coachJustGenerated && coach && (
+            <Link
+              to="/profile"
+              className="btn-setup-action-pill px-6 py-3"
+            >
+              <BarChart3 className="w-4 h-4 text-indigo-500" />
+              <span className="font-bold">{t('profile.coachViewReport')}</span>
+            </Link>
+          )}
           <div className="flex items-center gap-4 relative">
             <button
               onClick={save}

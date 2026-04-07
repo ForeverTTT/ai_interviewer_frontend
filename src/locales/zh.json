@@ -452,6 +452,8 @@
     "save": "保存到账户",
     "saveSuccess": "保存成功",
     "coachGenOk": "诊断报告生成成功",
+    "coachGeneratingHint": "报告正在生成中，请不要离开此页面...",
+    "coachViewReport": "查看诊断报告",
     "saveErr": "保存失败，请稍后重试。",
     "loadErr": "无法加载资料。",
     "pdfOnly": "请选择 PDF。",
