@@ -1759,31 +1759,14 @@ function ProfileEditView({
               <span className="font-bold text-sm">{t('profile.coachViewReport')}</span>
             </Link>
           )}
-          <div className="flex items-center gap-3 relative shrink-0">
-            <button
-              onClick={save}
-              disabled={saving}
-              className="btn-setup-action-pill px-5 py-3 shrink-0"
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
-              <span className="font-bold text-sm">{saving ? t('common.saving') : t('common.save')}</span>
-            </button>
-            <AnimatePresence>
-              {note && (
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  className={`absolute top-full right-0 mt-3 px-4 py-3 rounded-2xl text-[11px] font-bold leading-snug max-w-[280px] whitespace-normal break-words shadow-lg ring-1 ring-black/5 backdrop-blur ${note.type === 'ok'
-                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-200'
-                      : 'bg-red-50 text-red-700 dark:bg-red-950/20 dark:text-red-200'
-                    }`}
-                >
-                  {note.text}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <button
+            onClick={save}
+            disabled={saving}
+            className="btn-setup-action-pill px-5 py-3 shrink-0"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+            <span className="font-bold text-sm">{saving ? t('common.saving') : t('common.save')}</span>
+          </button>
           <Link
             to="/profile"
             className="btn-setup-action-pill px-5 py-3 shrink-0"
@@ -1792,6 +1775,21 @@ function ProfileEditView({
             <span className="font-bold text-sm">{t('common.back')}</span>
           </Link>
           </div>
+          <AnimatePresence>
+            {note && (
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                className={`self-end px-4 py-2 rounded-xl text-[11px] font-bold leading-snug shadow-sm ring-1 ring-black/5 ${note.type === 'ok'
+                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-200'
+                    : 'bg-red-50 text-red-700 dark:bg-red-950/20 dark:text-red-200'
+                  }`}
+              >
+                {note.text}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </header>
 
