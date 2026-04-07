@@ -1730,42 +1730,43 @@ function ProfileEditView({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-col items-end gap-3">
+          {coachGenerating && (
+            <div className="text-[11px] font-bold text-amber-600 dark:text-amber-400 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/20 rounded-xl animate-pulse">
+              {t('profile.coachGeneratingHint')}
+            </div>
+          )}
+          <div className="flex items-center gap-3 flex-nowrap overflow-x-auto">
           {coachErr && (
-            <div className="text-[10px] font-bold text-red-500 uppercase tracking-widest px-3 py-1 bg-red-50 dark:bg-red-950/20 rounded-lg">
+            <div className="text-[10px] font-bold text-red-500 uppercase tracking-widest px-3 py-1 bg-red-50 dark:bg-red-950/20 rounded-lg shrink-0">
               {coachErr}
             </div>
           )}
           <button
             onClick={runCoach}
             disabled={coachGenerating || (resumeText.trim().length < 80)}
-            className="btn-setup-action-pill px-6 py-3"
+            className="btn-setup-action-pill px-5 py-3 shrink-0"
           >
             {coachGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-emerald-500" />}
-            <span className="font-bold">{coachGenerating ? t('profile.coachRunning') : t('profile.coachRun')}</span>
+            <span className="font-bold text-sm">{coachGenerating ? t('profile.coachRunning') : t('profile.coachRun')}</span>
           </button>
-          {coachGenerating && (
-            <div className="text-[11px] font-bold text-amber-600 dark:text-amber-400 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/20 rounded-xl animate-pulse">
-              {t('profile.coachGeneratingHint')}
-            </div>
-          )}
           {!coachGenerating && coachJustGenerated && coach && (
             <Link
               to="/profile"
-              className="btn-setup-action-pill px-6 py-3"
+              className="btn-setup-action-pill px-5 py-3 shrink-0"
             >
               <BarChart3 className="w-4 h-4 text-indigo-500" />
-              <span className="font-bold">{t('profile.coachViewReport')}</span>
+              <span className="font-bold text-sm">{t('profile.coachViewReport')}</span>
             </Link>
           )}
-          <div className="flex items-center gap-4 relative">
+          <div className="flex items-center gap-3 relative shrink-0">
             <button
               onClick={save}
               disabled={saving}
-              className="btn-setup-action-pill px-8 py-3 shrink-0"
+              className="btn-setup-action-pill px-5 py-3 shrink-0"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
-              <span className="font-bold">{saving ? t('common.saving') : t('common.save')}</span>
+              <span className="font-bold text-sm">{saving ? t('common.saving') : t('common.save')}</span>
             </button>
             <AnimatePresence>
               {note && (
@@ -1785,11 +1786,12 @@ function ProfileEditView({
           </div>
           <Link
             to="/profile"
-            className="btn-setup-action-pill px-6 py-3 shrink-0"
+            className="btn-setup-action-pill px-5 py-3 shrink-0"
           >
             <ArrowRight className="w-4 h-4 rotate-180" />
-            <span className="font-bold">{t('common.back')}</span>
+            <span className="font-bold text-sm">{t('common.back')}</span>
           </Link>
+          </div>
         </div>
       </header>
 
