@@ -1676,7 +1676,7 @@ export default function ProfilePage() {
             coach={coach} coachGenerating={coachGenerating} coachJustGenerated={coachJustGenerated} coachErr={coachErr} runCoach={runCoach}
             save={save} saving={saving} note={note} setNote={setNote} parseBusy={parseBusy} extractBusy={extractBusy} onPdf={onPdf} fileRef={fileRef} runExtractCv={runExtractCv}
             pendingRaw={pendingRaw} setPendingRaw={setPendingRaw} pendingPreviewOpen={pendingPreviewOpen} setPendingPreviewOpen={setPendingPreviewOpen}
-            applyPendingToResume={applyPendingToResume} jobSearchStatus={jobSearchStatus} setJobSearchStatus={setJobSearchStatus}
+            applyPendingToResume={applyPendingToResume} pendingApplied={pendingApplied} jobSearchStatus={jobSearchStatus} setJobSearchStatus={setJobSearchStatus}
             avatarId={avatarId} setAvatarId={setAvatarId} uploadingAvatar={uploadingAvatar} setUploadingAvatar={setUploadingAvatar} t={t}
           />
       </div>
@@ -1697,7 +1697,7 @@ function ProfileEditView({
   cvProfile, setCvProfile, resumeText, setResumeText, resumeNotes, setResumeNotes,
   targetRole, setTargetRole, coach, coachGenerating, coachJustGenerated, coachErr, runCoach,
   save, saving, note, setNote, parseBusy, extractBusy, onPdf, fileRef, runExtractCv,
-  pendingRaw, setPendingRaw, pendingPreviewOpen, setPendingPreviewOpen, applyPendingToResume,
+  pendingRaw, setPendingRaw, pendingPreviewOpen, setPendingPreviewOpen, applyPendingToResume, pendingApplied,
   jobSearchStatus, setJobSearchStatus, avatarId, setAvatarId, uploadingAvatar, setUploadingAvatar, t
 }) {
   const [activeTab, setActiveTab] = useState('basic')
