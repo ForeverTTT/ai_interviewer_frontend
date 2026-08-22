@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
 import Navbar from './components/Navbar'
@@ -6,17 +6,18 @@ import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
 import BackgroundAurora from './components/BackgroundAurora'
 import CookieBanner from './components/CookieBanner'
+import { lazyWithReload } from './lib/lazyWithReload'
 
-const LandingPage = lazy(() => import('./pages/LandingPage'))
-const LoginPage = lazy(() => import('./pages/LoginPage'))
-const SetupPage = lazy(() => import('./pages/SetupPage'))
-const InterviewPage = lazy(() => import('./pages/InterviewPage'))
-const DashboardPage = lazy(() => import('./pages/DashboardPage'))
-const InterviewReportPage = lazy(() => import('./pages/InterviewReportPage'))
-const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'))
-const ProfilePage = lazy(() => import('./pages/ProfilePage'))
-const GallupTestPage = lazy(() => import('./pages/GallupTestPage'))
-const ExperiencesPage = lazy(() => import('./pages/ExperiencesPage'))
+const LandingPage = lazyWithReload(() => import('./pages/LandingPage'))
+const LoginPage = lazyWithReload(() => import('./pages/LoginPage'))
+const SetupPage = lazyWithReload(() => import('./pages/SetupPage'))
+const InterviewPage = lazyWithReload(() => import('./pages/InterviewPage'))
+const DashboardPage = lazyWithReload(() => import('./pages/DashboardPage'))
+const InterviewReportPage = lazyWithReload(() => import('./pages/InterviewReportPage'))
+const AuthCallbackPage = lazyWithReload(() => import('./pages/AuthCallbackPage'))
+const ProfilePage = lazyWithReload(() => import('./pages/ProfilePage'))
+const GallupTestPage = lazyWithReload(() => import('./pages/GallupTestPage'))
+const ExperiencesPage = lazyWithReload(() => import('./pages/ExperiencesPage'))
 
 function PageFallback() {
   return (
