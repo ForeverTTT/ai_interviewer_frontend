@@ -4,6 +4,10 @@ import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import { buildInterviewPrompt } from '../lib/promptBuilder'
+import {
+  createInterviewRequestId,
+  recordInterviewClientEvent,
+} from '../lib/interviewEvents'
 import ChatInterface from '../components/ChatInterface'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import { InterviewThemeToggle } from '../components/ThemeToggle'
@@ -61,6 +65,24 @@ export default function InterviewPage() {
   const [finalizing,     setFinalizing]     = useState(false)
   const [finalizeError,  setFinalizeError]  = useState(null)
   const chatRef = useRef(null)
+  const finalizeInFlightRef = useRef(false)
+  const finalizeCompletedRef = useRef(false)
+  const autoFinalizeRequestedRef = useRef(false)
+  const authTokenRef = useRef(null)
+
+  useEffect(() => {
+    let active = true
+    void supabase.auth.getSession().then(({ data }) => {
+      if (active) authTokenRef.current = data.session?.access_token || null
+    })
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      authTokenRef.current = session?.access_token || null
+    })
+    return () => {
+      active = false
+      listener.subscription.unsubscribe()
+    }
+  }, [])
 
   /* ── Lobby camera ── */
   const lobbyPreviewRef = useRef(null)
@@ -209,21 +231,112 @@ export default function InterviewPage() {
     return () => window.removeEventListener('interview-end-request', handler)
   }, [])
 
-  const finalizeAndGoReport = useCallback(async () => {
+  const finalizeAndGoReport = useCallback(async (trigger = 'manual') => {
+    if (finalizeInFlightRef.current) return
+    finalizeInFlightRef.current = true
     chatRef.current?.stopInterview?.()
     setShowEndModal(false); setFinalizeError(null)
-    if (!interviewId) { navigate('/dashboard'); return }
+    if (!interviewId) {
+      finalizeInFlightRef.current = false
+      navigate('/dashboard')
+      return
+    }
     setFinalizing(true)
+    const requestId = createInterviewRequestId()
+    const transcript = chatRef.current?.getTranscript?.() ?? []
+    let token = authTokenRef.current
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token
+      if (!token) {
+        const { data: { session } } = await supabase.auth.getSession()
+        token = session?.access_token
+        authTokenRef.current = token || null
+      }
       if (!token) { setFinalizeError(t('report.finalizeNoAuth')); return }
-      const transcript = chatRef.current?.getTranscript?.() ?? []
-      const res = await fetch(`${getBackendBaseUrl()}/api/interviews/${interviewId}/finalize`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ messages: transcript, reportUiLanguage: language }),
+
+      await recordInterviewClientEvent({
+        interviewId,
+        token,
+        requestId,
+        eventType: 'finalize_clicked',
+        stage: 'client',
+        messageCount: transcript.length,
+        metadata: { trigger },
       })
+      await recordInterviewClientEvent({
+        interviewId,
+        token,
+        requestId,
+        eventType: 'finalize_request_sent',
+        stage: 'client',
+        messageCount: transcript.length,
+        metadata: { trigger, attempt: 1 },
+      })
+      let res = null
+      let requestError = null
+      for (let attempt = 1; attempt <= 2; attempt += 1) {
+        if (attempt > 1) {
+          await recordInterviewClientEvent({
+            interviewId,
+            token,
+            requestId,
+            eventType: 'finalize_request_sent',
+            stage: 'client',
+            messageCount: transcript.length,
+            metadata: { trigger, attempt },
+          })
+        }
+        try {
+          res = await fetch(`${getBackendBaseUrl()}/api/interviews/${interviewId}/finalize`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+              'X-Request-Id': requestId,
+            },
+            body: JSON.stringify({ messages: transcript, reportUiLanguage: language }),
+          })
+          requestError = null
+        } catch (error) {
+          requestError = error
+        }
+        const retryableStatus = res && [429, 502, 503, 504].includes(res.status)
+        if (attempt < 2 && (requestError || retryableStatus)) {
+          await new Promise((resolve) => window.setTimeout(resolve, 1000))
+          continue
+        }
+        break
+      }
+      if (requestError || !res) throw requestError || new Error('Finalize request failed')
+      const responseRequestId = res.headers.get('X-Request-Id') || requestId
+      await recordInterviewClientEvent({
+        interviewId,
+        token,
+        requestId,
+        eventType: 'finalize_response_received',
+        stage: 'client',
+        httpStatus: res.status,
+        messageCount: transcript.length,
+        metadata: { trigger, responseRequestId },
+      })
+      if (res.status === 202) {
+        let completed = false
+        for (let poll = 0; poll < 20; poll += 1) {
+          await new Promise((resolve) => window.setTimeout(resolve, 2000))
+          const statusResponse = await fetch(`${getBackendBaseUrl()}/api/interviews/${interviewId}`, {
+            headers: { Authorization: `Bearer ${token}`, 'X-Request-Id': requestId },
+          })
+          if (!statusResponse.ok) continue
+          const statusBody = await statusResponse.json()
+          if (statusBody?.interview?.status === 'completed' && statusBody.interview.report_json) {
+            completed = true
+            break
+          }
+          if (statusBody?.interview?.finalize_status === 'failed') {
+            throw new Error(`Finalize failed at ${statusBody.interview.finalize_last_error_stage || 'unknown stage'}`)
+          }
+        }
+        if (!completed) throw new Error('Finalize is still processing')
+      }
       if (!res.ok) {
         let detail = t('report.finalizeFailed')
         try {
@@ -232,17 +345,69 @@ export default function InterviewPage() {
           if (j.details) detail += ` — ${j.details}`
           if (j.hint)    detail += ` (${j.hint})`
         } catch { /* ignore */ }
+        await recordInterviewClientEvent({
+          interviewId,
+          token,
+          requestId,
+          eventType: 'finalize_client_error',
+          stage: 'response',
+          httpStatus: res.status,
+          errorMessage: detail,
+          messageCount: transcript.length,
+          metadata: { trigger, responseRequestId },
+        })
         setFinalizeError(detail); return
       }
+      finalizeCompletedRef.current = true
       navigate(`/interview/${interviewId}/report`)
     } catch (e) {
-      console.error('[finalize]', e); setFinalizeError(t('report.finalizeNetwork'))
-    } finally { setFinalizing(false) }
+      console.error('[finalize]', e)
+      await recordInterviewClientEvent({
+        interviewId,
+        token,
+        requestId,
+        eventType: 'finalize_client_error',
+        stage: 'client',
+        errorMessage: e?.message,
+        messageCount: transcript.length,
+        metadata: { trigger },
+      })
+      setFinalizeError(t('report.finalizeNetwork'))
+    } finally {
+      finalizeInFlightRef.current = false
+      setFinalizing(false)
+    }
   }, [interviewId, navigate, t, language])
 
   useEffect(() => {
-    if (timer.finished) chatRef.current?.stopInterview?.()
-  }, [timer.finished])
+    if (!timer.finished || autoFinalizeRequestedRef.current) return
+    autoFinalizeRequestedRef.current = true
+    void finalizeAndGoReport('timer')
+  }, [timer.finished, finalizeAndGoReport])
+
+  useEffect(() => {
+    if (!interviewId) return undefined
+    const handlePageHide = () => {
+      if (finalizeCompletedRef.current || finalizeInFlightRef.current) return
+      const transcript = chatRef.current?.getTranscript?.() ?? []
+      void recordInterviewClientEvent({
+        interviewId,
+        token: authTokenRef.current,
+        requestId: createInterviewRequestId(),
+        eventType: 'interview_exit',
+        stage: 'client',
+        messageCount: transcript.length,
+        metadata: {
+          reason: 'pagehide',
+          online: navigator.onLine,
+          visibilityState: document.visibilityState,
+        },
+        keepalive: true,
+      })
+    }
+    window.addEventListener('pagehide', handlePageHide)
+    return () => window.removeEventListener('pagehide', handlePageHide)
+  }, [interviewId])
 
   if (!position) return null
 
