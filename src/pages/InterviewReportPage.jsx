@@ -689,15 +689,44 @@ export default function InterviewReportPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const token = session?.access_token
-      if (!token) return
+      if (!token) {
+        setErr(t('report.finalizeNoAuth'))
+        return
+      }
       const res = await fetch(`${backendUrl}/api/interviews/${interviewId}/finalize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ messages, reportUiLanguage: normalizeUiCode(i18n.resolvedLanguage || i18n.language) }),
+        body: JSON.stringify({
+          messages,
+          reportUiLanguage: normalizeUiCode(i18n.resolvedLanguage || i18n.language),
+          forceRegenerate: true,
+        }),
       })
+      if (res.status === 202) {
+        for (let attempt = 0; attempt < 30; attempt += 1) {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+          const statusRes = await fetch(`${backendUrl}/api/interviews/${interviewId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          if (!statusRes.ok) continue
+          const statusBody = await statusRes.json()
+          const nextInterview = statusBody?.interview
+          if (nextInterview?.finalize_status === 'completed' && reportJsonHasContent(nextInterview.report_json)) {
+            setInterview(nextInterview)
+            window.dispatchEvent(new Event('tokensChanged'))
+            return
+          }
+          if (nextInterview?.finalize_status === 'failed') {
+            setErr(nextInterview.finalize_last_error || t('report.retryFailed'))
+            return
+          }
+        }
+        setErr(t('report.retryFailed'))
+        return
+      }
       if (!res.ok) {
         const j = await res.json().catch(() => ({}))
         setErr(j.hint || j.details || j.error || t('report.retryFailed'))
