@@ -1,0 +1,1 @@
+function e(){return`https://interview-backend-557559701677.europe-west1.run.app`.replace(/\/$/,``)}export{e as t};

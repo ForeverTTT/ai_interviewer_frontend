@@ -17,6 +17,17 @@
 
 </div>
 
+## 🌐 在线使用
+
+直接访问：<https://aiinterviewer-491711-7b1cf.web.app>
+
+用户无需安装本地环境，使用 Google 账号登录即可。生产环境使用 Firebase Hosting，
+后端运行于 Google Cloud Run，用户数据和认证由 Supabase Cloud 管理。
+
+- 前端：`https://aiinterviewer-491711-7b1cf.web.app`
+- 后端：`https://interview-backend-557559701677.europe-west1.run.app`
+- 后端健康检查：`https://interview-backend-557559701677.europe-west1.run.app/api/health`
+
 <br/>
 
 ---
@@ -251,7 +262,7 @@ npm run preview
 npm ci
 npm run build
 npx firebase-tools login
-npx firebase-tools deploy --only hosting
+npx firebase-tools deploy --only hosting --project aiinterviewer-491711-7b1cf
 ```
 
 Supabase Anon Key 会被编译进浏览器代码，只能使用公开的 Anon Key；绝不能在任何
@@ -268,8 +279,8 @@ Supabase Anon Key 会被编译进浏览器代码，只能使用公开的 Anon Ke
 | 层 | 技术 | 说明 |
 |----|------|------|
 | UI 框架 | **React 18** | 组件化 + Hooks 驱动 |
-| 构建 | **Vite 5** | 极速 HMR + ESM 原生模块 |
-| 路由 | **React Router 6** | 嵌套路由 + 路由守卫 |
+| 构建 | **Vite 8** | 极速 HMR + ESM 原生模块 |
+| 路由 | **React Router 7** | 嵌套路由 + 路由守卫 |
 | 样式 | **Tailwind CSS 3** | 原子化 CSS + 自定义设计系统 |
 | 认证 | **Supabase Auth** | Google / LinkedIn OIDC |
 | 国际化 | **i18next** | 中 / 英 / 德三语 |

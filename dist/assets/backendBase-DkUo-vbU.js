@@ -1,1 +1,0 @@
-function e(){return`https://interview-backend-530979174916.us-central1.run.app`.replace(/\/$/,``)}export{e as t};
