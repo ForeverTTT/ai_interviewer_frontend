@@ -235,6 +235,7 @@
     "footerTip": "💡 对谈中即有实时评价线索，结束后还有结构化复盘与改进建议",
     "langEnDesc": "全英语面试",
     "langDeDesc": "全德语面试",
+    "langZhDesc": "普通话中文面试",
     "dur5": "5 分钟",
     "dur5d": "快速热身",
     "dur10": "10 分钟",
@@ -764,6 +765,7 @@
     "sectionQaCompareSub": "基于本场对话整理：左为你的实际回答，右为同类型问题的参考样例；下方为差距与改进建议（重新生成报告可更新本区块）。",
     "qaRound": "第 {{n}} 轮",
     "qaQuestionFallback": "面试官提问",
+    "qaExactQuestionLabel": "本轮实际问题",
     "yourAnswerLabel": "你的回答",
     "referenceExampleLabel": "标准回答样例",
     "gapsLabel": "与样例对比：主要差距",
@@ -780,6 +782,7 @@
   "chat": {
     "startTriggerEn": "Please start the interview now.",
     "startTriggerDe": "Bitte beginnen Sie das Interview jetzt.",
+    "startTriggerZh": "现在开始面试，请全程使用普通话和简体中文。",
     "agent": {
       "opening": "面试官开场",
       "explore": "经历与项目",
@@ -806,6 +809,11 @@
     "errRetry": "⚠️ 出错，请重试",
     "connFail": "⚠️ 连接失败，请重试",
     "connErr": "连接失败：{{msg}}（请确认后端已启动）",
+    "sessionMissing": "登录状态已失效，请重新登录后再重试。",
+    "sessionReadFail": "无法读取登录状态，请刷新页面或重新登录。",
+    "requestTimeout": "AI 响应超时，请重试。",
+    "streamFailed": "AI 服务返回错误",
+    "streamEnded": "AI 连接意外中断",
     "retry": "重试"
   },
   "auth": {

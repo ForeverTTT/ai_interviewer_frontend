@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 function normalizeUiCode(code) {
   const c = String(code || '').toLowerCase()
-  if (c.startsWith('zh')) return 'zh'
+  if (c.startsWith('zh') || c.startsWith('chinese') || c.includes('中文')) return 'zh'
   if (c.startsWith('de')) return 'de'
   return 'en'
 }
@@ -43,6 +43,7 @@ function reportJsonHasContent(raw) {
         (x) =>
           x &&
           (String(x.questionSummary || x.question || '').trim() ||
+            String(x.questionText || x.exactQuestion || '').trim() ||
             String(x.yourAnswerSummary || x.candidateAnswer || '').trim() ||
             String(x.referenceExample || x.referenceAnswer || '').trim()),
       )
@@ -277,13 +278,33 @@ function LegacySectionBody({ body, t }) {
 
 function normalizeQaItem(x) {
   if (!x || typeof x !== 'object') return null
+  const questionIndex = Number(x.questionIndex)
   const questionSummary = String(x.questionSummary || x.question || '').trim()
+  const questionText = String(x.questionText || x.exactQuestion || x.interviewerQuestion || '').trim()
   const yourAnswerSummary = String(x.yourAnswerSummary || x.candidateAnswer || x.yourAnswer || '').trim()
   const referenceExample = String(x.referenceExample || x.referenceAnswer || '').trim()
   const gaps = Array.isArray(x.gaps) ? x.gaps.map((g) => String(g || '').trim()).filter(Boolean) : []
   const howToImprove = String(x.howToImprove || x.improvementTip || '').trim()
-  if (!questionSummary && !yourAnswerSummary && !referenceExample) return null
-  return { questionSummary, yourAnswerSummary, referenceExample, gaps, howToImprove }
+  if (!questionSummary && !questionText && !yourAnswerSummary && !referenceExample) return null
+  return {
+    questionIndex: Number.isInteger(questionIndex) ? questionIndex : -1,
+    questionSummary,
+    questionText,
+    yourAnswerSummary,
+    referenceExample,
+    gaps,
+    howToImprove,
+  }
+}
+
+function interviewerQuestionsFromTranscript(transcript) {
+  if (!Array.isArray(transcript)) return []
+  return transcript
+    .map((message, index) => ({
+      index,
+      text: message?.role === 'assistant' ? String(message?.content || '').trim() : '',
+    }))
+    .filter((message) => message.text)
 }
 
 /** 与 transcript 下标对齐的逐条点评（后端 transcriptLineReview） */
@@ -305,9 +326,16 @@ function buildTranscriptLineReviewMap(report) {
   return map
 }
 
-function StructuredReportBody({ report, t }) {
+function StructuredReportBody({ report, transcript, t }) {
+  const transcriptQuestions = interviewerQuestionsFromTranscript(transcript)
   const qaReview = Array.isArray(report?.qaReview)
-    ? report.qaReview.map(normalizeQaItem).filter(Boolean)
+    ? report.qaReview.map(normalizeQaItem).filter(Boolean).map((item, index) => {
+        const indexedQuestion = transcriptQuestions.find((question) => question.index === item.questionIndex)
+        return {
+          ...item,
+          questionText: item.questionText || indexedQuestion?.text || transcriptQuestions[index]?.text || '',
+        }
+      })
     : []
 
   const summary = Array.isArray(report?.summary)
@@ -463,6 +491,18 @@ function StructuredReportBody({ report, t }) {
                     </h3>
                   </div>
                 </div>
+
+                {qa.questionText && (
+                  <div className="px-8 py-6 border-b border-indigo-100/70 dark:border-indigo-900/30 bg-indigo-50/40 dark:bg-indigo-950/10">
+                    <div className="flex items-center gap-2 mb-2 text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+                      <MessageSquareQuote className="w-4 h-4" />
+                      {t('report.qaExactQuestionLabel')}
+                    </div>
+                    <p className="text-[15px] font-bold leading-relaxed text-slate-800 dark:text-slate-100 whitespace-pre-wrap">
+                      {qa.questionText}
+                    </p>
+                  </div>
+                )}
 
                 <div className="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-100 dark:divide-slate-800">
                   {/* User Answer */}
@@ -794,7 +834,7 @@ export default function InterviewReportPage() {
                 )}
               </div>
             ) : hasStructuredReport ? (
-              <StructuredReportBody report={parsedReport} t={t} />
+              <StructuredReportBody report={parsedReport} transcript={transcript} t={t} />
             ) : (
               <div className="space-y-16">
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">

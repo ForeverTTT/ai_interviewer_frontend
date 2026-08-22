@@ -100,6 +100,7 @@ export default function InterviewPage() {
 
   function stopMicMeter() {
     cancelAnimationFrame(micRafRef.current)
+    micAnalyserRef.current?._stream?.getTracks().forEach(tr => tr.stop())
     try { micAudioCtxRef.current?.close() } catch { /* ignore */ }
     micAudioCtxRef.current = null
     micAnalyserRef.current = null
@@ -181,7 +182,6 @@ export default function InterviewPage() {
 
   const handleStart = () => {
     stopMicMeter()
-    micAnalyserRef.current?._stream?.getTracks().forEach(tr => tr.stop())
     // Keep the interview camera consistent with lobby selection.
     setInterviewCamOn(Boolean(lobbyCameraOn))
     setChatPhase('preparing')
@@ -210,6 +210,7 @@ export default function InterviewPage() {
   }, [])
 
   const finalizeAndGoReport = useCallback(async () => {
+    chatRef.current?.stopInterview?.()
     setShowEndModal(false); setFinalizeError(null)
     if (!interviewId) { navigate('/dashboard'); return }
     setFinalizing(true)
@@ -238,6 +239,10 @@ export default function InterviewPage() {
       console.error('[finalize]', e); setFinalizeError(t('report.finalizeNetwork'))
     } finally { setFinalizing(false) }
   }, [interviewId, navigate, t, language])
+
+  useEffect(() => {
+    if (timer.finished) chatRef.current?.stopInterview?.()
+  }, [timer.finished])
 
   if (!position) return null
 

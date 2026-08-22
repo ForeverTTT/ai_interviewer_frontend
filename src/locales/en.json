@@ -235,6 +235,7 @@
     "footerTip": "💡 Live feedback signals during session; full structured report after.",
     "langEnDesc": "Full English Session",
     "langDeDesc": "Full German Session",
+    "langZhDesc": "Mandarin Chinese Session",
     "dur5": "5 Minutes",
     "dur5d": "Quick Warm-up",
     "dur10": "10 Minutes",
@@ -763,6 +764,7 @@
     "sectionQaCompareSub": "Based on current transcript: Left shows your actual response, right shows a reference sample. Comparison of gaps below.",
     "qaRound": "Round {{n}}",
     "qaQuestionFallback": "Interviewer Question",
+    "qaExactQuestionLabel": "Exact Interview Question",
     "yourAnswerLabel": "Your Answer",
     "referenceExampleLabel": "Master Sample",
     "gapsLabel": "Key Gaps Contrast",
@@ -779,6 +781,7 @@
   "chat": {
     "startTriggerEn": "Please start the interview now.",
     "startTriggerDe": "Bitte beginnen Sie das Interview jetzt.",
+    "startTriggerZh": "Start the interview now and speak Mandarin Chinese throughout.",
     "agent": {
       "opening": "Opening",
       "explore": "Experience Dive",
@@ -805,6 +808,11 @@
     "errRetry": "⚠️ Error, please retry",
     "connFail": "⚠️ Conn failed",
     "connErr": "Conn Error: {{msg}} (Check backend)",
+    "sessionMissing": "Your session has expired. Please sign in again and retry.",
+    "sessionReadFail": "Unable to read your session. Refresh the page or sign in again.",
+    "requestTimeout": "The AI response timed out. Please retry.",
+    "streamFailed": "The AI service returned an error",
+    "streamEnded": "The AI connection ended unexpectedly",
     "retry": "Retry"
   },
   "auth": {

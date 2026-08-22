@@ -295,6 +295,7 @@ export default function SetupPage() {
   const languages = useMemo(() => [
     { value: 'English', label: 'English', flag: '🇬🇧', desc: t('setup.langEnDesc') },
     { value: 'Deutsch', label: 'Deutsch', flag: '🇩🇪', desc: t('setup.langDeDesc') },
+    { value: 'Chinese', label: '中文', flag: '🇨🇳', desc: t('setup.langZhDesc') },
   ], [t])
 
   const durations = useMemo(() => [
@@ -988,7 +989,7 @@ export default function SetupPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
                     <div className="space-y-8">
                       <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">{t('setup.interviewLang')}</h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {languages.map((lang) => (
                           <button
                             key={lang.value}

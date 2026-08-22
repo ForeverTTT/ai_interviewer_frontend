@@ -1,0 +1,1 @@
+var e=`/assets/background-lx7cAP_E.jpg`;export{e as t};

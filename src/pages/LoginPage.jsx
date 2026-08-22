@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
@@ -9,7 +9,10 @@ import { motion } from 'framer-motion'
 
 export default function LoginPage() {
   const { t } = useTranslation()
-  const { user, loading, signInWithGoogle, signInWithLinkedIn } = useAuth()
+  const { user, loading, signInWithGoogle, signInWithLinkedIn, signInLocal } = useAuth()
+  const [loginError, setLoginError] = useState('')
+  const [localBusy, setLocalBusy] = useState(false)
+  const isLocalSupabase = import.meta.env.VITE_LOCAL_SUPABASE === 'true'
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/setup'
@@ -37,6 +40,19 @@ export default function LoginPage() {
       await signInWithLinkedIn()
     } catch (error) {
       console.error('LinkedIn login error:', error)
+    }
+  }
+
+  const handleLocalLogin = async () => {
+    setLoginError('')
+    setLocalBusy(true)
+    try {
+      await signInLocal()
+    } catch (error) {
+      console.error('Local login error:', error)
+      setLoginError(error?.message || 'Local login failed')
+    } finally {
+      setLocalBusy(false)
     }
   }
 
@@ -122,7 +138,27 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-4">
-            <button
+            {isLocalSupabase && (
+              <button
+                onClick={handleLocalLogin}
+                disabled={localBusy}
+                className="w-full group flex items-center justify-between px-6 py-4 bg-primary-600 rounded-full text-white text-sm font-bold hover:bg-primary-700 disabled:opacity-60 transition-all duration-300"
+              >
+                <div className="flex items-center gap-4">
+                  <BrainCircuit className="w-5 h-5" />
+                  {localBusy ? 'Starting local session…' : 'Continue with local account'}
+                </div>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            )}
+
+            {loginError && (
+              <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-xs font-bold text-red-600 dark:bg-red-950/40 dark:text-red-300">
+                {loginError}
+              </p>
+            )}
+
+            {!isLocalSupabase && <button
               onClick={handleGoogleLogin}
               className="w-full group flex items-center justify-between px-6 py-4 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-full text-slate-900 dark:text-white text-sm font-bold hover:border-slate-900 dark:hover:border-white transition-all duration-300"
             >
@@ -136,9 +172,9 @@ export default function LoginPage() {
                 {t('login.google')}
               </div>
               <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white group-hover:translate-x-1 transition-all" />
-            </button>
+            </button>}
 
-            <button
+            {!isLocalSupabase && <button
               onClick={handleLinkedInLogin}
               className="w-full group flex items-center justify-between px-6 py-4 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-white text-sm font-bold hover:border-slate-900 dark:hover:border-white transition-all duration-300"
             >
@@ -149,7 +185,7 @@ export default function LoginPage() {
                 {t('login.linkedin')}
               </div>
               <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white group-hover:translate-x-1 transition-all" />
-            </button>
+            </button>}
           </div>
 
           <div className="pt-8 border-t border-slate-100 dark:border-slate-800">

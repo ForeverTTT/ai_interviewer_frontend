@@ -5,13 +5,15 @@ import {
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
+import { useGeminiLiveInterview } from '../hooks/useGeminiLiveInterview'
 import {
   Send, Volume2, VolumeX, Loader2, Video, VideoOff,
-  Mic, StopCircle, RefreshCw, BrainCircuit, Clock,
+  Mic, MicOff, RefreshCw, BrainCircuit, Clock,
   FlaskConical, Users, ClipboardList, Search, FolderOpen,
 } from 'lucide-react'
 
 const BACKEND_URL = getBackendBaseUrl()
+const CHAT_REQUEST_TIMEOUT_MS = 45_000
 
 /* ── Agent display config ─────────────────────────────────────── */
 
@@ -169,7 +171,7 @@ function useStreamingTTS(language, enabled) {
     if (!hasSpeechSynth || gen !== playGenRef.current) return
     const synth = window.speechSynthesis
     const utter = new SpeechSynthesisUtterance(text)
-    utter.lang = language === 'Deutsch' ? 'de-DE' : 'en-US'
+    utter.lang = language === 'Deutsch' ? 'de-DE' : language === 'Chinese' ? 'zh-CN' : 'en-US'
     utter.rate = 1.05
     utter.onend = () => { if (gen === playGenRef.current) checkIdle() }
     utter.onerror = () => { if (gen === playGenRef.current) checkIdle() }
@@ -562,6 +564,7 @@ const ChatInterface = forwardRef(function ChatInterface({
 
   const [messages, setMessages] = useState([])
   const messagesRef = useRef(messages)
+  const stopInterviewRef = useRef(() => {})
   useEffect(() => { messagesRef.current = messages }, [messages])
 
   const persistInterviewIdRef = useRef(persistInterviewId)
@@ -606,6 +609,7 @@ const ChatInterface = forwardRef(function ChatInterface({
         role: m.role === 'assistant' ? 'assistant' : 'user',
         content: String(m.content).trim(),
       })),
+    stopInterview: () => stopInterviewRef.current(),
   }), [])
 
   const [input, setInput] = useState('')
@@ -631,9 +635,10 @@ const ChatInterface = forwardRef(function ChatInterface({
   //   double-invocation from triggering the opening twice.
   //   React 18 Strict Mode runs effect cleanup + re-setup, but ref.current
   //   is preserved between those two cycles (state is restored).
-  const initDoneRef = useRef(false)
   const isFirstMsg = useRef(true)
   const openingLatchRef = useRef(true)
+  const liveInputMessageIdRef = useRef(null)
+  const liveOutputMessageIdRef = useRef(null)
 
   useLayoutEffect(() => {
     openingLatchRef.current = true
@@ -652,12 +657,133 @@ const ChatInterface = forwardRef(function ChatInterface({
     ttsEnabledRef.current = ttsEnabled
   }, [ttsEnabled])
 
-  const tts = useStreamingTTS(language, ttsEnabled)
-  const stt = useSpeechRecognition(
+  const releaseOpeningGate = useCallback(() => {
+    if (!deferGateRef.current || !openingLatchRef.current) return
+    openingLatchRef.current = false
+    onInterviewReadyRef.current?.()
+  }, [])
+
+  const nativeLiveEnabled = digitalHuman
+  const legacyTts = useStreamingTTS(language, ttsEnabled)
+  const legacyStt = useSpeechRecognition(
     language,
     useCallback(t => setInput(t), []),
     useCallback(t => setInterimText(t), []),
   )
+
+  const handleLiveReady = useCallback(() => {
+    setCurrentAgent({ name: 'opening' })
+    setIsStreaming(true)
+  }, [])
+
+  const handleLiveAudioStart = useCallback(() => {
+    releaseOpeningGate()
+  }, [releaseOpeningGate])
+
+  const handleLiveInputTranscript = useCallback((text) => {
+    const content = String(text || '').trim()
+    if (!content) return
+    setInterimText(content)
+    let id = liveInputMessageIdRef.current
+    if (!id) {
+      id = Date.now()
+      liveInputMessageIdRef.current = id
+      setMessages(prev => [...prev, { id, role: 'user', content, streaming: true }])
+    } else {
+      setMessages(prev => prev.map(message => message.id === id ? { ...message, content } : message))
+    }
+  }, [])
+
+  const handleLiveOutputTranscript = useCallback((text) => {
+    const content = sanitizeSquareBrackets(String(text || '').trim())
+    if (!content) return
+    releaseOpeningGate()
+    setIsStreaming(true)
+    const agent = openingLatchRef.current ? 'opening' : 'explore'
+    setCurrentAgent({ name: agent })
+    let id = liveOutputMessageIdRef.current
+    if (!id) {
+      id = Date.now() + 1
+      liveOutputMessageIdRef.current = id
+      setMessages(prev => [...prev, { id, role: 'assistant', content, streaming: true, agent }])
+    } else {
+      setMessages(prev => prev.map(message => message.id === id ? { ...message, content, agent } : message))
+    }
+  }, [releaseOpeningGate])
+
+  const handleLiveTurnComplete = useCallback(({ inputText, outputText }) => {
+    const inputId = liveInputMessageIdRef.current
+    const outputId = liveOutputMessageIdRef.current
+    const finalInput = String(inputText || '').trim()
+    const finalOutput = sanitizeSquareBrackets(String(outputText || '').trim())
+
+    setMessages(prev => {
+      let next = prev.map(message => {
+        if (message.id === inputId) return { ...message, content: finalInput || message.content, streaming: false }
+        if (message.id === outputId) return { ...message, content: finalOutput || message.content, streaming: false }
+        return message
+      })
+      if (finalInput && !inputId) next = [...next, { id: Date.now(), role: 'user', content: finalInput, streaming: false }]
+      if (finalOutput && !outputId) {
+        const agent = openingLatchRef.current ? 'opening' : 'explore'
+        next = [...next, { id: Date.now() + 1, role: 'assistant', content: finalOutput, streaming: false, agent }]
+      }
+      return next
+    })
+
+    liveInputMessageIdRef.current = null
+    liveOutputMessageIdRef.current = null
+    setInput('')
+    setInterimText('')
+    setIsStreaming(false)
+    setCurrentAgent(null)
+    releaseOpeningGate()
+  }, [releaseOpeningGate])
+
+  const handleLiveError = useCallback((error) => {
+    setInitError(t('chat.connErr', { msg: error?.message || 'Gemini Live error' }))
+    setIsStreaming(false)
+    setCurrentAgent(null)
+    releaseOpeningGate()
+  }, [releaseOpeningGate, t])
+
+  const live = useGeminiLiveInterview({
+    enabled: nativeLiveEnabled,
+    config: { position, jobDescription, language, duration, resumeSnapshot, roleTrack },
+    audioEnabled: ttsEnabled,
+    onReady: handleLiveReady,
+    onAudioStart: handleLiveAudioStart,
+    onInputTranscript: handleLiveInputTranscript,
+    onOutputTranscript: handleLiveOutputTranscript,
+    onTurnComplete: handleLiveTurnComplete,
+    onError: handleLiveError,
+  })
+
+  const autoMicStartedRef = useRef(false)
+  useEffect(() => {
+    if (!nativeLiveEnabled) return
+    if (!live.connected) {
+      autoMicStartedRef.current = false
+      return
+    }
+    if (autoMicStartedRef.current) return
+    autoMicStartedRef.current = true
+    void live.startMic()
+  }, [nativeLiveEnabled, live.connected, live.startMic])
+
+  const tts = nativeLiveEnabled
+    ? { speaking: live.speaking, stop: live.stopAudio, enqueue: () => {} }
+    : legacyTts
+  const stt = nativeLiveEnabled
+    ? {
+        active: live.recording,
+        start: live.startMic,
+        stop: live.stopMic,
+        supported: live.supported,
+        listeningRef: live.listeningRef,
+        syncAccumulatedFromUser: () => {},
+      }
+    : legacyStt
 
   const ttsRef = useRef(tts)
   const sttRef = useRef(stt)
@@ -665,6 +791,22 @@ const ChatInterface = forwardRef(function ChatInterface({
     ttsRef.current = tts
     sttRef.current = stt
   }, [tts, stt])
+
+  useLayoutEffect(() => {
+    stopInterviewRef.current = () => {
+      const frozenMessages = messagesRef.current.map(message => (
+        message.streaming ? { ...message, streaming: false } : message
+      ))
+      messagesRef.current = frozenMessages
+      setMessages(frozenMessages)
+      live.disconnect()
+      legacyTts.stop()
+      try { legacyStt.stop() } catch { /* ignore */ }
+      try { window.speechSynthesis?.cancel() } catch { /* ignore */ }
+      setIsStreaming(false)
+      setCurrentAgent(null)
+    }
+  }, [legacyStt, legacyTts, live])
 
   // ── 离开面试页：立刻停语音与麦克风 ──
   useEffect(() => {
@@ -697,24 +839,48 @@ const ChatInterface = forwardRef(function ChatInterface({
   // The AbortController lets the cleanup cancel the in-flight fetch from the
   // first run, so only the second run's fetch reaches the backend.
   useEffect(() => {
-    if (!position) return
+    if (!position || nativeLiveEnabled) return
 
     const controller = new AbortController()
     const trigger = language === 'Deutsch'
       ? t('chat.startTriggerDe')
-      : t('chat.startTriggerEn')
+      : language === 'Chinese'
+        ? t('chat.startTriggerZh')
+        : t('chat.startTriggerEn')
 
-    runGraph([{ role: 'user', content: trigger }], /* isSystem */ true, controller.signal)
+    // Let React StrictMode finish its synthetic setup/cleanup cycle before
+    // starting the real opening request.
+    const startTimer = window.setTimeout(() => {
+      void runGraph([{ role: 'user', content: trigger }], /* isSystem */ true, controller.signal)
+    }, 0)
 
-    return () => controller.abort()   // cancel if StrictMode re-runs or component unmounts
+    return () => {
+      window.clearTimeout(startTimer)
+      controller.abort()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [position])
+  }, [position, nativeLiveEnabled])
 
   // ── Core: call backend LangGraph via SSE ──────────────────────
   const runGraph = useCallback(async (messageHistory, isSystem = false, signal = null) => {
-    const session = await supabase.auth.getSession()
-    const token = session.data.session?.access_token
-    if (!token) return
+    let sessionResult
+    try {
+      sessionResult = await supabase.auth.getSession()
+    } catch (err) {
+      if (signal?.aborted) return
+      console.error('[ChatInterface] Failed to read auth session', err)
+      setInitError(t('chat.sessionReadFail'))
+      releaseOpeningGate()
+      return
+    }
+
+    const token = sessionResult.data.session?.access_token
+    if (!token) {
+      if (signal?.aborted) return
+      setInitError(t('chat.sessionMissing'))
+      releaseOpeningGate()
+      return
+    }
     if (signal?.aborted) return   // already cancelled before we even started
 
     tts.stop()
@@ -756,6 +922,14 @@ const ChatInterface = forwardRef(function ChatInterface({
     let lastAgentName = null
     let sseDone = false
     let hasError = false
+    let didTimeout = false
+    const requestController = new AbortController()
+    const abortFromParent = () => requestController.abort(signal?.reason)
+    if (signal) signal.addEventListener('abort', abortFromParent, { once: true })
+    const requestTimeout = window.setTimeout(() => {
+      didTimeout = true
+      requestController.abort()
+    }, CHAT_REQUEST_TIMEOUT_MS)
 
     try {
       const res = await fetch(`${BACKEND_URL}/api/chat/message`, {
@@ -771,7 +945,7 @@ const ChatInterface = forwardRef(function ChatInterface({
           roleTrack,
           sessionId: needsReset ? 'new' : undefined,
         }),
-        signal,
+        signal: requestController.signal,
       })
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -845,7 +1019,7 @@ const ChatInterface = forwardRef(function ChatInterface({
           }
 
           if (evt.type === 'done') {
-            if (signal?.aborted) break sse
+            if (requestController.signal.aborted) break sse
             // Finalize remaining buffer
             if (ttsEnabledRef.current && sentenceBuffer.trim() && lastAgentName !== 'feedback') {
                tts.enqueue(sanitizeSquareBrackets(sentenceBuffer), token)
@@ -864,11 +1038,17 @@ const ChatInterface = forwardRef(function ChatInterface({
 
           if (evt.type === 'error') {
             hasError = true
+            releaseOpeningGate()
+            setInitError(t('chat.connErr', { msg: evt.message || t('chat.streamFailed') }))
             setMessages(prev => prev.map(m =>
               m.id === aiId ? { ...m, content: m.content || t('chat.errRetry'), streaming: false } : m
             ))
           }
         }
+      }
+
+      if (!sseDone && !hasError && !requestController.signal.aborted) {
+        throw new Error(t('chat.streamEnded'))
       }
 
       if (!hasError || fullText) {
@@ -877,34 +1057,52 @@ const ChatInterface = forwardRef(function ChatInterface({
         ))
       }
     } catch (err) {
-      if (err.name === 'AbortError') {
+      if (err.name === 'AbortError' && !didTimeout) {
         // StrictMode cancelled the first call — silently remove the orphan bubble
         setMessages(prev => prev.filter(m => m.id !== aiId))
         setIsStreaming(false)
         return
       }
       console.error('[ChatInterface]', err)
-      if (deferGateRef.current && openingLatchRef.current) {
-        openingLatchRef.current = false
-        onInterviewReadyRef.current?.()
-      }
-      setInitError(t('chat.connErr', { msg: err.message }))
+      releaseOpeningGate()
+      setInitError(didTimeout
+        ? t('chat.requestTimeout')
+        : t('chat.connErr', { msg: err.message }))
       setMessages(prev => prev.map(m =>
         m.id === aiId ? { ...m, content: t('chat.connFail'), streaming: false } : m
       ))
     } finally {
+      window.clearTimeout(requestTimeout)
+      if (signal) signal.removeEventListener('abort', abortFromParent)
       setIsStreaming(false)
       setCurrentAgent(null)
       if (!sseDone) {
         setMessages(prev => prev.map(m => m.id === aiId ? { ...m, streaming: false } : m))
       }
     }
-  }, [position, jobDescription, language, duration, resumeSnapshot, roleTrack, tts, stt, t])
+  }, [position, jobDescription, language, duration, resumeSnapshot, roleTrack, tts, stt, t, releaseOpeningGate])
 
   // ── Send message ──────────────────────────────────────────────
   const sendMessage = useCallback(async (text) => {
     const trimmed = text?.trim()
     if (!trimmed || isStreaming) return
+    if (nativeLiveEnabled) {
+      if (stt.active) {
+        stt.stop()
+        setInput('')
+        setInterimText('')
+        return
+      }
+      if (!live.sendText(trimmed)) {
+        setInitError(t('chat.connErr', { msg: 'Live interview is not connected' }))
+        return
+      }
+      setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: trimmed, streaming: false }])
+      setInput('')
+      setInterimText('')
+      setIsStreaming(true)
+      return
+    }
     if (stt.active) stt.stop()
     tts.stop()
     setInput('')
@@ -919,7 +1117,7 @@ const ChatInterface = forwardRef(function ChatInterface({
       .map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content }))
 
     await runGraph(history, false)
-  }, [isStreaming, messages, stt, tts, runGraph])
+  }, [isStreaming, messages, stt, tts, runGraph, nativeLiveEnabled, live, t])
 
   /** 录音中为已落稿 + 实时识别；非录音即输入框 */
   const inputDraft = stt.active ? `${input}${interimText}` : input
@@ -1037,12 +1235,15 @@ const ChatInterface = forwardRef(function ChatInterface({
         <button
           onClick={() => stt.active ? stt.stop() : stt.start(input)}
           disabled={!stt.supported || isStreaming}
+          aria-pressed={stt.active}
+          aria-label={stt.active ? 'Microphone on — click to mute' : 'Microphone off — click to unmute'}
+          title={stt.active ? 'Microphone on — click to mute' : 'Microphone off — click to unmute'}
           className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${stt.active
               ? 'bg-red-600 text-white shadow-xl shadow-red-600/20'
               : 'bg-slate-100 dark:bg-slate-900 text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'
             } disabled:opacity-50`}
         >
-          {stt.active ? <StopCircle className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+          {stt.active ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
         </button>
 
         <div className="flex-1 relative group">
@@ -1105,13 +1306,21 @@ const ChatInterface = forwardRef(function ChatInterface({
           <button
             onClick={() => {
               setInitError(null)
-              initDoneRef.current = false
               isFirstMsg.current = true
               setMessages([])
+              liveInputMessageIdRef.current = null
+              liveOutputMessageIdRef.current = null
+              openingLatchRef.current = true
+              if (nativeLiveEnabled) {
+                live.reconnect()
+                return
+              }
               const controller = new AbortController()
               const trigger = language === 'Deutsch'
                 ? t('chat.startTriggerDe')
-                : t('chat.startTriggerEn')
+                : language === 'Chinese'
+                  ? t('chat.startTriggerZh')
+                  : t('chat.startTriggerEn')
               // Restart opening generation. Previously this button only cleared UI state.
               void runGraph([{ role: 'user', content: trigger }], /* isSystem */ true, controller.signal)
             }}
@@ -1228,27 +1437,6 @@ const ChatInterface = forwardRef(function ChatInterface({
                 {messageItems}
               </div>
 
-              <div className="p-6 border-t border-slate-200/50 dark:border-white/10 space-y-4">
-                <div className="flex gap-3 items-end">
-                  <div className="flex-1 relative">
-                    <textarea
-                      value={stt.active ? input + interimText : input}
-                      onChange={e => setInput(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      placeholder="..."
-                      className="w-full bg-white dark:bg-black/40 text-slate-900 dark:text-white text-[0.85rem] font-medium rounded-2xl px-4 py-3 min-h-[48px] max-h-32 resize-none focus:outline-none border border-slate-200 dark:border-white/5 transition-all disabled:opacity-50"
-                      disabled={isStreaming}
-                    />
-                  </div>
-                  <button
-                    onClick={() => sendMessage(input)}
-                    disabled={!input.trim() || isStreaming}
-                    className="w-12 h-12 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[1.5rem] flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-50 shadow-xl"
-                  >
-                    <Send className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
             </aside>
           </div>
 
@@ -1260,9 +1448,12 @@ const ChatInterface = forwardRef(function ChatInterface({
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => stt.active ? stt.stop() : stt.start(input)}
+                      aria-pressed={stt.active}
+                      aria-label={stt.active ? 'Microphone on — click to mute' : 'Microphone off — click to unmute'}
+                      title={stt.active ? 'Microphone on — click to mute' : 'Microphone off — click to unmute'}
                       className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center transition-all ${stt.active ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.5)] scale-110' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/60 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10 hover:border-slate-300 dark:hover:border-white/10 border border-transparent'}`}
                     >
-                      {stt.active ? <Mic className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+                      {stt.active ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
                     </button>
                     <button
                       onClick={() => {
@@ -1271,6 +1462,9 @@ const ChatInterface = forwardRef(function ChatInterface({
                         if (!next) tts.stop()
                         else window.speechSynthesis?.resume()
                       }}
+                      aria-pressed={ttsEnabled}
+                      aria-label={ttsEnabled ? 'Speaker on — click to mute' : 'Speaker off — click to unmute'}
+                      title={ttsEnabled ? 'Speaker on — click to mute' : 'Speaker off — click to unmute'}
                       className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center transition-all ${ttsEnabled ? 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/80' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}
                     >
                       {ttsEnabled ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
@@ -1284,6 +1478,9 @@ const ChatInterface = forwardRef(function ChatInterface({
                   <span className="text-[10px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest leading-none">Video Camera</span>
                   <button
                     onClick={() => onToggleCamera?.()}
+                    aria-pressed={isCameraOn}
+                    aria-label={isCameraOn ? 'Camera on — click to turn off' : 'Camera off — click to turn on'}
+                    title={isCameraOn ? 'Camera on — click to turn off' : 'Camera off — click to turn on'}
                     className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center transition-all ${isCameraOn ? 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/80' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}
                   >
                     {isCameraOn ? <Video className="w-6 h-6" /> : <VideoOff className="w-6 h-6" />}
@@ -1303,7 +1500,10 @@ const ChatInterface = forwardRef(function ChatInterface({
 
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => window.location.href = '/setup'}
+                  onClick={() => {
+                    stopInterviewRef.current()
+                    window.location.href = '/setup'
+                  }}
                   className="px-8 py-3.5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-slate-200 dark:border-white/10"
                 >
                   {t('interview.exitDirectly', { defaultValue: 'Exit Without Saving' })}

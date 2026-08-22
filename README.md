@@ -196,21 +196,66 @@
 
 ## 🚀 快速开始
 
+本项目是 Node.js/Vite 前端，不使用 Python `venv`。依赖安装在当前目录的
+`node_modules` 中，并由 `package-lock.json` 锁定版本，形成项目级隔离环境。
+
+前置要求：Node.js 20.19+ 或 22.12+（推荐当前 LTS 版本，Vite 8 的最低要求）。从仓库根目录执行：
+
 ```bash
-git clone https://github.com/your-org/offerclaw.git
-cd offerclaw/frontend
+cd ai_interviewer_frontend
 
-npm install
+# 严格按照 package-lock.json 安装依赖
+npm ci
 
-cp .env.example .env        # 填入 Supabase 与后端地址
-npm run dev                  # → http://localhost:3000
+# macOS / Linux
+cp .env.example .env
+
+# Windows PowerShell（与上一条二选一）
+Copy-Item .env.example .env
 ```
+
+编辑 `.env`，填入 Supabase 项目地址和 Anon Key，然后启动开发服务器：
+
+```bash
+npm run dev
+```
+
+开发地址为 `http://localhost:3000`。Vite 会把 `/api` 请求代理到
+`http://localhost:5000`，因此请先启动后端服务。
+
+当 `.env` 设置 `VITE_LOCAL_SUPABASE=true` 时，登录页会显示本地账户按钮，并隐藏
+云端 OAuth 按钮。首次点击会在本地 Supabase 自动创建开发账户，后续直接登录。
 
 | 环境变量 | 必填 | 说明 |
 |---------|:----:|------|
 | `VITE_SUPABASE_URL` | ✅ | Supabase 项目地址 |
 | `VITE_SUPABASE_ANON_KEY` | ✅ | Supabase 匿名公钥 |
-| `VITE_BACKEND_URL` | — | 后端 API（默认 `http://localhost:5000`） |
+| `VITE_API_URL` | — | 后端 API 地址；优先级高于 `VITE_BACKEND_URL`，生产环境推荐使用 |
+| `VITE_BACKEND_URL` | — | 后端 API 地址；本地未设置时通过 Vite 代理访问 `localhost:5000` |
+
+### 构建与本地预览
+
+```bash
+npm run build
+npm run preview
+```
+
+生产构建产物位于 `dist/`。`preview` 仅用于部署前检查，不应作为生产 Web 服务器。
+
+### Firebase Hosting 部署
+
+项目已包含 `firebase.json` 和 `.firebaserc`。先在 `.env.production` 中设置线上后端地址，
+再执行：
+
+```bash
+npm ci
+npm run build
+npx firebase-tools login
+npx firebase-tools deploy --only hosting
+```
+
+Supabase Anon Key 会被编译进浏览器代码，只能使用公开的 Anon Key；绝不能在任何
+`VITE_*` 变量中填写 Supabase Service Role Key 或其他服务端密钥。
 
 <br/>
 

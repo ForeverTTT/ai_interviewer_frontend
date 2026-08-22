@@ -1,21 +1,30 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
-import LandingPage from './pages/LandingPage'
-import LoginPage from './pages/LoginPage'
-import SetupPage from './pages/SetupPage'
-import InterviewPage from './pages/InterviewPage'
-import DashboardPage from './pages/DashboardPage'
-import InterviewReportPage from './pages/InterviewReportPage'
-import AuthCallbackPage from './pages/AuthCallbackPage'
-import ProfilePage from './pages/ProfilePage'
-import GallupTestPage from './pages/GallupTestPage'
-import ExperiencesPage from './pages/ExperiencesPage'
-
 import BackgroundAurora from './components/BackgroundAurora'
 import CookieBanner from './components/CookieBanner'
+
+const LandingPage = lazy(() => import('./pages/LandingPage'))
+const LoginPage = lazy(() => import('./pages/LoginPage'))
+const SetupPage = lazy(() => import('./pages/SetupPage'))
+const InterviewPage = lazy(() => import('./pages/InterviewPage'))
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const InterviewReportPage = lazy(() => import('./pages/InterviewReportPage'))
+const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'))
+const ProfilePage = lazy(() => import('./pages/ProfilePage'))
+const GallupTestPage = lazy(() => import('./pages/GallupTestPage'))
+const ExperiencesPage = lazy(() => import('./pages/ExperiencesPage'))
+
+function PageFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-sky-50/50 text-slate-600 dark:bg-[#020617] dark:text-slate-300">
+      <span role="status" aria-live="polite">Loading…</span>
+    </div>
+  )
+}
 
 function Layout({ children, hideFooter = false }) {
   return (
@@ -41,8 +50,9 @@ function AppThemeShell() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<AppThemeShell />}>
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
+          <Route element={<AppThemeShell />}>
           <Route path="/" element={
             <Layout>
               <LandingPage />
@@ -113,8 +123,9 @@ export default function App() {
               <ExperiencesPage />
             </Layout>
           } />
-        </Route>
-      </Routes>
+          </Route>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   )
 }
