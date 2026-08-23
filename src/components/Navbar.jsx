@@ -23,8 +23,19 @@ export default function Navbar() {
     if (!user) return
 
     const fetchStatus = async () => {
+      let session = null
+      const fetchOwnTokensDirectly = async () => {
+        const userId = session?.user?.id || user.id
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('tokens')
+          .eq('id', userId)
+          .maybeSingle()
+        if (!error && data?.tokens !== undefined) setTokens(data.tokens)
+      }
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+        const sessionResult = await supabase.auth.getSession()
+        session = sessionResult.data.session
         const token = session?.access_token
         if (!token) return
 
@@ -43,9 +54,12 @@ export default function Navbar() {
           if (j.tokens !== undefined) {
             setTokens(j.tokens)
           }
+          return
         }
+        await fetchOwnTokensDirectly()
       } catch (err) {
         console.error('Failed to fetch job status', err)
+        await fetchOwnTokensDirectly()
       }
     }
 

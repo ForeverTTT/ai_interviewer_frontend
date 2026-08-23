@@ -52,7 +52,22 @@ export default function InterviewPage() {
   const { t, i18n } = useTranslation()
   const location = useLocation()
   const navigate  = useNavigate()
-  const { position, jobDescription, language, duration, interviewId, resumeContext, roleTrack } = location.state || {}
+  const {
+    position,
+    jobDescription,
+    language,
+    duration,
+    interviewId,
+    resumeContext,
+    roleTrack,
+    interviewerStyle = 'balanced',
+  } = location.state || {}
+  const interviewerStyleLabel = t({
+    balanced: 'setup.styleBalanced',
+    supportive: 'setup.styleSupportive',
+    demanding: 'setup.styleDemanding',
+    analytical: 'setup.styleAnalytical',
+  }[interviewerStyle] || 'setup.styleBalanced')
 
   useEffect(() => {
     document.title = t('meta.title')
@@ -195,7 +210,9 @@ export default function InterviewPage() {
   useEffect(() => { if (!position) navigate('/setup') }, [position, navigate])
   useEffect(() => () => { try { window.speechSynthesis?.cancel() } catch { /* ignore */ } }, [])
 
-  const systemPrompt = position ? buildInterviewPrompt({ position, jobDescription, language, duration }) : ''
+  const systemPrompt = position
+    ? buildInterviewPrompt({ position, jobDescription, language, duration, interviewerStyle })
+    : ''
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(systemPrompt).catch(() => {})
@@ -534,6 +551,10 @@ export default function InterviewPage() {
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('interview.dur')}</span>
                 <p className="text-sm font-bold text-slate-900 dark:text-white">{t('interview.minShort', { n: duration })}</p>
               </div>
+              <div className="col-span-2 space-y-2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('setup.interviewerStyle')}</span>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">{interviewerStyleLabel}</p>
+              </div>
             </div>
 
             <div className="space-y-6">
@@ -733,6 +754,7 @@ export default function InterviewPage() {
                 duration={duration}
                 resumeContext={typeof resumeContext === 'string' ? resumeContext : ''}
                 roleTrack={roleTrack || 'work'}
+                interviewerStyle={interviewerStyle}
                 persistInterviewId={interviewId || undefined}
                 deferFirstAudioGate
                 interviewUiVisible={chatPhase === 'live' && !timer.finished}

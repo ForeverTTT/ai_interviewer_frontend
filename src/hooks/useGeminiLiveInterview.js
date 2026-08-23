@@ -77,7 +77,8 @@ export function useGeminiLiveInterview({
     duration: config.duration,
     resumeSnapshot: config.resumeSnapshot,
     roleTrack: config.roleTrack,
-  }), [config.position, config.jobDescription, config.language, config.duration, config.resumeSnapshot, config.roleTrack])
+    interviewerStyle: config.interviewerStyle,
+  }), [config.position, config.jobDescription, config.language, config.duration, config.resumeSnapshot, config.roleTrack, config.interviewerStyle])
 
   const stopAudio = useCallback(() => {
     for (const source of outputSourcesRef.current) {

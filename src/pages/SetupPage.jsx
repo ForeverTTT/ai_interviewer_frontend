@@ -218,6 +218,7 @@ export default function SetupPage() {
     jobDescription: '',
     language: 'English',
     duration: 10,
+    interviewerStyle: 'balanced',
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
@@ -276,18 +277,34 @@ export default function SetupPage() {
 
   useEffect(() => {
     const fetchTokens = async () => {
+      let session = null
+      const fetchOwnTokensDirectly = async () => {
+        const userId = session?.user?.id
+        if (!userId) return
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('tokens')
+          .eq('id', userId)
+          .maybeSingle()
+        if (!error && data?.tokens !== undefined) setTokens(data.tokens)
+      }
       try {
         const backendUrl = getBackendBaseUrl()
-        const { data: { session } } = await supabase.auth.getSession()
+        const sessionResult = await supabase.auth.getSession()
+        session = sessionResult.data.session
         if (!session) return
         const res = await fetch(`${backendUrl}/api/profile`, {
           headers: { Authorization: `Bearer ${session.access_token}` },
         })
         if (res.ok) {
           const j = await res.json()
-          setTokens(j.tokens || 0)
+          if (j.tokens !== undefined) setTokens(j.tokens)
+          return
         }
-      } catch { /* ignore */ }
+        await fetchOwnTokensDirectly()
+      } catch {
+        await fetchOwnTokensDirectly()
+      }
     }
     fetchTokens()
   }, [])
@@ -303,6 +320,13 @@ export default function SetupPage() {
     { value: 10, label: t('setup.dur10'), desc: t('setup.dur10d') },
     { value: 15, label: t('setup.dur15'), desc: t('setup.dur15d') },
     { value: 20, label: t('setup.dur20'), desc: t('setup.dur20d') },
+  ], [t])
+
+  const interviewerStyles = useMemo(() => [
+    { value: 'balanced', icon: '⚖️', label: t('setup.styleBalanced'), desc: t('setup.styleBalancedDesc') },
+    { value: 'supportive', icon: '🌿', label: t('setup.styleSupportive'), desc: t('setup.styleSupportiveDesc') },
+    { value: 'demanding', icon: '🎯', label: t('setup.styleDemanding'), desc: t('setup.styleDemandingDesc') },
+    { value: 'analytical', icon: '🔍', label: t('setup.styleAnalytical'), desc: t('setup.styleAnalyticalDesc') },
   ], [t])
 
   const trackTabs = useMemo(
@@ -370,6 +394,7 @@ export default function SetupPage() {
           job_description: form.jobDescription,
           language: form.language,
           duration: form.duration,
+          interviewer_style: form.interviewerStyle,
         }
         if (effectiveResume) body.resume_snapshot = effectiveResume.slice(0, 50_000)
 
@@ -1033,6 +1058,36 @@ export default function SetupPage() {
                       </div>
                     </div>
                   </div>
+
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">{t('setup.interviewerStyle')}</h3>
+                      <p className="mt-2 text-xs font-medium text-slate-500 dark:text-slate-400">{t('setup.interviewerStyleDesc')}</p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                      {interviewerStyles.map((style) => (
+                        <button
+                          key={style.value}
+                          type="button"
+                          onClick={() => setForm({ ...form, interviewerStyle: style.value })}
+                          aria-pressed={form.interviewerStyle === style.value}
+                          className={`flex min-h-44 flex-col items-start gap-4 rounded-2xl border p-6 text-left transition-all duration-300 ${form.interviewerStyle === style.value
+                              ? 'border-slate-300 bg-slate-50 text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white'
+                              : 'border-slate-100 bg-white text-slate-600 hover:border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400'
+                            }`}
+                        >
+                          <div className="flex w-full items-center justify-between">
+                            <span className="text-3xl" aria-hidden="true">{style.icon}</span>
+                            {form.interviewerStyle === style.value && <Check className="h-4 w-4" />}
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold tracking-tight">{style.label}</div>
+                            <div className="mt-2 text-xs font-medium leading-relaxed opacity-70">{style.desc}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Footer Section */}
@@ -1053,6 +1108,9 @@ export default function SetupPage() {
                     </span>
                     <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm">
                       {form.duration} {t('setup.minSuffix')}
+                    </span>
+                    <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm">
+                      {interviewerStyles.find((style) => style.value === form.interviewerStyle)?.label}
                     </span>
                   </div>
 

@@ -91,7 +91,7 @@ const TTS_MIN_CHUNK_BYTES = 4800 // ~100ms of 16-bit mono @ 24kHz
  */
 const TTS_ANTI_POP_V2 = false
 
-function useStreamingTTS(language, enabled) {
+function useStreamingTTS(language, interviewerStyle, enabled) {
   const ctxRef = useRef(null)
   const enabledRef = useRef(enabled)
   const playGenRef = useRef(0)
@@ -228,7 +228,7 @@ function useStreamingTTS(language, enabled) {
           const res = await fetch(`${BACKEND_URL}/api/chat/tts`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-            body: JSON.stringify({ text, language }),
+            body: JSON.stringify({ text, language, interviewerStyle }),
             signal,
           })
           if (gen !== playGenRef.current) return
@@ -258,7 +258,7 @@ function useStreamingTTS(language, enabled) {
         const res = await fetch(`${BACKEND_URL}/api/chat/tts-stream`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-          body: JSON.stringify({ text, language }),
+          body: JSON.stringify({ text, language, interviewerStyle }),
           signal,
         })
         if (gen !== playGenRef.current) return
@@ -331,7 +331,7 @@ function useStreamingTTS(language, enabled) {
           const res = await fetch(`${BACKEND_URL}/api/chat/tts`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-            body: JSON.stringify({ text, language }),
+            body: JSON.stringify({ text, language, interviewerStyle }),
             signal,
           })
           if (gen !== playGenRef.current) return
@@ -384,7 +384,7 @@ function useStreamingTTS(language, enabled) {
       pendingRef.current = Math.max(0, pendingRef.current - 1)
       checkIdle()
     }
-  }, [language, hasWebAudio, getCtx, scheduleChunk, checkIdle, speakWithBrowserTTS])
+  }, [language, interviewerStyle, hasWebAudio, getCtx, scheduleChunk, checkIdle, speakWithBrowserTTS])
 
   return { enqueue, stop, speaking }
 }
@@ -526,6 +526,8 @@ const ChatInterface = forwardRef(function ChatInterface({
   resumeContext = '',
   /** 'school' | 'work' — 用于让面试官身份匹配场景 */
   roleTrack = 'work',
+  /** balanced | supportive | demanding | analytical */
+  interviewerStyle = 'balanced',
   /** 有值时：防抖将当前对话 POST 到 /api/interviews/:id/transcript */
   persistInterviewId,
   /** 为 true 时：首条 SSE 完成后先预加载 TTS，再调用 onInterviewUiReady */
@@ -664,7 +666,7 @@ const ChatInterface = forwardRef(function ChatInterface({
   }, [])
 
   const nativeLiveEnabled = digitalHuman
-  const legacyTts = useStreamingTTS(language, ttsEnabled)
+  const legacyTts = useStreamingTTS(language, interviewerStyle, ttsEnabled)
   const legacyStt = useSpeechRecognition(
     language,
     useCallback(t => setInput(t), []),
@@ -749,7 +751,7 @@ const ChatInterface = forwardRef(function ChatInterface({
 
   const live = useGeminiLiveInterview({
     enabled: nativeLiveEnabled,
-    config: { position, jobDescription, language, duration, resumeSnapshot, roleTrack },
+    config: { position, jobDescription, language, duration, resumeSnapshot, roleTrack, interviewerStyle },
     audioEnabled: ttsEnabled,
     onReady: handleLiveReady,
     onAudioStart: handleLiveAudioStart,
@@ -901,6 +903,7 @@ const ChatInterface = forwardRef(function ChatInterface({
             duration,
             resumeSnapshot,
             roleTrack,
+            interviewerStyle,
           }),
           signal,
         })
@@ -943,6 +946,7 @@ const ChatInterface = forwardRef(function ChatInterface({
           duration,
           resumeSnapshot,
           roleTrack,
+          interviewerStyle,
           sessionId: needsReset ? 'new' : undefined,
         }),
         signal: requestController.signal,
@@ -1080,7 +1084,7 @@ const ChatInterface = forwardRef(function ChatInterface({
         setMessages(prev => prev.map(m => m.id === aiId ? { ...m, streaming: false } : m))
       }
     }
-  }, [position, jobDescription, language, duration, resumeSnapshot, roleTrack, tts, stt, t, releaseOpeningGate])
+  }, [position, jobDescription, language, duration, resumeSnapshot, roleTrack, interviewerStyle, tts, stt, t, releaseOpeningGate])
 
   // ── Send message ──────────────────────────────────────────────
   const sendMessage = useCallback(async (text) => {
