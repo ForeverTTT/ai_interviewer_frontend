@@ -15,6 +15,11 @@ import {
 const BACKEND_URL = getBackendBaseUrl()
 const CHAT_REQUEST_TIMEOUT_MS = 45_000
 
+function newRequestId() {
+  return globalThis.crypto?.randomUUID?.()
+    || `req-${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
 /* ── Agent display config ─────────────────────────────────────── */
 
 const AGENT_STYLE = {
@@ -528,6 +533,8 @@ const ChatInterface = forwardRef(function ChatInterface({
   roleTrack = 'work',
   /** balanced | supportive | demanding | analytical */
   interviewerStyle = 'balanced',
+  /** hr | technical | mixed; server still treats persisted interview config as authoritative */
+  interviewerType = 'mixed',
   /** 有值时：防抖将当前对话 POST 到 /api/interviews/:id/transcript */
   persistInterviewId,
   /** 为 true 时：首条 SSE 完成后先预加载 TTS，再调用 onInterviewUiReady */
@@ -598,7 +605,7 @@ const ChatInterface = forwardRef(function ChatInterface({
       await fetch(`${BACKEND_URL}/api/interviews/${id}/transcript`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: rows }),
+        body: JSON.stringify({ messages: rows, idempotencyKey: newRequestId() }),
         keepalive: true,
       })
     } catch { /* ignore */ }
@@ -751,7 +758,17 @@ const ChatInterface = forwardRef(function ChatInterface({
 
   const live = useGeminiLiveInterview({
     enabled: nativeLiveEnabled,
-    config: { position, jobDescription, language, duration, resumeSnapshot, roleTrack, interviewerStyle },
+    config: {
+      interviewId: persistInterviewId,
+      position,
+      jobDescription,
+      language,
+      duration,
+      resumeSnapshot,
+      roleTrack,
+      interviewerStyle,
+      interviewerType,
+    },
     audioEnabled: ttsEnabled,
     onReady: handleLiveReady,
     onAudioStart: handleLiveAudioStart,
@@ -897,6 +914,7 @@ const ChatInterface = forwardRef(function ChatInterface({
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
+            interviewId: persistInterviewIdRef.current,
             position,
             jobDescription,
             language,
@@ -904,6 +922,7 @@ const ChatInterface = forwardRef(function ChatInterface({
             resumeSnapshot,
             roleTrack,
             interviewerStyle,
+            interviewerType,
           }),
           signal,
         })
@@ -939,6 +958,8 @@ const ChatInterface = forwardRef(function ChatInterface({
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
+          interviewId: persistInterviewIdRef.current,
+          idempotencyKey: newRequestId(),
           messages: messageHistory,
           position,
           jobDescription,
@@ -947,7 +968,7 @@ const ChatInterface = forwardRef(function ChatInterface({
           resumeSnapshot,
           roleTrack,
           interviewerStyle,
-          sessionId: needsReset ? 'new' : undefined,
+          interviewerType,
         }),
         signal: requestController.signal,
       })
@@ -1084,7 +1105,7 @@ const ChatInterface = forwardRef(function ChatInterface({
         setMessages(prev => prev.map(m => m.id === aiId ? { ...m, streaming: false } : m))
       }
     }
-  }, [position, jobDescription, language, duration, resumeSnapshot, roleTrack, interviewerStyle, tts, stt, t, releaseOpeningGate])
+  }, [position, jobDescription, language, duration, resumeSnapshot, roleTrack, interviewerStyle, interviewerType, tts, stt, t, releaseOpeningGate])
 
   // ── Send message ──────────────────────────────────────────────
   const sendMessage = useCallback(async (text) => {

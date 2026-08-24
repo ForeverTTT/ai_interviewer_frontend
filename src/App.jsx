@@ -79,6 +79,11 @@ export default function App() {
               <InterviewPage />
             </ProtectedRoute>
           } />
+          <Route path="/interview/:interviewId" element={
+            <ProtectedRoute>
+              <InterviewPage />
+            </ProtectedRoute>
+          } />
 
           <Route path="/dashboard" element={
             <ProtectedRoute>

@@ -26,7 +26,8 @@ function readStored(fallback) {
 export function ThemeProvider({ children }) {
   const location = useLocation()
   const isInterview = Boolean(
-    matchPath({ path: '/interview', end: true }, location.pathname),
+    matchPath({ path: '/interview', end: true }, location.pathname)
+      || matchPath({ path: '/interview/:interviewId', end: true }, location.pathname),
   )
 
   const [theme, setThemeState] = useState(() => readStored('light'))

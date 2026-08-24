@@ -31,7 +31,29 @@ function stylePrompt(interviewerStyle, locale) {
   return (STYLE_PROMPTS[interviewerStyle] || STYLE_PROMPTS.balanced)[locale]
 }
 
-export function buildInterviewPrompt({ position, jobDescription, language, duration, interviewerStyle = 'balanced' }) {
+const TYPE_PROMPTS = {
+  hr: {
+    zh: 'HR/招聘面：聚焦动机、沟通、经历、STAR 证据和岗位匹配，不进行深度技术考核。',
+    de: 'HR/Recruiting: Fokus auf Motivation, Kommunikation, Erfahrung, STAR-Belege und Rollenpassung; keine technische Tiefenprüfung.',
+    en: 'HR/recruiting interview: focus on motivation, communication, experience, STAR evidence, and role fit; do not conduct deep technical assessment.',
+  },
+  technical: {
+    zh: '技术面：聚焦岗位知识、项目深度、调试、系统/案例分析和技术取舍，避免连续纯 HR 问题。',
+    de: 'Technisches Interview: Fokus auf Fachwissen, Projekttiefe, Fehlersuche, System-/Fallanalyse und technische Abwägungen.',
+    en: 'Technical interview: focus on role knowledge, project depth, debugging, system/case analysis, and technical trade-offs.',
+  },
+  mixed: {
+    zh: '综合面：平衡覆盖经历、行为和岗位技术能力。',
+    de: 'Gemischtes Interview: Erfahrung, Verhalten und rollenspezifische technische Fähigkeiten ausgewogen abdecken.',
+    en: 'Mixed interview: balance experience, behavioral, and role-specific technical assessment.',
+  },
+}
+
+function typePrompt(interviewerType, locale) {
+  return (TYPE_PROMPTS[interviewerType] || TYPE_PROMPTS.mixed)[locale]
+}
+
+export function buildInterviewPrompt({ position, jobDescription, language, duration, interviewerStyle = 'balanced', interviewerType = 'mixed' }) {
   const isGerman = language === 'Deutsch'
   const isChinese = language === 'Chinese'
 
@@ -42,6 +64,9 @@ export function buildInterviewPrompt({ position, jobDescription, language, durat
 
 面试官性格：
 ${stylePrompt(interviewerStyle, 'zh')}
+
+面试官类型：
+${typePrompt(interviewerType, 'zh')}
 
 目标岗位：${position} | 语言：普通话（简体中文） | 时长：${duration} 分钟
 
@@ -72,6 +97,9 @@ Sie sind ein erfahrener Personalverantwortlicher bei einem deutschen Unternehmen
 
 INTERVIEWER-STIL:
 ${stylePrompt(interviewerStyle, 'de')}
+
+INTERVIEWER-TYP:
+${typePrompt(interviewerType, 'de')}
 
 STELLE: ${position} | SPRACHE: Deutsch | DAUER: ${duration} Minuten
 
@@ -107,6 +135,9 @@ You are an experienced HR professional conducting a mock job interview.
 INTERVIEWER STYLE:
 ${stylePrompt(interviewerStyle, 'en')}
 
+INTERVIEWER TYPE:
+${typePrompt(interviewerType, 'en')}
+
 POSITION: ${position} | LANGUAGE: English | DURATION: ${duration} minutes
 
 JOB DESCRIPTION:
@@ -139,13 +170,14 @@ Start now.`
  * In your Dify workflow, add these as Start node variables and reference them
  * in the system prompt template.
  */
-export function buildDifyInputs({ position, jobDescription, language, duration, interviewerStyle = 'balanced' }) {
+export function buildDifyInputs({ position, jobDescription, language, duration, interviewerStyle = 'balanced', interviewerType = 'mixed' }) {
   return {
     position,
     job_description: jobDescription,
     language,
     duration: String(duration),
     interviewer_style: interviewerStyle,
-    interview_context: buildInterviewPrompt({ position, jobDescription, language, duration, interviewerStyle }),
+    interviewer_type: interviewerType,
+    interview_context: buildInterviewPrompt({ position, jobDescription, language, duration, interviewerStyle, interviewerType }),
   }
 }

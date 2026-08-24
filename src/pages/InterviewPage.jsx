@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLocation, useNavigate, Link } from 'react-router-dom'
+import { useLocation, useNavigate, Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import { buildInterviewPrompt } from '../lib/promptBuilder'
@@ -9,6 +9,7 @@ import {
   recordInterviewClientEvent,
 } from '../lib/interviewEvents'
 import ChatInterface from '../components/ChatInterface'
+import PracticeInterviewPanel from '../components/PracticeInterviewPanel'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import { InterviewThemeToggle } from '../components/ThemeToggle'
 import {
@@ -20,48 +21,83 @@ import BackgroundAurora from '../components/BackgroundAurora'
 
 
 function useCountdown(minutes) {
-  const [timeLeft, setTimeLeft] = useState(minutes * 60)
-  const [started,  setStarted]  = useState(false)
+  const totalSeconds = Math.max(60, Number(minutes || 10) * 60)
+  const [timeLeft, setTimeLeft] = useState(totalSeconds)
+  const [started, setStarted] = useState(false)
+  const [running, setRunning] = useState(false)
   const [finished, setFinished] = useState(false)
-  const ref = useRef(null)
-
-  const start = useCallback(() => setStarted(true), [])
 
   useEffect(() => {
-    if (!started) return
-    if (timeLeft <= 0) { setFinished(true); return }
-    ref.current = setInterval(() => {
+    setTimeLeft(totalSeconds)
+    setStarted(false)
+    setRunning(false)
+    setFinished(false)
+  }, [totalSeconds])
+
+  const start = useCallback(() => {
+    setStarted(true)
+    setRunning(true)
+    setFinished(false)
+  }, [])
+  const pause = useCallback(() => setRunning(false), [])
+  const syncRemaining = useCallback((seconds, shouldRun) => {
+    const next = Math.max(0, Math.min(totalSeconds, Number(seconds) || 0))
+    setTimeLeft(next)
+    setStarted(true)
+    setFinished(next <= 0)
+    setRunning(Boolean(shouldRun) && next > 0)
+  }, [totalSeconds])
+
+  useEffect(() => {
+    if (!running) return undefined
+    const interval = window.setInterval(() => {
       setTimeLeft(t => {
-        if (t <= 1) { clearInterval(ref.current); setFinished(true); return 0 }
+        if (t <= 1) {
+          window.clearInterval(interval)
+          setRunning(false)
+          setFinished(true)
+          return 0
+        }
         return t - 1
       })
     }, 1000)
-    return () => clearInterval(ref.current)
-  }, [started, timeLeft])
+    return () => window.clearInterval(interval)
+  }, [running])
 
   const mm = String(Math.floor(timeLeft / 60)).padStart(2, '0')
   const ss = String(timeLeft % 60).padStart(2, '0')
-  const progress  = started ? ((minutes * 60 - timeLeft) / (minutes * 60)) * 100 : 0
+  const progress  = started ? ((totalSeconds - timeLeft) / totalSeconds) * 100 : 0
   const isWarning  = timeLeft <= 120 && started
   const isCritical = timeLeft <= 60  && started
 
-  return { display: `${mm}:${ss}`, progress, started, finished, isWarning, isCritical, start }
+  return { display: `${mm}:${ss}`, progress, started, running, finished, isWarning, isCritical, start, pause, syncRemaining }
 }
 
 export default function InterviewPage() {
   const { t, i18n } = useTranslation()
   const location = useLocation()
   const navigate  = useNavigate()
+  const { interviewId: routeInterviewId } = useParams()
+  const [restoredState, setRestoredState] = useState(null)
+  const [restoreLoading, setRestoreLoading] = useState(Boolean(routeInterviewId && !location.state))
+  const [restoreError, setRestoreError] = useState(null)
+  const interviewState = location.state || restoredState || {}
   const {
     position,
     jobDescription,
     language,
     duration,
-    interviewId,
+    interviewId: stateInterviewId,
     resumeContext,
     roleTrack,
     interviewerStyle = 'balanced',
-  } = location.state || {}
+    interviewerType = 'mixed',
+    mode = 'formal',
+    difficulty = 'medium',
+    deadlineAt,
+    interviewStatus = 'active',
+  } = interviewState
+  const interviewId = stateInterviewId || routeInterviewId
   const interviewerStyleLabel = t({
     balanced: 'setup.styleBalanced',
     supportive: 'setup.styleSupportive',
@@ -72,6 +108,52 @@ export default function InterviewPage() {
   useEffect(() => {
     document.title = t('meta.title')
   }, [t, i18n.language])
+
+  useEffect(() => {
+    if (location.state || !routeInterviewId) {
+      setRestoreLoading(false)
+      return undefined
+    }
+    let cancelled = false
+    ;(async () => {
+      setRestoreLoading(true)
+      setRestoreError(null)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session?.access_token) throw new Error(t('interview.restoreAuth'))
+        const response = await fetch(`${getBackendBaseUrl()}/api/interviews/${routeInterviewId}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        const body = await response.json().catch(() => ({}))
+        if (!response.ok || !body.interview) throw new Error(body.error || t('interview.restoreFailed'))
+        const iv = body.interview
+        if (iv.status === 'completed' && iv.report_json) {
+          navigate(`/interview/${iv.id}/report`, { replace: true })
+          return
+        }
+        if (!cancelled) setRestoredState({
+          interviewId: iv.id,
+          position: iv.position,
+          jobDescription: iv.job_description_snapshot || iv.job_description || '',
+          language: iv.language,
+          duration: iv.duration,
+          resumeContext: iv.resume_snapshot || '',
+          roleTrack: iv.role_track || 'work',
+          interviewerStyle: iv.interviewer_style || 'balanced',
+          interviewerType: iv.interviewer_type || 'mixed',
+          mode: iv.mode || 'formal',
+          difficulty: iv.difficulty || 'medium',
+          deadlineAt: iv.status === 'finalizing' ? new Date(0).toISOString() : (iv.deadline_at || null),
+          interviewStatus: iv.status || 'active',
+        })
+      } catch (error) {
+        if (!cancelled) setRestoreError(error.message || t('interview.restoreFailed'))
+      } finally {
+        if (!cancelled) setRestoreLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [location.state, navigate, routeInterviewId, t])
 
   const [chatPhase, setChatPhase] = useState('idle')
   const [showEndModal,   setShowEndModal]   = useState(false)
@@ -207,11 +289,13 @@ export default function InterviewPage() {
     } finally { setMicBusy(false) }
   }, [t])
 
-  useEffect(() => { if (!position) navigate('/setup') }, [position, navigate])
+  useEffect(() => {
+    if (!restoreLoading && !position && (!routeInterviewId || restoreError)) navigate('/setup')
+  }, [position, navigate, restoreLoading, restoreError, routeInterviewId])
   useEffect(() => () => { try { window.speechSynthesis?.cancel() } catch { /* ignore */ } }, [])
 
   const systemPrompt = position
-    ? buildInterviewPrompt({ position, jobDescription, language, duration, interviewerStyle })
+    ? buildInterviewPrompt({ position, jobDescription, language, duration, interviewerStyle, interviewerType })
     : ''
 
   const handleCopy = async () => {
@@ -239,8 +323,20 @@ export default function InterviewPage() {
   }, [lobbyCameraOn])
 
   const handleInterviewUiReady = useCallback(() => {
-    setChatPhase('live'); timer.start()
-  }, [timer.start])
+    setChatPhase('live')
+    if (mode === 'formal') {
+      const remaining = deadlineAt
+        ? Math.max(0, Math.ceil((new Date(deadlineAt).getTime() - Date.now()) / 1000))
+        : null
+      if (remaining === null) timer.start()
+      else timer.syncRemaining(remaining, interviewStatus === 'active')
+    }
+  }, [deadlineAt, interviewStatus, mode, timer.start, timer.syncRemaining])
+
+  const handlePracticeState = useCallback(({ paused, limits }) => {
+    if (!limits) return
+    timer.syncRemaining(limits.remainingSeconds, !paused)
+  }, [timer.syncRemaining])
 
   useEffect(() => {
     const handler = () => setShowEndModal(true)
@@ -396,11 +492,15 @@ export default function InterviewPage() {
     }
   }, [interviewId, navigate, t, language])
 
+  const handlePracticeLimitReached = useCallback(() => {
+    void finalizeAndGoReport('practice_limit')
+  }, [finalizeAndGoReport])
+
   useEffect(() => {
-    if (!timer.finished || autoFinalizeRequestedRef.current) return
+    if (!['formal', 'practice'].includes(mode) || !timer.finished || autoFinalizeRequestedRef.current) return
     autoFinalizeRequestedRef.current = true
-    void finalizeAndGoReport('timer')
-  }, [timer.finished, finalizeAndGoReport])
+    void finalizeAndGoReport(mode === 'practice' ? 'practice_time_limit' : 'timer')
+  }, [mode, timer.finished, finalizeAndGoReport])
 
   useEffect(() => {
     if (!interviewId) return undefined
@@ -426,7 +526,9 @@ export default function InterviewPage() {
     return () => window.removeEventListener('pagehide', handlePageHide)
   }, [interviewId])
 
-  if (!position) return null
+  if (restoreLoading || !position) {
+    return <div className="flex min-h-screen items-center justify-center bg-white text-sm font-bold text-slate-500 dark:bg-slate-950">{restoreError || t('interview.restoring')}</div>
+  }
 
   const progressColor = timer.isCritical ? 'bg-red-500' : timer.isWarning ? 'bg-amber-500' : 'bg-primary-500'
   const interviewStream = interviewCamOn ? cameraStream : null
@@ -554,6 +656,12 @@ export default function InterviewPage() {
               <div className="col-span-2 space-y-2">
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('setup.interviewerStyle')}</span>
                 <p className="text-sm font-bold text-slate-900 dark:text-white">{interviewerStyleLabel}</p>
+              </div>
+              <div className="col-span-2 space-y-2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('setup.interviewerType')}</span>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">
+                  {t(`setup.type${interviewerType === 'hr' ? 'Hr' : interviewerType === 'technical' ? 'Technical' : 'Mixed'}`)} · {t(mode === 'practice' ? 'setup.modePractice' : 'setup.modeFormal')} · {difficulty}
+                </p>
               </div>
             </div>
 
@@ -746,7 +854,15 @@ export default function InterviewPage() {
                 </div>
               )}
 
-              <ChatInterface
+              {mode === 'practice' ? <PracticeInterviewPanel
+                ref={chatRef}
+                interviewId={interviewId}
+                language={language}
+                interviewerType={interviewerType}
+                onInterviewUiReady={handleInterviewUiReady}
+                onPracticeState={handlePracticeState}
+                onLimitReached={handlePracticeLimitReached}
+              /> : <ChatInterface
                 ref={chatRef}
                 position={position}
                 jobDescription={jobDescription}
@@ -755,6 +871,7 @@ export default function InterviewPage() {
                 resumeContext={typeof resumeContext === 'string' ? resumeContext : ''}
                 roleTrack={roleTrack || 'work'}
                 interviewerStyle={interviewerStyle}
+                interviewerType={interviewerType}
                 persistInterviewId={interviewId || undefined}
                 deferFirstAudioGate
                 interviewUiVisible={chatPhase === 'live' && !timer.finished}
@@ -765,9 +882,9 @@ export default function InterviewPage() {
                 onToggleCamera={toggleInterviewCam}
                 timerDisplay={timer.display}
                 timerStatus={timer.isCritical ? 'critical' : timer.isWarning ? 'warning' : 'normal'}
-              />
+              />}
 
-              {timer.finished && (
+              {mode === 'formal' && timer.finished && (
                 <div className="absolute inset-0 z-30 flex flex-col items-center justify-center px-8 text-center bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl animate-in fade-in duration-700">
                   <div className="w-24 h-24 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-5xl mb-8 shadow-inner border border-slate-100 dark:border-slate-800">
                     ⏰

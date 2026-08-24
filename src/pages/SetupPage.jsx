@@ -219,9 +219,13 @@ export default function SetupPage() {
     language: 'English',
     duration: 10,
     interviewerStyle: 'balanced',
+    interviewerType: 'mixed',
+    mode: 'formal',
+    difficulty: 'medium',
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+  const interviewCreateRequestRef = useRef(null)
   const [profileResumeText, setProfileResumeText] = useState('')
   const [sessionResumeText, setSessionResumeText] = useState('')
   const [resumeParsing, setResumeParsing] = useState(false)
@@ -384,46 +388,71 @@ export default function SetupPage() {
 
     setLoading(true)
     let interviewId = null
+    let createdInterview = null
     try {
       const backendUrl = getBackendBaseUrl()
       const { data: { session } } = await supabase.auth.getSession()
       const token = session?.access_token
+      if (!token) throw new Error('Missing authenticated session')
       if (token) {
+        const creationId = interviewCreateRequestRef.current
+          || globalThis.crypto?.randomUUID?.()
+          || `create-${Date.now()}`
+        interviewCreateRequestRef.current = creationId
         const body = {
           position: form.position,
           job_description: form.jobDescription,
           language: form.language,
           duration: form.duration,
           interviewer_style: form.interviewerStyle,
+          interviewerType: form.interviewerType,
+          role_track: roleTrack,
+          mode: form.mode,
+          difficulty: form.difficulty,
+          idempotencyKey: creationId,
         }
         if (effectiveResume) body.resume_snapshot = effectiveResume.slice(0, 50_000)
 
-        const res = await fetch(`${backendUrl}/api/interviews`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify(body),
-        }).catch(() => null)
+        let res = null
+        for (let attempt = 0; attempt < 2 && !res; attempt += 1) {
+          res = await fetch(`${backendUrl}/api/interviews`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Idempotency-Key': creationId,
+            },
+            body: JSON.stringify(body),
+          }).catch(() => null)
+          if (!res && attempt === 0) await new Promise(resolve => window.setTimeout(resolve, 500))
+        }
         if (res?.ok) {
           const j = await res.json().catch(() => ({}))
-          interviewId = j.interview?.id ?? null
+          createdInterview = j.interview || null
+          interviewId = createdInterview?.id ?? null
         }
+        if (!interviewId) throw new Error('Interview record was not created')
+        interviewCreateRequestRef.current = null
       }
-    } catch {
-      // non-blocking
+    } catch (error) {
+      console.error('[SetupPage] Failed to create persistent interview', error)
+      setLoading(false)
+      setTokenError(t('common.errorDesc', 'The interview could not be created. Please try again.'))
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
     }
 
     addJdHistoryEntry(form.position, form.jobDescription, roleTrack)
     setJdHistory(loadJdHistory())
 
     setLoading(false)
-    navigate('/interview', {
+    navigate(`/interview/${interviewId}`, {
       state: {
         ...form,
         roleTrack,
         interviewId,
+        deadlineAt: createdInterview?.deadline_at || null,
+        interviewStatus: createdInterview?.status || 'active',
         resumeContext: effectiveResume,
       },
     })
@@ -1011,6 +1040,100 @@ export default function SetupPage() {
                   </div>
 
                   {/* Interview Config */}
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">
+                        {t('setup.interviewerType')}
+                      </h3>
+                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                        {t('setup.interviewerTypeDesc')}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {[
+                        { value: 'hr', icon: '🤝', label: t('setup.typeHr'), desc: t('setup.typeHrDesc') },
+                        { value: 'technical', icon: '💻', label: t('setup.typeTechnical'), desc: t('setup.typeTechnicalDesc') },
+                        { value: 'mixed', icon: '🧭', label: t('setup.typeMixed'), desc: t('setup.typeMixedDesc') },
+                      ].map(option => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          aria-pressed={form.interviewerType === option.value}
+                          onClick={() => setForm({ ...form, interviewerType: option.value })}
+                          className={`rounded-2xl border p-6 text-left transition-all ${form.interviewerType === option.value
+                              ? 'border-indigo-300 bg-indigo-50 text-slate-900 shadow-sm dark:border-indigo-700 dark:bg-indigo-950/30 dark:text-white'
+                              : 'border-slate-100 bg-white text-slate-600 hover:border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400'
+                            }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-3xl" aria-hidden="true">{option.icon}</span>
+                            {form.interviewerType === option.value && <Check className="h-4 w-4" />}
+                          </div>
+                          <div className="mt-4 text-sm font-bold">{option.label}</div>
+                          <div className="mt-2 text-xs leading-relaxed opacity-75">{option.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+                    <div className="space-y-8">
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">
+                          {t('setup.interviewMode', 'Interview mode')}
+                        </h3>
+                        <p className="mt-2 text-xs text-slate-500">
+                          {t('setup.interviewModeDesc', 'Practice gives immediate coaching; formal simulation withholds feedback until the end.')}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        {[
+                          { value: 'practice', label: t('setup.modePractice', 'Practice'), desc: t('setup.modePracticeDesc', 'Hints, retries, notes and pause') },
+                          { value: 'formal', label: t('setup.modeFormal', 'Formal'), desc: t('setup.modeFormalDesc', 'Continuous timer and final feedback') },
+                        ].map(option => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => setForm({ ...form, mode: option.value })}
+                            className={`rounded-2xl border p-5 text-left transition-all ${form.mode === option.value
+                                ? 'border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-800'
+                                : 'border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-950'
+                              }`}
+                          >
+                            <div className="text-sm font-bold text-slate-900 dark:text-white">{option.label}</div>
+                            <div className="mt-2 text-xs text-slate-500">{option.desc}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-8">
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">
+                          {t('setup.difficulty', 'Difficulty')}
+                        </h3>
+                        <p className="mt-2 text-xs text-slate-500">
+                          {t('setup.difficultyDesc', 'Adaptive changes level using your previous scored answer.')}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {['easy', 'medium', 'hard', 'adaptive'].map(level => (
+                          <button
+                            key={level}
+                            type="button"
+                            onClick={() => setForm({ ...form, difficulty: level })}
+                            className={`rounded-2xl border px-3 py-5 text-xs font-black uppercase tracking-wider transition-all ${form.difficulty === level
+                                ? 'border-slate-300 bg-slate-50 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white'
+                                : 'border-slate-100 bg-white text-slate-500 dark:border-slate-800 dark:bg-slate-950'
+                              }`}
+                          >
+                            {level}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
                     <div className="space-y-8">
                       <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">{t('setup.interviewLang')}</h3>
@@ -1111,6 +1234,9 @@ export default function SetupPage() {
                     </span>
                     <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm">
                       {interviewerStyles.find((style) => style.value === form.interviewerStyle)?.label}
+                    </span>
+                    <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm">
+                      {t(`setup.type${form.interviewerType === 'hr' ? 'Hr' : form.interviewerType === 'technical' ? 'Technical' : 'Mixed'}`)}
                     </span>
                   </div>
 

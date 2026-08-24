@@ -71,6 +71,7 @@ export function useGeminiLiveInterview({
   useLayoutEffect(() => { audioEnabledRef.current = audioEnabled }, [audioEnabled])
 
   const stableConfig = useMemo(() => ({
+    interviewId: config.interviewId,
     position: config.position,
     jobDescription: config.jobDescription,
     language: config.language,
@@ -78,7 +79,7 @@ export function useGeminiLiveInterview({
     resumeSnapshot: config.resumeSnapshot,
     roleTrack: config.roleTrack,
     interviewerStyle: config.interviewerStyle,
-  }), [config.position, config.jobDescription, config.language, config.duration, config.resumeSnapshot, config.roleTrack, config.interviewerStyle])
+  }), [config.interviewId, config.position, config.jobDescription, config.language, config.duration, config.resumeSnapshot, config.roleTrack, config.interviewerStyle])
 
   const stopAudio = useCallback(() => {
     for (const source of outputSourcesRef.current) {

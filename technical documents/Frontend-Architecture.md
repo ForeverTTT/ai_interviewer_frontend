@@ -1,5 +1,7 @@
 # 前端技术架构文档
 
+> 文档版本：2026-08-24；已同步 `/interview/:interviewId` 刷新恢复、面试官类型和完整练习流程。
+
 ## 目录
 
 1. [技术栈总览](#1-技术栈总览)
@@ -26,10 +28,10 @@
 | 类别 | 技术 | 版本 | 用途 |
 |------|------|------|------|
 | **框架** | React | 18.3 | UI 组件化开发 |
-| **构建工具** | Vite | 5.4 | 极速 HMR + 生产构建 |
-| **路由** | React Router | 6.26 | SPA 路由 + 路由守卫 |
+| **构建工具** | Vite | 8.2 | 极速 HMR + 生产构建 |
+| **路由** | React Router | 7.18 | SPA 路由 + 路由守卫 |
 | **样式** | Tailwind CSS | 3.4 | 原子化 CSS 方案 |
-| **后处理** | PostCSS + Autoprefixer | 8.4 / 10.4 | CSS 编译与厂商前缀 |
+| **后处理** | PostCSS + Autoprefixer | 8.5 / 10.4 | CSS 编译与厂商前缀 |
 | **认证** | Supabase Auth | 2.45 | OAuth (Google / LinkedIn OIDC) |
 | **国际化** | i18next + react-i18next | 25.10 / 16.6 | 三语 (zh/en/de) |
 | **语言检测** | i18next-browser-languagedetector | 8.2 | 浏览器自动语言检测 |
@@ -54,7 +56,7 @@
   "react": "^18.3.1",
   "react-dom": "^18.3.1",
   "react-i18next": "^16.6.6",
-  "react-router-dom": "^6.26.2",
+  "react-router-dom": "^7.18.2",
   "three": "^0.180.0"
 }
 ```
@@ -63,11 +65,11 @@
 
 ```json
 {
-  "@vitejs/plugin-react": "^4.3.1",
+  "@vitejs/plugin-react": "^6.0.5",
   "autoprefixer": "^10.4.20",
-  "postcss": "^8.4.45",
+  "postcss": "^8.5.26",
   "tailwindcss": "^3.4.11",
-  "vite": "^5.4.2"
+  "vite": "^8.2.1"
 }
 ```
 
@@ -98,6 +100,7 @@ frontend/
 │   │   └── ExperiencesPage.jsx    # 面经库展示
 │   ├── components/            # 16 个功能组件
 │   │   ├── ChatInterface.jsx      # 核心：SSE + TTS + STT + 消息渲染
+│   │   ├── PracticeInterviewPanel.jsx # 练习模式：多次作答、提示、笔记和暂停恢复
 │   │   ├── Navbar.jsx             # 顶栏导航
 │   │   ├── Footer.jsx             # 页脚
 │   │   ├── ProtectedRoute.jsx     # 路由守卫
@@ -115,7 +118,8 @@ frontend/
 │   ├── context/               # 全局 Context
 │   │   └── ThemeContext.jsx       # 主题管理 Provider
 │   ├── hooks/                 # 自定义 Hooks
-│   │   └── useAuth.js             # Supabase 认证 Hook
+│   │   ├── useAuth.js             # Supabase 认证 Hook
+│   │   └── useGeminiLiveInterview.js # Gemini Live 语音连接（携带 interviewId）
 │   ├── lib/                   # 工具库
 │   │   ├── supabase.js            # Supabase 客户端初始化
 │   │   ├── backendBase.js         # 后端 URL 管理
@@ -183,6 +187,7 @@ BrowserRouter
     ├── /auth/callback ............ AuthCallbackPage (无 ProtectedRoute)
     ├── /setup .................... SetupPage (Layout + ProtectedRoute)
     ├── /interview ................ InterviewPage (无 Layout, 全屏)
+    ├── /interview/:interviewId ... InterviewPage (无 Layout, 全屏，可刷新恢复)
     ├── /dashboard ................ DashboardPage (Layout + ProtectedRoute)
     ├── /profile .................. ProfilePage (Layout + ProtectedRoute)
     ├── /profile/edit ............. ProfilePage (Layout + ProtectedRoute)
@@ -197,7 +202,7 @@ BrowserRouter
 Layout = Navbar + BackgroundAurora + <main>{children}</main> + Footer
 ```
 
-- 面试页 (`/interview`) 不使用 Layout，实现全屏沉浸模式
+- 面试页 (`/interview`、`/interview/:interviewId`) 不使用 Layout，实现全屏沉浸模式
 - 登录页和 OAuth 回调页独立于 Layout
 - 面经库 (`/experiences`) 公开访问，不需要登录
 
@@ -207,12 +212,17 @@ Layout = Navbar + BackgroundAurora + <main>{children}</main> + Footer
 
 ### 路由间数据传递
 
-`SetupPage → InterviewPage` 通过 `navigate('/interview', { state: {...} })` 传递面试配置：
+`SetupPage → InterviewPage` 创建成功后导航到 `/interview/:interviewId`，同时用 React Router
+`state` 传递首屏配置以减少一次等待：
 - `position`、`jobDescription`、`language`、`duration`
 - `interviewId`（后端创建的面试记录 ID）
+- `mode`（`practice` / `formal`）与 `difficulty`（Easy/Medium/Hard/Adaptive）
+- `interviewerType`（`hr` / `technical` / `mixed`）
 - `resumeContext`（简历文本）
 
-**注意**：浏览器刷新面试页会丢失 `state`，自动重定向回 `/setup`。
+直接刷新 `/interview/:interviewId` 时，页面通过 `GET /api/interviews/:id` 重新取得配置，再由
+聊天或练习组件恢复 checkpoint、题目、尝试和有限对话历史。无 ID 的兼容路由 `/interview`
+仍要求导航 `state`，缺失时返回 `/setup`。
 
 ---
 
@@ -290,6 +300,7 @@ fetch(`${backendUrl}/api/xxx`, {
 | 页面数据 | `useState` + `useEffect` | 页面级 |
 | 组件间传参 | Props / 路由 `state` | 父子组件 |
 | 持久化 | `localStorage` | 主题、语言、JD 历史 |
+| 面试业务状态 | Supabase（通过后端 API） | checkpoint、消息、题目、尝试、提示、笔记和计时 |
 
 ### ThemeContext
 
@@ -449,7 +460,7 @@ colors: {
 
 ### 核心组件
 
-#### ChatInterface.jsx (1226 行)
+#### ChatInterface.jsx
 
 面试核心组件，承载整个对话交互：
 
@@ -462,6 +473,18 @@ colors: {
 | STT 集成 | `webkitSpeechRecognition` 语音转文字 |
 | 消息渲染 | 用户/AI 消息气泡 + Agent 角色标签 |
 | 降级链 | Gemini TTS → 浏览器 SpeechSynthesis |
+| 持久化协议 | 每次文本请求携带 `interviewId` 与新的 `idempotencyKey` |
+
+#### PracticeInterviewPanel.jsx
+
+练习模式不复用正式面试的即时流式反馈流程，而是通过规范化状态机 API 操作：
+
+- 页面加载时恢复当前题、全部尝试、提示和私人笔记；没有当前题时幂等生成下一题。
+- 支持暂停/恢复、四级提示、浏览器语音听写、题目朗读、多次作答、重试、掌握、带可选原因的跳过和笔记保存。
+- 首次作答后必须先执行“重试”才能再次提交；未作答不能标记掌握，四级提示用尽后按钮锁定。
+- 用服务端 `remainingSeconds` 同步倒计时；暂停时前端计时冻结，达到时长或题数上限自动定稿。
+- 每次写操作生成幂等键；网络失败时使用同一个请求体重试，避免重复出题或重复保存。
+- `getTranscript()` 从规范化 questions/attempts 生成兼容报告所需的 transcript。
 
 #### Navbar.jsx (318 行)
 
@@ -508,7 +531,7 @@ OAuth 登录页面，支持 Google 和 LinkedIn OIDC 两种登录方式，使用
 
 OAuth 回调处理页面，调用 `exchangeCodeForSession` 将授权码换为会话 token，成功后跳转 `/dashboard`。
 
-### SetupPage (963 行)
+### SetupPage
 
 面试配置页，功能丰富：
 
@@ -518,15 +541,17 @@ OAuth 回调处理页面，调用 `exchangeCodeForSession` 将授权码换为会
 | 职位描述 | 文本域 + JD 历史记录（localStorage，最多 10 条） |
 | 简历上传 | PDF 解析 → 后端 OCR → 文本提取 |
 | AI 助手 | 动机信生成（位置、JD、简历 → LLM → 动机信） |
-| 面试配置 | 语言（English/Deutsch）+ 时长（5/10/15/20 min） |
+| 面试配置 | 模式（练习/正式）+ 难度（Easy/Medium/Hard/Adaptive）+ 语言 + 时长 |
+| 幂等创建 | 一个启动动作复用稳定的 `idempotencyKey`，网络重试不会重复创建或扣分 |
 
-### InterviewPage (636 行)
+### InterviewPage
 
 全屏面试页（无 Navbar/Footer），集成：
-- `ChatInterface` 组件
-- 倒计时器
+- 正式模式使用 `ChatInterface`（SSE 或 Gemini Live）
+- 练习模式使用 `PracticeInterviewPanel`
+- 正式模式倒计时与自动结束；练习模式由服务端累计实际练习用时
 - 面试进度条
-- 面试结束 → 生成报告
+- 面试结束 → 根据模式生成不同侧重点的报告
 
 ### DashboardPage (584 行)
 
@@ -575,8 +600,8 @@ OAuth 回调处理页面，调用 `exchangeCodeForSession` 将授权码换为会
 前端                                后端
   │                                  │
   ├─ POST /api/chat/message ────────►│
-  │  (Body: messages, position,      │
-  │   jobDescription, language, ...)  │
+  │  (Body: interviewId,             │
+  │   idempotencyKey, messages, ...)  │
   │                                  │
   │◄── SSE: {type:'agent', name}  ───┤  ← Agent 切换
   │◄── SSE: {type:'text', content} ──┤  ← Token 流
@@ -592,7 +617,15 @@ OAuth 回调处理页面，调用 `exchangeCodeForSession` 将授权码换为会
 const res = await fetch(`${BACKEND_URL}/api/chat/message`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-  body: JSON.stringify({ messages, position, jobDescription, language, duration }),
+  body: JSON.stringify({
+    interviewId,
+    idempotencyKey: crypto.randomUUID(),
+    messages,
+    position,
+    jobDescription,
+    language,
+    duration,
+  }),
 })
 
 const reader = res.body.getReader()
@@ -744,8 +777,13 @@ LLM 流式输出时，前端实时分句触发 TTS：
 
 ```javascript
 export function getBackendBaseUrl() {
-  const raw = import.meta.env.VITE_BACKEND_URL
-  if (raw) return String(raw).replace(/\/$/, '')
+  const raw = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL
+  if (raw != null && String(raw).trim() !== '') {
+    return String(raw).replace(/\/$/, '')
+  }
+  if (!['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+    return '<configured production Cloud Run origin>'
+  }
   return 'http://localhost:5000'
 }
 ```
@@ -759,10 +797,22 @@ export function getBackendBaseUrl() {
 | `/api/chat/message` | POST (SSE) | 面试对话流 | ChatInterface |
 | `/api/chat/tts-stream` | POST | 流式 TTS | ChatInterface |
 | `/api/chat/tts` | POST | 完整 TTS | ChatInterface |
-| `/api/chat/reset` | POST | 重置面试会话 | InterviewPage |
-| `/api/chat/session` | GET | 面试进度状态 | InterviewPage |
-| `/api/interviews` | GET/POST | 面试列表/创建 | Dashboard/SetupPage |
+| `/api/chat/reset` | POST | 携带 `interviewId` 的兼容初始化/恢复检查，不清空持久化状态 | InterviewPage |
+| `/api/chat/session?interviewId=...` | GET | 指定面试的持久化流程状态 | InterviewPage |
+| `/api/chat/live` | WebSocket | `start.config.interviewId` 必填的 Gemini Live 面试 | useGeminiLiveInterview |
+| `/api/interviews` | GET/POST | 面试列表/原子幂等创建 | Dashboard/SetupPage |
 | `/api/interviews/:id` | GET/DELETE | 面试详情/删除 | Report/Dashboard |
+| `/api/interview-sessions/:id` | GET | 恢复题目、尝试、提示、笔记、checkpoint 和服务端练习限制 | PracticeInterviewPanel |
+| `/api/interview-sessions/:id/questions/next` | POST | 按固定或 Adaptive 难度生成下一题 | PracticeInterviewPanel |
+| `/api/interview-sessions/:id/questions/:questionId/answer` | POST | 保存回答；练习返回即时反馈，正式隐藏反馈 | PracticeInterviewPanel / formal client |
+| `/api/interview-sessions/:id/questions/:questionId/hint` | POST | 获取下一层提示，最多四级（仅练习） | PracticeInterviewPanel |
+| `/api/interview-sessions/:id/pause`、`/resume` | POST | 练习暂停/恢复 | PracticeInterviewPanel |
+| `/api/interview-sessions/:id/questions/:questionId/retry`、`master`、`skip` | POST | 练习题状态动作 | PracticeInterviewPanel |
+| `/api/interview-sessions/:id/questions/:questionId/note` | PUT | 保存私人笔记 | PracticeInterviewPanel |
+| `/api/interview-sessions/:id/reconnect` | POST | 记录持久化重连动作 | Live/恢复客户端 |
+| `/api/interview-sessions/:id/reconnect-context` | GET | 只读取当前题和有限最近消息 | Live/恢复客户端 |
+| `/api/interview-sessions/:id/competencies` | GET | 岗位能力矩阵与评分证据 | 后续进度 UI / 调试 |
+| `/api/interview-sessions/progress/practice` | GET | 跨场练习进步汇总 | 后续进度 UI / 调试 |
 | `/api/profile` | GET/PUT | 个人资料 | ProfilePage/Navbar |
 | `/api/profile/resume` | GET/PUT | 简历文本 | SetupPage/Profile |
 | `/api/profile/resume/parse-pdf` | POST | PDF 解析 | SetupPage/Profile |
