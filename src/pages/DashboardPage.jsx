@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
+import { authenticatedFetch } from '../lib/authenticatedFetch'
 import {
   PlusCircle, Clock, Globe2, Briefcase,
   TrendingUp, Target, Zap, ArrowRight, FileText, UserCircle,
@@ -76,7 +77,7 @@ export default function DashboardPage() {
           setLoading(false)
           return
         }
-        const res = await fetch(`${backendUrl}/api/interviews`, {
+        const res = await authenticatedFetch(`${backendUrl}/api/interviews`, {
           headers: { Authorization: `Bearer ${session.access_token}` },
         })
         if (res.ok) {
@@ -99,7 +100,7 @@ export default function DashboardPage() {
         const backendUrl = getBackendBaseUrl()
         const { data: { session } } = await supabase.auth.getSession()
         if (!session?.access_token) return
-        const res = await fetch(`${backendUrl}/api/profile/game-stats`, {
+        const res = await authenticatedFetch(`${backendUrl}/api/profile/game-stats`, {
           headers: { Authorization: `Bearer ${session.access_token}` },
         })
         if (res.ok) {
@@ -121,7 +122,7 @@ export default function DashboardPage() {
     try {
       const backendUrl = getBackendBaseUrl()
       const { data: { session } } = await supabase.auth.getSession()
-      const res = await fetch(`${backendUrl}/api/profile/check-in`, {
+      const res = await authenticatedFetch(`${backendUrl}/api/profile/check-in`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}` },
       })
@@ -161,7 +162,7 @@ export default function DashboardPage() {
         setDeleteModalError(t('dashboard.deleteFailed'))
         return
       }
-      const res = await fetch(`${backendUrl}/api/interviews/${id}`, {
+      const res = await authenticatedFetch(`${backendUrl}/api/interviews/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session.access_token}` },
       })

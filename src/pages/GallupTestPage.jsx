@@ -30,6 +30,7 @@ import GallupReport from '../components/GallupReport'
 import heroBg from '../assets/background.jpg'
 
 import { getBackendBaseUrl } from '../lib/backendBase'
+import { authenticatedFetch } from '../lib/authenticatedFetch'
 
 const API_URL = getBackendBaseUrl()
 
@@ -55,7 +56,7 @@ export default function GallupTestPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
 
-      const res = await fetch(`${API_URL}/api/profile`, {
+      const res = await authenticatedFetch(`${API_URL}/api/profile`, {
         headers: { Authorization: `Bearer ${session.access_token}` }
       })
 

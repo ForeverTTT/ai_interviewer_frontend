@@ -18,6 +18,7 @@ const AuthCallbackPage = lazyWithReload(() => import('./pages/AuthCallbackPage')
 const ProfilePage = lazyWithReload(() => import('./pages/ProfilePage'))
 const GallupTestPage = lazyWithReload(() => import('./pages/GallupTestPage'))
 const ExperiencesPage = lazyWithReload(() => import('./pages/ExperiencesPage'))
+const ResumeTailorPage = lazyWithReload(() => import('./pages/ResumeTailorPage'))
 
 function PageFallback() {
   return (
@@ -104,6 +105,14 @@ export default function App() {
             <ProtectedRoute>
               <Layout>
                 <ProfilePage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/resume-tailor" element={
+            <ProtectedRoute>
+              <Layout>
+                <ResumeTailorPage />
               </Layout>
             </ProtectedRoute>
           } />

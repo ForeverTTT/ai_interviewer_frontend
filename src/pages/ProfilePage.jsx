@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
+import { authenticatedFetch } from '../lib/authenticatedFetch'
 import {
   mergeCvProfileFromApi,
   emptyCvProfile,
@@ -1216,7 +1217,7 @@ export default function ProfilePage() {
         setLoading(false)
         return
       }
-      const res = await fetch(`${backendUrl}/api/profile`, {
+      const res = await authenticatedFetch(`${backendUrl}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (!res.ok) throw new Error('load')
@@ -1253,7 +1254,7 @@ export default function ProfilePage() {
       const token = session?.access_token
       if (!token) return
 
-      const res = await fetch(`${backendUrl}/api/profile`, {
+      const res = await authenticatedFetch(`${backendUrl}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (!res.ok) return
@@ -1329,7 +1330,7 @@ export default function ProfilePage() {
         return;
       }
 
-      const res = await fetch(`${backendUrl}/api/profile`, {
+      const res = await authenticatedFetch(`${backendUrl}/api/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -1373,7 +1374,7 @@ export default function ProfilePage() {
       const token = session?.access_token
       if (!token) return
 
-      const res = await fetch(`${backendUrl}/api/profile/recharge`, {
+      const res = await authenticatedFetch(`${backendUrl}/api/profile/recharge`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1403,7 +1404,7 @@ export default function ProfilePage() {
         setCoachErr(t('profile.parseNeedAuth'))
         return
       }
-      const res = await fetch(`${backendUrl}/api/profile/resume-coach`, {
+      const res = await authenticatedFetch(`${backendUrl}/api/profile/resume-coach`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1457,7 +1458,7 @@ export default function ProfilePage() {
       const { data: { session } } = await supabase.auth.getSession()
       const token = session?.access_token
       if (!token) throw new Error('auth')
-      const res = await fetch(`${backendUrl}/api/profile/extract-cv`, {
+      const res = await authenticatedFetch(`${backendUrl}/api/profile/extract-cv`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1502,7 +1503,7 @@ export default function ProfilePage() {
       const token = session?.access_token
       if (!token) throw new Error('auth')
       const pdfBase64 = await fileToBase64Data(file)
-      const res = await fetch(`${backendUrl}/api/profile/resume/parse-pdf`, {
+      const res = await authenticatedFetch(`${backendUrl}/api/profile/resume/parse-pdf`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1559,7 +1560,7 @@ export default function ProfilePage() {
           const { data: { session } } = await supabase.auth.getSession()
           const token = session?.access_token
           if (!token) return
-          const res = await fetch(`${backendUrl}/api/profile/resume-coach/translate`, {
+          const res = await authenticatedFetch(`${backendUrl}/api/profile/resume-coach/translate`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

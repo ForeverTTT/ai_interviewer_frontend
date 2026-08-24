@@ -3,11 +3,13 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
+import { authenticatedFetch } from '../lib/authenticatedFetch'
+import { parseJobDescription } from '../lib/jobDescriptionParser'
 import {
   Briefcase, FileText, Globe2, Clock, ArrowRight,
   Info, Sparkles, Upload, Loader2, X, Check, LayoutTemplate,
   ChevronDown, Copy, RotateCcw, History, Trash2,
-  AlertCircle, Coins, Zap,
+  AlertCircle, Coins, Zap, Download,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -27,6 +29,107 @@ function fileToBase64Data(file) {
 const JD_HISTORY_KEY = 'interviewde_jd_history'
 const JD_HISTORY_MAX = 10
 
+const EMPLOYMENT_TYPE_VALUES = ['internship', 'full_time', 'working_student', 'part_time', 'contract']
+
+function safeFileName(value) {
+  return String(value || 'motivation-letter')
+    .replace(/[<>:"/\\|?*\u0000-\u001F]/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 80) || 'motivation-letter'
+}
+
+function downloadBlob(blob, fileName) {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+function encodePdfText(value) {
+  return Array.from(String(value || '')).map((char) => {
+    const code = char.charCodeAt(0)
+    if (char === '\\' || char === '(' || char === ')') return `\\${char}`
+    if (code >= 0x20 && code <= 0x7e) return char
+    if (code >= 0xa0 && code <= 0xff) return `\\${code.toString(8).padStart(3, '0')}`
+    return '?'
+  }).join('')
+}
+
+function buildSimplePdf(title, body) {
+  const maxChars = 88
+  const paragraphs = String(body || '').replace(/\r/g, '').split('\n')
+  const lines = []
+  for (const paragraph of paragraphs) {
+    if (!paragraph.trim()) {
+      lines.push('')
+      continue
+    }
+    const words = paragraph.split(/\s+/)
+    let line = ''
+    for (const word of words) {
+      if (!line) line = word
+      else if (`${line} ${word}`.length <= maxChars) line += ` ${word}`
+      else {
+        lines.push(line)
+        line = word
+      }
+    }
+    if (line) lines.push(line)
+  }
+
+  const pages = []
+  const pageCapacity = 48
+  for (let i = 0; i < lines.length || i === 0; i += pageCapacity) pages.push(lines.slice(i, i + pageCapacity))
+  const objects = []
+  const addObject = (content) => { objects.push(content); return objects.length }
+  const catalogId = addObject('')
+  const pagesId = addObject('')
+  const fontId = addObject('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>')
+  const pageIds = []
+
+  pages.forEach((pageLines, pageIndex) => {
+    const commands = [
+      'BT', '/F1 15 Tf', '50 792 Td', `(${encodePdfText(title)}) Tj`,
+      '/F1 10 Tf', '0 -28 Td',
+    ]
+    pageLines.forEach((line, index) => {
+      if (index > 0) commands.push('0 -15 Td')
+      commands.push(`(${encodePdfText(line)}) Tj`)
+    })
+    commands.push('ET', `BT /F1 8 Tf 520 28 Td (${pageIndex + 1}/${pages.length}) Tj ET`)
+    const stream = commands.join('\n')
+    const contentId = addObject(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`)
+    pageIds.push(addObject(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${fontId} 0 R >> >> /Contents ${contentId} 0 R >>`))
+  })
+  objects[catalogId - 1] = `<< /Type /Catalog /Pages ${pagesId} 0 R >>`
+  objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageIds.map(id => `${id} 0 R`).join(' ')}] /Count ${pageIds.length} >>`
+
+  let pdf = '%PDF-1.4\n'
+  const offsets = [0]
+  objects.forEach((object, index) => {
+    offsets.push(pdf.length)
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`
+  })
+  const xrefOffset = pdf.length
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`
+  offsets.slice(1).forEach(offset => { pdf += `${String(offset).padStart(10, '0')} 00000 n \n` })
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`
+  return new Blob([pdf], { type: 'application/pdf' })
+}
+
 function loadJdHistory() {
   try {
     const raw = localStorage.getItem(JD_HISTORY_KEY)
@@ -38,7 +141,7 @@ function saveJdHistory(entries) {
   try { localStorage.setItem(JD_HISTORY_KEY, JSON.stringify(entries.slice(0, JD_HISTORY_MAX))) } catch { /* ignore */ }
 }
 
-function addJdHistoryEntry(position, jobDescription, roleTrack) {
+function addJdHistoryEntry(position, jobDescription, employmentType, category) {
   if (!position?.trim() || !jobDescription?.trim()) return
   const entries = loadJdHistory()
   const deduped = entries.filter(e =>
@@ -48,7 +151,8 @@ function addJdHistoryEntry(position, jobDescription, roleTrack) {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     position: position.trim(),
     jobDescription: jobDescription.trim(),
-    roleTrack: roleTrack || 'work',
+    employmentType: employmentType || 'full_time',
+    category: category || '',
     createdAt: Date.now(),
   })
   saveJdHistory(deduped)
@@ -211,7 +315,6 @@ function EnergyBadge({ amount, label, t }) {
 export default function SetupPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const [roleTrack, setRoleTrack] = useState('work')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [form, setForm] = useState({
     position: '',
@@ -222,11 +325,13 @@ export default function SetupPage() {
     interviewerType: 'mixed',
     mode: 'formal',
     difficulty: 'medium',
+    employmentType: 'full_time',
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const interviewCreateRequestRef = useRef(null)
   const [profileResumeText, setProfileResumeText] = useState('')
+  const [profileResumeLoading, setProfileResumeLoading] = useState(true)
   const [sessionResumeText, setSessionResumeText] = useState('')
   const [resumeParsing, setResumeParsing] = useState(false)
   const [resumeNote, setResumeNote] = useState(null)
@@ -240,13 +345,18 @@ export default function SetupPage() {
   const [mlCopied, setMlCopied] = useState(false)
   const [jdHistory, setJdHistory] = useState(() => loadJdHistory())
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [jdAnalysis, setJdAnalysis] = useState({ status: 'idle', message: '' })
   const [tokens, setTokens] = useState(0)
-  const [tokenError, setTokenError] = useState(null)
+  const [formNotice, setFormNotice] = useState(null)
   const historyRef = useRef(null)
+  const lastAnalyzedJdRef = useRef('')
 
   const resumeFileRef = useRef(null)
 
-  const effectiveResume = (sessionResumeText.trim() || profileResumeText.trim())
+  const effectiveResume = (profileResumeText.trim() || sessionResumeText.trim())
+  const practiceEquivalentMinutes = form.difficulty === 'easy' ? 10 : form.difficulty === 'hard' ? 45 : 20
+  const practiceCoreQuestions = form.difficulty === 'easy' ? 5 : form.difficulty === 'hard' ? 18 : 9
+  const practiceTotalQuestions = practiceCoreQuestions + 1
 
   useEffect(() => {
     document.title = t('meta.title')
@@ -265,16 +375,12 @@ export default function SetupPage() {
       ; (async () => {
         try {
           const backendUrl = getBackendBaseUrl()
-          const { data: { session } } = await supabase.auth.getSession()
-          const token = session?.access_token
-          if (!token) return
-          const res = await fetch(`${backendUrl}/api/profile/resume`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
+          const res = await authenticatedFetch(`${backendUrl}/api/profile/resume`)
           if (!res.ok || cancelled) return
           const j = await res.json()
           if (!cancelled) setProfileResumeText(j.resumeText || '')
         } catch { /* ignore */ }
+        finally { if (!cancelled) setProfileResumeLoading(false) }
       })()
     return () => { cancelled = true }
   }, [])
@@ -297,9 +403,7 @@ export default function SetupPage() {
         const sessionResult = await supabase.auth.getSession()
         session = sessionResult.data.session
         if (!session) return
-        const res = await fetch(`${backendUrl}/api/profile`, {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        })
+        const res = await authenticatedFetch(`${backendUrl}/api/profile`)
         if (res.ok) {
           const j = await res.json()
           if (j.tokens !== undefined) setTokens(j.tokens)
@@ -319,13 +423,6 @@ export default function SetupPage() {
     { value: 'Chinese', label: '中文', flag: '🇨🇳', desc: t('setup.langZhDesc') },
   ], [t])
 
-  const durations = useMemo(() => [
-    { value: 5, label: t('setup.dur5'), desc: t('setup.dur5d') },
-    { value: 10, label: t('setup.dur10'), desc: t('setup.dur10d') },
-    { value: 15, label: t('setup.dur15'), desc: t('setup.dur15d') },
-    { value: 20, label: t('setup.dur20'), desc: t('setup.dur20d') },
-  ], [t])
-
   const interviewerStyles = useMemo(() => [
     { value: 'balanced', icon: '⚖️', label: t('setup.styleBalanced'), desc: t('setup.styleBalancedDesc') },
     { value: 'supportive', icon: '🌿', label: t('setup.styleSupportive'), desc: t('setup.styleSupportiveDesc') },
@@ -333,13 +430,10 @@ export default function SetupPage() {
     { value: 'analytical', icon: '🔍', label: t('setup.styleAnalytical'), desc: t('setup.styleAnalyticalDesc') },
   ], [t])
 
-  const trackTabs = useMemo(
-    () => [
-      { value: 'school', label: t('setup.trackSchool') },
-      { value: 'work', label: t('setup.trackWork') },
-    ],
-    [t],
-  )
+  const employmentTypes = useMemo(() => EMPLOYMENT_TYPE_VALUES.map(value => ({
+    value,
+    label: t(`setup.employment${value.split('_').map(part => part[0].toUpperCase() + part.slice(1)).join('')}`),
+  })), [t])
 
   const uiLang = useMemo(() => {
     const c = String(i18n.resolvedLanguage || i18n.language || 'en').toLowerCase()
@@ -349,11 +443,40 @@ export default function SetupPage() {
   }, [i18n.language, i18n.resolvedLanguage])
 
   const roleCatalog = useMemo(() => buildRoleCatalog(uiLang), [uiLang])
-  const categories = roleCatalog[roleTrack] || {}
+  const categories = roleCatalog.work || {}
   const categoryEntries = Object.entries(categories)
   const selectedRoles = selectedCategory && categories[selectedCategory]
     ? categories[selectedCategory].roles
     : []
+
+  const analyzeJobDescription = async (jobDescription, force = false) => {
+    const normalized = String(jobDescription || '').trim()
+    if (normalized.length < 50 || (!force && normalized === lastAnalyzedJdRef.current)) return
+    lastAnalyzedJdRef.current = normalized
+    setJdAnalysis({ status: 'loading', message: '' })
+    try {
+      await Promise.resolve()
+      const result = parseJobDescription(normalized)
+      setForm(prev => ({
+        ...prev,
+        position: result.position || prev.position,
+        employmentType: EMPLOYMENT_TYPE_VALUES.includes(result.employmentType) ? result.employmentType : prev.employmentType,
+      }))
+      if (result.category && categories[result.category]) setSelectedCategory(result.category)
+      setErrors(prev => ({ ...prev, position: '', jobDescription: '' }))
+      setJdAnalysis({ status: 'success', message: t('setup.jdAnalysisSuccess') })
+    } catch {
+      lastAnalyzedJdRef.current = ''
+      setJdAnalysis({ status: 'error', message: t('setup.jdAnalysisError') })
+    }
+  }
+
+  useEffect(() => {
+    const normalized = form.jobDescription.trim()
+    if (normalized.length < 80 || normalized === lastAnalyzedJdRef.current) return undefined
+    const timer = window.setTimeout(() => void analyzeJobDescription(normalized), 900)
+    return () => window.clearTimeout(timer)
+  }, [form.jobDescription])
 
   const validate = () => {
     const newErrors = {}
@@ -381,75 +504,87 @@ export default function SetupPage() {
     }
 
     if (tokens < 300) {
-      setTokenError(t('common.insufficientTokens', 'Insufficient Energy'))
+      setFormNotice({ type: 'tokens', text: t('common.insufficientTokens', 'Insufficient Energy') })
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
 
+    setFormNotice(null)
     setLoading(true)
     let interviewId = null
     let createdInterview = null
     try {
       const backendUrl = getBackendBaseUrl()
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token
-      if (!token) throw new Error('Missing authenticated session')
-      if (token) {
-        const creationId = interviewCreateRequestRef.current
-          || globalThis.crypto?.randomUUID?.()
-          || `create-${Date.now()}`
-        interviewCreateRequestRef.current = creationId
-        const body = {
-          position: form.position,
-          job_description: form.jobDescription,
-          language: form.language,
-          duration: form.duration,
-          interviewer_style: form.interviewerStyle,
-          interviewerType: form.interviewerType,
-          role_track: roleTrack,
-          mode: form.mode,
-          difficulty: form.difficulty,
-          idempotencyKey: creationId,
-        }
-        if (effectiveResume) body.resume_snapshot = effectiveResume.slice(0, 50_000)
-
-        let res = null
-        for (let attempt = 0; attempt < 2 && !res; attempt += 1) {
-          res = await fetch(`${backendUrl}/api/interviews`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-              'Idempotency-Key': creationId,
-            },
-            body: JSON.stringify(body),
-          }).catch(() => null)
-          if (!res && attempt === 0) await new Promise(resolve => window.setTimeout(resolve, 500))
-        }
-        if (res?.ok) {
-          const j = await res.json().catch(() => ({}))
-          createdInterview = j.interview || null
-          interviewId = createdInterview?.id ?? null
-        }
-        if (!interviewId) throw new Error('Interview record was not created')
-        interviewCreateRequestRef.current = null
+      const creationId = interviewCreateRequestRef.current
+        || globalThis.crypto?.randomUUID?.()
+        || `create-${Date.now()}`
+      interviewCreateRequestRef.current = creationId
+      const body = {
+        position: form.position,
+        job_description: form.jobDescription,
+        language: form.language,
+        duration: form.duration,
+        interviewer_style: form.interviewerStyle,
+        interviewerType: form.interviewerType,
+        role_track: 'work',
+        employment_type: form.employmentType,
+        mode: form.mode,
+        difficulty: form.difficulty,
+        idempotencyKey: creationId,
       }
+      if (effectiveResume) body.resume_snapshot = effectiveResume.slice(0, 50_000)
+
+      let res = null
+      for (let attempt = 0; attempt < 2 && !res; attempt += 1) {
+        res = await authenticatedFetch(`${backendUrl}/api/interviews`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Idempotency-Key': creationId,
+          },
+          body: JSON.stringify(body),
+        }).catch((error) => {
+          if (error?.code === 'AUTH_EXPIRED' || error?.code === 'AUTH_REJECTED') throw error
+          return null
+        })
+        if (!res && attempt === 0) await new Promise(resolve => window.setTimeout(resolve, 500))
+      }
+      const responseBody = res ? await res.json().catch(() => ({})) : {}
+      if (res?.ok) {
+        createdInterview = responseBody.interview || null
+        interviewId = createdInterview?.id ?? null
+      }
+      if (!res) throw new Error('Interview service is unreachable')
+      if (!res.ok) {
+        const requestError = new Error(responseBody.error || `Interview creation failed (${res.status})`)
+        requestError.status = res.status
+        requestError.code = responseBody.code
+        throw requestError
+      }
+      if (!interviewId) throw new Error('Interview record was not created')
+      interviewCreateRequestRef.current = null
     } catch (error) {
       console.error('[SetupPage] Failed to create persistent interview', error)
       setLoading(false)
-      setTokenError(t('common.errorDesc', 'The interview could not be created. Please try again.'))
+      if (error?.code === 'AUTH_EXPIRED' || error?.code === 'AUTH_REJECTED' || error?.status === 401) {
+        setFormNotice({ type: 'auth', text: t('setup.sessionExpired') })
+      } else if (error?.code === 'INSUFFICIENT_TOKENS' || error?.status === 403) {
+        setFormNotice({ type: 'tokens', text: t('common.insufficientTokens', 'Insufficient Energy') })
+      } else {
+        setFormNotice({ type: 'error', text: t('setup.createInterviewError') })
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
 
-    addJdHistoryEntry(form.position, form.jobDescription, roleTrack)
+    addJdHistoryEntry(form.position, form.jobDescription, form.employmentType, selectedCategory)
     setJdHistory(loadJdHistory())
 
     setLoading(false)
     navigate(`/interview/${interviewId}`, {
       state: {
         ...form,
-        roleTrack,
+        roleTrack: 'work',
         interviewId,
         deadlineAt: createdInterview?.deadline_at || null,
         interviewStatus: createdInterview?.status || 'active',
@@ -462,33 +597,52 @@ export default function SetupPage() {
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file) return
-    if (file.type !== 'application/pdf') {
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
       setResumeNote({ type: 'err', text: t('setup.resumePdfOnly') })
+      return
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      setResumeNote({ type: 'err', text: t('setup.resumeTooLarge') })
       return
     }
     setResumeParsing(true)
     setResumeNote(null)
     try {
       const backendUrl = getBackendBaseUrl()
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token
-      if (!token) throw new Error('no auth')
       const pdfBase64 = await fileToBase64Data(file)
-      const res = await fetch(`${backendUrl}/api/profile/resume/parse-pdf`, {
+      const res = await authenticatedFetch(`${backendUrl}/api/profile/resume/parse-pdf`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ pdfBase64 }),
       })
       const j = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(j.error || 'parse')
-      setSessionResumeText(j.text || '')
+      if (!res.ok) throw Object.assign(new Error(j.error || 'parse'), { code: j.code || (res.status === 413 ? 'PDF_TOO_LARGE' : 'PDF_UNREADABLE') })
+      const parsedText = String(j.text || '')
+      const saveRes = await authenticatedFetch(`${backendUrl}/api/profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resumeText: parsedText }),
+      })
+      if (!saveRes.ok) throw Object.assign(new Error('save'), { code: 'RESUME_SAVE_FAILED' })
+      setProfileResumeText(parsedText)
+      setSessionResumeText('')
       if (j.warning) setResumeNote({ type: 'warn', text: j.warning })
-      else setResumeNote({ type: 'ok', text: t('setup.resumeParsed', { n: j.charCount ?? 0 }) })
-    } catch {
-      setResumeNote({ type: 'err', text: t('setup.resumeParseErr') })
+      else setResumeNote({ type: 'ok', text: t('setup.resumeParsedSaved', { n: j.charCount ?? parsedText.length }) })
+    } catch (error) {
+      const messageKey = {
+        PDF_TOO_LARGE: 'resumeTooLarge',
+        REQUEST_TOO_LARGE: 'resumeTooLarge',
+        PDF_NO_TEXT: 'resumeNoText',
+        PDF_PASSWORD_PROTECTED: 'resumePasswordProtected',
+        PDF_INVALID: 'resumeInvalid',
+        PDF_UNREADABLE: 'resumeInvalid',
+        RESUME_SAVE_FAILED: 'resumeSaveErr',
+        AUTH_EXPIRED: 'sessionExpired',
+        AUTH_REJECTED: 'sessionExpired',
+      }[error?.code] || 'resumeParseErr'
+      setResumeNote({ type: 'err', text: t(`setup.${messageKey}`) })
     } finally {
       setResumeParsing(false)
     }
@@ -556,10 +710,22 @@ export default function SetupPage() {
     setTimeout(() => setMlCopied(false), 2000)
   }
 
+  const handleExportWord = () => {
+    if (!mlResult) return
+    const title = `${t('setup.mlTitle')} — ${form.position}`
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>body{font-family:Arial,sans-serif;max-width:720px;margin:56px auto;color:#172033;line-height:1.65}h1{font-size:22px;margin-bottom:32px}p{white-space:pre-wrap;font-size:12pt}</style></head><body><h1>${escapeHtml(title)}</h1><p>${escapeHtml(mlResult)}</p></body></html>`
+    downloadBlob(new Blob(['\ufeff', html], { type: 'application/msword' }), `${safeFileName(form.position)}-motivation-letter.doc`)
+  }
+
+  const handleExportPdf = () => {
+    if (!mlResult) return
+    downloadBlob(buildSimplePdf(`${form.position} - Motivation Letter`, mlResult), `${safeFileName(form.position)}-motivation-letter.pdf`)
+  }
+
   return (
     <div className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-20">
       <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
-        {tokenError && (
+        {formNotice && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -568,13 +734,22 @@ export default function SetupPage() {
             <div className="flex items-center gap-3">
               <Info className="h-5 w-5 text-red-500" />
               <div className="flex flex-col">
-                <span className="text-sm font-bold text-red-700 dark:text-red-400">{tokenError}</span>
-                <span className="text-[10px] font-bold text-red-500/80 uppercase tracking-widest">{t('profile.tokenUsageInterview')}: 300 ({t('profile.tokens')}: {tokens})</span>
+                <span className="text-sm font-bold text-red-700 dark:text-red-400">{formNotice.text}</span>
+                {formNotice.type === 'tokens' && (
+                  <span className="text-[10px] font-bold text-red-500/80 uppercase tracking-widest">{t('profile.tokenUsageInterview')}: 300 ({t('profile.tokens')}: {tokens})</span>
+                )}
               </div>
             </div>
-            <Link to="/profile" className="px-4 py-2 rounded-xl bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-[10px] font-black uppercase tracking-widest hover:bg-red-200 transition-colors">
-              {t('profile.recharge')}
-            </Link>
+            {formNotice.type === 'tokens' && (
+              <Link to="/profile" className="px-4 py-2 rounded-xl bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-[10px] font-black uppercase tracking-widest hover:bg-red-200 transition-colors">
+                {t('profile.recharge')}
+              </Link>
+            )}
+            {formNotice.type === 'auth' && (
+              <Link to="/login" className="px-4 py-2 rounded-xl bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-[10px] font-black uppercase tracking-widest hover:bg-red-200 transition-colors">
+                {t('setup.signInAgain')}
+              </Link>
+            )}
           </motion.div>
         )}
         <header className="mb-20">
@@ -597,7 +772,7 @@ export default function SetupPage() {
           <main className="lg:col-span-12">
             <div className="bg-white dark:bg-slate-950 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 p-8 sm:p-12 shadow-sm">
               <form onSubmit={handleSubmit} className="space-y-16">
-                <div className="space-y-12">
+                <div className="flex flex-col gap-12">
                   {/* Role Section */}
                   <div className="space-y-8">
                     <div className="space-y-2">
@@ -608,16 +783,15 @@ export default function SetupPage() {
                     <div className="space-y-6">
                       <div className="space-y-4">
                         <label className="text-xs font-bold uppercase tracking-widest text-slate-600">{t('setup.trackLabel')}</label>
-                        <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-800">
-                          {trackTabs.map((tab) => (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-800">
+                          {employmentTypes.map((tab) => (
                             <button
                               key={tab.value}
                               type="button"
                               onClick={() => {
-                                setRoleTrack(tab.value)
-                                setSelectedCategory('')
+                                setForm(prev => ({ ...prev, employmentType: tab.value }))
                               }}
-                              className={`rounded-xl px-4 py-3 text-sm font-bold transition-all ${roleTrack === tab.value
+                              className={`rounded-xl px-4 py-3 text-sm font-bold transition-all ${form.employmentType === tab.value
                                   ? 'border border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white shadow-sm'
                                   : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950 text-slate-600'
                                 }`}
@@ -687,10 +861,10 @@ export default function SetupPage() {
                   </div>
 
                   {/* Job Description Section */}
-                  <div className="space-y-8">
-                    <div className="flex items-center justify-between">
+                  <div className="order-first space-y-8">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest font-chinese-modern">{t('setup.jobDesc')} <span className="text-red-500">*</span></h3>
-                      <div className="flex items-center gap-4">
+                      <div className="flex flex-wrap items-center gap-3">
                         {jdHistory.length > 0 && (
                           <div className="relative" ref={historyRef}>
                             <button
@@ -747,7 +921,10 @@ export default function SetupPage() {
                                               position: entry.position,
                                               jobDescription: entry.jobDescription,
                                             }))
-                                            if (entry.roleTrack) setRoleTrack(entry.roleTrack)
+                                            if (entry.employmentType) {
+                                              setForm(prev => ({ ...prev, employmentType: entry.employmentType }))
+                                            }
+                                            if (entry.category && categories[entry.category]) setSelectedCategory(entry.category)
                                             setErrors({})
                                             setHistoryOpen(false)
                                           }}
@@ -784,6 +961,15 @@ export default function SetupPage() {
                             </AnimatePresence>
                           </div>
                         )}
+                        <button
+                          type="button"
+                          disabled={jdAnalysis.status === 'loading' || form.jobDescription.trim().length < 50}
+                          onClick={() => void analyzeJobDescription(form.jobDescription, true)}
+                          className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-black text-white shadow-sm transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                        >
+                          {jdAnalysis.status === 'loading' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                          {jdAnalysis.status === 'loading' ? t('setup.jdAnalyzingButton') : t('setup.jdAnalyzeButton')}
+                        </button>
                         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">{t('setup.pasteHint')}</span>
                       </div>
                     </div>
@@ -794,6 +980,7 @@ export default function SetupPage() {
                         onChange={(e) => {
                           setForm({ ...form, jobDescription: e.target.value })
                           setErrors({ ...errors, jobDescription: '' })
+                          setJdAnalysis({ status: 'idle', message: '' })
                         }}
                         placeholder={t('setup.placeholder')}
                         rows={10}
@@ -807,6 +994,18 @@ export default function SetupPage() {
                         )}
                         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">{form.jobDescription.length} {t('setup.chars')}</span>
                       </div>
+                      {form.jobDescription.trim().length >= 50 && (
+                        <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/60">
+                          <div className="flex items-center gap-2 text-xs font-bold">
+                            {jdAnalysis.status === 'loading' && <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />}
+                            {jdAnalysis.status === 'success' && <Check className="h-4 w-4 text-emerald-600" />}
+                            {jdAnalysis.status === 'error' && <AlertCircle className="h-4 w-4 text-amber-600" />}
+                            <span className="text-slate-600 dark:text-slate-300">
+                              {jdAnalysis.status === 'loading' ? t('setup.jdAnalyzing') : jdAnalysis.message || t('setup.jdAnalysisReady')}
+                            </span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -826,7 +1025,7 @@ export default function SetupPage() {
                     </div>
 
                     <div className="space-y-6">
-                      <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{t('setup.resumeEncourage')}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{t('setup.resumeAutoMatch')}</p>
                       <input
                         ref={resumeFileRef}
                         type="file"
@@ -834,7 +1033,9 @@ export default function SetupPage() {
                         className="hidden"
                         onChange={(e) => void handleResumePdf(e)}
                       />
-                      <div className="flex flex-wrap items-center gap-4">
+                      {profileResumeLoading ? (
+                        <div className="flex items-center gap-2 text-sm font-bold text-slate-500"><Loader2 className="h-4 w-4 animate-spin" />{t('setup.resumeChecking')}</div>
+                      ) : !profileResumeText.trim() ? <div className="flex flex-wrap items-center gap-4">
                         <button
                           type="button"
                           disabled={resumeParsing}
@@ -863,7 +1064,7 @@ export default function SetupPage() {
                             {t('setup.resumeClearSession')}
                           </button>
                         )}
-                      </div>
+                      </div> : null}
 
                       {resumeNote && (
                         <div className={`p-4 rounded-2xl border text-sm font-bold ${resumeNote.type === 'ok' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
@@ -878,7 +1079,7 @@ export default function SetupPage() {
                         <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
                           {effectiveResume ? (
                             <>
-                              {sessionResumeText.trim() ? t('setup.resumeUsingSession') : t('setup.resumeUsingProfile')}
+                              {profileResumeText.trim() ? t('setup.resumeUsingProfile') : t('setup.resumeUsingSession')}
                               <span className="ml-2 text-slate-900 dark:text-white">{effectiveResume.length} {t('setup.chars')}</span>
                             </>
                           ) : t('setup.resumeNone')}
@@ -888,7 +1089,7 @@ export default function SetupPage() {
                   </div>
 
                   {/* AI Assistant Section */}
-                  <div className="bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 p-8 space-y-8">
+                  <div className="hidden">
                     <div className="flex items-center gap-3">
                       <Sparkles className="h-4 w-4 text-slate-400" />
                       <Sparkles className="h-4 w-4 text-slate-500" />
@@ -1019,17 +1220,21 @@ export default function SetupPage() {
                                   readOnly
                                   value={mlResult}
                                   placeholder={t('setup.mlPlaceholder')}
-                                  className={`textarea-field-premium transition-all ${mlResult ? 'h-[500px] shadow-sm' : 'h-[160px] border-dashed'
+                                  className={`textarea-field-premium transition-all ${mlResult ? 'h-[500px] pt-20 shadow-sm' : 'h-[160px] border-dashed'
                                     } scrollbar-hide`}
                                 />
                                 {mlResult && (
-                                  <button
-                                    type="button"
-                                    onClick={handleCopyML}
-                                    className="absolute top-4 right-4 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-slate-600 dark:text-slate-500"
-                                  >
-                                    {mlCopied ? <Check className="h-5 w-5 text-emerald-600" /> : <Copy className="h-5 w-5" />}
-                                  </button>
+                                  <div className="absolute right-4 top-4 flex flex-wrap justify-end gap-2">
+                                    <button type="button" onClick={handleCopyML} title={t('setup.mlCopy')} className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                                      {mlCopied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                                    </button>
+                                    <button type="button" onClick={handleExportWord} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                                      <Download className="h-4 w-4" />{t('setup.mlExportWord')}
+                                    </button>
+                                    <button type="button" onClick={handleExportPdf} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                                      <Download className="h-4 w-4" />{t('setup.mlExportPdf')}
+                                    </button>
+                                  </div>
                                 )}
                               </>
                             )}
@@ -1051,9 +1256,9 @@ export default function SetupPage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {[
-                        { value: 'hr', icon: '🤝', label: t('setup.typeHr'), desc: t('setup.typeHrDesc') },
-                        { value: 'technical', icon: '💻', label: t('setup.typeTechnical'), desc: t('setup.typeTechnicalDesc') },
-                        { value: 'mixed', icon: '🧭', label: t('setup.typeMixed'), desc: t('setup.typeMixedDesc') },
+                        { value: 'hr', label: t('setup.typeHr'), desc: t('setup.typeHrDesc') },
+                        { value: 'technical', label: t('setup.typeTechnical'), desc: t('setup.typeTechnicalDesc') },
+                        { value: 'mixed', label: t('setup.typeMixed'), desc: t('setup.typeMixedDesc') },
                       ].map(option => (
                         <button
                           key={option.value}
@@ -1065,11 +1270,10 @@ export default function SetupPage() {
                               : 'border-slate-100 bg-white text-slate-600 hover:border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400'
                             }`}
                         >
-                          <div className="flex items-center justify-between">
-                            <span className="text-3xl" aria-hidden="true">{option.icon}</span>
+                          <div className="flex items-center justify-end">
                             {form.interviewerType === option.value && <Check className="h-4 w-4" />}
                           </div>
-                          <div className="mt-4 text-sm font-bold">{option.label}</div>
+                          <div className="mt-2 text-sm font-bold">{option.label}</div>
                           <div className="mt-2 text-xs leading-relaxed opacity-75">{option.desc}</div>
                         </button>
                       ))}
@@ -1117,17 +1321,23 @@ export default function SetupPage() {
                         </p>
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {['easy', 'medium', 'hard', 'adaptive'].map(level => (
+                        {[
+                          { value: 'easy', label: t('setup.difficultyEasy'), desc: t('setup.difficultyEasyDesc') },
+                          { value: 'medium', label: t('setup.difficultyMedium'), desc: t('setup.difficultyMediumDesc') },
+                          { value: 'hard', label: t('setup.difficultyHard'), desc: t('setup.difficultyHardDesc') },
+                          { value: 'adaptive', label: t('setup.difficultyAdaptive'), desc: t('setup.difficultyAdaptiveDesc') },
+                        ].map(level => (
                           <button
-                            key={level}
+                            key={level.value}
                             type="button"
-                            onClick={() => setForm({ ...form, difficulty: level })}
-                            className={`rounded-2xl border px-3 py-5 text-xs font-black uppercase tracking-wider transition-all ${form.difficulty === level
+                            onClick={() => setForm({ ...form, difficulty: level.value })}
+                            className={`rounded-2xl border px-3 py-4 text-left transition-all ${form.difficulty === level.value
                                 ? 'border-slate-300 bg-slate-50 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white'
                                 : 'border-slate-100 bg-white text-slate-500 dark:border-slate-800 dark:bg-slate-950'
                               }`}
                           >
-                            {level}
+                            <span className="block text-xs font-black uppercase tracking-wider">{level.label}</span>
+                            <span className="mt-2 block text-[10px] font-medium normal-case leading-relaxed tracking-normal opacity-75">{level.desc}</span>
                           </button>
                         ))}
                       </div>
@@ -1162,23 +1372,23 @@ export default function SetupPage() {
                     </div>
 
                     <div className="space-y-8">
-                      <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">{t('setup.duration')}</h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        {durations.map((dur) => (
-                          <button
-                            key={dur.value}
-                            type="button"
-                            onClick={() => setForm({ ...form, duration: dur.value })}
-                            className={`flex flex-col items-center justify-center px-2 py-6 rounded-2xl border transition-all duration-300 ${form.duration === dur.value
-                                ? 'border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white shadow-sm'
-                                : 'border-slate-100 bg-white hover:border-slate-200 dark:border-slate-800 dark:bg-slate-950 text-slate-400'
-                              }`}
-                          >
-                            <span className={`text-xl font-black whitespace-nowrap ${form.duration === dur.value ? 'text-slate-900' : 'text-slate-700'}`}>{dur.label}</span>
-                            <span className={`text-[10px] uppercase font-bold mt-1 tracking-widest ${form.duration === dur.value ? 'opacity-60' : 'text-slate-500'}`}>{dur.desc}</span>
-                          </button>
-                        ))}
+                      <div className="flex items-center justify-between gap-4">
+                        <h3 className={`text-sm font-bold uppercase tracking-widest ${form.mode === 'practice' ? 'text-slate-400' : 'text-slate-900 dark:text-white'}`}>{t('setup.duration')}</h3>
+                        {form.mode === 'practice' && <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">{t('setup.practiceUnlimitedCount', { n: practiceTotalQuestions })}</span>}
                       </div>
+                      <div className={`rounded-2xl border p-6 transition-all ${form.mode === 'practice' ? 'border-slate-100 bg-slate-50/60 opacity-40 dark:border-slate-800 dark:bg-slate-900/40' : 'border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-950'}`}>
+                        <div className="mb-5 flex items-end justify-between">
+                          <span className="text-xs font-bold text-slate-400">5 {t('dashboard.durMin')}</span>
+                          <span className="text-3xl font-black tabular-nums text-slate-900 dark:text-white">{form.duration} <span className="text-sm text-slate-400">{t('dashboard.durMin')}</span></span>
+                          <span className="text-xs font-bold text-slate-400">60 {t('dashboard.durMin')}</span>
+                        </div>
+                        <input type="range" min="5" max="60" step="1" value={form.duration}
+                          disabled={form.mode === 'practice'}
+                          onChange={(event) => setForm({ ...form, duration: Number(event.target.value) })}
+                          aria-label={t('setup.duration')}
+                          className="h-2 w-full cursor-pointer accent-slate-900 disabled:cursor-not-allowed dark:accent-white" />
+                      </div>
+                      {form.mode === 'practice' && <p className="text-xs font-medium leading-relaxed text-slate-500 dark:text-slate-400">{t('setup.practiceFlowDesc', { minutes: practiceEquivalentMinutes, core: practiceCoreQuestions, total: practiceTotalQuestions })}</p>}
                     </div>
                   </div>
 
@@ -1237,6 +1447,9 @@ export default function SetupPage() {
                     </span>
                     <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm">
                       {t(`setup.type${form.interviewerType === 'hr' ? 'Hr' : form.interviewerType === 'technical' ? 'Technical' : 'Mixed'}`)}
+                    </span>
+                    <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm">
+                      {employmentTypes.find(item => item.value === form.employmentType)?.label}
                     </span>
                   </div>
 

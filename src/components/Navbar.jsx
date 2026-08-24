@@ -6,7 +6,8 @@ import LanguageSwitcher from './LanguageSwitcher'
 import { AppThemeToggle } from './ThemeToggle'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
-import { Menu, X, BrainCircuit, ChevronDown, LogOut, LayoutDashboard, UserCircle, Briefcase, BookOpen } from 'lucide-react'
+import { authenticatedFetch } from '../lib/authenticatedFetch'
+import { Menu, X, BrainCircuit, ChevronDown, LogOut, LayoutDashboard, UserCircle, Briefcase, BookOpen, FilePenLine } from 'lucide-react'
 
 export default function Navbar() {
   const { t } = useTranslation()
@@ -36,13 +37,10 @@ export default function Navbar() {
       try {
         const sessionResult = await supabase.auth.getSession()
         session = sessionResult.data.session
-        const token = session?.access_token
-        if (!token) return
+        if (!session?.access_token) return
 
         const backendUrl = getBackendBaseUrl()
-        const res = await fetch(`${backendUrl}/api/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
+        const res = await authenticatedFetch(`${backendUrl}/api/profile`)
         if (res.ok) {
           const j = await res.json()
           if (j.jobSearchStatus !== undefined && j.jobSearchStatus !== null) {
@@ -102,7 +100,7 @@ export default function Navbar() {
       if (!token) return
 
       const backendUrl = getBackendBaseUrl()
-      await fetch(`${backendUrl}/api/profile`, {
+      await authenticatedFetch(`${backendUrl}/api/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -188,14 +186,14 @@ export default function Navbar() {
                   )}
                 </Link>
                 <Link
-                  to="/profile"
-                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isActive('/profile')
+                  to="/resume-tailor"
+                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isActive('/resume-tailor')
                     ? 'text-primary-600 dark:text-primary-400'
                     : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                     }`}
                 >
-                  {t('nav.profile')}
-                  {isActive('/profile') && (
+                  {t('nav.resumeTailor')}
+                  {isActive('/resume-tailor') && (
                     <span className="absolute -bottom-1 left-4 right-4 h-[3px] bg-primary-600 dark:bg-primary-400 rounded-full" />
                   )}
                 </Link>
@@ -284,6 +282,14 @@ export default function Navbar() {
                       {t('nav.history')}
                     </Link>
                     <Link
+                      to="/resume-tailor"
+                      className="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <FilePenLine className="w-4 h-4" />
+                      {t('nav.resumeTailor')}
+                    </Link>
+                    <Link
                       to="/profile"
                       className="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
                       onClick={() => setDropdownOpen(false)}
@@ -359,6 +365,7 @@ export default function Navbar() {
             <>
               <Link to="/setup" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.startInterview')}</Link>
               <Link to="/dashboard" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.history')}</Link>
+              <Link to="/resume-tailor" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.resumeTailor')}</Link>
               <Link to="/profile" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.profile')}</Link>
               <button onClick={handleSignOut} className="w-full text-left text-2xl font-black text-red-600 py-4 tracking-tighter">{t('nav.signOut')}</button>
             </>

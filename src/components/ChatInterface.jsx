@@ -552,6 +552,9 @@ const ChatInterface = forwardRef(function ChatInterface({
   /** 倒计时显示文本与状态（由父级提供，更精确同步） */
   timerDisplay = '00:00',
   timerStatus = 'normal',
+  onCandidateAnswerSubmitted,
+  mode = 'formal',
+  practiceController = null,
 }, ref) {
   const { t, i18n } = useTranslation()
   const agentMap = useMemo(
@@ -611,6 +614,8 @@ const ChatInterface = forwardRef(function ChatInterface({
     } catch { /* ignore */ }
   }, [])
 
+  const candidateAnsweringRef = useRef(false)
+
   useImperativeHandle(ref, () => ({
     getTranscript: () => messagesRef.current
       .filter((m) => !m.streaming && String(m.content || '').trim())
@@ -619,6 +624,7 @@ const ChatInterface = forwardRef(function ChatInterface({
         content: String(m.content).trim(),
       })),
     stopInterview: () => stopInterviewRef.current(),
+    isCandidateAnswering: () => candidateAnsweringRef.current,
   }), [])
 
   const [input, setInput] = useState('')
@@ -627,6 +633,7 @@ const ChatInterface = forwardRef(function ChatInterface({
   const [ttsEnabled, setTtsEnabled] = useState(true)
   const [currentAgent, setCurrentAgent] = useState(null)
   const [initError, setInitError] = useState(null)
+  const isPractice = mode === 'practice' && Boolean(practiceController)
 
   const messagesEndRef = useRef(null)
   const userPipVideoRef = useRef(null)
@@ -648,6 +655,15 @@ const ChatInterface = forwardRef(function ChatInterface({
   const openingLatchRef = useRef(true)
   const liveInputMessageIdRef = useRef(null)
   const liveOutputMessageIdRef = useRef(null)
+
+  useEffect(() => {
+    if (!isPractice) return
+    const next = Array.isArray(practiceController.messages) ? practiceController.messages : []
+    messagesRef.current = next
+    setMessages(next)
+    setInput(practiceController.answer || '')
+    setInterimText('')
+  }, [isPractice, practiceController?.messages, practiceController?.answer])
 
   useLayoutEffect(() => {
     openingLatchRef.current = true
@@ -681,9 +697,15 @@ const ChatInterface = forwardRef(function ChatInterface({
   )
 
   const handleLiveReady = useCallback(() => {
+    if (isPractice) {
+      setIsStreaming(false)
+      setCurrentAgent(null)
+      onInterviewReadyRef.current?.()
+      return
+    }
     setCurrentAgent({ name: 'opening' })
     setIsStreaming(true)
-  }, [])
+  }, [isPractice])
 
   const handleLiveAudioStart = useCallback(() => {
     releaseOpeningGate()
@@ -692,6 +714,11 @@ const ChatInterface = forwardRef(function ChatInterface({
   const handleLiveInputTranscript = useCallback((text) => {
     const content = String(text || '').trim()
     if (!content) return
+    if (isPractice) {
+      setInterimText(content)
+      practiceController.setAnswer([speechBaseForPracticeRef.current, content].filter(Boolean).join(' ').trim())
+      return
+    }
     setInterimText(content)
     let id = liveInputMessageIdRef.current
     if (!id) {
@@ -701,11 +728,12 @@ const ChatInterface = forwardRef(function ChatInterface({
     } else {
       setMessages(prev => prev.map(message => message.id === id ? { ...message, content } : message))
     }
-  }, [])
+  }, [isPractice, practiceController])
 
   const handleLiveOutputTranscript = useCallback((text) => {
     const content = sanitizeSquareBrackets(String(text || '').trim())
     if (!content) return
+    if (isPractice) return
     releaseOpeningGate()
     setIsStreaming(true)
     const agent = openingLatchRef.current ? 'opening' : 'explore'
@@ -718,13 +746,25 @@ const ChatInterface = forwardRef(function ChatInterface({
     } else {
       setMessages(prev => prev.map(message => message.id === id ? { ...message, content, agent } : message))
     }
-  }, [releaseOpeningGate])
+  }, [releaseOpeningGate, isPractice])
 
   const handleLiveTurnComplete = useCallback(({ inputText, outputText }) => {
     const inputId = liveInputMessageIdRef.current
     const outputId = liveOutputMessageIdRef.current
     const finalInput = String(inputText || '').trim()
     const finalOutput = sanitizeSquareBrackets(String(outputText || '').trim())
+
+    if (isPractice) {
+      if (finalInput) {
+        const accumulatedAnswer = [speechBaseForPracticeRef.current, finalInput].filter(Boolean).join(' ').trim()
+        speechBaseForPracticeRef.current = accumulatedAnswer
+        practiceController.setAnswer(accumulatedAnswer)
+      }
+      setInterimText('')
+      setIsStreaming(false)
+      setCurrentAgent(null)
+      return
+    }
 
     setMessages(prev => {
       let next = prev.map(message => {
@@ -737,6 +777,7 @@ const ChatInterface = forwardRef(function ChatInterface({
         const agent = openingLatchRef.current ? 'opening' : 'explore'
         next = [...next, { id: Date.now() + 1, role: 'assistant', content: finalOutput, streaming: false, agent }]
       }
+      messagesRef.current = next
       return next
     })
 
@@ -747,7 +788,8 @@ const ChatInterface = forwardRef(function ChatInterface({
     setIsStreaming(false)
     setCurrentAgent(null)
     releaseOpeningGate()
-  }, [releaseOpeningGate])
+    if (finalInput) window.setTimeout(() => onCandidateAnswerSubmitted?.(), 0)
+  }, [releaseOpeningGate, onCandidateAnswerSubmitted, isPractice, practiceController])
 
   const handleLiveError = useCallback((error) => {
     setInitError(t('chat.connErr', { msg: error?.message || 'Gemini Live error' }))
@@ -779,16 +821,29 @@ const ChatInterface = forwardRef(function ChatInterface({
   })
 
   const autoMicStartedRef = useRef(false)
+  const speechBaseForPracticeRef = useRef('')
+  const spokenPracticeQuestionRef = useRef(null)
+  useEffect(() => {
+    if (!live.connected) spokenPracticeQuestionRef.current = null
+  }, [live.connected])
   useEffect(() => {
     if (!nativeLiveEnabled) return
     if (!live.connected) {
       autoMicStartedRef.current = false
       return
     }
-    if (autoMicStartedRef.current) return
+    if (isPractice || autoMicStartedRef.current) return
     autoMicStartedRef.current = true
     void live.startMic()
-  }, [nativeLiveEnabled, live.connected, live.startMic])
+  }, [nativeLiveEnabled, live.connected, live.startMic, isPractice])
+
+  useEffect(() => {
+    if (!isPractice || !live.connected || practiceController.paused || !practiceController.currentQuestion) return
+    const question = practiceController.currentQuestion
+    if (spokenPracticeQuestionRef.current === question.id) return
+    spokenPracticeQuestionRef.current = question.id
+    live.sendText(`[PRACTICE_CONTROL] Read this question exactly once in the interview language, without commentary: ${question.question_text}`)
+  }, [isPractice, live.connected, live.sendText, practiceController])
 
   const tts = nativeLiveEnabled
     ? { speaking: live.speaking, stop: live.stopAudio, enqueue: () => {} }
@@ -803,6 +858,8 @@ const ChatInterface = forwardRef(function ChatInterface({
         syncAccumulatedFromUser: () => {},
       }
     : legacyStt
+
+  candidateAnsweringRef.current = Boolean(stt.active || input.trim() || interimText.trim())
 
   const ttsRef = useRef(tts)
   const sttRef = useRef(stt)
@@ -1111,6 +1168,12 @@ const ChatInterface = forwardRef(function ChatInterface({
   const sendMessage = useCallback(async (text) => {
     const trimmed = text?.trim()
     if (!trimmed || isStreaming) return
+    if (isPractice) {
+      if (stt.active) stt.stop()
+      setInterimText('')
+      await practiceController.submitAnswer(trimmed)
+      return
+    }
     if (nativeLiveEnabled) {
       if (stt.active) {
         stt.stop()
@@ -1135,17 +1198,22 @@ const ChatInterface = forwardRef(function ChatInterface({
 
     const userMsg = { id: Date.now(), role: 'user', content: trimmed }
     const updated = [...messages, userMsg]
+    messagesRef.current = updated
     setMessages(updated)
+
+    if (onCandidateAnswerSubmitted?.() === true) return
 
     const history = updated
       .filter(m => m.content)
       .map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content }))
 
     await runGraph(history, false)
-  }, [isStreaming, messages, stt, tts, runGraph, nativeLiveEnabled, live, t])
+  }, [isStreaming, messages, stt, tts, runGraph, nativeLiveEnabled, live, t, onCandidateAnswerSubmitted, isPractice, practiceController])
 
   /** 录音中为已落稿 + 实时识别；非录音即输入框 */
-  const inputDraft = stt.active ? `${input}${interimText}` : input
+  const inputDraft = isPractice
+    ? String(practiceController.answer || '')
+    : stt.active ? `${input}${interimText}` : input
 
   const handleKeyDown = e => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -1158,6 +1226,7 @@ const ChatInterface = forwardRef(function ChatInterface({
   const displayMessages = messages.filter(m => (m.content || m.streaming) && m.agent !== 'feedback')
 
   const interviewerThinking = isStreaming || Boolean(currentAgent)
+  const interactionBusy = isStreaming || Boolean(practiceController?.busy)
   const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant')
   const activeAgentName = currentAgent?.name || lastAssistantMsg?.agent
   const activeAgentLabel = activeAgentName ? (agentMap[activeAgentName]?.label || activeAgentName) : 'Interviewer'
@@ -1229,7 +1298,7 @@ const ChatInterface = forwardRef(function ChatInterface({
             </div>
           )}
 
-          {isStreaming && (
+          {interactionBusy && (
             <div className="flex items-center gap-2">
               <Loader2 className="w-3 h-3 animate-spin text-slate-400" />
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
@@ -1258,8 +1327,14 @@ const ChatInterface = forwardRef(function ChatInterface({
 
       <div className="flex gap-4 items-end max-w-5xl mx-auto w-full">
         <button
-          onClick={() => stt.active ? stt.stop() : stt.start(input)}
-          disabled={!stt.supported || isStreaming}
+          onClick={() => {
+            if (stt.active) stt.stop()
+            else {
+              if (isPractice) speechBaseForPracticeRef.current = String(practiceController.answer || '').trim()
+              stt.start(isPractice ? practiceController.answer : input)
+            }
+          }}
+          disabled={!stt.supported || interactionBusy || Boolean(practiceController?.paused)}
           aria-pressed={stt.active}
           aria-label={stt.active ? 'Microphone on — click to mute' : 'Microphone off — click to unmute'}
           title={stt.active ? 'Microphone on — click to mute' : 'Microphone off — click to unmute'}
@@ -1273,9 +1348,13 @@ const ChatInterface = forwardRef(function ChatInterface({
 
         <div className="flex-1 relative group">
           <textarea
-            value={stt.active ? input + interimText : input}
+            value={isPractice ? practiceController.answer : stt.active ? input + interimText : input}
             onChange={e => {
               const v = e.target.value
+              if (isPractice) {
+                practiceController.setAnswer(v)
+                return
+              }
               if (stt.listeningRef.current) {
                 stt.syncAccumulatedFromUser(v)
                 setInterimText('')
@@ -1287,7 +1366,7 @@ const ChatInterface = forwardRef(function ChatInterface({
             onKeyDown={handleKeyDown}
             placeholder={stt.active ? t('chat.listening') : t('chat.placeholder', { lang: language || 'English' })}
             rows={1}
-            disabled={isStreaming}
+            disabled={interactionBusy || Boolean(practiceController && !practiceController.canDraftAnswer)}
             className="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 text-sm font-medium rounded-2xl px-6 py-4.5 min-h-[56px] max-h-32 resize-none focus:outline-none border border-slate-100 dark:border-slate-800 focus:border-slate-900 dark:focus:border-white transition-all disabled:opacity-50"
           />
           {interimText && stt.active && (
@@ -1303,10 +1382,10 @@ const ChatInterface = forwardRef(function ChatInterface({
             if (stt.active) stt.stop()
             sendMessage(text)
           }}
-          disabled={!inputDraft.trim() || isStreaming}
+          disabled={!inputDraft.trim() || interactionBusy || Boolean(practiceController && !practiceController.canDraftAnswer)}
           className="flex-shrink-0 w-14 h-14 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl flex items-center justify-center hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-xl shadow-slate-900/10 disabled:opacity-50"
         >
-          {isStreaming ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+          {interactionBusy ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
         </button>
       </div>
 
@@ -1441,7 +1520,7 @@ const ChatInterface = forwardRef(function ChatInterface({
             </div>
 
             {/* Chat Sidebar: Meeting Transcript (20% Width) */}
-            <aside className="w-full lg:flex-[2] flex flex-col bg-transparent lg:my-4 lg:mr-4 rounded-[2.5rem] border border-slate-200/50 dark:border-white/5 overflow-hidden transition-all duration-300 relative">
+            <aside className={`w-full ${isPractice ? 'lg:flex-[3]' : 'lg:flex-[2]'} flex flex-col bg-transparent lg:my-4 lg:mr-4 rounded-[2.5rem] border border-slate-200/50 dark:border-white/5 overflow-hidden transition-all duration-300 relative`}>
               {/* Glass background for sidebar */}
               <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/40 backdrop-blur-3xl -z-10" />
               
@@ -1462,6 +1541,64 @@ const ChatInterface = forwardRef(function ChatInterface({
                 {messageItems}
               </div>
 
+              {isPractice && (
+                <div className="relative z-20 max-h-[58%] space-y-3 overflow-y-auto border-t border-slate-200/60 bg-white/75 p-4 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/70">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600">{t('interview.practice.title')}</span>
+                    <button type="button" disabled={practiceController.busy} onClick={() => {
+                      if (!practiceController.paused) live.stopMic()
+                      void practiceController.togglePause()
+                    }} className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-[10px] font-bold dark:border-slate-700">
+                      {practiceController.paused ? t('interview.practice.resume') : t('interview.practice.pause')}
+                    </button>
+                  </div>
+
+                  <div className="text-[10px] font-bold text-slate-500">
+                    {t('interview.practice.progress', {
+                      current: practiceController.workspace.interview.question_index || 0,
+                      total: practiceController.workspace.practiceLimits?.questionLimit || '–',
+                      difficulty: practiceController.workspace.interview.current_difficulty,
+                      type: t(`setup.type${interviewerType === 'hr' ? 'Hr' : interviewerType === 'technical' ? 'Technical' : 'Mixed'}`),
+                    })}
+                  </div>
+
+                  {practiceController.error && <div className="rounded-xl bg-red-50 p-2.5 text-xs text-red-700 dark:bg-red-950/30 dark:text-red-200">{practiceController.error}</div>}
+                  {practiceController.paused ? (
+                    <div className="rounded-xl bg-amber-50 p-3 text-xs font-medium text-amber-900 dark:bg-amber-950/30 dark:text-amber-100">{t('interview.practice.pausedMessage')}</div>
+                  ) : (
+                    <>
+                      <textarea
+                        value={practiceController.answer}
+                        onChange={event => practiceController.setAnswer(event.target.value)}
+                        rows={4}
+                        disabled={practiceController.busy || !practiceController.canDraftAnswer}
+                        placeholder={practiceController.attempts.length ? t('interview.practice.refinePlaceholder') : t('interview.practice.answerPlaceholder')}
+                        className="w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-xs leading-relaxed text-slate-900 outline-none focus:border-slate-500 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:disabled:bg-slate-950"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <button type="button" disabled={practiceController.busy || !practiceController.answer.trim() || !practiceController.canDraftAnswer} onClick={() => void practiceController.submitAnswer()} className="rounded-xl bg-slate-900 px-3 py-2.5 text-[10px] font-black text-white disabled:opacity-40 dark:bg-white dark:text-slate-900">
+                          {practiceController.attempts.length ? t('interview.practice.submitRetry') : t('interview.practice.submit')}
+                        </button>
+                        <button type="button" disabled={practiceController.busy || practiceController.hintsExhausted} onClick={() => void practiceController.nextHint()} className="rounded-xl border border-violet-300 px-3 py-2.5 text-[10px] font-black text-violet-700 disabled:opacity-40 dark:text-violet-300">
+                          {practiceController.hintsExhausted ? t('interview.practice.hintsExhausted') : t('interview.practice.nextHint')}
+                        </button>
+                        {practiceController.attempts.length > 0 && !practiceController.retrying && <button type="button" disabled={practiceController.busy} onClick={() => void practiceController.beginRetry()} className="rounded-xl border px-3 py-2.5 text-[10px] font-black">{t('interview.practice.retry')}</button>}
+                        <button type="button" disabled={practiceController.busy || practiceController.attempts.length === 0} onClick={() => void practiceController.masterNext()} className="rounded-xl border border-emerald-300 px-3 py-2.5 text-[10px] font-black text-emerald-700 disabled:opacity-40">{t('interview.practice.masterNext')}</button>
+                        <button type="button" disabled={practiceController.busy} onClick={() => void practiceController.skipNext()} className="rounded-xl border border-amber-300 px-3 py-2.5 text-[10px] font-black text-amber-700">{t('interview.practice.skipNext')}</button>
+                      </div>
+
+                      {practiceController.hints.map(hint => <div key={hint.id} className="rounded-xl border border-violet-200 bg-violet-50 p-3 text-xs text-violet-950 dark:bg-violet-950/30 dark:text-violet-100"><div className="mb-1 text-[9px] font-black uppercase">{t(`interview.practice.hintLevels.${hint.level}`)}</div>{hint.content}</div>)}
+                      {practiceController.latestFeedback && <div className="rounded-xl bg-emerald-50 p-3 text-xs text-emerald-950 dark:bg-emerald-950/30 dark:text-emerald-100"><div className="font-black">{t('interview.practice.score', { score: practiceController.latestFeedback.score })}</div>{(practiceController.latestFeedback.strengths || []).slice(0, 2).map(item => <p key={item} className="mt-1">✓ {item}</p>)}{(practiceController.latestFeedback.gaps || []).slice(0, 2).map(item => <p key={item} className="mt-1">→ {item}</p>)}</div>}
+                      <details className="rounded-xl border border-slate-200 p-3 text-xs dark:border-slate-700">
+                        <summary className="cursor-pointer font-black text-slate-500">{t('interview.practice.privateNotes')}</summary>
+                        <textarea value={practiceController.note} onChange={event => practiceController.setNote(event.target.value)} rows={2} className="mt-3 w-full resize-none rounded-lg border border-slate-200 bg-white p-2 outline-none dark:border-slate-700 dark:bg-slate-900" />
+                        <button type="button" disabled={practiceController.busy} onClick={() => void practiceController.saveNote()} className="mt-2 rounded-lg border px-3 py-1.5 text-[10px] font-bold">{t('interview.practice.saveNote')}</button>
+                      </details>
+                    </>
+                  )}
+                </div>
+              )}
+
             </aside>
           </div>
 
@@ -1472,7 +1609,14 @@ const ChatInterface = forwardRef(function ChatInterface({
                   <span className="text-[10px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest leading-none">Audio Controls</span>
                   <div className="flex items-center gap-4">
                     <button
-                      onClick={() => stt.active ? stt.stop() : stt.start(input)}
+                      onClick={() => {
+                        if (stt.active) stt.stop()
+                        else {
+                          if (isPractice) speechBaseForPracticeRef.current = String(practiceController.answer || '').trim()
+                          stt.start(isPractice ? practiceController.answer : input)
+                        }
+                      }}
+                      disabled={interactionBusy || Boolean(practiceController?.paused) || Boolean(practiceController && !practiceController.canDraftAnswer)}
                       aria-pressed={stt.active}
                       aria-label={stt.active ? 'Microphone on — click to mute' : 'Microphone off — click to unmute'}
                       title={stt.active ? 'Microphone on — click to mute' : 'Microphone off — click to unmute'}

@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
-import { buildInterviewPrompt } from '../lib/promptBuilder'
 import {
   createInterviewRequestId,
   recordInterviewClientEvent,
@@ -14,7 +13,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher'
 import { InterviewThemeToggle } from '../components/ThemeToggle'
 import {
   Clock, Globe2, Briefcase, ArrowLeft, AlertCircle,
-  Play, ChevronDown, ChevronUp, Copy, CheckCheck, MessageSquare,
+  Play, ChevronDown, ChevronUp,
   Loader2, Video, VideoOff, Mic,
 } from 'lucide-react'
 import BackgroundAurora from '../components/BackgroundAurora'
@@ -157,8 +156,6 @@ export default function InterviewPage() {
 
   const [chatPhase, setChatPhase] = useState('idle')
   const [showEndModal,   setShowEndModal]   = useState(false)
-  const [showPrompt,     setShowPrompt]     = useState(false)
-  const [copied,         setCopied]         = useState(false)
   const [finalizing,     setFinalizing]     = useState(false)
   const [finalizeError,  setFinalizeError]  = useState(null)
   const chatRef = useRef(null)
@@ -200,6 +197,8 @@ export default function InterviewPage() {
   const [micLevel, setMicLevel] = useState(0)
 
   const timer = useCountdown(duration || 10)
+  const deadlineGraceRef = useRef(false)
+  const [deadlineGraceActive, setDeadlineGraceActive] = useState(false)
 
   /* ── Sync stream ref ── */
   useEffect(() => { cameraStreamRef.current = cameraStream }, [cameraStream])
@@ -294,15 +293,6 @@ export default function InterviewPage() {
   }, [position, navigate, restoreLoading, restoreError, routeInterviewId])
   useEffect(() => () => { try { window.speechSynthesis?.cancel() } catch { /* ignore */ } }, [])
 
-  const systemPrompt = position
-    ? buildInterviewPrompt({ position, jobDescription, language, duration, interviewerStyle, interviewerType })
-    : ''
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(systemPrompt).catch(() => {})
-    setCopied(true); setTimeout(() => setCopied(false), 2000)
-  }
-
   const handleStart = () => {
     stopMicMeter()
     // Keep the interview camera consistent with lobby selection.
@@ -335,7 +325,7 @@ export default function InterviewPage() {
 
   const handlePracticeState = useCallback(({ paused, limits }) => {
     if (!limits) return
-    timer.syncRemaining(limits.remainingSeconds, !paused)
+    if (Number.isFinite(limits.remainingSeconds)) timer.syncRemaining(limits.remainingSeconds, !paused)
   }, [timer.syncRemaining])
 
   useEffect(() => {
@@ -496,10 +486,23 @@ export default function InterviewPage() {
     void finalizeAndGoReport('practice_limit')
   }, [finalizeAndGoReport])
 
+  const handleCandidateAnswerSubmitted = useCallback(() => {
+    if (!deadlineGraceRef.current) return false
+    deadlineGraceRef.current = false
+    setDeadlineGraceActive(false)
+    void finalizeAndGoReport('timer_answer_completed')
+    return true
+  }, [finalizeAndGoReport])
+
   useEffect(() => {
-    if (!['formal', 'practice'].includes(mode) || !timer.finished || autoFinalizeRequestedRef.current) return
+    if (mode !== 'formal' || !timer.finished || autoFinalizeRequestedRef.current) return
     autoFinalizeRequestedRef.current = true
-    void finalizeAndGoReport(mode === 'practice' ? 'practice_time_limit' : 'timer')
+    if (chatRef.current?.isCandidateAnswering?.()) {
+      deadlineGraceRef.current = true
+      setDeadlineGraceActive(true)
+      return
+    }
+    void finalizeAndGoReport('timer')
   }, [mode, timer.finished, finalizeAndGoReport])
 
   useEffect(() => {
@@ -618,7 +621,7 @@ export default function InterviewPage() {
       </nav>
       )}
 
-      {chatPhase === 'live' && (
+      {chatPhase === 'live' && mode === 'formal' && (
         <div className="h-1 bg-slate-100 dark:bg-slate-900 flex-shrink-0">
           <div 
             className={`h-full ${progressColor} transition-all duration-1000`} 
@@ -651,7 +654,7 @@ export default function InterviewPage() {
               </div>
               <div className="space-y-2">
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('interview.dur')}</span>
-                <p className="text-sm font-bold text-slate-900 dark:text-white">{t('interview.minShort', { n: duration })}</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">{mode === 'practice' ? t('setup.practiceUnlimited') : t('interview.minShort', { n: duration })}</p>
               </div>
               <div className="col-span-2 space-y-2">
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('setup.interviewerStyle')}</span>
@@ -662,24 +665,6 @@ export default function InterviewPage() {
                 <p className="text-sm font-bold text-slate-900 dark:text-white">
                   {t(`setup.type${interviewerType === 'hr' ? 'Hr' : interviewerType === 'technical' ? 'Technical' : 'Mixed'}`)} · {t(mode === 'practice' ? 'setup.modePractice' : 'setup.modeFormal')} · {difficulty}
                 </p>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 text-slate-400">
-                <MessageSquare className="w-4 h-4" />
-                <span className="text-[10px] font-black uppercase tracking-widest">{t('interview.promptTitle')}</span>
-              </div>
-              <div className="group relative">
-                <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 max-h-48 overflow-y-auto text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-serif italic">
-                  {systemPrompt}
-                </div>
-                <button
-                  onClick={handleCopy}
-                  className="absolute top-4 right-4 p-2 rounded-lg bg-white dark:bg-slate-800 text-slate-400 hover:text-slate-900 shadow-sm opacity-0 group-hover:opacity-100 transition-all border border-slate-100 dark:border-slate-700"
-                >
-                  {copied ? <CheckCheck className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                </button>
               </div>
             </div>
 
@@ -857,8 +842,17 @@ export default function InterviewPage() {
               {mode === 'practice' ? <PracticeInterviewPanel
                 ref={chatRef}
                 interviewId={interviewId}
+                position={position}
+                jobDescription={jobDescription}
                 language={language}
                 interviewerType={interviewerType}
+                resumeContext={typeof resumeContext === 'string' ? resumeContext : ''}
+                roleTrack={roleTrack || 'work'}
+                interviewerStyle={interviewerStyle}
+                interviewUiVisible={chatPhase === 'live'}
+                userCameraStream={interviewStream}
+                isCameraOn={interviewCamOn}
+                onToggleCamera={toggleInterviewCam}
                 onInterviewUiReady={handleInterviewUiReady}
                 onPracticeState={handlePracticeState}
                 onLimitReached={handlePracticeLimitReached}
@@ -874,8 +868,9 @@ export default function InterviewPage() {
                 interviewerType={interviewerType}
                 persistInterviewId={interviewId || undefined}
                 deferFirstAudioGate
-                interviewUiVisible={chatPhase === 'live' && !timer.finished}
+                interviewUiVisible={chatPhase === 'live' && (!timer.finished || deadlineGraceActive)}
                 onInterviewUiReady={handleInterviewUiReady}
+                onCandidateAnswerSubmitted={handleCandidateAnswerSubmitted}
                 digitalHuman
                 userCameraStream={interviewStream}
                 isCameraOn={interviewCamOn}
@@ -884,7 +879,13 @@ export default function InterviewPage() {
                 timerStatus={timer.isCritical ? 'critical' : timer.isWarning ? 'warning' : 'normal'}
               />}
 
-              {mode === 'formal' && timer.finished && (
+              {mode === 'formal' && deadlineGraceActive && (
+                <div className="absolute inset-x-4 top-4 z-40 rounded-2xl border border-amber-200 bg-amber-50/95 px-5 py-3 text-center text-sm font-bold text-amber-900 shadow-lg backdrop-blur dark:border-amber-800 dark:bg-amber-950/90 dark:text-amber-100" role="status" aria-live="polite">
+                  {t('interview.timeUpAnswering')}
+                </div>
+              )}
+
+              {mode === 'formal' && timer.finished && !deadlineGraceActive && (
                 <div className="absolute inset-0 z-30 flex flex-col items-center justify-center px-8 text-center bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl animate-in fade-in duration-700">
                   <div className="w-24 h-24 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-5xl mb-8 shadow-inner border border-slate-100 dark:border-slate-800">
                     ⏰
