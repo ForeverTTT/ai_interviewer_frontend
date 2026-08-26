@@ -34,6 +34,7 @@ const PracticeInterviewPanel = forwardRef(function PracticeInterviewPanel({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   const [retrying, setRetrying] = useState(false)
+  const [restoreAttempt, setRestoreAttempt] = useState(0)
   const limitNotifiedRef = useRef(false)
 
   const notifyLimit = useCallback((reason) => {
@@ -48,9 +49,12 @@ const PracticeInterviewPanel = forwardRef(function PracticeInterviewPanel({
     let response = null
     let networkError = null
     for (let attempt = 0; attempt < 2 && !response; attempt += 1) {
+      const controller = new AbortController()
+      const timeoutId = window.setTimeout(() => controller.abort(), 20_000)
       try {
         response = await fetch(`${API}/api/interview-sessions/${interviewId}${path}`, {
           ...options,
+          signal: controller.signal,
           headers: {
             Authorization: `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
@@ -58,8 +62,12 @@ const PracticeInterviewPanel = forwardRef(function PracticeInterviewPanel({
           },
         })
       } catch (cause) {
-        networkError = cause
+        networkError = cause?.name === 'AbortError'
+          ? new Error(t('interview.practice.networkFailed'))
+          : cause
         if (attempt === 0) await new Promise(resolve => window.setTimeout(resolve, 400))
+      } finally {
+        window.clearTimeout(timeoutId)
       }
     }
     if (!response) throw networkError || new Error(t('interview.practice.networkFailed'))
@@ -114,6 +122,9 @@ const PracticeInterviewPanel = forwardRef(function PracticeInterviewPanel({
       try {
         const initial = await reload()
         if (cancelled) return
+        // Match formal mode: reveal the interview room as soon as its persisted
+        // session is restored. First-question generation continues inside it.
+        onInterviewUiReady?.()
         if (!initial.interview.current_question_id && initial.interview.status === 'active') {
           if (initial.practiceLimits?.timeLimitReached || initial.practiceLimits?.questionLimitReached) {
             notifyLimit(initial.practiceLimits.timeLimitReached ? 'PRACTICE_TIME_LIMIT' : 'PRACTICE_QUESTION_LIMIT')
@@ -121,13 +132,15 @@ const PracticeInterviewPanel = forwardRef(function PracticeInterviewPanel({
             await generateNext()
           }
         }
-        if (!cancelled) onInterviewUiReady?.()
       } catch (cause) {
-        if (!cancelled) setError(cause.message || t('interview.practice.restoreFailed'))
+        if (!cancelled) {
+          setError(cause.message || t('interview.practice.restoreFailed'))
+          onInterviewUiReady?.()
+        }
       }
     })()
     return () => { cancelled = true }
-  }, [generateNext, notifyLimit, onInterviewUiReady, reload, t])
+  }, [generateNext, notifyLimit, onInterviewUiReady, reload, restoreAttempt, t])
 
   const currentQuestion = useMemo(() => workspace?.questions?.find(
     question => question.id === workspace.interview.current_question_id,
@@ -184,7 +197,20 @@ const PracticeInterviewPanel = forwardRef(function PracticeInterviewPanel({
     await generateNext()
   }
 
-  if (!workspace) return <div className="flex flex-1 items-center justify-center text-sm text-slate-500">{t('interview.practice.loading')}</div>
+  if (!workspace) return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center text-sm text-slate-500">
+      <span>{error || t('interview.practice.loading')}</span>
+      {error && (
+        <button
+          type="button"
+          onClick={() => { setError(null); setRestoreAttempt(value => value + 1) }}
+          className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white dark:bg-white dark:text-slate-900"
+        >
+          {t('chat.retry')}
+        </button>
+      )}
+    </div>
+  )
 
   const paused = workspace.interview.status === 'paused'
   const messages = (workspace.questions || []).flatMap(question => [
