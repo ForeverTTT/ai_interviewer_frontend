@@ -1,6 +1,9 @@
 # 前端技术架构文档
 
-> 文档版本：2026-08-24；已同步 `/interview/:interviewId` 刷新恢复、面试官类型、完整练习流程、5–60 分钟正式模拟和截止答题宽限。
+> 文档版本：2026-08-26；状态：已上线。已同步 `/interview/:interviewId` 刷新恢复、面试官类型、完整练习流程、5–60 分钟正式模拟、截止答题宽限和练习首题加载降级。
+
+后端端到端面试流程以
+[`面试流程技术架构.md`](https://github.com/ForeverTTT/ai_interviewer_backend/blob/main/technical%20documents/%E9%9D%A2%E8%AF%95%E6%B5%81%E7%A8%8B%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84.md) 为准；本文只描述前端页面、组件、状态和交互边界。
 
 ## 目录
 
