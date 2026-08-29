@@ -30,14 +30,15 @@ export default function GallupRadar({ domainMap }) {
   return (
     <div className="flex flex-col items-center justify-center py-6 w-full max-w-full">
       <div className="relative w-full aspect-square" style={{ maxWidth: RADAR_SIZE }}>
+        {/* viewBox 负责缩放，容器只给宽高比：换肤不动几何 */}
         <svg width="100%" height="100%" viewBox={`0 0 ${RADAR_SIZE} ${RADAR_SIZE}`} className="overflow-visible absolute inset-0">
           <defs>
             <linearGradient id="gallupRadarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.5" />
-              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.5" />
+              <stop offset="0%" stopColor="rgb(var(--brand-violet))" stopOpacity="0.26" />
+              <stop offset="100%" stopColor="rgb(var(--brand-glow))" stopOpacity="0.14" />
             </linearGradient>
             <filter id="gallupGlow">
-              <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+              <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
               <feMerge>
                 <feMergeNode in="coloredBlur" />
                 <feMergeNode in="SourceGraphic" />
@@ -54,7 +55,7 @@ export default function GallupRadar({ domainMap }) {
               r={RADIUS * scale}
               fill="none"
               stroke="currentColor"
-              className="text-slate-200 dark:text-slate-700 opacity-80"
+              className="text-brand-line"
               strokeWidth="1.5"
               strokeDasharray={scale === 1 ? "none" : "4,4"}
             />
@@ -73,7 +74,7 @@ export default function GallupRadar({ domainMap }) {
                 x2={x2}
                 y2={y2}
                 stroke="currentColor"
-                className="text-slate-200 dark:text-slate-700 opacity-80"
+                className="text-brand-line"
                 strokeWidth="1.5"
               />
             )
@@ -86,9 +87,9 @@ export default function GallupRadar({ domainMap }) {
             transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
             points={points}
             fill="url(#gallupRadarGradient)"
-            stroke="#d946ef"
+            stroke="rgb(var(--brand-violet))"
             className="transition-all duration-1000 ease-out"
-            strokeWidth="3.5"
+            strokeWidth="3"
             strokeLinejoin="round"
             filter="url(#gallupGlow)"
           />
@@ -106,7 +107,7 @@ export default function GallupRadar({ domainMap }) {
                 cx={x}
                 cy={y}
                 r="6"
-                className="fill-white dark:fill-slate-900 stroke-fuchsia-500 stroke-[3.5px]"
+                className="fill-brand-card stroke-brand-ink stroke-[3px]"
               />
             )
           })}
@@ -161,11 +162,11 @@ export default function GallupRadar({ domainMap }) {
                 className={`absolute flex flex-col pointer-events-auto ${containerClass}`}
                 style={{ left: `${(xOffset / RADAR_SIZE) * 100}%`, top: `${(yOffset / RADAR_SIZE) * 100}%` }}
               >
-                <div className="font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest whitespace-nowrap drop-shadow-sm flex flex-col leading-tight mb-2">
-                  <span className="text-[14px] sm:text-[15px]">{mainLabel}</span>
-                  {subLabel && <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{subLabel}</span>}
+                <div className="font-brand font-semibold text-brand-ink tracking-tight whitespace-nowrap flex flex-col leading-tight mb-2">
+                  <span className="text-[13px] sm:text-[14px]">{mainLabel}</span>
+                  {subLabel && <span className="text-[11px] font-bold text-brand-muted mt-0.5">{subLabel}</span>}
                 </div>
-                <div className="inline-flex h-7 flex-nowrap items-center px-3 rounded-full bg-fuchsia-50 dark:bg-fuchsia-950/40 border border-fuchsia-100 dark:border-fuchsia-900/60 text-xs font-black text-fuchsia-600 dark:text-fuchsia-400 backdrop-blur-sm shadow-sm opacity-90">
+                <div className="inline-flex h-7 flex-nowrap items-center px-3 rounded-full border border-brand-line bg-brand-inset text-[12px] font-semibold text-brand-ink">
                   <span className="tabular-nums">{val}%</span>
                 </div>
               </motion.div>
@@ -176,4 +177,3 @@ export default function GallupRadar({ domainMap }) {
     </div>
   )
 }
-

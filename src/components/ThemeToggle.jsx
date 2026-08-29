@@ -15,7 +15,7 @@ export function AppThemeToggle({ className = '' }) {
     <button
       type="button"
       onClick={() => setAppTheme(dark ? 'light' : 'dark')}
-      className={`${baseBtn} bg-white text-slate-400 border-slate-100 hover:border-slate-200 hover:text-slate-900 dark:bg-slate-950 dark:border-slate-800 dark:hover:border-slate-700 dark:hover:text-white ${className}`}
+      className={`${baseBtn} border-brand-line bg-brand-card text-brand-muted hover:border-brand-ink hover:text-brand-ink ${className}`}
       aria-label={t('common.themeToggle')}
       title={t('common.themeToggle')}
     >
@@ -34,7 +34,7 @@ export function InterviewThemeToggle({ className = '' }) {
     <button
       type="button"
       onClick={() => setInterviewTheme(dark ? 'light' : 'dark')}
-      className={`${baseBtn} bg-white/10 text-white/40 hover:text-white border-white/10 hover:border-white/20 transition-all ${className}`}
+      className={`${baseBtn} border-brand-line bg-brand-card text-brand-muted hover:border-brand-ink hover:text-brand-ink ${className}`}
       aria-label={t('common.interviewThemeToggle')}
       title={t('common.interviewThemeToggle')}
     >

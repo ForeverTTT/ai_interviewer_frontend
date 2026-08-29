@@ -11,6 +11,7 @@
     "home": "Home",
     "startInterview": "Start Interview",
     "history": "History",
+    "personalCenter": "Dashboard",
     "login": "Login",
     "signUpFree": "Sign Up Free",
     "signOut": "Sign Out",
@@ -238,6 +239,25 @@
       "simD": "State-of-the-art Zoom-style interview interface with real-time camera interaction replicates the authentic German corporate interview setting. Paired with advanced TTS models for a truly immersive practice experience.",
       "privacyT": "German-Standard Security",
       "privacyD": "We understand the paramount importance of privacy. All resume data and interview transcripts are processed in de-identified environments strictly compliant with GDPR. Your practice remains private—security that empowers your progress."
+    },
+    "demo": {
+      "role": "AI Interviewer · Product Manager",
+      "recording": "Recording",
+      "currentQuestion": "Question",
+      "tagSituational": "Situational",
+      "question": "How would you design a feature that lifts user engagement?",
+      "hintLevel": "Hint level",
+      "transcript": "Live transcript",
+      "interviewer": "Interviewer",
+      "you": "You",
+      "line1": "Walk me through a product you owned and what your role actually was.",
+      "line2": "I ran discovery and solution design from zero to one, aiming to lift new-user retention.",
+      "score": "Overall score",
+      "dim1": "Problem solving",
+      "dim2": "Structured answers",
+      "dim3": "User thinking",
+      "dim4": "Communication",
+      "dim5": "Learning potential"
     }
   },
   "offerMarquee": {
@@ -396,7 +416,47 @@
     "historyClear": "Clear All",
     "historyClearConfirm": "Clear all history records?",
     "historyCount": "{{n}} records",
-    "historyAgo": "{{t}} ago"
+    "historyAgo": "{{t}} ago",
+    "sectionJobInfo": "Role details",
+    "sectionJobInfoSub": "Fill in the basics — AI builds the questions and rubric from this",
+    "sectionInterviewSetup": "Interview settings",
+    "sectionInterviewSetupSub": "Tailor the flow and evaluation criteria",
+    "resumeUploadLabel": "Resume upload (optional)",
+    "resumeHintLimit": "PDF only, up to {{mb}}MB",
+    "typeHrHint": "Suggested 10 min",
+    "typeTechnicalHint": "Suggested 15–20 min",
+    "typeMixedHint": "Suggested 10–15 min",
+    "summaryTitle": "Configuration overview",
+    "summaryPosition": "Role",
+    "summaryEmployment": "Employment",
+    "summaryCategory": "Category",
+    "summaryResume": "Resume",
+    "summaryType": "Interviewer",
+    "summaryMode": "Mode",
+    "summaryLanguage": "Language",
+    "summaryDifficulty": "Difficulty",
+    "summaryDuration": "Duration",
+    "summaryStyle": "Personality",
+    "summaryUnset": "Not set",
+    "summaryCategoryUnset": "None",
+    "summaryResumeReady": "Ready",
+    "summaryResumeNone": "Not uploaded",
+    "benefitsTitle": "What you'll get",
+    "benefit1": "AI-generated questions built for this role",
+    "benefit2": "Live voice conversation and feedback",
+    "benefit3": "Results with concrete improvement advice",
+    "securityNote": "Encrypted end to end — your interview is only used to help you improve",
+    "creditCost": "{{n}} credits",
+    "durationMinutes": "{{n}} min",
+    "positionPlaceholder": "e.g. Frontend Developer",
+    "pageTitle": "Start an interview",
+    "pageSub": "Tell us the role you are targeting — the AI builds a path and questions around it.",
+    "jobDescSub": "Paste the job description so the AI can tailor the questions",
+    "summaryOverview": "Overview",
+    "previewReady": "Your AI interviewer is ready whenever you are",
+    "privacyTitle": "Privacy & security",
+    "privacyBody": "Your interviews stay private, are never used for model training, and you can delete every record at any time.",
+    "privacyMore": "Learn more"
   },
   "profile": {
     "title": "Profile & Resume",
@@ -774,7 +834,9 @@
       "experience": "Experience descriptions need more specific STAR cases. Use interview practice to find your highlights.",
       "portfolio": "Portfolio richness can be optimized; showcase more actual problem-solving processes.",
       "networking": "Networking is in its early stages. Try engaging with alumni or attending campus career events."
-    }
+    },
+    "scoreLabel": "Overall readiness",
+    "lvlMapSub": "Your growth path"
   },
   "interview": {
     "live": "Live Interview",
@@ -888,7 +950,15 @@
         "key_points": "Key Points",
         "example": "Example"
       }
-    }
+    },
+    "cameraOff": "Camera off",
+    "onScreen": "On screen",
+    "transcriptTitle": "Live transcript",
+    "audioControls": "Audio",
+    "videoCamera": "Camera",
+    "connectionLabel": "Connection",
+    "connectionOk": "Connected",
+    "connectionWait": "Connecting"
   },
   "report": {
     "title": "Interview Report",
@@ -938,7 +1008,19 @@
     "lineModelAnswer": "Reference",
     "noTranscript": "No transcript data saved.",
     "roleCandidate": "Candidate",
-    "roleInterviewer": "Interviewer"
+    "roleInterviewer": "Interviewer",
+    "tabCards": "Cards",
+    "tabOverview": "All questions",
+    "cardReveal": "Show reference answer",
+    "cardHide": "Hide reference answer",
+    "cardPrev": "Previous question",
+    "cardNext": "Next question",
+    "deckTitle": "Question review",
+    "deckEmpty": "No questions to review in this session.",
+    "deckSub": "One question at a time: recall your answer first, then reveal the reference and the gaps.",
+    "aiFeedback": "AI feedback",
+    "summaryAside": "Report summary",
+    "yourAnswerEmpty": "No answer was recorded for this round."
   },
   "chat": {
     "startTriggerEn": "Please start the interview now.",

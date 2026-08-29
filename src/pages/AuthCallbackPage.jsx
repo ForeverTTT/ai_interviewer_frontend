@@ -101,13 +101,12 @@ export default function AuthCallbackPage() {
   }, [navigate])
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-slate-50 to-primary-50 px-4 overflow-hidden dark:from-slate-950 dark:to-slate-900">
-      <div className="pointer-events-none absolute inset-0 bg-mesh-light opacity-35 dark:opacity-20" aria-hidden />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-paper px-4">
       <div className="relative z-[1] flex flex-col items-center gap-5 max-w-sm w-full text-center">
         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-xl ${
-          status === 'error'   ? 'bg-red-500' :
-          status === 'success' ? 'bg-emerald-500' :
-          'bg-gradient-to-br from-primary-600 to-violet-600'
+          status === 'error'   ? 'bg-brand-danger' :
+          status === 'success' ? 'bg-brand-success' :
+          'bg-brand-ink'
         }`}>
           {status === 'error'   && <AlertCircle className="w-9 h-9 text-white" />}
           {status === 'success' && <CheckCircle2 className="w-9 h-9 text-white" />}
@@ -116,31 +115,31 @@ export default function AuthCallbackPage() {
 
         {status === 'loading' && (
           <>
-            <div className="w-10 h-10 border-4 border-primary-200 border-t-primary-600 dark:border-primary-900 dark:border-t-primary-400 rounded-full animate-spin" />
-            <p className="text-slate-700 dark:text-slate-200 font-semibold">{t('auth.loading')}</p>
-            <p className="text-slate-400 dark:text-slate-500 text-sm">{t('auth.wait')}</p>
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-line border-t-brand-ink" />
+            <p className="font-bold text-brand-ink">{t('auth.loading')}</p>
+            <p className="text-[13px] text-brand-muted">{t('auth.wait')}</p>
           </>
         )}
 
         {status === 'success' && (
-          <p className="text-emerald-600 font-semibold">{t('auth.success')}</p>
+          <p className="font-bold text-brand-success">{t('auth.success')}</p>
         )}
 
         {status === 'error' && (
           <>
-            <p className="text-red-600 font-semibold text-base whitespace-pre-line">{errorMsg}</p>
-            <p className="text-slate-400 dark:text-slate-500 text-sm">{t('auth.backSoon')}</p>
+            <p className="whitespace-pre-line text-[15px] font-bold text-brand-danger">{errorMsg}</p>
+            <p className="text-[13px] text-brand-muted">{t('auth.backSoon')}</p>
             <button
               onClick={() => navigate('/login', { replace: true })}
-              className="mt-2 px-6 py-2 bg-primary-600 text-white rounded-xl text-sm font-medium hover:bg-primary-700 transition-colors"
+              className="mt-2 rounded-xl bg-brand-ink px-6 py-2.5 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90"
             >
               {t('auth.backNow')}
             </button>
 
             {debugInfo && (
               <details className="mt-4 text-left w-full">
-                <summary className="text-xs text-slate-400 dark:text-slate-500 cursor-pointer hover:text-slate-600 dark:hover:text-slate-300">{t('auth.debug')}</summary>
-                <pre className="mt-2 p-3 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs text-slate-600 dark:text-slate-300 break-all whitespace-pre-wrap">{debugInfo}</pre>
+                <summary className="cursor-pointer text-[12px] text-brand-muted transition-colors hover:text-brand-ink">{t('auth.debug')}</summary>
+                <pre className="mt-2 whitespace-pre-wrap break-all rounded-lg bg-brand-inset p-3 text-[12px] text-brand-muted">{debugInfo}</pre>
               </details>
             )}
           </>

@@ -4,7 +4,6 @@ import { ThemeProvider } from './context/ThemeContext'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
-import BackgroundAurora from './components/BackgroundAurora'
 import CookieBanner from './components/CookieBanner'
 import { lazyWithReload } from './lib/lazyWithReload'
 
@@ -22,7 +21,7 @@ const ResumeTailorPage = lazyWithReload(() => import('./pages/ResumeTailorPage')
 
 function PageFallback() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-sky-50/50 text-slate-600 dark:bg-[#020617] dark:text-slate-300">
+    <div className="flex min-h-screen items-center justify-center bg-brand-paper text-brand-muted">
       <span role="status" aria-live="polite">Loading…</span>
     </div>
   )
@@ -30,10 +29,9 @@ function PageFallback() {
 
 function Layout({ children, hideFooter = false }) {
   return (
-    <div className="relative min-h-screen bg-sky-50/50 dark:bg-[#020617] transition-colors duration-500">
+    <div className="relative min-h-screen bg-brand-paper">
       <Navbar />
-      <BackgroundAurora />
-      <main className="relative z-10 min-h-[calc(100dvh-4.25rem)]">{children}</main>
+      <main className="relative z-10 min-h-[calc(100dvh-var(--ui-nav-h))]">{children}</main>
       {!hideFooter && <Footer />}
     </div>
   )

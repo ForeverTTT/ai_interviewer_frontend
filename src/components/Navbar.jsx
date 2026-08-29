@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
 import LanguageSwitcher from './LanguageSwitcher'
 import { AppThemeToggle } from './ThemeToggle'
+import { useTheme } from '../context/ThemeContext'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import { authenticatedFetch } from '../lib/authenticatedFetch'
@@ -12,6 +13,7 @@ import { Menu, X, BrainCircuit, ChevronDown, LogOut, LayoutDashboard, UserCircle
 export default function Navbar() {
   const { t } = useTranslation()
   const { user, signOut } = useAuth()
+  const { isDark } = useTheme()
   const [jobStatus, setJobStatus] = useState('seeking')
   const [avatarId, setAvatarId] = useState(null)
   const [tokens, setTokens] = useState(0)
@@ -119,6 +121,19 @@ export default function Navbar() {
     setDropdownOpen(false)
   }
 
+  /**
+   * 顶部菜单。顺序由这张表决定，桌面端和移动端抽屉共用同一份，
+   * 改顺序只动这里。auth: true 的项仅登录后出现。
+   */
+  const navItems = [
+    { to: '/', label: t('nav.home') },
+    { to: '/setup', label: t('nav.startInterview'), auth: true },
+    { to: '/resume-tailor', label: t('nav.resumeTailor'), auth: true },
+    { to: '/experiences', label: t('nav.experiences') },
+    { to: '/gallup', label: t('nav.gallup'), auth: true },
+    { to: '/dashboard', label: t('nav.personalCenter'), auth: true },
+  ].filter(item => !item.auth || user)
+
   const isActive = (path) => {
     if (path === '/profile') {
       return location.pathname === '/profile' || location.pathname === '/profile/edit'
@@ -127,106 +142,36 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none transition-all duration-500">
-      <div className="pointer-events-auto w-full max-w-[80rem] bg-white/70 dark:bg-slate-950/70 backdrop-blur-2xl rounded-b-2xl border-x border-b border-slate-200/50 dark:border-slate-800/50 shadow-lg shadow-slate-900/[0.04] px-6 lg:px-8 overflow-visible">
-        <div className="flex items-center justify-between h-20">
+    /* 通栏固定条：高度取自 --ui-nav-h，页面顶部避让读同一个变量 */
+    <nav className="theme-quiet fixed inset-x-0 top-0 z-50 bg-brand-paper/85 backdrop-blur-xl">
+      <div className="px-4 sm:px-6 lg:px-8">
+        <div className="flex h-[var(--ui-nav-h)] items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 overflow-hidden flex items-center justify-center">
-              <picture>
-                <source srcSet="/landit-icon-dark.svg" media="(prefers-color-scheme: dark)" />
-                <img
-                  src="/landit-icon-light.svg"
-                  alt="LandIt Logo"
-                  className="w-full h-full object-contain transition-transform group-hover:scale-[1.1] group-hover:rotate-3 duration-500"
-                />
-              </picture>
+              <img
+                src={isDark ? '/landit-icon-dark.svg' : '/landit-icon-light.svg'}
+                alt="LandIt Logo"
+                className="w-full h-full object-contain transition-transform group-hover:scale-[1.1] group-hover:rotate-3 duration-500"
+              />
             </div>
-            <span className="font-black text-xl tracking-tighter text-slate-900 dark:text-white leading-none">
-              Land<span className="text-[#E8A832] italic">It</span>
+            <span className="font-brand text-xl font-black leading-none tracking-tight text-brand-ink">
+              Land<span className="italic text-brand-violet">It</span>
             </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-2">
-            <Link
-              to="/"
-              className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isActive('/')
-                ? 'text-primary-600 dark:text-primary-400'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                }`}
-            >
-              {t('nav.home')}
-              {isActive('/') && (
-                <span className="absolute -bottom-1 left-4 right-4 h-[3px] bg-primary-600 dark:bg-primary-400 rounded-full" />
-              )}
-            </Link>
-            {user && (
-              <>
-                <Link
-                  to="/setup"
-                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isActive('/setup')
-                    ? 'text-primary-600 dark:text-primary-400'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                >
-                  {t('nav.startInterview')}
-                  {isActive('/setup') && (
-                    <span className="absolute -bottom-1 left-4 right-4 h-[3px] bg-primary-600 dark:bg-primary-400 rounded-full" />
-                  )}
-                </Link>
-                <Link
-                  to="/dashboard"
-                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isActive('/dashboard')
-                    ? 'text-primary-600 dark:text-primary-400'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                >
-                  {t('nav.history')}
-                  {isActive('/dashboard') && (
-                    <span className="absolute -bottom-1 left-4 right-4 h-[3px] bg-primary-600 dark:bg-primary-400 rounded-full" />
-                  )}
-                </Link>
-                <Link
-                  to="/resume-tailor"
-                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isActive('/resume-tailor')
-                    ? 'text-primary-600 dark:text-primary-400'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                >
-                  {t('nav.resumeTailor')}
-                  {isActive('/resume-tailor') && (
-                    <span className="absolute -bottom-1 left-4 right-4 h-[3px] bg-primary-600 dark:bg-primary-400 rounded-full" />
-                  )}
-                </Link>
-              </>
-            )}
-            <Link
-              to="/experiences"
-              className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isActive('/experiences')
-                ? 'text-primary-600 dark:text-primary-400'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                }`}
-            >
-              {t('nav.experiences')}
-              {isActive('/experiences') && (
-                <span className="absolute -bottom-1 left-4 right-4 h-[3px] bg-primary-600 dark:bg-primary-400 rounded-full" />
-              )}
-            </Link>
-            {user && (
-              <>
-                <Link
-                  to="/gallup"
-                  className={`relative px-4 py-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isActive('/gallup')
-                    ? 'text-primary-600 dark:text-primary-400'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                >
-                  {t('nav.gallup')}
-                  {isActive('/gallup') && (
-                    <span className="absolute -bottom-1 left-4 right-4 h-[3px] bg-primary-600 dark:bg-primary-400 rounded-full" />
-                  )}
-                </Link>
-              </>
-            )}
+            {navItems.map(item => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="relative whitespace-nowrap px-4 py-2 text-[14px] font-semibold text-brand-ink transition-opacity duration-200 hover:opacity-70"
+              >
+                {item.label}
+                {isActive(item.to) && (
+                  <span className="absolute -bottom-1 left-4 right-4 h-[2px] rounded-full bg-brand-ink" />
+                )}
+              </Link>
+            ))}
           </div>
 
           <div className="hidden md:flex items-center gap-6">
@@ -239,51 +184,51 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-3 pl-2 pr-4 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 transition-all group"
+                  className="group flex items-center gap-3 rounded-full border border-brand-line bg-brand-card py-1.5 pl-2 pr-4 transition-colors hover:border-brand-ink/40"
                 >
                   <div className="relative">
-                    <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-black overflow-hidden">
+                    <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-brand-ink text-xs font-bold text-brand-on-ink">
                       {avatarId ? (
                         <img src={avatarId.startsWith('data:') || avatarId.startsWith('http') ? avatarId : `/avatars/${avatarId}.png`} alt="Avatar" className="w-full h-full object-cover" />
                       ) : (
                         user.user_metadata?.full_name?.[0] || user.email?.[0]?.toUpperCase() || 'U'
                       )}
                     </div>
-                    <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-950 ${jobStatus === 'seeking' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                    <div className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-brand-card ${jobStatus === 'seeking' ? 'bg-brand-success' : 'bg-brand-line'}`} />
                   </div>
-                  <span className="text-sm font-bold text-slate-700 dark:text-slate-200 max-w-[100px] truncate">
+                  <span className="max-w-[100px] truncate text-[13px] font-semibold text-brand-ink">
                     {user.user_metadata?.full_name || user.email.split('@')[0]}
                   </span>
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
-                    <BrainCircuit className="w-3 h-3 text-emerald-500" />
-                    <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400">{tokens}</span>
+                  <div className="flex items-center gap-1.5 rounded-md border border-brand-line bg-brand-inset px-2 py-0.5">
+                    <BrainCircuit className="h-3 w-3 text-brand-muted" />
+                    <span className="text-[11px] font-semibold tabular-nums text-brand-ink">{tokens}</span>
                   </div>
-                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-4 w-4 text-brand-muted transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-4 w-64 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-950 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-900 py-4 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="px-6 py-4 border-b border-slate-50 dark:border-slate-900 mb-2">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{t('nav.profile')}</p>
-                      <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                  <div className="brand-float absolute right-0 z-50 mt-3 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-brand-line py-3">
+                    <div className="mb-2 border-b border-brand-line px-5 pb-3">
+                      <p className="mb-1 text-[11px] font-medium text-brand-muted">{t('nav.profile')}</p>
+                      <p className="truncate text-[13px] font-semibold text-brand-ink">
                         {user.user_metadata?.full_name || user.email}
                       </p>
                       <div className="mt-2 flex items-center justify-between">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('nav.tokens')}</span>
-                        <span className="text-xs font-black text-emerald-500">{tokens}</span>
+                        <span className="text-[11px] text-brand-muted">{t('nav.tokens')}</span>
+                        <span className="text-[12px] font-semibold tabular-nums text-brand-ink">{tokens}</span>
                       </div>
                     </div>
                     <Link
                       to="/dashboard"
-                      className="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+                      className="flex items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-brand-muted transition-colors hover:bg-brand-inset hover:text-brand-ink"
                       onClick={() => setDropdownOpen(false)}
                     >
                       <LayoutDashboard className="w-4 h-4" />
-                      {t('nav.history')}
+                      {t('nav.personalCenter')}
                     </Link>
                     <Link
                       to="/resume-tailor"
-                      className="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+                      className="flex items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-brand-muted transition-colors hover:bg-brand-inset hover:text-brand-ink"
                       onClick={() => setDropdownOpen(false)}
                     >
                       <FilePenLine className="w-4 h-4" />
@@ -291,7 +236,7 @@ export default function Navbar() {
                     </Link>
                     <Link
                       to="/profile"
-                      className="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+                      className="flex items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-brand-muted transition-colors hover:bg-brand-inset hover:text-brand-ink"
                       onClick={() => setDropdownOpen(false)}
                     >
                       <UserCircle className="w-4 h-4" />
@@ -299,7 +244,7 @@ export default function Navbar() {
                     </Link>
                     <Link
                       to="/experiences?mine=true"
-                      className="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+                      className="flex items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-brand-muted transition-colors hover:bg-brand-inset hover:text-brand-ink"
                       onClick={() => setDropdownOpen(false)}
                     >
                       <BookOpen className="w-4 h-4" />
@@ -310,23 +255,22 @@ export default function Navbar() {
                         e.stopPropagation()
                         toggleJobStatus()
                       }}
-                      className="flex items-center justify-between w-full px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+                      className="flex w-full items-center justify-between px-5 py-2.5 text-[13px] font-medium text-brand-muted transition-colors hover:bg-brand-inset hover:text-brand-ink"
                     >
                       <div className="flex items-center gap-3">
                         <Briefcase className="w-4 h-4" />
                         <span>{t('profile.status')}</span>
                       </div>
-                      <span className={`px-2 py-1 rounded-lg ${jobStatus === 'seeking' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
-                        }`}>
+                      <span className={`rounded-md px-2 py-1 text-[12px] ${jobStatus === 'seeking' ? 'border border-brand-line bg-brand-inset font-medium text-brand-ink' : 'border border-transparent bg-brand-inset text-brand-muted'}`}>
                         {jobStatus === 'seeking' ? t('profile.statusSeeking') : t('profile.statusHired')}
                       </span>
                     </button>
-                    <div className="my-2 px-6">
-                      <div className="h-px bg-slate-50 dark:bg-slate-900" />
+                    <div className="my-2 px-5">
+                      <div className="h-px bg-brand-line" />
                     </div>
                     <button
                       onClick={handleSignOut}
-                      className="flex items-center gap-3 w-full px-6 py-3 text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all"
+                      className="flex w-full items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-brand-danger transition-colors hover:bg-brand-inset"
                     >
                       <LogOut className="w-4 h-4" />
                       {t('nav.signOut')}
@@ -336,10 +280,10 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center gap-4">
-                <Link to="/login" className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white">
+                <Link to="/login" className="text-[13px] font-semibold text-brand-muted transition-colors hover:text-brand-ink">
                   {t('nav.login')}
                 </Link>
-                <Link to="/login" className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-lg shadow-slate-900/10">
+                <Link to="/login" className="rounded-full bg-brand-ink px-5 py-2.5 text-[13px] font-semibold text-brand-on-ink transition-transform duration-200 hover:-translate-y-0.5">
                   {t('nav.signUpFree')}
                 </Link>
               </div>
@@ -348,7 +292,7 @@ export default function Navbar() {
 
           <div className="flex items-center gap-4 md:hidden">
             <button
-              className="p-2 rounded-xl text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900 transition-all"
+              className="rounded-lg p-2 text-brand-ink transition-colors hover:bg-brand-inset"
               onClick={() => setMobileOpen(!mobileOpen)}
             >
               {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -358,24 +302,23 @@ export default function Navbar() {
       </div>
 
       {mobileOpen && (
-        <div className="pointer-events-auto md:hidden bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900 p-8 space-y-6 animate-in slide-in-from-top-4 duration-500 font-chinese-modern uppercase">
-          <Link to="/" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.home')}</Link>
-          <Link to="/experiences" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.experiences')}</Link>
+        <div className="max-h-[calc(100dvh-var(--ui-nav-h))] space-y-5 overflow-y-auto border-t border-brand-line bg-brand-paper p-7 md:hidden">
+          {/* 与桌面端共用 navItems，顺序一致；个人资料和退出登录是移动端专有的收尾项 */}
+          {navItems.map(item => (
+            <Link key={item.to} to={item.to} className="block font-brand text-xl font-semibold tracking-tight text-brand-ink" onClick={() => setMobileOpen(false)}>{item.label}</Link>
+          ))}
           {user ? (
             <>
-              <Link to="/setup" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.startInterview')}</Link>
-              <Link to="/dashboard" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.history')}</Link>
-              <Link to="/resume-tailor" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.resumeTailor')}</Link>
-              <Link to="/profile" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.profile')}</Link>
-              <button onClick={handleSignOut} className="w-full text-left text-2xl font-black text-red-600 py-4 tracking-tighter">{t('nav.signOut')}</button>
+              <Link to="/profile" className="block font-brand text-xl font-semibold tracking-tight text-brand-ink" onClick={() => setMobileOpen(false)}>{t('nav.profile')}</Link>
+              <button onClick={handleSignOut} className="w-full py-3 text-left font-brand text-xl font-semibold tracking-tight text-brand-danger">{t('nav.signOut')}</button>
             </>
           ) : (
             <>
-              <Link to="/login" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.login')}</Link>
-              <Link to="/login" className="block w-full text-center px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black uppercase tracking-widest rounded-full shadow-xl" onClick={() => setMobileOpen(false)}>{t('nav.signUpFree')}</Link>
+              <Link to="/login" className="block font-brand text-xl font-semibold tracking-tight text-brand-ink" onClick={() => setMobileOpen(false)}>{t('nav.login')}</Link>
+              <Link to="/login" className="block w-full rounded-full bg-brand-ink px-8 py-3.5 text-center text-[14px] font-semibold text-brand-on-ink" onClick={() => setMobileOpen(false)}>{t('nav.signUpFree')}</Link>
             </>
           )}
-          <div className="pt-8 flex items-center justify-between border-t border-slate-100 dark:border-slate-900">
+          <div className="flex items-center justify-between border-t border-brand-line pt-6">
             <LanguageSwitcher />
             <AppThemeToggle />
           </div>

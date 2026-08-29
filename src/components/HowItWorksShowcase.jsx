@@ -1,100 +1,98 @@
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import {
-  Briefcase, Globe2,
-  ArrowRight, Sparkles, Zap, Mic
-} from 'lucide-react'
+import { Briefcase, Globe2, Zap, Mic } from 'lucide-react'
+import { SectionHead, WordMark, IndexBadge } from './brand/BrandKit'
 
 // Use the generated image path
 import mockupImg from '../assets/interview_interface_mockup.png'
 
 const MAIN_BULLET_KEYS = ['howMainB1', 'howMainB2', 'howMainB3', 'howMainB4']
 
+const VALUE_CARDS = [
+  { key: 'howV1', icon: <Briefcase className="h-5 w-5" /> },
+  { key: 'howV2', icon: <Zap className="h-5 w-5" /> },
+  { key: 'howV3', icon: <Globe2 className="h-5 w-5" /> },
+  { key: 'howV4', icon: <Mic className="h-5 w-5" /> },
+]
+
 export default function HowItWorksShowcase({ ctaLink }) {
   const { t } = useTranslation()
 
   return (
-    <section id="how-it-works" className="pt-32 pb-16 bg-slate-50 dark:bg-slate-950 px-4 sm:px-6 lg:px-8 border-y border-slate-200 dark:border-slate-900">
-      <div className="max-w-6xl mx-auto">
-        <header className="text-center mb-20 max-w-4xl mx-auto space-y-6">
-          <motion.h2
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="text-4xl sm:text-6xl font-black text-slate-900 dark:text-white font-serif tracking-tight"
-          >
-            {t('landing.howTitlePre')}<span className="inline whitespace-nowrap font-sans tracking-tighter">Land<span className="text-[#E8A832] italic">It</span></span>{t('landing.howTitlePost')}
-            <span className="block h-1 w-16 bg-primary-600 dark:bg-primary-400 mx-auto mt-6 rounded-full" />
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 leading-relaxed font-medium"
-          >
-            {t('landing.howSub')}
-          </motion.p>
-        </header>
-
-        {/* Main Interface Demo Card */}
+    <section id="how-it-works" className="bg-brand-paper py-24 sm:py-28">
+      <div className="ui-container">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="relative bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden mb-24 max-w-5xl mx-auto"
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto max-w-3xl"
         >
-          <div className="grid lg:grid-cols-2 items-center">
-            {/* Left side bullets */}
-            <div className="p-10 sm:p-16 lg:p-20 space-y-12">
-              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
+          <SectionHead
+            align="center"
+            title={<>{t('landing.howTitlePre')}<WordMark />{t('landing.howTitlePost')}</>}
+            sub={t('landing.howSub')}
+          />
+        </motion.div>
+
+        {/* 主界面演示 */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-16"
+        >
+          {/* 这块不再套白色卡片：正文直接落在页面底色上，文字用纯黑 */}
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+            {/* 脱掉卡片外框后文字会贴到容器左边界，这里补回内缩 */}
+            <div className="py-2 sm:pl-6 lg:pl-10 xl:pl-14">
+              <h3 className="font-brand text-[24px] font-black leading-snug tracking-tight text-brand-ink sm:text-[30px]">
                 {t('landing.howMainTitle')}
               </h3>
-              <div className="space-y-8">
-                {MAIN_BULLET_KEYS.map((key) => (
-                  <div key={key} className="flex gap-4 items-start group">
-                    <div className="mt-1.5 w-2 h-2 rounded-full bg-primary-600 shadow-[0_0_10px_rgba(79,70,229,0.4)] flex-shrink-0 group-hover:scale-125 transition-transform duration-500" />
-                    <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-medium transition-colors group-hover:text-slate-900 dark:group-hover:text-white">
+
+              <ul className="mt-10 space-y-6">
+                {MAIN_BULLET_KEYS.map((key, i) => (
+                  <li key={key} className="flex items-start gap-4">
+                    <IndexBadge n={i + 1} />
+                    <p className="pt-1 text-[15px] leading-relaxed text-brand-ink">
                       {t(`landing.${key}`)}
                     </p>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
 
-            <div className="relative h-full lg:min-h-[700px] bg-sky-50/50 dark:bg-sky-950/20 overflow-hidden flex items-center justify-start p-0 pl-1">
+            <div className="flex h-full items-center justify-center overflow-hidden rounded-[24px] border border-brand-line bg-brand-inset p-8 lg:min-h-[520px]">
               <img
                 src={mockupImg}
                 alt="AI Interview Session"
-                className="relative z-10 w-full h-full object-contain hover:scale-[1.05] transition-transform duration-1000"
+                className="h-full w-full object-contain"
               />
             </div>
           </div>
         </motion.div>
 
-        {/* 4 Feature Cards Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { key: 'howV1', icon: <Briefcase /> },
-            { key: 'howV2', icon: <Zap /> },
-            { key: 'howV3', icon: <Globe2 /> },
-            { key: 'howV4', icon: <Mic /> }
-          ].map((item, i) => (
+        {/* 四个价值点 */}
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {VALUE_CARDS.map((item, i) => (
             <motion.div
               key={item.key}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="group p-8 bg-white dark:bg-slate-950 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 transition-all hover:-translate-y-2 hover:shadow-xl space-y-8"
+              transition={{ delay: i * 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="brand-float group p-7 transition-transform duration-300 hover:-translate-y-1"
             >
-              <div className="w-16 h-16 rounded-[1.25rem] bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 group-hover:scale-110 transition-all">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-ink text-brand-on-ink transition-colors duration-300 group-hover:bg-brand-violet">
                 {item.icon}
               </div>
-              <div className="space-y-4">
-                <h4 className="text-xl font-black text-slate-900 dark:text-white leading-tight">{t(`landing.${item.key}Title`)}</h4>
-                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-bold italic">{t(`landing.${item.key}Desc`)}</p>
-              </div>
+              <h4 className="mt-6 text-[17px] font-bold leading-tight text-brand-ink">
+                {t(`landing.${item.key}Title`)}
+              </h4>
+              <p className="mt-3 text-[13.5px] leading-relaxed text-brand-muted">
+                {t(`landing.${item.key}Desc`)}
+              </p>
             </motion.div>
           ))}
         </div>

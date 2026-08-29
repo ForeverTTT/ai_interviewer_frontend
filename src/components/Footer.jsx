@@ -1,64 +1,65 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BrainCircuit, Mail } from 'lucide-react'
+import { useTheme } from '../context/ThemeContext'
 
 export default function Footer() {
   const { t } = useTranslation()
+  const { isDark } = useTheme()
 
   return (
-    <footer className="relative overflow-hidden border-t border-slate-200/90 bg-slate-100 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-500/40 to-transparent" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.08),transparent)] pointer-events-none dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 relative">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12">
+    /* 底色与页面同为 brand-paper，只靠 border-t 分隔；不再叠柔光椭圆和紫色渐变细线 */
+    <footer className="theme-quiet border-t border-brand-line bg-brand-paper text-brand-muted">
+      <div className="ui-container py-12">
+        {/* 品牌靠左、链接组靠右；容器收口后中间不会拉出大片空隙 */}
+        <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between md:gap-12">
           <div>
             <Link to="/" className="inline-flex items-center gap-2.5 mb-5 group">
               <div className="w-9 h-9 overflow-hidden flex items-center justify-center">
-                <picture>
-                  <source srcSet="/landit-icon-dark.svg" media="(prefers-color-scheme: dark)" />
-                  <img
-                    src="/landit-icon-light.svg"
-                    alt="LandIt Logo"
-                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
-                  />
-                </picture>
+                <img
+                  src={isDark ? '/landit-icon-dark.svg' : '/landit-icon-light.svg'}
+                  alt="LandIt Logo"
+                  className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                />
               </div>
-              <span className="font-bold text-lg tracking-tight text-slate-900 dark:text-white">
-                Land<span className="text-[#E8A832] italic">It</span>
+              <span className="font-brand text-lg font-bold tracking-tight text-brand-ink">
+                Land<span className="italic text-brand-violet">It</span>
               </span>
             </Link>
-            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 max-w-sm">
+            <p className="max-w-sm text-[13px] leading-relaxed text-brand-muted">
               {t('footer.tagline')}
             </p>
           </div>
 
-          <div>
-            <h4 className="text-slate-900 dark:text-white font-semibold mb-4 text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">{t('footer.quickNav')}</h4>
-            <ul className="space-y-2.5 text-sm">
-              <li><Link to="/" className="text-slate-600 hover:text-primary-700 dark:text-slate-400 dark:hover:text-white transition-colors inline-block border-b border-transparent hover:border-primary-300/50 dark:hover:border-white/20 pb-0.5">{t('footer.home')}</Link></li>
-              <li><Link to="/setup" className="text-slate-600 hover:text-primary-700 dark:text-slate-400 dark:hover:text-white transition-colors inline-block border-b border-transparent hover:border-primary-300/50 dark:hover:border-white/20 pb-0.5">{t('footer.startPractice')}</Link></li>
-              <li><Link to="/dashboard" className="text-slate-600 hover:text-primary-700 dark:text-slate-400 dark:hover:text-white transition-colors inline-block border-b border-transparent hover:border-primary-300/50 dark:hover:border-white/20 pb-0.5">{t('footer.history')}</Link></li>
-              <li><Link to="/profile" className="text-slate-600 hover:text-primary-700 dark:text-slate-400 dark:hover:text-white transition-colors inline-block border-b border-transparent hover:border-primary-300/50 dark:hover:border-white/20 pb-0.5">{t('nav.profile')}</Link></li>
-              <li><Link to="/login" className="text-slate-600 hover:text-primary-700 dark:text-slate-400 dark:hover:text-white transition-colors inline-block border-b border-transparent hover:border-primary-300/50 dark:hover:border-white/20 pb-0.5">{t('footer.loginRegister')}</Link></li>
+          <div className="grid grid-cols-2 gap-10 sm:gap-16 lg:gap-24">
+            <div>
+              <h4 className="mb-4 text-[12.5px] font-semibold text-brand-ink">{t('footer.quickNav')}</h4>
+            <ul className="space-y-2.5 text-[13px]">
+              <li><Link to="/" className="inline-block border-b border-transparent pb-0.5 text-brand-muted transition-colors hover:border-brand-ink/40 hover:text-brand-ink">{t('footer.home')}</Link></li>
+              <li><Link to="/setup" className="inline-block border-b border-transparent pb-0.5 text-brand-muted transition-colors hover:border-brand-ink/40 hover:text-brand-ink">{t('footer.startPractice')}</Link></li>
+              <li><Link to="/dashboard" className="inline-block border-b border-transparent pb-0.5 text-brand-muted transition-colors hover:border-brand-ink/40 hover:text-brand-ink">{t('footer.history')}</Link></li>
+              <li><Link to="/profile" className="inline-block border-b border-transparent pb-0.5 text-brand-muted transition-colors hover:border-brand-ink/40 hover:text-brand-ink">{t('nav.profile')}</Link></li>
+              <li><Link to="/login" className="inline-block border-b border-transparent pb-0.5 text-brand-muted transition-colors hover:border-brand-ink/40 hover:text-brand-ink">{t('footer.loginRegister')}</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-slate-900 dark:text-white font-semibold mb-4 text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">{t('footer.about')}</h4>
-            <ul className="space-y-2.5 text-sm">
-              <li className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                <Mail className="w-4 h-4 shrink-0 text-slate-500 dark:text-slate-500" />
+            <h4 className="mb-4 text-[12.5px] font-semibold text-brand-ink">{t('footer.about')}</h4>
+            <ul className="space-y-2.5 text-[13px]">
+              <li className="flex items-center gap-2 text-brand-muted">
+                <Mail className="w-4 h-4 shrink-0 text-brand-muted" />
                 <span>support@landit.app</span>
               </li>
-              <li><span className="text-slate-500 dark:text-slate-500">{t('footer.supportLang')}</span></li>
-              <li><span className="text-slate-500 dark:text-slate-500">{t('footer.roles')}</span></li>
+              <li><span className="text-brand-muted">{t('footer.supportLang')}</span></li>
+              <li><span className="text-brand-muted">{t('footer.roles')}</span></li>
             </ul>
+            </div>
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-slate-200/90 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-slate-500 dark:text-slate-500">{t('footer.copyright')}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-600">{t('footer.powered')}</p>
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-brand-line pt-6 sm:flex-row">
+          <p className="text-[11px] text-brand-muted">{t('footer.copyright')}</p>
+          <p className="text-[11px] text-brand-muted">{t('footer.powered')}</p>
         </div>
       </div>
     </footer>

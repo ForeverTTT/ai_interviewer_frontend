@@ -12,12 +12,24 @@ import {
   Trash2, Plus, X, Send, BrainCircuit, Zap, AlertTriangle
 } from 'lucide-react'
 
+/**
+ * 统计卡图标色。必须是完整类名字符串——
+ * 之前写的是拼接式类名（text- 加变量 加 -500），这种类名会被生产构建整批 purge 掉，
+ * 线上四张卡的图标是没有颜色的。
+ */
+const STAT_ICON_CLASS = {
+  total: 'h-4 w-4 text-brand-muted',
+  work: 'h-4 w-4 text-brand-muted',
+  school: 'h-4 w-4 text-brand-muted',
+  offers: 'h-4 w-4 text-brand-muted',
+}
+
 function ResultBadge({ result, t }) {
   if (!result) return null
   const lower = result.toLowerCase()
   if (lower.includes('offer') || lower.includes('admitted') || lower.includes('pass')) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-success/30 bg-brand-success/[0.10] px-3 py-1 text-[12px] font-bold text-brand-success">
         <CheckCircle2 className="w-3.5 h-3.5" />
         {t('exp.resultPass')}
       </span>
@@ -25,14 +37,14 @@ function ResultBadge({ result, t }) {
   }
   if (lower.includes('reject') || lower.includes('fail')) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-red-50 text-red-600 border border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-danger/30 bg-brand-danger/[0.08] px-3 py-1 text-[12px] font-bold text-brand-danger">
         <XCircle className="w-3.5 h-3.5" />
         {t('exp.resultFail')}
       </span>
     )
   }
   return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-inset px-3 py-1 text-[12px] font-bold text-brand-muted">
       {result}
     </span>
   )
@@ -41,14 +53,14 @@ function ResultBadge({ result, t }) {
 function TypeBadge({ type, t }) {
   if (type === 'school') {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800">
+      <span className="inline-flex items-center gap-1 rounded-lg border border-brand-line bg-brand-inset px-2.5 py-1 text-[11px] font-medium text-brand-muted">
         <GraduationCap className="w-3 h-3" />
         {t('exp.tagSchool')}
       </span>
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800">
+    <span className="inline-flex items-center gap-1 rounded-lg border border-brand-line bg-brand-inset px-2.5 py-1 text-[11px] font-bold text-brand-ink">
       <Briefcase className="w-3 h-3" />
       {t('exp.tagWork')}
     </span>
@@ -73,17 +85,20 @@ function CustomDropdown({ label, value, options, onChange, t }) {
 
   return (
     <div className="relative" ref={containerRef}>
-      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-2 block">{label}</label>
+      <label className="mb-2 ml-1 block text-[12.5px] font-bold text-brand-ink">{label}</label>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-[54px] flex items-center justify-between px-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all hover:bg-white dark:hover:bg-slate-800 shadow-sm"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        className={`flex h-[54px] w-full items-center justify-between rounded-xl border bg-brand-inset px-5 text-[13.5px] font-bold transition-colors ${isOpen ? 'border-brand-ink ring-1 ring-brand-ink' : 'border-brand-line hover:border-brand-muted/40'
+          }`}
       >
         <div className="flex items-center gap-3">
-          {selectedOption?.icon && <selectedOption.icon className="w-4 h-4 text-slate-400" />}
-          <span className="text-slate-900 dark:text-white">{selectedOption?.label || t('exp.selectPlaceholder')}</span>
+          {selectedOption?.icon && <selectedOption.icon className="h-4 w-4 text-brand-muted" />}
+          <span className="text-brand-ink">{selectedOption?.label || t('exp.selectPlaceholder')}</span>
         </div>
-        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`h-4 w-4 text-brand-muted transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
@@ -93,7 +108,7 @@ function CustomDropdown({ label, value, options, onChange, t }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute z-[100] w-full mt-2 p-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-100 dark:border-slate-800 rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden"
+            className="brand-float absolute z-[100] mt-2 w-full overflow-hidden rounded-[20px] border border-brand-line p-2"
           >
             {options.map((opt) => {
               const Icon = opt.icon
@@ -105,18 +120,18 @@ function CustomDropdown({ label, value, options, onChange, t }) {
                     onChange(opt.value)
                     setIsOpen(false)
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all relative group ${
+                  className={`group relative flex w-full items-center gap-3 rounded-xl px-4 py-3 text-[13px] font-bold transition-colors ${
                     value === opt.value
-                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-brand-ink text-brand-on-ink'
+                      : 'text-brand-muted hover:bg-brand-inset hover:text-brand-ink'
                   }`}
                 >
-                  <div className={`p-1.5 rounded-lg transition-colors ${
-                    value === opt.value 
-                      ? (value === 'work' || value === 'Passed' ? 'bg-primary-500/20' : 'bg-slate-500/20')
-                      : 'bg-slate-100 dark:bg-slate-800 group-hover:bg-white dark:group-hover:bg-slate-700'
+                  <div className={`rounded-lg p-1.5 transition-colors ${
+                    value === opt.value
+                      ? 'bg-brand-on-ink/15'
+                      : 'bg-brand-inset group-hover:bg-brand-card'
                   }`}>
-                    {Icon && <Icon className={`w-3.5 h-3.5 ${value === opt.value ? 'text-current' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />}
+                    {Icon && <Icon className={`h-3.5 w-3.5 ${value === opt.value ? 'text-current' : 'text-brand-muted group-hover:text-brand-ink'}`} />}
                   </div>
                   <span className="flex-1 text-left">{opt.label}</span>
                   {value === opt.value && (
@@ -140,7 +155,7 @@ function DeleteConfirmModal({ isOpen, onClose, onConfirm }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-brand-ink/40 backdrop-blur-sm"
       />
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 10 }}
@@ -148,33 +163,33 @@ function DeleteConfirmModal({ isOpen, onClose, onConfirm }) {
         exit={{ opacity: 0, scale: 0.9, y: 10 }}
         transition={{ type: 'spring', duration: 0.35, bounce: 0.2 }}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-sm bg-white dark:bg-slate-950 rounded-3xl shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800"
+        className="brand-float relative w-full max-w-sm overflow-hidden rounded-[22px] border border-brand-line"
       >
         <div className="flex flex-col items-center px-8 pt-8 pb-6 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-950/30 flex items-center justify-center mb-5 border border-red-100 dark:border-red-900/50">
-            <AlertTriangle className="w-7 h-7 text-red-500" />
+          <div className="mb-5 grid h-14 w-14 place-items-center rounded-2xl border border-brand-danger/25 bg-brand-danger/[0.08]">
+            <AlertTriangle className="h-7 w-7 text-brand-danger" />
           </div>
-          <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">
+          <h3 className="font-brand text-[17px] font-semibold tracking-[-0.01em] text-brand-ink">
             确定要删除这条面经吗？
           </h3>
-          <p className="mt-2.5 text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+          <p className="mt-2.5 flex items-center gap-1.5 text-[13px] text-brand-muted">
             删除后能量值
-            <span className="inline-flex items-center gap-0.5 font-black text-red-500">
+            <span className="inline-flex items-center gap-0.5 font-semibold text-brand-danger">
               <Zap className="w-3.5 h-3.5" />-200
             </span>
           </p>
         </div>
-        <div className="flex border-t border-slate-100 dark:border-slate-800">
+        <div className="flex border-t border-brand-line">
           <button
             onClick={onClose}
-            className="flex-1 py-4 text-sm font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
+            className="flex-1 py-4 text-[13px] font-bold text-brand-muted transition-colors hover:bg-brand-inset"
           >
             取消
           </button>
-          <div className="w-px bg-slate-100 dark:bg-slate-800" />
+          <div className="w-px bg-brand-line" />
           <button
             onClick={onConfirm}
-            className="flex-1 py-4 text-sm font-black text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+            className="flex-1 py-4 text-[13px] font-semibold text-brand-danger transition-colors hover:bg-brand-danger/[0.08]"
           >
             删除
           </button>
@@ -196,7 +211,7 @@ const ExperienceCard = forwardRef(function ExperienceCard({ exp, t, user, onDele
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
-      className="bg-white dark:bg-slate-950 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden group relative"
+      className="brand-float group relative overflow-hidden rounded-[22px] border border-brand-line"
     >
       {isOwner && (
         <>
@@ -205,7 +220,7 @@ const ExperienceCard = forwardRef(function ExperienceCard({ exp, t, user, onDele
               e.stopPropagation()
               setShowDeleteConfirm(true)
             }}
-            className="absolute top-6 right-16 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all opacity-0 group-hover:opacity-100 z-10"
+            className="absolute right-16 top-6 z-10 rounded-xl p-2 text-brand-muted opacity-0 transition-colors hover:bg-brand-danger/[0.08] hover:text-brand-danger group-hover:opacity-100"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -234,22 +249,23 @@ const ExperienceCard = forwardRef(function ExperienceCard({ exp, t, user, onDele
               <TypeBadge type={exp.type} t={t} />
               <ResultBadge result={exp.result} t={t} />
               {exp.salary && (
-                <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800">
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-brand-line bg-brand-card px-2.5 py-1 text-[11px] font-bold text-brand-ink">
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand-ink" aria-hidden="true" />
                   {exp.salary}
                 </span>
               )}
             </div>
 
             <div>
-              <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+              <h3 className="font-brand text-[17px] font-semibold leading-tight tracking-[-0.01em] text-brand-ink sm:text-[19px]">
                 {exp.company}
               </h3>
-              <p className="text-sm font-bold text-slate-600 dark:text-slate-400 mt-1">
+              <p className="mt-1 text-[13.5px] font-bold text-brand-muted">
                 {exp.position}
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500 dark:text-slate-500">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12.5px] text-brand-muted">
               {exp.department && (
                 <span className="flex items-center gap-1">
                   <Building2 className="w-3.5 h-3.5" />
@@ -269,7 +285,7 @@ const ExperienceCard = forwardRef(function ExperienceCard({ exp, t, user, onDele
                 {exp.language}
               </span>
               {exp.publisher && (
-                <span className="flex items-center gap-1 text-slate-400">
+                <span className="flex items-center gap-1 text-brand-muted">
                   <Award className="w-3.5 h-3.5" />
                   {exp.publisher}
                 </span>
@@ -278,10 +294,10 @@ const ExperienceCard = forwardRef(function ExperienceCard({ exp, t, user, onDele
           </div>
 
           <div className="shrink-0 mt-1">
-            <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300 ${
+            <div className={`grid h-8 w-8 place-items-center rounded-xl transition-colors duration-300 ${
               expanded
-                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                ? 'bg-brand-ink text-brand-on-ink'
+                : 'bg-brand-inset text-brand-muted'
             }`}>
               {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </div>
@@ -299,20 +315,20 @@ const ExperienceCard = forwardRef(function ExperienceCard({ exp, t, user, onDele
             className="overflow-hidden"
           >
             <div className="px-6 sm:px-8 pb-8 space-y-8">
-              <div className="h-px bg-slate-100 dark:bg-slate-800" />
+              <div className="h-px bg-brand-line" />
 
               {exp.rounds?.map((round, ri) => (
                 <div key={ri} className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black">
+                    <span className="grid h-7 w-7 place-items-center rounded-lg bg-brand-ink text-[12px] font-semibold text-brand-on-ink">
                       {round.round}
                     </span>
                     <div>
-                      <h4 className="text-sm font-black text-slate-900 dark:text-white">
+                      <h4 className="text-[13.5px] font-semibold text-brand-ink">
                         {round.format}
                       </h4>
                       {round.duration_min && (
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        <span className="text-[11px] text-brand-muted">
                           {round.duration_min} min
                         </span>
                       )}
@@ -320,18 +336,18 @@ const ExperienceCard = forwardRef(function ExperienceCard({ exp, t, user, onDele
                   </div>
 
                   <div className="space-y-2 pl-10">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                    <p className="mb-2 text-[12.5px] font-bold text-brand-ink">
                       {t('exp.questionsTitle')}
                     </p>
                     {round.questions.map((q, qi) => (
                       <div
                         key={qi}
-                        className="flex gap-3 py-2.5 px-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/50"
+                        className="flex gap-3 rounded-xl border border-brand-line bg-brand-inset px-4 py-2.5"
                       >
-                        <span className="shrink-0 w-5 h-5 rounded-md bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-black text-slate-600 dark:text-slate-300 mt-0.5">
+                        <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border border-brand-line bg-brand-card text-[11px] font-semibold text-brand-ink">
                           {qi + 1}
                         </span>
-                        <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                        <p className="text-[13.5px] leading-relaxed text-brand-ink">
                           {q}
                         </p>
                       </div>
@@ -343,13 +359,13 @@ const ExperienceCard = forwardRef(function ExperienceCard({ exp, t, user, onDele
               {exp.reflection && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <MessageSquareQuote className="w-4 h-4 text-slate-400" />
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <MessageSquareQuote className="h-4 w-4 text-brand-muted" />
+                    <p className="text-[12.5px] font-bold text-brand-ink">
                       {t('exp.reflectionTitle')}
                     </p>
                   </div>
-                  <div className="p-5 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30">
-                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-[1.8] whitespace-pre-line">
+                  <div className="rounded-2xl border border-brand-line bg-brand-inset p-5">
+                    <p className="whitespace-pre-line text-[13.5px] leading-[1.8] text-brand-ink">
                       {exp.reflection}
                     </p>
                   </div>
@@ -430,60 +446,38 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
         animate={{ opacity: 1 }} 
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
+        className="absolute inset-0 bg-brand-ink/40 backdrop-blur-sm" 
       />
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative w-full max-w-2xl max-h-[90vh] bg-white dark:bg-slate-950 rounded-[2.5rem] shadow-2xl overflow-y-auto experience-modal"
+        className="custom-scrollbar brand-float relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[22px] border border-brand-line"
       >
-        <style dangerouslySetInnerHTML={{ __html: `
-          .experience-modal::-webkit-scrollbar {
-            width: 6px;
-          }
-          .experience-modal::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.02);
-            border-radius: 10px;
-          }
-          .experience-modal::-webkit-scrollbar-thumb {
-            background: rgba(0,0,0,0.1);
-            border-radius: 10px;
-            border: 2px solid transparent;
-            background-clip: content-box;
-          }
-          .experience-modal::-webkit-scrollbar-thumb:hover {
-            background: rgba(0,0,0,0.2);
-            background-clip: content-box;
-          }
-          .dark .experience-modal::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.05);
-          }
-        `}} />
-        <div className="sticky top-0 z-10 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-brand-line bg-brand-card/85 px-8 py-6 backdrop-blur-md">
           <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">{t('exp.postTitle')}</h2>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('exp.postSubtitle')}</p>
+            <h2 className="font-brand text-[21px] font-semibold tracking-[-0.01em] text-brand-ink">{t('exp.postTitle')}</h2>
+            <p className="mt-1 text-[12.5px] text-brand-muted">{t('exp.postSubtitle')}</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-colors">
-            <X className="w-5 h-5 text-slate-400" />
+          <button onClick={onClose} className="rounded-xl p-2 transition-colors hover:bg-brand-inset">
+            <X className="h-5 w-5 text-brand-muted" />
           </button>
         </div>
 
-        <div className="mx-8 mt-6 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-between">
+        <div className="mx-8 mt-6 flex items-center justify-between rounded-2xl border border-brand-line bg-brand-inset p-4">
           <div className="flex items-center gap-3">
-            <div className="bg-emerald-500 p-2 rounded-xl text-white shadow-lg shadow-emerald-500/20">
+            <div className="rounded-xl border border-brand-line bg-brand-inset p-2 text-brand-ink">
               <BrainCircuit className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-black text-emerald-900 dark:text-emerald-400">{t('profile.tokenRewardContribution')}</span>
-              <p className="text-[10px] font-bold text-emerald-600/70 dark:text-emerald-500/70 uppercase tracking-widest">Community Reward: +200 Energy</p>
+              <span className="text-[13.5px] font-semibold text-brand-ink">{t('profile.tokenRewardContribution')}</span>
+              <p className="text-[11px] text-brand-muted">Community Reward: +200 Energy</p>
             </div>
           </div>
         </div>
 
-        <div className="mx-8 mt-3 px-4 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-center gap-2.5">
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-          <span className="text-xs font-bold text-amber-700 dark:text-amber-400">{t('exp.dailyLimitHint')}</span>
+        <div className="mx-8 mt-3 flex items-center gap-2.5 rounded-xl border border-brand-line bg-brand-card px-4 py-2.5">
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-brand-ink" />
+          <span className="text-[12.5px] font-bold text-brand-ink">{t('exp.dailyLimitHint')}</span>
         </div>
 
         <form onSubmit={handleSubmit} className="p-8 space-y-8">
@@ -517,14 +511,14 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
                 value={formData.company} 
                 onChange={e => setFormData({...formData, company: e.target.value})}
                 placeholder={t('exp.postCompany')}
-                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
+                className="w-full rounded-xl border border-brand-line bg-brand-inset px-5 py-3.5 text-[13.5px] font-bold text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none"
               />
               <input 
                 required
                 value={formData.position} 
                 onChange={e => setFormData({...formData, position: e.target.value})}
                 placeholder={t('exp.postPosition')}
-                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
+                className="w-full rounded-xl border border-brand-line bg-brand-inset px-5 py-3.5 text-[13.5px] font-bold text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -532,13 +526,13 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
                 value={formData.location} 
                 onChange={e => setFormData({...formData, location: e.target.value})}
                 placeholder={t('exp.postLocation')}
-                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
+                className="w-full rounded-xl border border-brand-line bg-brand-inset px-5 py-3.5 text-[13.5px] font-bold text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none"
               />
               <input 
                 value={formData.department} 
                 onChange={e => setFormData({...formData, department: e.target.value})}
                 placeholder={t('exp.postDepartment')}
-                className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
+                className="w-full rounded-xl border border-brand-line bg-brand-inset px-5 py-3.5 text-[13.5px] font-bold text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none"
               />
             </div>
           </div>
@@ -548,53 +542,53 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
               type="month"
               value={formData.date} 
               onChange={e => setFormData({...formData, date: e.target.value})}
-              className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs font-bold focus:outline-none focus:border-slate-300 transition-all"
+              className="w-full rounded-xl border border-brand-line bg-brand-inset px-5 py-3.5 text-[12.5px] font-bold text-brand-ink transition-colors focus:border-brand-ink focus:outline-none"
             />
             <input 
               value={formData.language} 
               onChange={e => setFormData({...formData, language: e.target.value})}
               placeholder="English / German / Chinese"
-              className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
+              className="w-full rounded-xl border border-brand-line bg-brand-inset px-5 py-3.5 text-[13.5px] font-bold text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none"
             />
             <input 
               value={formData.salary} 
               onChange={e => setFormData({...formData, salary: e.target.value})}
               placeholder="e.g. 16€/h"
-              className="w-full px-5 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-slate-300 transition-all"
+              className="w-full rounded-xl border border-brand-line bg-brand-inset px-5 py-3.5 text-[13.5px] font-bold text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none"
             />
           </div>
 
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('exp.labelRounds')}</h4>
+              <h4 className="ml-1 text-[12.5px] font-bold text-brand-ink">{t('exp.labelRounds')}</h4>
               <button 
                 type="button" 
                 onClick={addRound}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform"
+                className="flex items-center gap-1.5 rounded-lg bg-brand-ink px-3 py-1.5 text-[11px] font-bold text-brand-on-ink transition-transform duration-200 hover:-translate-y-0.5"
               >
                 <Plus className="w-3 h-3" /> {t('exp.btnPulseRound')}
               </button>
             </div>
             
             {formData.rounds.map((r, ri) => (
-              <div key={ri} className="p-6 rounded-3xl border border-slate-100 dark:border-slate-900/50 space-y-4">
-                <div className="flex items-center justify-between font-black text-xs uppercase tracking-widest text-slate-400">
+              <div key={ri} className="space-y-4 rounded-[20px] border border-brand-line p-6">
+                <div className="flex items-center justify-between text-[12.5px] font-bold text-brand-ink">
                   <span>{t('exp.roundLabel', { n: r.round })}</span>
-                  {ri > 0 && <button onClick={() => removeRound(ri)} type="button" className="text-red-500 hover:text-red-600">{t('exp.labelRemove')}</button>}
+                  {ri > 0 && <button onClick={() => removeRound(ri)} type="button" className="text-brand-danger transition-colors hover:underline">{t('exp.labelRemove')}</button>}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <input 
                     value={r.format} 
                     onChange={e => updateRound(ri, 'format', e.target.value)}
                     placeholder={t('exp.phRoundsFormat')}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs font-bold"
+                    className="w-full rounded-xl border border-brand-line bg-brand-inset px-4 py-3 text-[12.5px] font-bold text-brand-ink placeholder:text-brand-muted/70"
                   />
                   <input 
                     type="number"
                     value={r.duration_min} 
                     onChange={e => updateRound(ri, 'duration_min', parseInt(e.target.value))}
                     placeholder={t('exp.phRoundsDuration')}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs font-bold"
+                    className="w-full rounded-xl border border-brand-line bg-brand-inset px-4 py-3 text-[12.5px] font-bold text-brand-ink placeholder:text-brand-muted/70"
                   />
                 </div>
                 <div className="space-y-3">
@@ -604,22 +598,22 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
                           value={q} 
                           onChange={e => updateQuestion(ri, qi, e.target.value)}
                           placeholder={`${t('exp.phRoundsQuestion')} ${qi + 1}`}
-                          className="flex-1 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs font-bold"
+                          className="flex-1 rounded-xl border border-brand-line bg-brand-inset px-4 py-3 text-[12.5px] font-bold text-brand-ink placeholder:text-brand-muted/70"
                         />
                      </div>
                    ))}
-                   <button type="button" onClick={() => addQuestion(ri)} className="text-[10px] font-black text-primary-600 uppercase tracking-widest">+ {t('exp.btnPulseQuestion')}</button>
+                   <button type="button" onClick={() => addQuestion(ri)} className="text-[12px] font-semibold text-brand-ink hover:underline">+ {t('exp.btnPulseQuestion')}</button>
                 </div>
               </div>
             ))}
           </div>
 
           <div className="space-y-2">
-             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">{t('exp.labelReflection')}</label>
+             <label className="ml-1 text-[12.5px] font-bold text-brand-ink">{t('exp.labelReflection')}</label>
              <textarea 
                value={formData.reflection}
                onChange={e => setFormData({...formData, reflection: e.target.value})}
-               className="w-full px-5 py-4 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-sm font-bold min-h-[150px] focus:outline-none focus:border-slate-300 transition-all"
+               className="min-h-[150px] w-full rounded-[20px] border border-brand-line bg-brand-inset px-5 py-4 text-[13.5px] font-medium text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none"
                placeholder="Share your thoughts, tips, and experience..."
              />
           </div>
@@ -630,14 +624,14 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20"
+                className="flex items-start gap-3 rounded-2xl border border-brand-danger/30 bg-brand-danger/[0.06] p-4"
               >
-                <AlertTriangle className="w-4 h-4 text-red-500 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-brand-danger" />
                 <div className="flex-1">
-                  <p className="text-sm font-bold text-red-700 dark:text-red-400">{submitError}</p>
+                  <p className="text-[13px] font-bold text-brand-danger">{submitError}</p>
                 </div>
-                <button type="button" onClick={() => setSubmitError('')} className="p-0.5 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg transition-colors">
-                  <X className="w-3.5 h-3.5 text-red-400" />
+                <button type="button" onClick={() => setSubmitError('')} className="rounded-lg p-0.5 transition-colors hover:bg-brand-danger/10">
+                  <X className="h-3.5 w-3.5 text-brand-danger" />
                 </button>
               </motion.div>
             )}
@@ -646,7 +640,7 @@ function PostModal({ isOpen, onClose, t, onPost, user }) {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-3xl text-xs font-black uppercase tracking-widest shadow-xl shadow-slate-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
+            className="flex w-full items-center justify-center gap-2 rounded-[20px] bg-brand-ink py-4 text-[15px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             {t('exp.submit')}
@@ -824,19 +818,18 @@ export default function ExperiencesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-20">
-      <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
-        <header className="mb-16 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-8">
+    <div className="theme-quiet min-h-screen bg-brand-paper pb-16 pt-[calc(var(--ui-nav-h)+2rem)]">
+      <div className="ui-container">
+        <header className="mb-10 flex flex-col items-start justify-between gap-8 sm:flex-row sm:items-end">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl space-y-6"
+            className="max-w-3xl space-y-3"
           >
-            <div className="section-badge">{t('exp.badge')}</div>
-            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight font-serif">
+            <h1 className="font-brand text-[30px] font-semibold leading-tight tracking-[-0.02em] text-brand-ink sm:text-[34px]">
               {t('exp.title')}
             </h1>
-            <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed">
+            <p className="text-[15px] leading-relaxed text-brand-muted">
               {t('exp.subtitle')}
             </p>
           </motion.div>
@@ -847,7 +840,7 @@ export default function ExperiencesPage() {
                  initial={{ opacity: 0, scale: 0.9 }}
                  animate={{ opacity: 1, scale: 1 }}
                  onClick={() => setPostModalOpen(true)}
-                 className="flex items-center gap-3 px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2rem] text-sm font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-slate-900/10"
+                 className="flex items-center gap-2.5 rounded-full bg-brand-ink px-7 py-3.5 text-[14px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90"
                >
                  <Plus className="w-5 h-5" />
                  {t('exp.postBtn')}
@@ -856,7 +849,7 @@ export default function ExperiencesPage() {
                  initial={{ opacity: 0, y: -5 }}
                  animate={{ opacity: 1, y: 0 }}
                  transition={{ delay: 0.2 }}
-                 className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-black tracking-widest uppercase border border-emerald-200 dark:border-emerald-800/50 shadow-sm"
+                 className="flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-inset px-3 py-1 text-[11px] font-medium text-brand-muted"
                >
                  <Zap className="w-3 h-3" />
                  {t('exp.rewardBadge')}
@@ -867,12 +860,12 @@ export default function ExperiencesPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-32">
-            <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
-            <span className="ml-3 text-sm font-bold text-slate-500">{t('exp.loading')}</span>
+            <Loader2 className="h-8 w-8 animate-spin text-brand-muted" />
+            <span className="ml-3 text-[13px] font-bold text-brand-muted">{t('exp.loading')}</span>
           </div>
         ) : error ? (
           <div className="flex items-center justify-center py-32">
-            <p className="text-sm font-bold text-red-500">{t('exp.error')}</p>
+            <p className="text-[13px] font-bold text-brand-danger">{t('exp.error')}</p>
           </div>
         ) : (
           <>
@@ -883,20 +876,21 @@ export default function ExperiencesPage() {
                 className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10"
               >
                 {[
-                  { n: stats.total, label: t('exp.filterAll'), icon: Filter, color: 'slate' },
-                  { n: stats.work, label: t('exp.filterWork'), icon: Briefcase, color: 'blue' },
-                  { n: stats.school, label: t('exp.filterSchool'), icon: GraduationCap, color: 'violet' },
-                  { n: stats.offers, label: 'Passed / Offers', icon: Award, color: 'emerald' },
-                ].map(({ n, label, icon: Icon, color }) => (
+                  { n: stats.total, label: t('exp.filterAll'), icon: Filter, tone: 'total' },
+                  { n: stats.work, label: t('exp.filterWork'), icon: Briefcase, tone: 'work' },
+                  { n: stats.school, label: t('exp.filterSchool'), icon: GraduationCap, tone: 'school' },
+                  { n: stats.offers, label: 'Passed / Offers', icon: Award, tone: 'offers' },
+                ].map(({ n, label, icon: Icon, tone }) => (
                   <div
                     key={label}
-                    className="bg-white dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 space-y-2"
+                    className="brand-float space-y-2 rounded-[20px] border border-brand-line p-5"
                   >
                     <div className="flex items-center justify-between">
-                      <Icon className={`w-4 h-4 text-${color}-500`} />
-                      <span className="text-2xl font-black text-slate-900 dark:text-white">{n}</span>
+                      {/* 完整类名走映射表：拼接出来的 text-xxx-500 会被生产构建 purge 掉 */}
+                      <Icon className={STAT_ICON_CLASS[tone]} />
+                      <span className="font-brand text-[22px] font-semibold tabular-nums text-brand-ink">{n}</span>
                     </div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</p>
+                    <p className="text-[12px] text-brand-muted">{label}</p>
                   </div>
                 ))}
               </motion.div>
@@ -907,7 +901,7 @@ export default function ExperiencesPage() {
               transition={{ delay: 0.15 }}
               className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-10"
             >
-                <div className="flex flex-wrap gap-2 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <div className="flex flex-wrap gap-2 rounded-2xl border border-brand-line bg-brand-inset p-1.5">
                   {filterTabs.map((tab) => (
                     <button
                       key={tab.key}
@@ -918,17 +912,19 @@ export default function ExperiencesPage() {
                           setSearchParams({})
                         }
                       }}
-                      className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                      aria-pressed={filter === tab.key}
+                      /* 选中态用黑框 + ring，不加粗 border，避免 0.5px 布局位移 */
+                      className={`rounded-xl border px-4 py-2.5 text-[12.5px] font-bold transition-colors ${
                         filter === tab.key
-                          ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 shadow-sm'
-                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                          ? 'border-brand-ink bg-brand-card text-brand-ink ring-1 ring-brand-ink'
+                          : 'border-transparent text-brand-muted hover:text-brand-ink'
                       }`}
                     >
                       {tab.label}
-                      <span className={`ml-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-black ${
+                      <span className={`ml-1.5 rounded-md px-1.5 py-0.5 text-[11px] font-bold tabular-nums ${
                         filter === tab.key
-                          ? 'bg-slate-100 dark:bg-slate-700'
-                          : 'bg-slate-200/50 dark:bg-slate-800'
+                          ? 'bg-brand-inset text-brand-ink'
+                          : 'bg-brand-card text-brand-muted'
                       }`}>
                         {tab.count}
                       </span>
@@ -937,24 +933,24 @@ export default function ExperiencesPage() {
                 </div>
 
               <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={t('exp.searchPlaceholder')}
-                  className="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-slate-300 dark:focus:border-slate-600 transition-colors"
+                  className="w-full rounded-2xl border border-brand-line bg-brand-card py-3 pl-11 pr-4 text-[13.5px] font-medium text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none"
                 />
               </div>
             </motion.div>
 
             {filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 px-10 text-center space-y-4">
-                <p className="text-sm font-bold text-slate-400">{filter === 'mine' ? t('exp.noMyResults') : t('exp.noResults')}</p>
+                <p className="text-[13.5px] font-bold text-brand-muted">{filter === 'mine' ? t('exp.noMyResults') : t('exp.noResults')}</p>
                 {search && (
                    <button 
                      onClick={() => setSearch('')}
-                     className="text-xs font-black text-slate-900 dark:text-white underline underline-offset-4 decoration-slate-200 hover:decoration-slate-900 transition-all uppercase tracking-widest"
+                     className="text-[12.5px] font-bold text-brand-ink underline decoration-brand-line underline-offset-4 transition-colors hover:decoration-brand-ink"
                    >
                      Clear Search
                    </button>

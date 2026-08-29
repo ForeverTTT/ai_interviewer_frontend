@@ -63,9 +63,9 @@ export default function LoginPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col md:flex-row overflow-hidden">
+    <div className="flex min-h-screen flex-col overflow-hidden bg-brand-paper md:flex-row">
       {/* Left side - Visual/Branding (Desktop Only) */}
-      <div className="hidden md:flex md:w-1/2 bg-slate-50 dark:bg-slate-900 items-center justify-center p-20 relative">
+      <div className="relative hidden items-center justify-center bg-brand-inset p-20 md:flex md:w-1/2">
         <div className="absolute inset-0 bg-dot-grid opacity-10" />
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
@@ -73,13 +73,13 @@ export default function LoginPage() {
           transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
           className="max-w-md space-y-12 relative z-10"
         >
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-[10px] font-black uppercase tracking-widest text-slate-400">
-            <BrainCircuit className="w-3 h-3 text-primary-600" />
+          <div className="inline-flex items-center gap-2.5 rounded-full border border-brand-line bg-brand-card px-4 py-2 text-[12px] font-bold text-brand-muted">
+            <BrainCircuit className="h-3 w-3 text-brand-violet" />
             {t('login.welcome')}
           </div>
-          <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white font-chinese-modern leading-[1.2] tracking-tight uppercase">
+          <h2 className="font-brand text-[30px] font-black leading-tight tracking-tight text-brand-ink md:text-[38px]">
             Elevate your <br />
-            <span className="text-primary-600">interview</span> <br />
+            <span className="text-brand-violet">interview</span> <br />
             performance.
           </h2>
           <div className="space-y-6">
@@ -89,10 +89,10 @@ export default function LoginPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + i * 0.1 }}
-                className="flex items-center gap-4 text-sm font-bold text-slate-500 dark:text-slate-400"
+                className="flex items-center gap-3 text-[13.5px] text-brand-muted"
               >
-                <div className="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center shrink-0">
-                  <Check className="w-3 h-3 text-white" />
+                <div className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-brand-ink">
+                  <Check className="h-3 w-3 text-brand-on-ink" />
                 </div>
                 {feat.text}
               </motion.div>
@@ -107,10 +107,10 @@ export default function LoginPage() {
       </div>
 
       {/* Right side - Login Form */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8 sm:p-12 lg:p-24 relative bg-white dark:bg-slate-950">
+      <div className="relative flex flex-1 flex-col items-center justify-center bg-brand-paper p-8 sm:p-12 lg:p-24">
         <Link
           to="/"
-          className="absolute top-8 left-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+          className="absolute left-8 top-8 flex items-center gap-2 text-[12.5px] font-bold text-brand-muted transition-colors hover:text-brand-ink"
         >
           <ArrowLeft className="w-3 h-3" />
           {t('login.back')}
@@ -129,10 +129,10 @@ export default function LoginPage() {
           className="w-full max-w-sm space-y-12"
         >
           <div className="space-y-4">
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white font-chinese-modern tracking-tight uppercase">
-              {t('login.welcome')}<span className="text-primary-600">DE</span>
+            <h1 className="font-brand text-[24px] font-black tracking-tight text-brand-ink">
+              {t('login.welcome')}<span className="text-brand-violet">DE</span>
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+            <p className="text-[13.5px] leading-relaxed text-brand-muted">
               {t('login.subtitle')}
             </p>
           </div>
@@ -142,7 +142,7 @@ export default function LoginPage() {
               <button
                 onClick={handleLocalLogin}
                 disabled={localBusy}
-                className="w-full group flex items-center justify-between px-6 py-4 bg-primary-600 rounded-full text-white text-sm font-bold hover:bg-primary-700 disabled:opacity-60 transition-all duration-300"
+                className="group flex w-full items-center justify-between rounded-full bg-brand-ink px-6 py-3.5 text-[14px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90 disabled:opacity-50"
               >
                 <div className="flex items-center gap-4">
                   <BrainCircuit className="w-5 h-5" />
@@ -153,14 +153,14 @@ export default function LoginPage() {
             )}
 
             {loginError && (
-              <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-xs font-bold text-red-600 dark:bg-red-950/40 dark:text-red-300">
+              <p role="alert" className="rounded-xl border border-brand-danger/30 bg-brand-danger/[0.07] px-4 py-3 text-[12.5px] font-bold text-brand-danger">
                 {loginError}
               </p>
             )}
 
             {!isLocalSupabase && <button
               onClick={handleGoogleLogin}
-              className="w-full group flex items-center justify-between px-6 py-4 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-full text-slate-900 dark:text-white text-sm font-bold hover:border-slate-900 dark:hover:border-white transition-all duration-300"
+              className="group flex w-full items-center justify-between rounded-full border border-brand-line bg-brand-card px-6 py-3.5 text-[14px] font-bold text-brand-ink transition-colors hover:border-brand-ink"
             >
               <div className="flex items-center gap-4">
                 <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
@@ -171,12 +171,12 @@ export default function LoginPage() {
                 </svg>
                 {t('login.google')}
               </div>
-              <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="h-4 w-4 text-brand-muted transition-all group-hover:translate-x-1 group-hover:text-brand-ink" />
             </button>}
 
             {!isLocalSupabase && <button
               onClick={handleLinkedInLogin}
-              className="w-full group flex items-center justify-between px-6 py-4 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-white text-sm font-bold hover:border-slate-900 dark:hover:border-white transition-all duration-300"
+              className="group flex w-full items-center justify-between rounded-full border border-brand-line bg-brand-card px-6 py-3.5 text-[14px] font-bold text-brand-ink transition-colors hover:border-brand-ink"
             >
               <div className="flex items-center gap-4">
                 <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
@@ -184,12 +184,12 @@ export default function LoginPage() {
                 </svg>
                 {t('login.linkedin')}
               </div>
-              <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="h-4 w-4 text-brand-muted transition-all group-hover:translate-x-1 group-hover:text-brand-ink" />
             </button>}
           </div>
 
-          <div className="pt-8 border-t border-slate-100 dark:border-slate-800">
-            <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400 text-center leading-relaxed">
+          <div className="border-t border-brand-line pt-8">
+            <p className="text-center text-[11.5px] leading-relaxed text-brand-muted">
               {t('login.terms')}
             </p>
           </div>
@@ -197,9 +197,9 @@ export default function LoginPage() {
 
         {/* Bottom decorative element */}
         <div className="absolute bottom-12 flex gap-4 opacity-20 hidden lg:flex">
-          <div className="w-px h-12 bg-slate-900 dark:bg-white" />
-          <div className="w-px h-12 bg-slate-900 dark:bg-white opacity-50" />
-          <div className="w-px h-12 bg-slate-900 dark:bg-white opacity-25" />
+          <div className="h-12 w-px bg-brand-ink" />
+          <div className="h-12 w-px bg-brand-ink opacity-50" />
+          <div className="h-12 w-px bg-brand-ink opacity-25" />
         </div>
       </div>
     </div>

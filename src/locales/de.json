@@ -11,6 +11,7 @@
     "home": "Startseite",
     "startInterview": "Interview starten",
     "history": "Verlauf",
+    "personalCenter": "Mein Bereich",
     "login": "Anmelden",
     "signUpFree": "Kostenlos starten",
     "signOut": "Abmelden",
@@ -238,6 +239,25 @@
       "simD": "Zoom-ähnliches Interview-Interface mit Echtzeit-Kamerainteraktion bildet die authentische Atmosphäre deutscher Vorstellungsgespräche ab. Kombiniert mit fortschrittlichen TTS-Modellen für ein immersives Übungserlebnis.",
       "privacyT": "Datenschutz nach deutschem Standard",
       "privacyD": "Wir verstehen die Bedeutung Ihrer Privatsphäre. Alle Daten werden nach GDPR-Vorgaben anonymisiert verarbeitet. Sicherheit, die Ihren Fortschritt ermutigt."
+    },
+    "demo": {
+      "role": "KI-Interviewer · Product Manager",
+      "recording": "Aufnahme",
+      "currentQuestion": "Frage",
+      "tagSituational": "Situativ",
+      "question": "Wie würdest du ein Feature entwerfen, das die Nutzeraktivität steigert?",
+      "hintLevel": "Hinweisstufe",
+      "transcript": "Live-Transkript",
+      "interviewer": "Interviewer",
+      "you": "Du",
+      "line1": "Erzähl von einem Produkt, das du verantwortet hast, und deiner konkreten Rolle darin.",
+      "line2": "Ich habe Discovery und Lösungsdesign von null auf eins geführt, Ziel war die Retention neuer Nutzer.",
+      "score": "Gesamtbewertung",
+      "dim1": "Problemlösung",
+      "dim2": "Strukturierte Antworten",
+      "dim3": "Nutzerdenken",
+      "dim4": "Kommunikation",
+      "dim5": "Lernpotenzial"
     }
   },
   "offerMarquee": {
@@ -396,7 +416,47 @@
     "historyClear": "Alle löschen",
     "historyClearConfirm": "Alle Verlaufseinträge löschen?",
     "historyCount": "{{n}} Einträge",
-    "historyAgo": "vor {{t}}"
+    "historyAgo": "vor {{t}}",
+    "sectionJobInfo": "Stellenangaben",
+    "sectionJobInfoSub": "Basisdaten eintragen — die KI erstellt daraus Fragen und Bewertungsmaßstab",
+    "sectionInterviewSetup": "Interview-Einstellungen",
+    "sectionInterviewSetupSub": "Ablauf und Bewertungskriterien anpassen",
+    "resumeUploadLabel": "Lebenslauf hochladen (optional)",
+    "resumeHintLimit": "Nur PDF, max. {{mb}}MB",
+    "typeHrHint": "Empfohlen 10 Min.",
+    "typeTechnicalHint": "Empfohlen 15–20 Min.",
+    "typeMixedHint": "Empfohlen 10–15 Min.",
+    "summaryTitle": "Konfigurationsübersicht",
+    "summaryPosition": "Position",
+    "summaryEmployment": "Anstellungsart",
+    "summaryCategory": "Kategorie",
+    "summaryResume": "Lebenslauf",
+    "summaryType": "Interviewer",
+    "summaryMode": "Modus",
+    "summaryLanguage": "Sprache",
+    "summaryDifficulty": "Schwierigkeit",
+    "summaryDuration": "Dauer",
+    "summaryStyle": "Persönlichkeit",
+    "summaryUnset": "Offen",
+    "summaryCategoryUnset": "Keine",
+    "summaryResumeReady": "Bereit",
+    "summaryResumeNone": "Nicht hochgeladen",
+    "benefitsTitle": "Das bekommst du",
+    "benefit1": "KI-generierte Fragen für genau diese Rolle",
+    "benefit2": "Sprachdialog und Feedback in Echtzeit",
+    "benefit3": "Ergebnisse mit konkreten Verbesserungsvorschlägen",
+    "securityNote": "Verschlüsselt — dein Interview dient ausschließlich deiner Vorbereitung",
+    "creditCost": "{{n}} Credits",
+    "durationMinutes": "{{n}} Min.",
+    "positionPlaceholder": "z. B. Frontend Developer",
+    "pageTitle": "Interview starten",
+    "pageSub": "Nenne uns deine Zielposition — die KI baut Fragen und Ablauf darum herum.",
+    "jobDescSub": "Stellenbeschreibung einfügen, damit die KI die Fragen genauer zuschneidet",
+    "summaryOverview": "Übersicht",
+    "previewReady": "Dein KI-Interviewer ist bereit, wann immer du es bist",
+    "privacyTitle": "Datenschutz & Sicherheit",
+    "privacyBody": "Deine Interviews bleiben privat, werden nie für Modelltraining genutzt, und du kannst jeden Eintrag jederzeit löschen.",
+    "privacyMore": "Mehr erfahren"
   },
   "profile": {
     "title": "Profil & Lebenslauf",
@@ -765,7 +825,9 @@
       "experience": "Die Beschreibungen benötigen konkretere STAR-Beispiele. Testen Sie dies im Interview.",
       "portfolio": "Die Portfolio-Tiefe kann optimiert werden; zeigen Sie Lösungswege auf.",
       "networking": "Networking ist im Anfangsstadium. Nutzen Sie LinkedIn für Alumni-Kontakte."
-    }
+    },
+    "scoreLabel": "Gesamtbereitschaft",
+    "lvlMapSub": "Dein Wachstumspfad"
   },
   "interview": {
     "live": "Live Interview",
@@ -879,7 +941,15 @@
         "key_points": "Kernpunkte",
         "example": "Beispiel"
       }
-    }
+    },
+    "cameraOff": "Kamera aus",
+    "onScreen": "Im Bild",
+    "transcriptTitle": "Live-Transkript",
+    "audioControls": "Audio",
+    "videoCamera": "Kamera",
+    "connectionLabel": "Verbindung",
+    "connectionOk": "Verbunden",
+    "connectionWait": "Verbinde"
   },
   "report": {
     "title": "Interview Bericht",
@@ -929,7 +999,19 @@
     "lineModelAnswer": "Referenz",
     "noTranscript": "Leer.",
     "roleCandidate": "Kandidat",
-    "roleInterviewer": "Interviewer"
+    "roleInterviewer": "Interviewer",
+    "tabCards": "Karten",
+    "tabOverview": "Alle Fragen",
+    "cardReveal": "Musterantwort zeigen",
+    "cardHide": "Musterantwort ausblenden",
+    "cardPrev": "Vorherige Frage",
+    "cardNext": "Nächste Frage",
+    "deckTitle": "Fragen wiederholen",
+    "deckEmpty": "In dieser Sitzung gibt es keine Fragen zum Wiederholen.",
+    "deckSub": "Eine Frage nach der anderen: erst selbst überlegen, dann Musterantwort und Lücken aufdecken.",
+    "aiFeedback": "KI-Feedback",
+    "summaryAside": "Zusammenfassung",
+    "yourAnswerEmpty": "Für diese Runde wurde keine Antwort gespeichert."
   },
   "chat": {
     "startTriggerEn": "Please start the interview now.",

@@ -5,8 +5,9 @@ import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import {
   ArrowLeft, Briefcase, Globe2, Clock, FileText, Loader2, RefreshCw,
-  Sparkles, ListChecks, Target, MessageSquareQuote, GitCompare,
+  Sparkles, ListChecks, Target, MessageSquareQuote,
   User, CheckCircle2, AlertTriangle, Lightbulb, Zap, ArrowRight,
+  ChevronLeft, ChevronRight, Eye, EyeOff, LayoutList, Layers,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -78,7 +79,10 @@ function RichText({ text, className, strongClassName }) {
   if (!text) return null
   const parts = String(text).split(/(\*\*[^*\n]+\*\*)/g)
   if (parts.length === 1) return <span className={className}>{text}</span>
-  const strongCls = strongClassName || 'font-black text-primary-600 dark:text-primary-400'
+  /* 重点不再靠「变紫 + 加粗」，改成薰衣草马克笔底 + 近黑字：在冷灰页面里更像划重点，
+     box-decoration-clone 保证跨行高亮两端都有圆角和内边距 */
+  const strongCls = strongClassName
+    || 'rounded-[3px] bg-brand-glow/40 px-1 py-[2px] font-semibold text-brand-ink [box-decoration-break:clone] [-webkit-box-decoration-break:clone]'
   return (
     <span className={className}>
       {parts.map((part, i) => {
@@ -193,7 +197,7 @@ function LegacySectionBody({ body, t }) {
   const blocks = parseLegacyBodyBlocks(body)
   if (!blocks.length) {
     return (
-      <p className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-200 whitespace-pre-wrap">
+      <p className="text-[14px] leading-relaxed text-brand-ink whitespace-pre-wrap">
         {stripMdNoise(body)}
       </p>
     )
@@ -206,7 +210,7 @@ function LegacySectionBody({ body, t }) {
           return (
             <p
               key={idx}
-              className="text-[15px] leading-[1.7] text-slate-700 dark:text-slate-200 whitespace-pre-wrap"
+              className="text-[14px] leading-[1.7] text-brand-ink whitespace-pre-wrap"
             >
               {b.text}
             </p>
@@ -216,8 +220,8 @@ function LegacySectionBody({ body, t }) {
           return (
             <ul key={idx} className="space-y-2.5 pl-1">
               {b.items.map((item, j) => (
-                <li key={j} className="flex gap-3 text-[15px] leading-relaxed text-slate-700 dark:text-slate-200">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary-500" aria-hidden />
+                <li key={j} className="flex gap-3 text-[14px] leading-relaxed text-brand-ink">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-violet" aria-hidden />
                   <span className="min-w-0 flex-1">{item}</span>
                 </li>
               ))}
@@ -228,13 +232,13 @@ function LegacySectionBody({ body, t }) {
           return (
             <div
               key={idx}
-              className="rounded-xl border border-primary-200/80 bg-primary-50/60 px-4 py-3 dark:border-primary-900/50 dark:bg-primary-950/25"
+              className="rounded-xl border border-brand-violet/25 bg-brand-violet/[0.06] px-4 py-3"
             >
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-primary-700 dark:text-primary-400 mb-1.5">
+              <div className="mb-1.5 flex items-center gap-2 text-[12.5px] font-bold text-brand-violet">
                 <MessageSquareQuote className="w-3.5 h-3.5" aria-hidden />
                 {t('report.legacyQuestionLabel')}
               </div>
-              <p className="text-[15px] font-medium text-slate-900 dark:text-slate-100 leading-relaxed">{b.text || '—'}</p>
+              <p className="text-[14px] font-medium leading-relaxed text-brand-ink">{b.text || '—'}</p>
             </div>
           )
         }
@@ -242,25 +246,25 @@ function LegacySectionBody({ body, t }) {
           return (
             <div
               key={idx}
-              className="rounded-xl border border-slate-200/90 bg-slate-50/90 px-4 py-3 dark:border-slate-600 dark:bg-slate-800/50"
+              className="rounded-xl border border-brand-line bg-brand-inset px-4 py-3"
             >
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-600 dark:text-slate-400 mb-2">
+              <div className="mb-2 flex items-center gap-2 text-[12.5px] font-bold text-brand-muted">
                 <ListChecks className="w-3.5 h-3.5" aria-hidden />
                 {t('report.legacyAnswerLabel')}
               </div>
               {b.lead ? (
-                <p className="text-[15px] text-slate-800 dark:text-slate-100 leading-relaxed mb-2">{b.lead}</p>
+                <p className="mb-2 text-[14px] leading-relaxed text-brand-ink">{b.lead}</p>
               ) : null}
               {b.rest?.length ? (
                 <ul className="space-y-2">
                   {b.rest.map((r, j) =>
                     r.kind === 'li' ? (
-                      <li key={j} className="flex gap-2.5 text-[14px] leading-relaxed text-slate-700 dark:text-slate-200">
-                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-slate-400 dark:bg-slate-500" aria-hidden />
+                      <li key={j} className="flex gap-2.5 text-[13px] leading-relaxed text-brand-ink">
+                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-muted" aria-hidden />
                         <span>{r.text}</span>
                       </li>
                     ) : (
-                      <li key={j} className="text-[14px] leading-relaxed text-slate-600 dark:text-slate-300 list-none">
+                      <li key={j} className="list-none text-[13.5px] leading-relaxed text-brand-ink">
                         {r.text}
                       </li>
                     ),
@@ -326,7 +330,436 @@ function buildTranscriptLineReviewMap(report) {
   return map
 }
 
-function StructuredReportBody({ report, transcript, t }) {
+/**
+ * 把「逐题问答与对比」和「完整对话记录」合并成同一套题卡。
+ *
+ * 两边本来讲的是同一件事：transcript 里面试官的每句提问 + 你随后的回答，
+ * 就是 qaReview 里那一条的原始素材。分成两个区块看会来回对照，所以这里合并：
+ * 以 transcript 为骨架切分轮次（一条 assistant 开一张卡，之后的 user 全算这一轮的回答），
+ * 再把 qaReview 的参考答案/差距/建议和 transcriptLineReview 的逐条点评挂上去。
+ * qaReview 里没能对上 transcript 的条目会补在末尾，保证两边的信息一条都不丢。
+ */
+function buildQaCards(qaReview, transcript, lineReviewByIndex) {
+  const cards = []
+  const usedQa = new Set()
+
+  const pushCard = (card) => {
+    if (!card) return
+    const hasContent = card.question || card.yourAnswer || card.referenceExample
+      || card.gaps.length || card.howToImprove || card.reviews.length
+    if (hasContent) cards.push(card)
+  }
+
+  let current = null
+  transcript.forEach((message, index) => {
+    const content = String(message?.content || '').trim()
+    const review = lineReviewByIndex.get(index)
+    if (message?.role === 'assistant') {
+      pushCard(current)
+      current = {
+        question: content,
+        questionIndex: index,
+        yourAnswer: '',
+        questionSummary: '',
+        referenceExample: '',
+        gaps: [],
+        howToImprove: '',
+        reviews: [],
+      }
+      if (review) current.reviews.push(review)
+      return
+    }
+    if (!current) {
+      current = {
+        question: '', questionIndex: -1, yourAnswer: '', questionSummary: '',
+        referenceExample: '', gaps: [], howToImprove: '', reviews: [],
+      }
+    }
+    current.yourAnswer = current.yourAnswer ? `${current.yourAnswer}\n${content}` : content
+    if (review) current.reviews.push(review)
+  })
+  pushCard(current)
+
+  // 把 qaReview 挂到对应轮次上：优先按 questionIndex 对齐，否则按出现顺序
+  cards.forEach((card, order) => {
+    let qa = qaReview.find((x, i) => !usedQa.has(i) && x.questionIndex === card.questionIndex)
+    if (!qa) qa = qaReview.find((x, i) => !usedQa.has(i) && x.questionIndex < 0 && i === order)
+    if (!qa) return
+    usedQa.add(qaReview.indexOf(qa))
+    card.questionSummary = qa.questionSummary
+    card.question = card.question || qa.questionText
+    card.yourAnswer = card.yourAnswer || qa.yourAnswerSummary
+    card.referenceExample = qa.referenceExample
+    card.gaps = qa.gaps
+    card.howToImprove = qa.howToImprove
+  })
+
+  // 没能对上 transcript 的 qaReview 条目单独补在后面，避免丢内容
+  qaReview.forEach((qa, i) => {
+    if (usedQa.has(i)) return
+    pushCard({
+      question: qa.questionText,
+      questionIndex: qa.questionIndex,
+      questionSummary: qa.questionSummary,
+      yourAnswer: qa.yourAnswerSummary,
+      referenceExample: qa.referenceExample,
+      gaps: qa.gaps,
+      howToImprove: qa.howToImprove,
+      reviews: [],
+    })
+  })
+
+  return cards
+}
+
+/** 小节外壳：左侧总结栏的三张卡共用 */
+function AsideSection({ icon: Icon, tone = 'ink', title, children }) {
+  const toneCls = {
+    ink: 'text-brand-ink',
+    success: 'text-brand-success',
+    danger: 'text-brand-danger',
+  }[tone]
+  return (
+    <section className="brand-float rounded-[20px] px-5 py-5">
+      <div className="mb-4 flex items-center gap-2.5">
+        <Icon className={`h-4 w-4 shrink-0 ${toneCls}`} />
+        <h2 className="font-brand text-[15px] font-semibold tracking-[-0.01em] text-brand-ink">{title}</h2>
+      </div>
+      {children}
+    </section>
+  )
+}
+
+/** 题卡正面/背面共用的一块标注内容 */
+function CardBlock({ icon: Icon, tone, label, children }) {
+  const tones = {
+    ink: { rail: 'bg-brand-ink', text: 'text-brand-ink', box: 'border-brand-line bg-brand-inset' },
+    violet: { rail: 'bg-brand-violet', text: 'text-brand-violet', box: 'border-brand-violet/25 bg-brand-violet/[0.05]' },
+    success: { rail: 'bg-brand-success', text: 'text-brand-success', box: 'border-brand-success/25 bg-brand-success/[0.05]' },
+    danger: { rail: 'bg-brand-danger', text: 'text-brand-danger', box: 'border-brand-danger/25 bg-brand-danger/[0.05]' },
+  }[tone]
+  return (
+    <div className="space-y-2">
+      <div className={`flex items-center gap-2 text-[11.5px] font-semibold ${tones.text}`}>
+        <span className={`h-3 w-[2px] rounded-full ${tones.rail}`} aria-hidden="true" />
+        {Icon && <Icon className="h-3.5 w-3.5" />}
+        {label}
+      </div>
+      <div className={`rounded-xl border px-4 py-3.5 text-[14px] leading-relaxed text-brand-ink ${tones.box}`}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+/** 一张题卡的「背面」：参考答案 / 差距 / 建议 / AI 点评 */
+function CardBack({ card, t }) {
+  return (
+    <div className="space-y-4">
+      {card.referenceExample && (
+        <CardBlock icon={CheckCircle2} tone="success" label={t('report.referenceExampleLabel')}>
+          <p className="whitespace-pre-wrap"><RichText text={card.referenceExample} /></p>
+        </CardBlock>
+      )}
+
+      {card.gaps.length > 0 && (
+        <CardBlock icon={AlertTriangle} tone="danger" label={t('report.gapsLabel')}>
+          <ul className="space-y-2">
+            {card.gaps.map((g, j) => (
+              <li key={j} className="flex gap-2.5">
+                <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-brand-danger" aria-hidden="true" />
+                <span><RichText text={g} /></span>
+              </li>
+            ))}
+          </ul>
+        </CardBlock>
+      )}
+
+      {card.howToImprove && (
+        <CardBlock icon={Lightbulb} tone="violet" label={t('report.improveTipLabel')}>
+          <p><RichText text={card.howToImprove} /></p>
+        </CardBlock>
+      )}
+
+      {/*
+        AI 点评只保留「解析」。原来还带「改进点」和「参考标答」，但上面的
+        主要差距 / 改进建议 / 标准回答样例已经把这两块讲过一遍了，重复读很累。
+        兜底：只有当上面确实没有对应内容时（例如这一轮没有 qaReview，只有逐条点评），
+        才把它们补出来，避免信息真的丢掉。
+      */}
+      {card.reviews.map((review, ri) => {
+        const showImprovements = review.improvements?.length > 0
+          && card.gaps.length === 0 && !card.howToImprove
+        const showModelAnswer = review.modelAnswer && !card.referenceExample
+        if (!review.parse && !showImprovements && !showModelAnswer) return null
+        return (
+          <CardBlock key={ri} icon={Sparkles} tone="violet" label={t('report.aiFeedback')}>
+            <div className="space-y-3.5">
+              {review.parse && (
+                <p className="text-[13.5px] leading-relaxed text-brand-ink">
+                  <RichText text={review.parse} />
+                </p>
+              )}
+              {showImprovements && (
+                <div className="space-y-1.5">
+                  <p className="text-[11.5px] font-semibold text-brand-muted">{t('report.lineImprovements')}</p>
+                  <ul className="space-y-1.5">
+                    {review.improvements.map((g, j) => (
+                      <li key={j} className="flex gap-2 text-[13.5px] text-brand-ink">
+                        <ArrowRight className="mt-1 h-3.5 w-3.5 shrink-0 text-brand-violet" />
+                        <span><RichText text={g} /></span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {showModelAnswer && (
+                <div className="space-y-1 border-t border-brand-violet/20 pt-3">
+                  <p className="text-[11.5px] font-semibold text-brand-success">{t('report.lineModelAnswer')}</p>
+                  <p className="text-[13.5px] text-brand-ink"><RichText text={review.modelAnswer} /></p>
+                </div>
+              )}
+            </div>
+          </CardBlock>
+        )
+      })}
+    </div>
+  )
+}
+
+/**
+ * 总览里的一行：左窄列放标签，右宽列放正文。
+ * 总览一次要铺开所有题，如果每块都像单题卡那样套「左轨 + 图标 + 淡底框」，
+ * 五个块乘以 N 道题就全是横条，读起来很吵。这里改成定义列表式：
+ * 只有标签带语义色，正文一律纯黑，块与块之间用一条细横线分隔。
+ */
+function OverviewRow({ label, tone = 'ink', children }) {
+  const labelCls = {
+    ink: 'text-brand-muted',
+    success: 'text-brand-success',
+    danger: 'text-brand-danger',
+    violet: 'text-brand-violet',
+  }[tone]
+  return (
+    <div className="grid gap-1.5 py-4 sm:grid-cols-[128px_minmax(0,1fr)] sm:gap-6">
+      <div className={`pt-[3px] text-[12px] font-medium leading-snug ${labelCls}`}>{label}</div>
+      <div className="min-w-0 text-[14px] leading-relaxed text-brand-ink">{children}</div>
+    </div>
+  )
+}
+
+/** 逐题复习：单题卡（一次一题、可翻面）与所有题总览两种视图 */
+function QaDeck({ cards, t }) {
+  const [mode, setMode] = useState('card')
+  const [index, setIndex] = useState(0)
+  const [revealed, setRevealed] = useState(false)
+
+  const total = cards.length
+  const current = cards[Math.min(index, Math.max(total - 1, 0))]
+
+  const go = (delta) => {
+    setIndex((prev) => {
+      const next = Math.min(Math.max(prev + delta, 0), total - 1)
+      if (next !== prev) setRevealed(false)
+      return next
+    })
+  }
+
+  if (total === 0) {
+    return (
+      <div className="brand-float rounded-[22px] px-6 py-16 text-center text-[13px] text-brand-muted">
+        {t('report.deckEmpty')}
+      </div>
+    )
+  }
+
+  const modes = [
+    { key: 'card', label: t('report.tabCards'), icon: Layers },
+    { key: 'list', label: t('report.tabOverview'), icon: LayoutList },
+  ]
+
+  return (
+    <section className="space-y-4">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="font-brand text-[18px] font-semibold tracking-[-0.01em] text-brand-ink">
+            {t('report.deckTitle')}
+          </h2>
+          <p className="mt-1.5 max-w-xl text-[12.5px] leading-relaxed text-brand-muted">
+            {t('report.deckSub')}
+          </p>
+        </div>
+        <div className="flex shrink-0 gap-1 rounded-xl border border-brand-line bg-brand-inset p-1">
+          {modes.map((m) => (
+            <button
+              key={m.key}
+              type="button"
+              onClick={() => setMode(m.key)}
+              aria-pressed={mode === m.key}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
+                mode === m.key ? 'bg-brand-card text-brand-ink shadow-sm' : 'text-brand-muted hover:text-brand-ink'
+              }`}
+            >
+              <m.icon className="h-3.5 w-3.5" />
+              {m.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {mode === 'card' ? (
+        <div className="brand-float overflow-hidden rounded-[22px]">
+          {/* 卡头：轮次 + 进度 + 前后翻页 */}
+          <div className="flex items-center justify-between gap-3 border-b border-brand-line bg-brand-inset px-5 py-3.5">
+            <span className="shrink-0 rounded-full border border-brand-line bg-brand-card px-2.5 py-1 text-[11px] font-medium text-brand-ink">
+              {t('report.qaRound', { n: index + 1 })}
+            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[12px] tabular-nums text-brand-muted">{index + 1} / {total}</span>
+              <button
+                type="button"
+                onClick={() => go(-1)}
+                disabled={index === 0}
+                aria-label={t('report.cardPrev')}
+                className="grid h-7 w-7 place-items-center rounded-lg border border-brand-line bg-brand-card text-brand-ink transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-35"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => go(1)}
+                disabled={index >= total - 1}
+                aria-label={t('report.cardNext')}
+                className="grid h-7 w-7 place-items-center rounded-lg border border-brand-line bg-brand-card text-brand-ink transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-35"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-5 px-5 py-5">
+            {/* 正面：问题 + 你的回答 */}
+            <CardBlock icon={MessageSquareQuote} tone="ink" label={t('report.qaExactQuestionLabel')}>
+              <p className="whitespace-pre-wrap font-semibold">
+                {current.question || current.questionSummary || t('report.qaQuestionFallback')}
+              </p>
+            </CardBlock>
+
+            <CardBlock icon={User} tone="ink" label={t('report.yourAnswerLabel')}>
+              {current.yourAnswer
+                ? <p className="whitespace-pre-wrap"><RichText text={current.yourAnswer} /></p>
+                : <p className="text-brand-muted">{t('report.yourAnswerEmpty')}</p>}
+            </CardBlock>
+
+            <button
+              type="button"
+              onClick={() => setRevealed((v) => !v)}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-ink px-5 py-3 text-[13.5px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90"
+            >
+              {revealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {revealed ? t('report.cardHide') : t('report.cardReveal')}
+            </button>
+
+            <AnimatePresence initial={false}>
+              {revealed && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="pt-1"><CardBack card={current} t={t} /></div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {cards.map((card, i) => (
+            <div key={i} className="brand-float overflow-hidden rounded-[22px]">
+              {/* 题头：轮次 + 小结 + 本轮实际问题，问题本身就是最大的一行黑字 */}
+              <div className="border-b border-brand-line bg-brand-inset px-6 py-4">
+                <div className="flex items-baseline gap-3">
+                  <span className="shrink-0 text-[11px] font-medium tabular-nums text-brand-muted">
+                    {t('report.qaRound', { n: i + 1 })}
+                  </span>
+                  {card.questionSummary && (
+                    <span className="truncate text-[12.5px] text-brand-muted">{card.questionSummary}</span>
+                  )}
+                </div>
+                <p className="mt-2 whitespace-pre-wrap text-[15.5px] font-semibold leading-snug text-brand-ink">
+                  {card.question || card.questionSummary || t('report.qaQuestionFallback')}
+                </p>
+              </div>
+
+              <div className="divide-y divide-brand-line px-6 py-1">
+                <OverviewRow label={t('report.yourAnswerLabel')}>
+                  {card.yourAnswer
+                    ? <p className="whitespace-pre-wrap"><RichText text={card.yourAnswer} /></p>
+                    : <p className="text-brand-muted">{t('report.yourAnswerEmpty')}</p>}
+                </OverviewRow>
+
+                {card.referenceExample && (
+                  <OverviewRow label={t('report.referenceExampleLabel')} tone="success">
+                    <p className="whitespace-pre-wrap"><RichText text={card.referenceExample} /></p>
+                  </OverviewRow>
+                )}
+
+                {card.gaps.length > 0 && (
+                  <OverviewRow label={t('report.gapsLabel')} tone="danger">
+                    <ul className="space-y-1.5">
+                      {card.gaps.map((g, j) => (
+                        <li key={j} className="flex gap-2.5">
+                          <span className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-brand-danger" aria-hidden="true" />
+                          <span><RichText text={g} /></span>
+                        </li>
+                      ))}
+                    </ul>
+                  </OverviewRow>
+                )}
+
+                {card.howToImprove && (
+                  <OverviewRow label={t('report.improveTipLabel')} tone="violet">
+                    <p><RichText text={card.howToImprove} /></p>
+                  </OverviewRow>
+                )}
+
+                {card.reviews.map((review, ri) => {
+                  const showImprovements = review.improvements?.length > 0
+                    && card.gaps.length === 0 && !card.howToImprove
+                  const showModelAnswer = review.modelAnswer && !card.referenceExample
+                  if (!review.parse && !showImprovements && !showModelAnswer) return null
+                  return (
+                    <OverviewRow key={ri} label={t('report.aiFeedback')} tone="violet">
+                      <div className="space-y-2.5">
+                        {review.parse && <p><RichText text={review.parse} /></p>}
+                        {showImprovements && (
+                          <ul className="space-y-1.5">
+                            {review.improvements.map((g, j) => (
+                              <li key={j} className="flex gap-2">
+                                <ArrowRight className="mt-1 h-3.5 w-3.5 shrink-0 text-brand-violet" />
+                                <span><RichText text={g} /></span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {showModelAnswer && <p><RichText text={review.modelAnswer} /></p>}
+                      </div>
+                    </OverviewRow>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
+function StructuredReportBody({ report, transcript, lineReviewByIndex, t }) {
   const transcriptQuestions = interviewerQuestionsFromTranscript(transcript)
   const qaReview = Array.isArray(report?.qaReview)
     ? report.qaReview.map(normalizeQaItem).filter(Boolean).map((item, index) => {
@@ -354,223 +787,70 @@ function StructuredReportBody({ report, transcript, t }) {
       .filter((x) => x.title || x.why || x.how)
     : []
 
+  const cards = buildQaCards(qaReview, Array.isArray(transcript) ? transcript : [], lineReviewByIndex)
+
   return (
-    <div className="space-y-16">
-      {/* Bento Grid for Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Core Summary */}
+    <div className="grid gap-5 lg:grid-cols-12">
+
+      {/* ── 左栏：整份报告的总结，长页面滚动时吸顶 ── */}
+      <aside className="space-y-4 lg:col-span-4 lg:sticky lg:top-[calc(var(--ui-nav-h)+1.5rem)] lg:self-start lg:max-h-[calc(100dvh-var(--ui-nav-h)-3rem)] lg:overflow-y-auto lg:pr-1 custom-scrollbar">
         {summary.length > 0 && (
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="lg:col-span-12 p-8 rounded-[2rem] border border-primary-100/50 dark:border-primary-900/20 bg-gradient-to-br from-white to-primary-50/50 dark:from-slate-900 dark:to-primary-950/20 shadow-sm space-y-8"
-          >
-            <div className="flex items-center gap-4 text-primary-600 dark:text-primary-400">
-              <div className="p-3 rounded-2xl bg-primary-100 dark:bg-primary-900/30">
-                <Sparkles className="w-6 h-6" />
-              </div>
-              <h2 className="text-[10px] font-black uppercase tracking-[0.2em]">
-                {t('report.sectionSummary')}
-              </h2>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {summary.map((s, i) => (
-                <div key={i} className="group relative p-8 rounded-[2rem] bg-indigo-50/30 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/20 transition-all hover:border-indigo-300 dark:hover:border-indigo-700">
-                  <div className="absolute top-6 right-8 text-[40px] font-black text-indigo-500/10 group-hover:text-indigo-500/20 transition-colors leading-none tabular-nums">
+          <AsideSection icon={Sparkles} tone="ink" title={t('report.sectionSummary')}>
+            <ul className="space-y-2.5">
+              {summary.map((item, i) => (
+                <li key={i} className="flex gap-3 text-[14px] leading-relaxed text-brand-ink">
+                  <span className="shrink-0 text-[11px] font-medium tabular-nums text-brand-muted">
                     {String(i + 1).padStart(2, '0')}
-                  </div>
-                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200 leading-relaxed relative z-10">
-                    <RichText text={s} />
-                  </p>
-                </div>
+                  </span>
+                  <span><RichText text={item} /></span>
+                </li>
               ))}
-            </div>
-          </motion.section>
+            </ul>
+          </AsideSection>
         )}
 
-        {/* Strengths & Improvements */}
-        <div className="lg:col-span-12 grid md:grid-cols-2 gap-6">
-          {strengths.length > 0 && (
-            <motion.section
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-              className="p-8 rounded-[2rem] border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/20 dark:bg-emerald-950/10 space-y-8"
-            >
-              <div className="flex items-center gap-4 text-emerald-600 dark:text-emerald-400">
-                <div className="p-3 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30">
-                  <ListChecks className="w-6 h-6" />
-                </div>
-                <h2 className="text-2xl font-black font-serif tracking-tight uppercase tracking-widest text-xs">
-                  {t('report.sectionStrengths')}
-                </h2>
-              </div>
-              <ul className="space-y-4">
-                {strengths.map((s, i) => (
-                  <li key={i} className="flex gap-4 p-4 rounded-xl bg-white/60 dark:bg-slate-900/40 border border-emerald-50 dark:border-emerald-900/20 text-sm font-medium text-slate-700 dark:text-slate-300">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                    <RichText text={s} />
-                  </li>
-                ))}
-              </ul>
-            </motion.section>
-          )}
+        {strengths.length > 0 && (
+          <AsideSection icon={ListChecks} tone="success" title={t('report.sectionStrengths')}>
+            <ul className="space-y-2.5">
+              {strengths.map((item, i) => (
+                <li key={i} className="flex gap-2.5 text-[14px] leading-relaxed text-brand-ink">
+                  <CheckCircle2 className="mt-[3px] h-3.5 w-3.5 shrink-0 text-brand-success" />
+                  <span><RichText text={item} /></span>
+                </li>
+              ))}
+            </ul>
+          </AsideSection>
+        )}
 
-          {toImprove.length > 0 && (
-            <motion.section
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="p-8 rounded-[2rem] border border-amber-100 dark:border-amber-900/30 bg-amber-50/20 dark:bg-amber-950/10 space-y-8"
-            >
-              <div className="flex items-center gap-4 text-amber-600 dark:text-amber-400">
-                <div className="p-3 rounded-2xl bg-amber-100 dark:bg-amber-900/30">
-                  <Target className="w-6 h-6" />
-                </div>
-                <h2 className="text-2xl font-black font-serif tracking-tight uppercase tracking-widest text-xs">
-                  {t('report.sectionImprove')}
-                </h2>
-              </div>
-              <div className="space-y-4">
-                {toImprove.map((item, i) => (
-                  <div key={i} className="p-5 rounded-2xl bg-white/60 dark:bg-slate-900/40 border border-amber-50 dark:border-amber-900/20 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/40 text-[10px] font-black text-amber-600">
-                        {i + 1}
-                      </span>
-                      <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{item.title}</p>
-                    </div>
-                    {item.how && (
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed pl-9 italic">
-                        <RichText text={item.how} />
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </motion.section>
-          )}
-        </div>
-      </div>
-
-      {/* Comparison View */}
-      {qaReview.length > 0 && (
-        <section className="space-y-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600">
-                  <GitCompare className="w-6 h-6" />
-                </div>
-                <h2 className="text-3xl font-black font-serif tracking-tight text-slate-900 dark:text-white">
-                  {t('report.sectionQaCompare')}
-                </h2>
-              </div>
-              <p className="text-slate-500 dark:text-slate-400 max-w-2xl font-medium leading-relaxed">
-                {t('report.sectionQaCompareSub')}
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-8">
-            {qaReview.map((qa, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="group relative bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden"
-              >
-                <div className="bg-slate-50 dark:bg-slate-800/50 px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <span className="px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-[10px] font-black text-indigo-600 uppercase tracking-widest">
-                      {t('report.qaRound', { n: i + 1 })}
-                    </span>
-                    <h3 className="text-lg font-black text-slate-900 dark:text-white font-serif">
-                      {qa.questionSummary || t('report.qaQuestionFallback')}
-                    </h3>
-                  </div>
-                </div>
-
-                {qa.questionText && (
-                  <div className="px-8 py-6 border-b border-indigo-100/70 dark:border-indigo-900/30 bg-indigo-50/40 dark:bg-indigo-950/10">
-                    <div className="flex items-center gap-2 mb-2 text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
-                      <MessageSquareQuote className="w-4 h-4" />
-                      {t('report.qaExactQuestionLabel')}
-                    </div>
-                    <p className="text-[15px] font-bold leading-relaxed text-slate-800 dark:text-slate-100 whitespace-pre-wrap">
-                      {qa.questionText}
+        {toImprove.length > 0 && (
+          <AsideSection icon={Target} tone="danger" title={t('report.sectionImprove')}>
+            <ol className="space-y-3.5">
+              {toImprove.map((item, i) => (
+                <li key={i} className="border-l-2 border-brand-danger/40 pl-3.5">
+                  <p className="text-[13.5px] font-semibold leading-snug text-brand-ink">{item.title}</p>
+                  {item.why && (
+                    <p className="mt-1.5 text-[13px] leading-relaxed text-brand-ink">
+                      <span className="text-brand-muted">{t('report.whyLabel')}</span>
+                      <RichText text={item.why} />
                     </p>
-                  </div>
-                )}
+                  )}
+                  {item.how && (
+                    <p className="mt-1 text-[13px] leading-relaxed text-brand-ink">
+                      <span className="text-brand-muted">{t('report.howLabel')}</span>
+                      <RichText text={item.how} />
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </AsideSection>
+        )}
+      </aside>
 
-                <div className="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-100 dark:divide-slate-800">
-                  {/* User Answer */}
-                  <div className="p-8 space-y-4">
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                      <User className="w-3 h-3" />
-                      {t('report.yourAnswerLabel')}
-                    </div>
-                    <div className="p-6 rounded-2xl bg-indigo-50/30 dark:bg-indigo-950/10 border border-indigo-50/50 dark:border-indigo-900/20">
-                      <p className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-300 font-medium whitespace-pre-wrap">
-                        <RichText text={qa.yourAnswerSummary || '—'} />
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Reference Answer */}
-                  <div className="p-8 space-y-4 bg-emerald-50/[0.02] dark:bg-emerald-950/[0.02]">
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-600/60">
-                      <CheckCircle2 className="w-3 h-3" />
-                      {t('report.referenceExampleLabel')}
-                    </div>
-                    <div className="p-6 rounded-2xl bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-50/50 dark:border-emerald-900/20">
-                      <p className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-300 font-medium whitespace-pre-wrap italic">
-                        <RichText text={qa.referenceExample || '—'} />
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {(qa.gaps.length > 0 || qa.howToImprove) && (
-                  <div className="p-8 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800">
-                    <div className="grid md:grid-cols-2 gap-8">
-                      {qa.gaps.length > 0 && (
-                        <div className="space-y-4">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                            {t('report.gapsLabel')}
-                          </label>
-                          <ul className="space-y-2">
-                            {qa.gaps.map((g, j) => (
-                              <li key={j} className="flex gap-3 text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                                <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                                <RichText text={g} />
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {qa.howToImprove && (
-                        <div className="space-y-4">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                            {t('report.improveTipLabel')}
-                          </label>
-                          <div className="flex gap-4 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm">
-                            <Lightbulb className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-                            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-bold">
-                              <RichText text={qa.howToImprove} />
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* ── 右栏：逐题复习（单题卡 / 所有题总览）── */}
+      <div className="min-w-0 lg:col-span-8">
+        <QaDeck cards={cards} t={t} />
+      </div>
     </div>
   )
 }
@@ -755,9 +1035,9 @@ export default function InterviewReportPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-slate-100 to-slate-50 dark:from-slate-950 dark:to-slate-900">
-        <Loader2 className="w-10 h-10 animate-spin text-primary-600" />
-        <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('report.loading')}</span>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-brand-paper">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-violet" />
+        <span className="text-[13px] font-medium text-brand-muted">{t('report.loading')}</span>
         <span className="sr-only">{t('report.loading')}</span>
       </div>
     )
@@ -765,9 +1045,9 @@ export default function InterviewReportPage() {
 
   if (err && !interview) {
     return (
-      <div className="max-w-lg mx-auto pt-28 pb-24 px-4 text-center">
-        <p className="text-red-600 dark:text-red-400">{err}</p>
-        <Link to="/dashboard" className="btn-primary inline-flex mt-8 px-6 py-3 rounded-xl font-bold">
+      <div className="ui-container min-h-screen max-w-lg bg-brand-paper pb-24 pt-[calc(var(--ui-nav-h)+2rem)] text-center">
+        <p className="text-[14px] text-brand-danger">{err}</p>
+        <Link to="/dashboard" className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-brand-ink px-6 py-3 text-[14px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90">
           {t('report.backDashboard')}
         </Link>
       </div>
@@ -775,59 +1055,59 @@ export default function InterviewReportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 bg-dot-grid pt-32 pb-24 px-6 sm:px-10 lg:px-16">
-      <div className="mx-auto max-w-5xl space-y-12">
+    <div className="theme-quiet min-h-screen bg-brand-paper pb-20 pt-[calc(var(--ui-nav-h)+2rem)]">
+      <div className="ui-container max-w-[1400px] space-y-6">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
         >
           <Link
             to="/dashboard"
-            className="group inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all"
+            className="group inline-flex items-center gap-2 text-[12.5px] font-bold text-brand-muted transition-colors hover:text-brand-ink"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             {t('report.backDashboard')}
           </Link>
         </motion.div>
 
-        <article className="space-y-16">
+        <article className="space-y-10">
           <motion.header
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-10"
+            className="space-y-6"
           >
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-slate-100 dark:border-slate-800">
-              <div className="space-y-6 max-w-2xl">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xl shadow-slate-900/10 transition-transform hover:rotate-3">
-                    <Zap className="w-8 h-8" />
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-brand-line">
+              <div className="space-y-3 max-w-2xl">
+                <div className="flex items-center gap-3.5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-brand-ink text-brand-on-ink">
+                    <Zap className="w-6 h-6" />
                   </div>
                   <div className="space-y-1">
-                    <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-md bg-primary-100 dark:bg-primary-950 text-[10px] font-black uppercase tracking-widest text-primary-600 dark:text-primary-400">
+                    <div className="inline-flex items-center gap-2 rounded-md border border-brand-line bg-brand-inset px-2 py-0.5 text-[11px] font-medium text-brand-muted">
                       {t('report.docLabel')}
                     </div>
-                    <h1 className="text-4xl sm:text-5xl font-black font-serif tracking-tight text-slate-900 dark:text-white">
+                    <h1 className="font-brand text-[28px] font-semibold leading-tight tracking-[-0.02em] text-brand-ink sm:text-[32px]">
                       {t('report.title')}
                     </h1>
                   </div>
                 </div>
-                <p className="text-lg text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                <p className="text-[14px] leading-relaxed text-brand-ink">
                   {t('report.subtitle')}
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <div className="px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                  <Briefcase className="w-4 h-4 text-slate-400" />
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate max-w-[140px]">{interview?.position}</span>
+                <div className="flex items-center gap-2.5 rounded-xl border border-brand-line bg-brand-card px-3.5 py-2">
+                  <Briefcase className="w-4 h-4 text-brand-muted" />
+                  <span className="max-w-[140px] truncate text-[12.5px] font-bold text-brand-ink">{interview?.position}</span>
                 </div>
-                <div className="px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                  <Globe2 className="w-4 h-4 text-slate-400" />
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{interview?.language}</span>
+                <div className="flex items-center gap-2.5 rounded-xl border border-brand-line bg-brand-card px-3.5 py-2">
+                  <Globe2 className="w-4 h-4 text-brand-muted" />
+                  <span className="text-[12.5px] font-bold text-brand-ink">{interview?.language}</span>
                 </div>
-                <div className="px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                  <Clock className="w-4 h-4 text-slate-400" />
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{interview?.duration} {t('dashboard.durMin')}</span>
+                <div className="flex items-center gap-2.5 rounded-xl border border-brand-line bg-brand-card px-3.5 py-2">
+                  <Clock className="w-4 h-4 text-brand-muted" />
+                  <span className="text-[12.5px] font-bold text-brand-ink">{interview?.duration} {t('dashboard.durMin')}</span>
                 </div>
               </div>
             </div>
@@ -836,45 +1116,45 @@ export default function InterviewReportPage() {
           <div className="min-h-[400px]">
             {reportTranslating ? (
               <div className="flex flex-col items-center justify-center gap-6 py-24">
-                <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <Loader2 className="h-7 w-7 animate-spin text-brand-violet" />
+                <p className="text-[12.5px] font-bold text-brand-muted">
                   {t('report.translating', { lang: t(`profile.langName.${normalizeUiCode(i18n.resolvedLanguage || i18n.language)}`) })}
                 </p>
               </div>
             ) : !hasAnyReport ? (
-              <div className="text-center py-20 px-8 rounded-[3rem] border-2 border-dashed border-slate-100 dark:border-slate-800 space-y-8">
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[2rem] bg-slate-50 dark:bg-slate-900">
-                  <FileText className="w-10 h-10 text-slate-300" />
+              <div className="space-y-6 rounded-[22px] border border-dashed border-brand-line bg-brand-card px-8 py-16 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[20px] bg-brand-inset">
+                  <FileText className="w-7 h-7 text-brand-muted" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-black font-serif text-slate-900 dark:text-white">{t('report.noReport')}</h3>
-                  <p className="text-sm text-slate-500 max-w-sm mx-auto">{t('report.retryHint')}</p>
+                  <h3 className="font-brand text-[20px] font-semibold tracking-tight text-brand-ink">{t('report.noReport')}</h3>
+                  <p className="mx-auto max-w-sm text-[13px] text-brand-ink">{t('report.retryHint')}</p>
                 </div>
                 {transcript.length > 0 && (
                   <button
                     type="button"
                     disabled={retrying}
                     onClick={() => void finalizeReport()}
-                    className="btn-primary px-10 py-4 text-sm font-black uppercase tracking-widest group"
+                    className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-ink px-8 py-3.5 text-[14px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {retrying ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />}
+                    {retrying ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />}
                     {retrying ? t('report.retrying') : t('report.retryGenerate')}
                   </button>
                 )}
               </div>
             ) : hasStructuredReport ? (
-              <StructuredReportBody report={parsedReport} transcript={transcript} t={t} />
+              <StructuredReportBody report={parsedReport} transcript={transcript} lineReviewByIndex={lineReviewByIndex} t={t} />
             ) : (
-              <div className="space-y-16">
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
+              <div className="space-y-10">
+                <div className="rounded-xl border border-brand-line bg-brand-inset px-4 py-3 text-[12.5px] font-bold text-brand-muted">
                   {t('report.legacyFormatHint')}
                 </div>
                 {sections.map((sec, i) => (
-                  <section key={`${sec.title}-${i}`} className="space-y-8">
+                  <section key={`${sec.title}-${i}`} className="space-y-4">
                     {sec.title ? (
-                      <div className="flex items-center gap-4">
-                        <div className="h-8 w-1.5 rounded-full bg-slate-900 dark:bg-white" />
-                        <h2 className="text-2xl font-black font-serif tracking-tight text-slate-900 dark:text-white">
+                      <div className="flex items-center gap-3">
+                        <div className="h-7 w-1.5 rounded-full bg-brand-ink" />
+                        <h2 className="font-brand text-[18px] font-semibold tracking-tight text-brand-ink">
                           {stripMdNoise(sec.title)}
                         </h2>
                       </div>
@@ -885,71 +1165,73 @@ export default function InterviewReportPage() {
               </div>
             )}
 
-            {!reportTranslating && transcript.length > 0 && (
-              <section className="mt-24 pt-24 border-t border-slate-100 dark:border-slate-800 space-y-12">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                      <MessageSquareQuote className="w-6 h-6" />
+            {/* 结构化报告下，对话记录已经并进右侧题卡，不再重复渲染一遍；
+                旧版 Markdown 报告和「没有报告」的情况仍然需要它 */}
+            {!reportTranslating && transcript.length > 0 && !hasStructuredReport && (
+              <section className="mt-14 space-y-6 border-t border-brand-line pt-12">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-inset text-brand-ink">
+                      <MessageSquareQuote className="w-5 h-5" />
                     </div>
-                    <h2 className="text-3xl font-black font-serif tracking-tight text-slate-900 dark:text-white">
+                    <h2 className="font-brand text-[22px] font-semibold tracking-tight text-brand-ink">
                       {t('report.transcriptTitle')}
                     </h2>
                   </div>
-                  <p className="text-slate-500 dark:text-slate-400 max-w-xl font-medium">
+                  <p className="max-w-xl text-[13px] text-brand-muted">
                     {t('report.transcriptSub')}
                   </p>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {transcript.map((m, i) => {
                     const coach = lineReviewByIndex.get(i)
                     return (
                       <div
                         key={i}
-                        className={`group relative p-8 rounded-[2rem] border transition-all ${
+                        className={`group relative rounded-[20px] border border-brand-line px-5 py-5 transition-colors ${
                           m.role === 'assistant'
-                            ? 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-sm'
-                            : 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 md:ml-20'
+                            ? 'bg-brand-card'
+                            : 'bg-brand-inset md:ml-16'
                         }`}
                       >
-                        <div className="flex items-center gap-4 mb-4">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">
+                        <div className="mb-3 flex items-center gap-3">
+                          <span className="text-[11px] font-bold tabular-nums text-brand-muted">
                             {String(i + 1).padStart(2, '0')}
                           </span>
-                          <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${
-                            m.role === 'assistant' ? 'bg-slate-100 dark:bg-slate-800 text-slate-500' : 'bg-primary-100 dark:bg-primary-900/40 text-primary-600'
+                          <span className={`rounded px-2 py-0.5 text-[11px] font-bold ${
+                            m.role === 'assistant' ? 'bg-brand-inset text-brand-muted' : 'bg-brand-violet/10 text-brand-violet'
                           }`}>
                             {m.role === 'assistant' ? t('dashboard.roleAssistant') : t('dashboard.roleUser')}
                           </span>
                         </div>
-                        <p className="text-sm font-medium leading-relaxed text-slate-700 dark:text-slate-300">
+                        <p className="text-[13.5px] font-medium leading-relaxed text-brand-ink">
                           {m.content}
                         </p>
 
                         {coach && (
-                          <div className="mt-8 p-6 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/10 border border-indigo-100/50 dark:border-indigo-900/20 space-y-6">
-                            <div className="flex items-center gap-3">
-                              <Sparkles className="w-4 h-4 text-indigo-500" />
-                              <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600">AI Feedback</span>
+                          <div className="mt-5 space-y-4 rounded-xl border border-brand-violet/25 bg-brand-violet/[0.06] px-4 py-4">
+                            <div className="flex items-center gap-2.5">
+                              <Sparkles className="w-3.5 h-3.5 text-brand-violet" />
+                              <span className="text-[12px] font-bold text-brand-violet">AI Feedback</span>
                             </div>
                             
-                            <div className="grid md:grid-cols-2 gap-8">
+                            <div className="grid md:grid-cols-2 gap-5">
                               {coach.parse && (
                                 <div className="space-y-2">
-                                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Analysis</label>
-                                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">
+                                  <label className="text-[11.5px] font-bold text-brand-muted">Analysis</label>
+                                  <p className="text-[13px] leading-relaxed text-brand-ink">
                                     <RichText text={coach.parse} />
                                   </p>
                                 </div>
                               )}
                               {coach.improvements?.length > 0 && (
                                 <div className="space-y-3">
-                                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Points to Note</label>
+                                  <label className="text-[11.5px] font-bold text-brand-muted">Points to Note</label>
                                   <ul className="space-y-1.5">
                                     {coach.improvements.map((g, j) => (
-                                      <li key={j} className="flex gap-2 text-xs text-indigo-900/70 dark:text-indigo-300/70 font-bold">
-                                        <ArrowRight className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                                      <li key={j} className="flex gap-2 text-[12.5px] font-bold text-brand-ink">
+                                        <ArrowRight className="mt-0.5 w-3.5 h-3.5 shrink-0 text-brand-violet" />
                                         <RichText text={g} />
                                       </li>
                                     ))}
@@ -959,9 +1241,9 @@ export default function InterviewReportPage() {
                             </div>
                             
                             {coach.modelAnswer && (
-                              <div className="pt-4 border-t border-indigo-100/50 dark:border-indigo-900/20 space-y-2">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Better Expression</label>
-                                <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-bold">
+                              <div className="space-y-2 border-t border-brand-violet/20 pt-3.5">
+                                <label className="text-[11.5px] font-bold text-brand-success">Better Expression</label>
+                                <p className="text-[12.5px] font-bold leading-relaxed text-brand-ink">
                                   <RichText text={coach.modelAnswer} />
                                 </p>
                               </div>
@@ -977,7 +1259,7 @@ export default function InterviewReportPage() {
           </div>
         </article>
 
-        <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-300">
+        <p className="text-center text-[11px] text-brand-muted">
           End of Interview Report
         </p>
       </div>

@@ -32,14 +32,14 @@ export default function ProtectedRoute({ children }) {
 
   if (state.loading) {
     return (
-      <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-b from-slate-50 to-white overflow-hidden dark:from-slate-950 dark:to-slate-950">
-        <div className="pointer-events-none absolute inset-0 bg-mesh-subtle opacity-60 dark:opacity-40" aria-hidden />
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-paper">
+        {/* bg-mesh-subtle / shadow-glow-primary 在项目里都没有定义，是失效类，一并移除 */}
         <div className="relative z-[1] flex flex-col items-center gap-5">
-          <div className="w-14 h-14 bg-gradient-to-br from-primary-600 to-violet-600 rounded-2xl flex items-center justify-center shadow-glow-primary ring-1 ring-white/20">
-            <BrainCircuit className="w-7 h-7 text-white" />
+          <div className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-ink text-brand-on-ink">
+            <BrainCircuit className="h-7 w-7" />
           </div>
-          <div className="w-9 h-9 border-[3px] border-primary-100 border-t-primary-600 dark:border-primary-900 dark:border-t-primary-400 rounded-full animate-spin" />
-          <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">{t('protected.loading')}</p>
+          <div className="h-9 w-9 animate-spin rounded-full border-[3px] border-brand-line border-t-brand-ink" />
+          <p className="text-[13px] text-brand-muted">{t('protected.loading')}</p>
         </div>
       </div>
     )
