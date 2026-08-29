@@ -8,9 +8,10 @@
     "de": "Deutsch"
   },
   "nav": {
+    "notes": "题目收藏",
     "home": "首页",
     "startInterview": "开始面试",
-    "history": "历史记录",
+    "history": "成长中心",
     "login": "登录",
     "signUpFree": "免费开始",
     "signOut": "退出登录",
@@ -82,7 +83,7 @@
     "about": "关于",
     "home": "首页",
     "startPractice": "开始练习",
-    "history": "历史记录",
+    "history": "成长中心",
     "loginRegister": "登录/注册",
     "supportLang": "支持德语 & 英语面试",
     "roles": "覆盖 Werkstudent / Praktikum",
@@ -768,6 +769,74 @@
     "achievements": "勋章墙",
     "roleAssistant": "面试官",
     "roleUser": "你的回答",
+    "growth": {
+      "eyebrow": "Offer 准备行动中心",
+      "title": "成长中心",
+      "subtitle": "每一次有效练习，都离你的 Offer 更近一步。先看清最近结果，再继续最值得完成的训练。",
+      "overview": "成长概览",
+      "loadFailed": "成长数据加载失败，请刷新页面后重试。",
+      "minutes": "{{count}} 分钟有效训练",
+      "hoursMinutes": "{{hours}} 小时 {{minutes}} 分钟有效训练",
+      "viewReport": "查看完整报告",
+      "continuePractice": "继续练习",
+      "generating": "报告生成中",
+      "checkReportStatus": "查看报告状态",
+      "unavailable": "记录已结束",
+      "viewEvidence": "查看报告依据",
+      "viewLatestReport": "查看最新报告",
+      "startBaseline": "开始首次模拟",
+      "readiness": {
+        "initial": "初始评估",
+        "established": "持续评估",
+        "insufficient": "证据不足，暂不推断",
+        "dimensions": { "technical": "技术", "experience": "经历证据", "structure": "结构表达", "communication": "沟通协作", "strategy": "策略匹配" },
+        "title": "职场胜算",
+        "description": "表示当前面试准备度，只采用面试报告中的明确证据，不代表获得 Offer 的概率。",
+        "pendingTitle": "等待可靠评估",
+        "pendingBody": "当前报告尚未提供统一的基础分数，因此这里不展示推测值。完成模拟后仍可先查看完整反馈。"
+      },
+      "practice": { "title": "练习积累", "count": "次有效练习" },
+      "rhythm": { "title": "本周节奏", "weeklyDays": "天有效训练", "streak": "连续 {{count}} 天" },
+      "task": { "eyebrow": "今天只做这一件事", "minutes": "预计 {{count}} 分钟", "start": "开始针对练习", "failed": "无法创建练习，请检查能量余额后重试。", "weekly": "本周练习节奏", "weeklyCount": "{{count}} 个任务", "weeklyBody": "每周最多保留 5 个有证据支撑的任务，避免列表越积越多。" },
+      "collections": { "eyebrow": "待复习", "title": "最近题目收藏", "viewAll": "查看全部", "toReview": "待复习", "empty": "还没有待复习卡片。可在练习中写笔记，或从报告逐题收藏。" },
+      "latest": {
+        "eyebrow": "最近结果",
+        "title": "最新复盘",
+        "emptyTitle": "完成一次模拟，建立你的准备基线",
+        "emptyBody": "报告生成后，这里会优先展示结论、优势和下一步入口。",
+        "generatingTitle": "报告正在生成",
+        "generatingBody": "分析仍在进行，稍后刷新即可查看完整复盘。",
+        "reportReadyBody": "完整报告已经就绪，可查看逐题反馈与改进建议。",
+        "unfinishedTitle": "你有一场练习尚未完成",
+        "unfinishedBody": "继续 {{position}} 练习，原题目、回答、提示、笔记、配置和计时状态都会恢复。",
+        "noReportTitle": "本场练习暂时没有可用报告",
+        "noReportBody": "可进入报告页检查生成状态；已有对话不会因此丢失。"
+      },
+      "status": {
+        "reportReady": "报告已就绪",
+        "generating": "生成中",
+        "paused": "已暂停",
+        "inProgress": "进行中",
+        "noReport": "暂无报告",
+        "closed": "已结束"
+      },
+      "history": {
+        "eyebrow": "训练与结果",
+        "title": "面试复盘记录",
+        "subtitle": "整张卡片可打开；主按钮会明确区分查看报告与继续原练习。",
+        "filterLabel": "筛选复盘记录",
+        "filters": { "all": "全部", "reports": "报告", "continue": "待继续" },
+        "emptyTitle": "还没有面试复盘记录",
+        "emptyBody": "完成或开始一场模拟后，记录会出现在这里。",
+        "noMatchTitle": "当前筛选下没有记录",
+        "noMatchBody": "切换筛选条件查看其他面试记录。",
+        "untitled": "未命名岗位",
+        "practiceMode": "练习模式",
+        "formalMode": "正式模拟",
+        "resumeHint": "从原 interviewId 恢复本场练习，不会创建新面试。",
+        "noSummary": "本场记录尚无报告摘要。"
+      }
+    },
     "insights": {
       "language": "德语词汇量尚有提升空间，建议针对性进行模拟面试以加强表达。",
       "softSkills": "您的软技能得分很高，表现出极强的沟通潜力。",
@@ -775,6 +844,166 @@
       "experience": "经历描述需要更具体的 STAR 案例，建议通过面试练习挖掘闪光点。",
       "portfolio": "作品集丰富度可进一步优化，多展示实际解决问题的过程。",
       "networking": "人脉网络建设处于起步阶段，建议多参加领英校友互动或校招活动。"
+    }
+  },
+  "notes": {
+    "title": "题目收藏库",
+    "eyebrow": "统一复盘素材",
+    "subtitle": "集中整理练习与面试报告中的原题、回答、反馈快照和私人笔记，并从任意卡片开始针对性训练。",
+    "back": "返回成长中心",
+    "cards": "张卡片",
+    "filters": "收藏筛选",
+    "search": "搜索问题、回答、反馈、笔记、职位或标签",
+    "allPositions": "全部职位",
+    "allTags": "全部标签",
+    "dateFrom": "开始日期",
+    "dateTo": "结束日期",
+    "reset": "重置筛选",
+    "loadFailed": "题目收藏加载失败，请稍后重试。",
+    "saveFailed": "收藏更新失败，请重试。",
+    "deleteFailed": "无法取消收藏，请重试。",
+    "practiceFailed": "无法创建针对性练习，请检查能量余额后重试。",
+    "emptyTitle": "暂时没有匹配的题目卡片",
+    "emptyBody": "在练习中写下笔记，或在面试报告中逐题收藏，卡片会统一出现在这里。",
+    "unknownPosition": "未命名职位",
+    "answer": "你的回答",
+    "feedback": "反馈",
+    "personalNote": "私人笔记",
+    "notePlaceholder": "记录你下一次想改进的表达或证据……",
+    "tagsPlaceholder": "标签，用英文逗号分隔",
+    "save": "保存笔记与标签",
+    "practiceAgain": "再练一次",
+    "markReviewed": "标记已复习",
+    "markToReview": "加入待复习",
+    "openOrigin": "查看原始内容",
+    "pin": "置顶或取消置顶",
+    "remove": "取消收藏",
+    "source": { "all": "全部来源", "practice": "练习", "report": "面试报告" },
+    "interviewer": { "all": "全部面试官", "mixed": "综合", "technical": "技术", "hr": "行为 / HR" },
+    "review": { "all": "全部复习状态", "to_review": "待复习", "reviewed": "已复习" }
+  },
+  "growthSprint": {
+    "eyebrow": "Offer 冲刺计划",
+    "empty": {
+      "title": "把下一次面试变成一条可执行路线",
+      "body": "设定目标职位和时间节点，系统会按你的真实报告、薄弱维度与收藏内容，每周生成 3–5 个可直接开始的任务。",
+      "create": "建立冲刺计划",
+      "steps": {
+        "position": "选择目标职位，可补充职位描述",
+        "interview": "填写下一次面试或期望拿到 Offer 的日期",
+        "rhythm": "选择每周 3、5 或 7 天的训练节奏"
+      }
+    },
+    "form": {
+      "editTitle": "调整冲刺目标",
+      "createTitle": "建立 Offer 冲刺计划",
+      "position": "目标职位",
+      "positionPlaceholder": "例如：高级前端工程师",
+      "interviewer": "重点面试官类型",
+      "nextInterview": "下一次面试日期（可选）",
+      "offerDate": "目标 Offer 日期（可选）",
+      "jd": "目标职位描述（可选）",
+      "jdPlaceholder": "粘贴职责与要求，后续任务会更贴合岗位……",
+      "weeklyTarget": "每周有效训练目标",
+      "days": "{{count}} 天",
+      "reminders": {
+        "inApp": "站内节点提醒",
+        "browser": "浏览器通知",
+        "email": "邮件提醒",
+        "weeklyReport": "周成长报告提醒"
+      },
+      "notConfigured": "服务暂未接入",
+      "save": "保存并生成本周任务",
+      "cancel": "取消",
+      "remove": "删除计划",
+      "removeConfirm": "确定删除当前 Offer 冲刺计划及其周任务和提醒吗？报告、收藏和面试历史不会受到影响。"
+    },
+    "errors": {
+      "save": "冲刺计划保存失败，请稍后重试。",
+      "delete": "冲刺计划删除失败。",
+      "task": "任务状态更新失败，请重试。",
+      "reminder": "提醒状态更新失败。"
+    },
+    "reminders": {
+      "interview_7d": { "title": "面试还有 7 天", "body": "{{position}} 已进入聚焦准备期，先完成本周最高优先级任务。" },
+      "interview_2d": { "title": "面试进入最后 48 小时", "body": "收束 {{position}} 的自我介绍、证据案例与面试清单。" },
+      "interview_day": { "title": "今天是面试日", "body": "快速检查 {{position}} 的面试清单，保持稳定节奏。" },
+      "weekly_report": { "title": "本周成长报告已就绪", "body": "查看有效训练、完成任务和有证据的能力变化。" },
+      "dismiss": "知道了"
+    },
+    "recovery": {
+      "continue": { "title": "今天做一个短任务，就能延续节奏", "body": "本周目标还差 {{count}} 天，不必补课，从“今天先做”重新接上即可。" },
+      "restart": { "title": "中断不等于清零", "body": "本周目标还差 {{count}} 天，完成一个短任务即可温和重启。" }
+    },
+    "stage": {
+      "foundation": "能力覆盖阶段：优先补齐岗位所需能力与证据",
+      "focused": "聚焦准备阶段：围绕薄弱维度安排练习与正式模拟",
+      "imminent": "临近面试阶段：优先正式模拟、复盘和面试清单",
+      "final48": "最后 48 小时：收束表达，避免无效堆量",
+      "interview_day": "面试当天：只做轻量检查与状态准备",
+      "renew": "原时间节点已结束，请更新下一目标"
+    },
+    "countdown": {
+      "interview": "距离面试",
+      "offer": "距离目标 Offer",
+      "days": "{{count}} 天",
+      "update": "待更新"
+    },
+    "progress": {
+      "title": "本周任务进度",
+      "days": "本周已有效训练 {{current}} 天，目标 {{target}} 天"
+    },
+    "tasks": {
+      "eyebrow": "自适应周任务",
+      "title": "本周最重要的 3–5 件事",
+      "limit": "只保留能产生结果的任务",
+      "today": "今天先做",
+      "checklistReview": "面试前优先复习",
+      "minutes": "约 {{count}} 分钟",
+      "start": "直接开始",
+      "completeChecklist": "已检查并完成",
+      "complete": "标记完成",
+      "skip": "跳过本任务",
+      "types": {
+        "baseline": { "title": "完成一次正式基线面试", "reason": "先建立可追踪的能力基线，后续建议才有证据。", "unlock": "解锁首份正式能力基线" },
+        "focus_question": { "title": "攻克下一道关键题", "reason": "针对当前最需要提升的 {{dimension}} 做一次聚焦练习。", "unlock": "为下一次能力比较补充证据" },
+        "formal_mock": { "title": "完成目标岗位正式模拟", "reason": "按 {{position}} 的真实面试节奏验证准备状态。", "unlock": "生成可比较的正式报告" },
+        "review_collection": { "title": "重练一张待复习题卡", "reason": "把已发现的问题转化成一次新的回答。", "unlock": "让收藏从记录变成改进" },
+        "pre_interview_checklist": { "title": "完成面试前检查清单", "reason": "确认时间、设备、材料、核心案例与反问问题。", "unlock": "降低临场遗漏风险" },
+        "self_intro": { "title": "打磨目标岗位自我介绍", "reason": "用岗位相关证据收束开场表达。", "unlock": "建立稳定的面试开场" },
+        "weekly_review": { "title": "完成本周轻复盘", "reason": "查看收藏与报告，选择下一条最值得改进的证据。", "unlock": "让下周任务保持聚焦" }
+      }
+    },
+    "weekly": {
+      "eyebrow": "站内成长周报",
+      "title": "本周发生了什么",
+      "days": "有效天数",
+      "minutes": "有效分钟",
+      "completed": "完成任务",
+      "stable": "保持稳定",
+      "noTrend": "已有训练记录，但当前报告证据不足以判断能力变化，因此不展示推断趋势。",
+      "return": "完成一个本周任务后，这里会汇总真实训练记录。"
+    },
+    "milestones": {
+      "eyebrow": "成长里程碑",
+      "title": "被证据验证的进展",
+      "empty": "完成首份正式报告、连续 5 天有效训练，或单项能力提升 15 分后，会在这里留下里程碑。",
+      "types": {
+        "first_formal_report": "完成首份正式面试报告",
+        "streak_5": "连续 5 天有效训练",
+        "readiness_gain_15": "单项准备度提升至少 15 分"
+      }
+    },
+    "premium": {
+      "eyebrow": "高级准备能力预览",
+      "title": "当基础闭环产生价值后，再按需深入",
+      "body": "这些能力仍在规划中；当前页面不会虚构套餐、价格或购买入口。",
+      "features": {
+        "drills": { "title": "高频专项训练包", "body": "按能力主题组织更长周期的刻意练习。" },
+        "jdPlan": { "title": "岗位定制冲刺方案", "body": "基于完整 JD 与证据差距生成更细的准备路线。" },
+        "deepReport": { "title": "深度对比报告", "body": "跨更多正式面试分析稳定趋势和高价值证据。" }
+      },
+      "ownership": "无论未来是否启用高级能力，已有报告、历史记录、收藏和基础训练闭环始终归你访问。"
     }
   },
   "interview": {
@@ -830,6 +1059,17 @@
     "modalSub": "确定要结束本次模拟面试吗？",
     "continue": "继续",
     "confirmEnd": "结束",
+    "endNotice": {
+      "generatingTitle": "报告正在生成",
+      "generatingBody": "本次面试已结束。你可以先离开，报告完成后会出现在成长中心。",
+      "readyTitle": "报告已进入成长中心",
+      "readyBody": "报告已经生成，可前往成长中心查看证据、能力维度和下一步练习。",
+      "failedTitle": "报告生成遇到问题",
+      "failedBody": "面试文本已经保留，你可以重试生成，或稍后到成长中心查看状态。",
+      "openGrowth": "前往成长中心",
+      "stay": "暂时留在这里",
+      "retry": "重试生成"
+    },
     "minShort": "{{n}} 分钟",
     "digitalHuman": "数字面试官",
     "digitalZoomTitle": "面试官",
@@ -892,6 +1132,30 @@
     }
   },
   "report": {
+    "collection": {
+      "save": "收藏本题",
+      "saved": "已收藏",
+      "failed": "无法更新题目收藏，请稍后重试。",
+      "practiceFailed": "无法从推荐题创建练习，请检查能量余额后重试。"
+    },
+    "readiness": {
+      "title": "五维面试准备度",
+      "evidenceTitle": "每个判断都来自本场证据",
+      "description": "分数只表达当前报告中的可验证表现，不代表拿到 Offer 的概率。展开维度可查看证据和动作。",
+      "initial": "初始评估",
+      "partial": "证据仍不完整",
+      "insufficientEvidence": "本场报告没有足够证据，暂不生成趋势或推断。",
+      "nextTask": "下一道最值得练的题",
+      "minutes": "预计 {{count}} 分钟",
+      "startTask": "开始针对练习",
+      "dimensions": {
+        "technical": "技术能力",
+        "experience": "经历与证据深度",
+        "structure": "结构化表达",
+        "communication": "沟通与协作",
+        "strategy": "面试策略与岗位匹配"
+      }
+    },
     "title": "面试报告",
     "docLabel": "评估摘要",
     "subtitle": "由最新AI大模型技术分析得出",
@@ -902,7 +1166,7 @@
     "generatingSub": "正在根据对话记录调用 AI 分析，通常需要几秒到一分钟，请稍候…",
     "loading": "加载中…",
     "loadError": "无法加载该记录",
-    "backDashboard": "返回面试记录",
+    "backDashboard": "返回成长中心",
     "noReport": "当前没有已保存的报告正文。常见原因：结束时生成失败（例如数据库缺列），或本条记录从未成功执行「结束面试」的生成步骤。",
     "retryHint": "若数据库与 GEMINI 已配置好，且本条已保存对话记录，可点击下方重试生成。",
     "retryGenerate": "重新生成报告",

@@ -7,7 +7,7 @@ import { AppThemeToggle } from './ThemeToggle'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import { authenticatedFetch } from '../lib/authenticatedFetch'
-import { Menu, X, BrainCircuit, ChevronDown, LogOut, LayoutDashboard, UserCircle, Briefcase, BookOpen, FilePenLine } from 'lucide-react'
+import { Menu, X, BrainCircuit, ChevronDown, LogOut, LayoutDashboard, UserCircle, Briefcase, BookOpen, FilePenLine, StickyNote } from 'lucide-react'
 
 export default function Navbar() {
   const { t } = useTranslation()
@@ -282,6 +282,14 @@ export default function Navbar() {
                       {t('nav.history')}
                     </Link>
                     <Link
+                      to="/notes"
+                      className="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <StickyNote className="w-4 h-4" />
+                      {t('nav.notes')}
+                    </Link>
+                    <Link
                       to="/resume-tailor"
                       className="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
                       onClick={() => setDropdownOpen(false)}
@@ -365,6 +373,7 @@ export default function Navbar() {
             <>
               <Link to="/setup" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.startInterview')}</Link>
               <Link to="/dashboard" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.history')}</Link>
+              <Link to="/notes" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.notes')}</Link>
               <Link to="/resume-tailor" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.resumeTailor')}</Link>
               <Link to="/profile" className="block text-2xl font-black text-slate-900 dark:text-white tracking-tighter" onClick={() => setMobileOpen(false)}>{t('nav.profile')}</Link>
               <button onClick={handleSignOut} className="w-full text-left text-2xl font-black text-red-600 py-4 tracking-tighter">{t('nav.signOut')}</button>

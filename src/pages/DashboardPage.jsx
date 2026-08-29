@@ -1,652 +1,408 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
+import {
+  AlertTriangle, ArrowRight, BarChart3, BriefcaseBusiness, CalendarDays,
+  CheckCircle2, Clock3, FileClock, FileText, Flame, Loader2, PauseCircle,
+  PlayCircle, PlusCircle, Sparkles, Target, Trash2, BookmarkCheck,
+} from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import { authenticatedFetch } from '../lib/authenticatedFetch'
-import {
-  PlusCircle, Clock, Globe2, Briefcase,
-  TrendingUp, Target, Zap, ArrowRight, FileText, UserCircle,
-  Trash2, Loader2, AlertTriangle, Sparkles, LayoutDashboard, History,
-  Lock, CheckCircle2, Flame,
-} from 'lucide-react'
-import GamificationDashboard from '../components/GamificationDashboard'
+import { createInterviewRequestId } from '../lib/interviewEvents'
+import OfferSprintPanel from '../components/OfferSprintPanel'
 
-function useLocaleTag(i18nLang) {
-  return useMemo(() => {
-    if (i18nLang === 'de') return 'de-DE'
-    if (i18nLang === 'en') return 'en-US'
-    return 'zh-CN'
-  }, [i18nLang])
+const RESUMABLE_STATUSES = new Set(['draft', 'active', 'paused'])
+
+function isResumable(interview) {
+  return interview?.mode === 'practice' && RESUMABLE_STATUSES.has(interview?.status)
 }
 
-function langPillClass(lang) {
-  if (lang === 'Deutsch') {
-    return 'border-violet-200/90 bg-violet-100 text-violet-800 dark:border-violet-700 dark:bg-violet-950/50 dark:text-violet-200 shadow-sm shadow-violet-500/10'
+function parseReport(raw) {
+  if (!raw) return null
+  if (typeof raw === 'object') return raw
+  try { return JSON.parse(raw) } catch { return null }
+}
+
+function hasReport(interview) {
+  const report = parseReport(interview?.report_json)
+  const hasStructuredContent = Boolean(
+    report && [report.summary, report.strengths, report.toImprove, report.qaReview]
+      .some(value => Array.isArray(value) && value.length > 0),
+  )
+  return hasStructuredContent || Boolean(String(interview?.report_markdown || '').trim())
+}
+
+function reportSummary(interview) {
+  const report = parseReport(interview?.report_json)
+  const summary = Array.isArray(report?.summary)
+    ? report.summary.find(item => String(item || '').trim())
+    : null
+  if (summary) return String(summary).trim()
+  return String(interview?.report_markdown || '').split('\n')
+    .map(line => line.replace(/^#+\s*/, '').replace(/[*_`]/g, '').trim())
+    .find(Boolean) || ''
+}
+
+function reportStrength(interview) {
+  const report = parseReport(interview?.report_json)
+  return Array.isArray(report?.strengths)
+    ? String(report.strengths.find(item => String(item || '').trim()) || '').trim()
+    : ''
+}
+
+function explicitReportScore(interview) {
+  const report = parseReport(interview?.report_json)
+  const value = Number(report?.overallScore ?? report?.overall_score)
+  return Number.isFinite(value) && value >= 0 && value <= 100 ? Math.round(value) : null
+}
+
+function isGenerating(interview) {
+  if (hasReport(interview)) return false
+  return interview?.status === 'finalizing' || interview?.finalize_status === 'processing'
+}
+
+function effectiveSeconds(interview) {
+  const value = Number(interview?.accumulated_seconds)
+  return Number.isFinite(value) && value > 0 ? value : 0
+}
+
+function sessionDate(interview) {
+  return interview?.completed_at || interview?.updated_at || interview?.created_at || null
+}
+
+function localDayKey(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
+function startOfWeek() {
+  const result = new Date()
+  result.setHours(0, 0, 0, 0)
+  result.setDate(result.getDate() - (result.getDay() || 7) + 1)
+  return result
+}
+
+function calculateStreak(dayKeys) {
+  const unique = new Set(dayKeys.filter(Boolean))
+  if (!unique.size) return 0
+  const cursor = new Date()
+  cursor.setHours(0, 0, 0, 0)
+  if (!unique.has(localDayKey(cursor))) cursor.setDate(cursor.getDate() - 1)
+  let streak = 0
+  while (unique.has(localDayKey(cursor))) {
+    streak += 1
+    cursor.setDate(cursor.getDate() - 1)
   }
-  return 'border-indigo-200/90 bg-indigo-100 text-indigo-900 dark:border-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-200 shadow-sm shadow-indigo-500/10'
+  return streak
+}
+
+function formatEffectiveDuration(seconds, t) {
+  const totalMinutes = Math.floor(seconds / 60)
+  if (totalMinutes < 60) return t('dashboard.growth.minutes', { count: totalMinutes })
+  return t('dashboard.growth.hoursMinutes', {
+    hours: Math.floor(totalMinutes / 60),
+    minutes: totalMinutes % 60,
+  })
+}
+
+function getAction(interview, t) {
+  if (hasReport(interview)) return { label: t('dashboard.growth.viewReport'), route: `/interview/${interview.id}/report`, icon: FileText, tone: 'primary' }
+  if (isResumable(interview)) return { label: t('dashboard.growth.continuePractice'), route: `/interview/${interview.id}`, icon: PlayCircle, tone: 'dark' }
+  if (isGenerating(interview)) return { label: t('dashboard.growth.generating'), route: null, icon: Loader2, tone: 'muted' }
+  if (interview?.status === 'completed') return { label: t('dashboard.growth.checkReportStatus'), route: `/interview/${interview.id}/report`, icon: FileClock, tone: 'muted' }
+  return { label: t('dashboard.growth.unavailable'), route: null, icon: PauseCircle, tone: 'muted' }
+}
+
+function statusLabel(interview, t) {
+  if (hasReport(interview)) return t('dashboard.growth.status.reportReady')
+  if (isGenerating(interview)) return t('dashboard.growth.status.generating')
+  if (interview?.status === 'paused') return t('dashboard.growth.status.paused')
+  if (isResumable(interview)) return t('dashboard.growth.status.inProgress')
+  if (interview?.status === 'completed') return t('dashboard.growth.status.noReport')
+  return t('dashboard.growth.status.closed')
 }
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [interviews, setInterviews] = useState([])
+  const [growthOverview, setGrowthOverview] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [gameStats, setGameStats] = useState(null)
-  const [checkingIn, setCheckingIn] = useState(false)
-  const [deletingId, setDeletingId] = useState(null)
+  const [loadError, setLoadError] = useState(false)
+  const [filter, setFilter] = useState('all')
   const [pendingDelete, setPendingDelete] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
   const [deleteModalError, setDeleteModalError] = useState(null)
-  const localeTag = useLocaleTag(i18n.language)
+  const [taskBusy, setTaskBusy] = useState(false)
+  const [taskError, setTaskError] = useState(false)
+  const formalFinalizeRequestedRef = useRef(new Set())
+  const localeTag = i18n.language === 'de' ? 'de-DE' : i18n.language === 'en' ? 'en-US' : 'zh-CN'
 
   const closeDeleteModal = useCallback(() => {
     setPendingDelete(null)
     setDeleteModalError(null)
   }, [])
 
-  useEffect(() => {
-    if (!pendingDelete) return
-    const onKey = (e) => {
-      if (e.key === 'Escape') closeDeleteModal()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [pendingDelete, closeDeleteModal])
+  useEffect(() => { document.title = `${t('dashboard.growth.title')} · ${t('meta.title')}` }, [t])
 
   useEffect(() => {
-    if (!pendingDelete) return
+    if (!pendingDelete) return undefined
+    const onKeyDown = event => { if (event.key === 'Escape') closeDeleteModal() }
     document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKeyDown)
     return () => {
       document.body.style.overflow = ''
+      window.removeEventListener('keydown', onKeyDown)
     }
-  }, [pendingDelete])
+  }, [closeDeleteModal, pendingDelete])
 
   useEffect(() => {
-    document.title = t('meta.title')
-  }, [t])
-
-  useEffect(() => {
+    let cancelled = false
     async function fetchInterviews() {
       if (!user) return
+      setLoading(true)
+      setLoadError(false)
       try {
-        const backendUrl = getBackendBaseUrl()
         const { data: { session } } = await supabase.auth.getSession()
-        if (!session?.access_token) {
-          setLoading(false)
-          return
+        if (!session?.access_token) throw new Error('missing auth session')
+        const [response, overviewResponse] = await Promise.all([
+          authenticatedFetch(`${getBackendBaseUrl()}/api/interviews`, {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          }),
+          authenticatedFetch(`${getBackendBaseUrl()}/api/growth-center/overview`, {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          }).catch(() => null),
+        ])
+        if (!response.ok) throw new Error('failed to load interviews')
+        const data = await response.json()
+        if (overviewResponse?.ok && !cancelled) {
+          const overviewData = await overviewResponse.json()
+          setGrowthOverview(overviewData)
         }
-        const res = await authenticatedFetch(`${backendUrl}/api/interviews`, {
-          headers: { Authorization: `Bearer ${session.access_token}` },
+        const loadedInterviews = data.interviews || []
+        if (!cancelled) setInterviews(loadedInterviews)
+        loadedInterviews.forEach((interview) => {
+          if (
+            interview.mode !== 'formal'
+            || hasReport(interview)
+            || isGenerating(interview)
+            || !RESUMABLE_STATUSES.has(interview.status)
+            || formalFinalizeRequestedRef.current.has(interview.id)
+          ) return
+          formalFinalizeRequestedRef.current.add(interview.id)
+          setInterviews(current => current.map(item => item.id === interview.id
+            ? { ...item, status: 'finalizing', finalize_status: 'processing' }
+            : item))
+          void authenticatedFetch(`${getBackendBaseUrl()}/api/interviews/${interview.id}/finalize`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Request-Id': createInterviewRequestId(),
+            },
+            body: JSON.stringify({ messages: [], reportUiLanguage: i18n.language }),
+          }).then(async (finalizeResponse) => {
+            if (!finalizeResponse.ok || cancelled) return
+            const finalizeBody = await finalizeResponse.json().catch(() => ({}))
+            if (finalizeBody.interview) {
+              setInterviews(current => current.map(item => item.id === interview.id ? finalizeBody.interview : item))
+            }
+          }).catch(() => {})
         })
-        if (res.ok) {
-          const data = await res.json()
-          setInterviews(data.interviews || [])
-        }
       } catch {
-        // Backend may not be running
+        if (!cancelled) setLoadError(true)
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
-    fetchInterviews()
-  }, [user])
+    void fetchInterviews()
+    return () => { cancelled = true }
+  }, [i18n.language, user])
 
-  useEffect(() => {
-    async function fetchGameStats() {
-      if (!user) return
-      try {
-        const backendUrl = getBackendBaseUrl()
-        const { data: { session } } = await supabase.auth.getSession()
-        if (!session?.access_token) return
-        const res = await authenticatedFetch(`${backendUrl}/api/profile/game-stats`, {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        })
-        if (res.ok) {
-          const data = await res.json()
-          setGameStats(data)
-        }
-      } catch (err) {
-        console.error('Failed to fetch game stats', err)
-      }
-    }
-    fetchGameStats()
-  }, [user])
-
-  const [checkInReward, setCheckInReward] = useState(false)
-
-  const handleCheckIn = async () => {
-    if (checkingIn || !user) return
-    setCheckingIn(true)
-    try {
-      const backendUrl = getBackendBaseUrl()
-      const { data: { session } } = await supabase.auth.getSession()
-      const res = await authenticatedFetch(`${backendUrl}/api/profile/check-in`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` },
+  const metrics = useMemo(() => {
+    const effectiveInterviews = interviews.filter(interview => interview.status === 'completed' || effectiveSeconds(interview) >= 480)
+    const totalSeconds = interviews.reduce((sum, interview) => sum + effectiveSeconds(interview), 0)
+    const completedDayKeys = effectiveInterviews.map(interview => localDayKey(sessionDate(interview))).filter(Boolean)
+    const weekStart = startOfWeek()
+    const weeklyDays = new Set(effectiveInterviews
+      .filter(interview => {
+        const date = new Date(sessionDate(interview))
+        return !Number.isNaN(date.getTime()) && date >= weekStart
       })
-      if (res.ok) {
-        const data = await res.json()
-        setGameStats(prev => ({ ...prev, streak: data.streak, alreadyCheckedIn: true }))
-        if (data.tokensAwarded > 0) {
-          setCheckInReward(true)
-          window.dispatchEvent(new Event('tokensChanged'))
-          setTimeout(() => setCheckInReward(false), 3000)
-        }
-        return true
-      }
-      return false
-    } catch (err) {
-      console.error('Check-in failed', err)
-      return false
-    } finally {
-      setCheckingIn(false)
+      .map(interview => localDayKey(sessionDate(interview)))).size
+    return {
+      effectiveCount: effectiveInterviews.length,
+      totalSeconds,
+      weeklyDays: growthOverview?.rhythm?.weeklyDays ?? weeklyDays,
+      streak: growthOverview?.rhythm?.streak ?? calculateStreak(completedDayKeys),
     }
-  }
+  }, [growthOverview, interviews])
 
-  const requestDeleteInterview = (id, position) => {
-    setDeleteModalError(null)
-    setPendingDelete({ id, position: position || '' })
-  }
+  const latestReviewCandidate = useMemo(() => (
+    interviews.find(interview => isGenerating(interview))
+      || interviews.find(interview => hasReport(interview))
+      || interviews.find(interview => interview.status === 'completed')
+      || interviews[0]
+      || null
+  ), [interviews])
+  const latestReport = useMemo(() => interviews.find(interview => hasReport(interview)) || null, [interviews])
+  const readiness = growthOverview?.readiness || null
+  const readinessScore = readiness?.overallScore ?? (latestReport ? explicitReportScore(latestReport) : null)
+  const filteredInterviews = useMemo(() => interviews.filter(interview => {
+    if (filter === 'reports') return hasReport(interview) || isGenerating(interview) || interview.status === 'completed'
+    if (filter === 'continue') return isResumable(interview)
+    return true
+  }), [filter, interviews])
 
   const confirmDeleteInterview = async () => {
     if (!pendingDelete) return
-    const { id } = pendingDelete
+    setDeletingId(pendingDelete.id)
     setDeleteModalError(null)
-    setDeletingId(id)
     try {
-      const backendUrl = getBackendBaseUrl()
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) {
-        setDeleteModalError(t('dashboard.deleteFailed'))
-        return
-      }
-      const res = await authenticatedFetch(`${backendUrl}/api/interviews/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${session.access_token}` },
+      if (!session?.access_token) throw new Error('missing auth session')
+      const response = await authenticatedFetch(`${getBackendBaseUrl()}/api/interviews/${pendingDelete.id}`, {
+        method: 'DELETE', headers: { Authorization: `Bearer ${session.access_token}` },
       })
-      if (!res.ok) {
-        setDeleteModalError(t('dashboard.deleteFailed'))
-        return
-      }
-      setInterviews((prev) => prev.filter((x) => x.id !== id))
+      if (!response.ok) throw new Error('delete failed')
+      setInterviews(current => current.filter(interview => interview.id !== pendingDelete.id))
       closeDeleteModal()
     } catch {
       setDeleteModalError(t('dashboard.deleteFailed'))
-    } finally {
-      setDeletingId(null)
-    }
+    } finally { setDeletingId(null) }
   }
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return ''
-    const d = new Date(dateStr)
-    return d.toLocaleDateString(localeTag, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
+  const openInterview = interview => {
+    const action = getAction(interview, t)
+    if (action.route) navigate(action.route)
   }
 
-  const totalTime = interviews.reduce((sum, iv) => sum + (iv.duration || 0), 0)
-  const langCounts = interviews.reduce((acc, iv) => {
-    acc[iv.language] = (acc[iv.language] || 0) + 1
-    return acc
-  }, {})
-
-  const firstName = user?.user_metadata?.full_name?.split(' ')[0]
-
-  const statCards = [
-    { icon: Target, value: interviews.length, label: t('dashboard.statTotal'), color: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/20' },
-    { icon: Clock, value: `${totalTime}${t('dashboard.minUnit')}`, label: t('dashboard.statTime'), color: 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/20' },
-    { icon: Globe2, value: langCounts.Deutsch || 0, label: t('dashboard.statDe'), color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20' },
-    { icon: TrendingUp, value: langCounts.English || 0, label: t('dashboard.statEn'), color: 'text-fuchsia-600 dark:text-fuchsia-400 bg-fuchsia-50 dark:bg-fuchsia-950/20' },
-  ]
+  const startRecommendedTask = async (taskOverride = null) => {
+    const task = taskOverride || readiness?.nextPracticeTask
+    const existingCollectionId = task?.collection_id || task?.collectionId || null
+    const sourceInterviewId = task?.source_interview_id || task?.interviewId || readiness?.latestInterviewId
+    const rawQuestionIndex = task?.question_index ?? task?.questionIndex
+    const questionIndex = rawQuestionIndex === null || rawQuestionIndex === undefined ? NaN : Number(rawQuestionIndex)
+    if (!existingCollectionId && (!sourceInterviewId || !Number.isInteger(questionIndex) || questionIndex < 0)) return
+    setTaskBusy(true)
+    setTaskError(false)
+    try {
+      let collectionId = existingCollectionId
+      if (!collectionId) {
+        const collectResponse = await authenticatedFetch(`${getBackendBaseUrl()}/api/growth-center/collections`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ interviewId: sourceInterviewId, questionIndex, source: 'report' }),
+        })
+        const collectBody = await collectResponse.json().catch(() => ({}))
+        if (!collectResponse.ok || !collectBody.collection) throw new Error('collect failed')
+        collectionId = collectBody.collection.id
+      }
+      const practiceResponse = await authenticatedFetch(`${getBackendBaseUrl()}/api/growth-center/collections/${collectionId}/practice`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Request-Id': createInterviewRequestId() },
+        body: JSON.stringify({ idempotencyKey: createInterviewRequestId() }),
+      })
+      const practiceBody = await practiceResponse.json().catch(() => ({}))
+      if (!practiceResponse.ok || !practiceBody.interviewId) throw new Error('practice failed')
+      navigate(`/interview/${practiceBody.interviewId}`)
+    } catch {
+      setTaskError(true)
+    } finally { setTaskBusy(false) }
+  }
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header Section */}
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="space-y-4"
-          >
-            <div className="section-badge">{t('dashboard.heroBadge')}</div>
-            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white font-serif tracking-tight">
-              {t('dashboard.hello')}{firstName || t('dashboard.guest')}
-            </h1>
-            <p className="text-lg text-slate-500 dark:text-slate-400 max-w-xl">
-              {t('dashboard.sub')}
-            </p>
+    <div className="min-h-screen bg-[#f7f6f2] pb-24 pt-28 dark:bg-slate-950">
+      <main className="mx-auto max-w-7xl space-y-10 px-4 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl space-y-4">
+            <div className="section-badge">{t('dashboard.growth.eyebrow')}</div>
+            <div className="space-y-3">
+              <h1 className="font-serif text-4xl font-black tracking-tight text-slate-950 dark:text-white sm:text-5xl">{t('dashboard.growth.title')}</h1>
+              <p className="max-w-2xl text-lg leading-relaxed text-slate-600 dark:text-slate-300">{t('dashboard.growth.subtitle')}</p>
+            </div>
           </motion.div>
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex flex-row flex-nowrap items-center gap-3 shrink-0"
-          >
-            <Link to="/profile" className="btn-setup-action-pill px-6 py-3 text-xs whitespace-nowrap">
-              <UserCircle className="w-4 h-4" />
-              <span className="shrink-0">{t('profile.title')}</span>
-            </Link>
-            <Link to="/setup" className="btn-setup-action-pill px-6 py-3 text-xs whitespace-nowrap">
-              <PlusCircle className="w-4 h-4" />
-              <span className="shrink-0">{t('dashboard.newInterview')}</span>
-            </Link>
-          </motion.div>
+          <Link to="/setup" className="btn-primary inline-flex w-full items-center justify-center gap-2 px-7 py-4 sm:w-auto"><PlusCircle className="h-5 w-5" />{t('dashboard.newInterview')}</Link>
         </header>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {statCards.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.1 }}
-              className="card-premium p-8"
-            >
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 ${stat.color}`}>
-                <stat.icon className="w-6 h-6" />
+        <section aria-label={t('dashboard.growth.overview')} className="grid gap-5 lg:grid-cols-12">
+          <motion.article initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-[2rem] bg-slate-950 p-7 text-white shadow-2xl shadow-slate-900/15 lg:col-span-6 sm:p-9">
+            <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary-500/25 blur-3xl" />
+            <div className="relative flex min-h-[230px] flex-col justify-between gap-8">
+              <div className="flex items-start justify-between gap-5">
+                <div className="space-y-2"><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-primary-300"><Target className="h-4 w-4" />{t('dashboard.growth.readiness.title')}</div><p className="max-w-md text-sm leading-relaxed text-slate-300">{t('dashboard.growth.readiness.description')}</p></div>
+                <BriefcaseBusiness className="h-8 w-8 text-white/30" />
               </div>
-              <div className="text-3xl font-black text-slate-900 dark:text-white mb-1 tracking-tighter">{stat.value}</div>
-              <div className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{stat.label}</div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Bento Grid layout matching the new premium design */}
-        <div className="grid lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Left Column: Success Radar card with Achievements & AI Insights below */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="lg:col-span-12 xl:col-span-7"
-          >
-            <div className="card-premium p-10 h-full flex flex-col gap-10 min-h-[600px] overflow-hidden relative">
-              {/* Background Accent orbs */}
-              <div className="absolute top-0 right-0 w-80 h-80 bg-primary-500/5 blur-[120px] translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-              
-              {/* Header */}
-              <div className="flex items-center justify-between relative z-10">
-                <div className="space-y-1">
-                  <div className="text-[10px] font-black text-primary-500 uppercase tracking-widest">{t('dashboard.heroBadge')}</div>
-                  <h2 className="text-3xl font-black text-slate-900 dark:text-white font-serif tracking-tight">{t('profile.game.radarTitle')}</h2>
-                </div>
-                <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
-                  <TrendingUp className="w-6 h-6 text-primary-500" />
-                </div>
-              </div>
-
-              {/* Radar Chart Panel - Centered at the top half */}
-              <div className="flex-1 flex items-center justify-center relative min-h-[350px] py-4">
-                <GamificationDashboard 
-                  stats={gameStats} 
-                  onCheckIn={handleCheckIn} 
-                  interviews={interviews} 
-                  viewMode="radarOnly" 
-                />
-              </div>
-
-              {/* Bottom Section: Achievements & Insights Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-slate-100 dark:border-slate-800 relative z-10">
-                
-                {/* AI Insight Highlight */}
-                <div className="p-6 rounded-[2rem] bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 space-y-4">
-                  <div className="flex items-center gap-2 text-primary-600 dark:text-primary-400 text-[10px] font-black uppercase tracking-widest">
-                    <Sparkles className="w-4 h-4" />
-                    {t('dashboard.aiInsight')}
-                  </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-bold">
-                    {(() => {
-                      const radar = gameStats?.radar || { language: 1, softSkills: 8, resume: 5 }
-                      const minKey = Object.entries(radar).reduce((p, c) => (c[1] < p[1] ? c : p))[0]
-                      return t(`dashboard.insights.${minKey}`, "您的面试表现稳步提升，建议针对性挑战中高级模拟面试。")
-                    })()}
-                  </p>
-                </div>
-
-                {/* Achievements & Score Side-by-Side */}
-                <div className="flex flex-col justify-between gap-6">
-                  <div className="space-y-4">
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t('dashboard.achievements')}</h4>
-                    <div className="flex gap-4">
-                      {[
-                        { id: 'pioneer', icon: Target, label: '面试先锋', active: interviews.length > 0 },
-                        { id: 'linguist', icon: Globe2, label: '德语达人', active: (gameStats?.radar?.language || 0) > 7 },
-                        { id: 'allrounder', icon: Zap, label: '全能王', active: (gameStats?.level || 1) > 4 },
-                        { id: 'streak', icon: Flame, label: '勤奋蜂', active: (gameStats?.streak || 0) > 2 },
-                      ].map(badge => (
-                        <div key={badge.id} className="relative group">
-                          <div className={`
-                            w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 border
-                            ${badge.active ? 'bg-white dark:bg-slate-800 border-primary-500 shadow-lg shadow-primary-500/20 text-primary-500' : 'bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-300 dark:text-slate-700 opacity-50'}
-                          `}>
-                            <badge.icon className="w-6 h-6" />
-                          </div>
-                          {/* Tooltip on hover */}
-                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-slate-900 dark:bg-slate-800 text-white text-[10px] font-black rounded-lg opacity-0 group-hover:opacity-100 group-hover:-top-12 transition-all duration-300 pointer-events-none z-20 whitespace-nowrap shadow-xl">
-                            {badge.label}
-                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 dark:bg-slate-800 rotate-45" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-end gap-3 pb-1">
-                      <div className="shrink-0 flex items-end gap-1">
-                        <span className="text-5xl font-black text-slate-900 dark:text-white leading-none">
-                          {Math.round(Object.values(gameStats?.radar || { r: 6 }).reduce((a, b) => a + b, 0) / 6 * 10) || 45}
-                        </span>
-                        <span className="text-sm font-bold text-slate-400 mb-1">/ 100 PTS</span>
-                      </div>
-                      <div className="h-2 flex-1 bg-slate-100 dark:bg-slate-800 rounded-full mb-1.5 overflow-hidden">
-                        <div 
-                          className="h-full bg-primary-500 rounded-full transition-all duration-1000" 
-                          style={{ width: `${Math.round(Object.values(gameStats?.radar || { r: 6 }).reduce((a, b) => a + b, 0) / 6 * 10) || 45}%` }}
-                        />
-                      </div>
-                  </div>
-                </div>
-
-              </div>
+              {readinessScore !== null ? (
+                <div className="space-y-5"><div className="flex flex-wrap items-end justify-between gap-5"><div><span className="text-6xl font-black tabular-nums">{readinessScore}</span><span className="ml-2 text-sm font-bold text-slate-400">/ 100</span><p className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-500">{t(`dashboard.growth.readiness.${readiness?.assessment || 'initial'}`)}</p></div><Link to={`/interview/${readiness?.latestInterviewId || latestReport.id}/report`} className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-primary-50">{t('dashboard.growth.viewEvidence')} <ArrowRight className="h-4 w-4" /></Link></div>{readiness?.dimensions?.length > 0 && <div className="grid gap-2 sm:grid-cols-5">{readiness.dimensions.map(dimension => <details key={dimension.key} className="rounded-xl bg-white/[0.07] p-3"><summary className="cursor-pointer list-none"><div className="flex justify-between gap-2 text-[10px] font-black"><span>{t(`dashboard.growth.readiness.dimensions.${dimension.key}`)}</span><span className="text-primary-300">{dimension.score ?? '—'}</span></div><div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-primary-400" style={{ width: `${dimension.score ?? 0}%` }} /></div></summary><p className="mt-3 text-[10px] leading-relaxed text-slate-300">{dimension.evidence?.excerpt || t('dashboard.growth.readiness.insufficient')}</p>{dimension.trend !== null && dimension.trend !== undefined && <p className="mt-2 text-[10px] font-black text-primary-300">{dimension.trend > 0 ? '+' : ''}{dimension.trend}</p>}</details>)}</div>}</div>
+              ) : (
+                <div className="flex flex-wrap items-end justify-between gap-5"><div className="space-y-2"><p className="text-2xl font-black">{t('dashboard.growth.readiness.pendingTitle')}</p><p className="max-w-md text-sm text-slate-400">{t('dashboard.growth.readiness.pendingBody')}</p></div><Link to={latestReport ? `/interview/${latestReport.id}/report` : '/setup'} className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-primary-50">{latestReport ? t('dashboard.growth.viewLatestReport') : t('dashboard.growth.startBaseline')}<ArrowRight className="h-4 w-4" /></Link></div>
+              )}
             </div>
-          </motion.div>
+          </motion.article>
 
-          {/* Right Column: History & Milestones */}
-          <div className="lg:col-span-12 xl:col-span-5 space-y-8">
+          <motion.article initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card-premium p-7 lg:col-span-3 sm:p-8">
+            <div className="flex h-full min-h-[230px] flex-col justify-between gap-7"><div className="flex items-center justify-between"><div className="rounded-2xl bg-indigo-50 p-3 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-300"><BarChart3 className="h-6 w-6" /></div><span className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">{t('dashboard.growth.practice.title')}</span></div><div className="space-y-5"><div><div className="text-4xl font-black tracking-tight text-slate-950 dark:text-white">{metrics.effectiveCount}</div><div className="mt-1 text-sm font-bold text-slate-500">{t('dashboard.growth.practice.count')}</div></div><div className="flex items-center gap-2 border-t border-slate-100 pt-4 text-sm font-bold text-slate-700 dark:border-slate-800 dark:text-slate-200"><Clock3 className="h-4 w-4 text-indigo-500" />{formatEffectiveDuration(metrics.totalSeconds, t)}</div></div></div>
+          </motion.article>
 
-            {/* Daily Check-in Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              className="card-premium p-8 relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/8 blur-[80px] pointer-events-none" />
-              <div className="relative z-10 flex items-center gap-6">
-                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-500 ${
-                  gameStats?.alreadyCheckedIn 
-                    ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 border-2 border-emerald-200 dark:border-emerald-800' 
-                    : 'bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-500 border-2 border-emerald-200 dark:border-emerald-800'
-                }`}>
-                  {gameStats?.alreadyCheckedIn ? <CheckCircle2 className="w-7 h-7" /> : <Flame className="w-7 h-7" />}
-                </div>
-                <div className="flex-1 min-w-0 space-y-1">
-                  <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{t('dashboard.checkIn.title')}</h3>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-slate-400">
-                      {gameStats?.streak || 0} {t('profile.game.streak')}
-                    </span>
-                    <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                      +200 {t('common.energyShort')}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={handleCheckIn}
-                  disabled={checkingIn || gameStats?.alreadyCheckedIn}
-                  className={`shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${
-                    gameStats?.alreadyCheckedIn 
-                      ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 border border-emerald-200 dark:border-emerald-800 cursor-default' 
-                      : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:scale-105 active:scale-95 shadow-lg shadow-slate-900/20 dark:shadow-none'
-                  } disabled:opacity-70 disabled:scale-100`}
-                >
-                  {checkingIn ? (
-                    <Loader2 className="w-4 h-4 animate-spin mx-auto" />
-                  ) : gameStats?.alreadyCheckedIn ? (
-                    t('dashboard.checkIn.done')
-                  ) : (
-                    t('dashboard.checkIn.btn')
-                  )}
-                </button>
-              </div>
-              <AnimatePresence>
-                {checkInReward && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="mt-4 flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20"
-                  >
-                    <Zap className="w-4 h-4 text-emerald-500" />
-                    <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">{t('dashboard.checkIn.reward')}</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+          <motion.article initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="card-premium p-7 lg:col-span-3 sm:p-8">
+            <div className="flex h-full min-h-[230px] flex-col justify-between gap-7"><div className="flex items-center justify-between"><div className="rounded-2xl bg-amber-50 p-3 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300"><CalendarDays className="h-6 w-6" /></div><span className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">{t('dashboard.growth.rhythm.title')}</span></div><div className="space-y-5"><div><div className="text-4xl font-black tracking-tight text-slate-950 dark:text-white">{metrics.weeklyDays}<span className="ml-1 text-lg text-slate-400">/ 5</span></div><div className="mt-1 text-sm font-bold text-slate-500">{t('dashboard.growth.rhythm.weeklyDays')}</div></div><div className="flex items-center gap-2 border-t border-slate-100 pt-4 text-sm font-bold text-slate-700 dark:border-slate-800 dark:text-slate-200"><Flame className="h-4 w-4 text-amber-500" />{t('dashboard.growth.rhythm.streak', { count: metrics.streak })}</div></div></div>
+          </motion.article>
+        </section>
 
-            {/* Interview History List */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="card-premium p-8 space-y-8 min-h-[400px]"
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black text-slate-900 dark:text-white font-serif tracking-tight">{t('dashboard.history')}</h3>
-                <span className="px-3 py-1 bg-slate-50 dark:bg-slate-900 rounded-full text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border border-slate-100 dark:border-slate-800">
-                  {interviews.length} {t('dashboard.records')}
-                </span>
-              </div>
+        <OfferSprintPanel
+          offerSprint={growthOverview?.offerSprint}
+          onOverview={setGrowthOverview}
+          onStartTask={startRecommendedTask}
+        />
 
-              <div className="space-y-6 max-h-[480px] overflow-y-auto pr-2 custom-scrollbar">
-                {loading ? (
-                  <div className="py-20 flex flex-col items-center justify-center gap-4 text-slate-400">
-                    <Loader2 className="w-8 h-8 animate-spin" />
-                  </div>
-                ) : interviews.length === 0 ? (
-                  <div className="py-12 text-center space-y-4">
-                    <p className="text-slate-500 text-sm italic font-medium">{t('dashboard.emptySub')}</p>
-                    <Link to="/setup" className="text-indigo-500 text-sm font-bold flex items-center justify-center gap-2 hover:underline">
-                      {t('dashboard.newInterview')} <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                ) : (
-                  interviews.map((interview, i) => {
-                    const d = new Date(interview.created_at)
-                    const month = d.toLocaleDateString(localeTag, { month: 'short' })
-                    const day = d.toLocaleDateString(localeTag, { day: '2-digit' })
-                    
-                    return (
-                      <motion.div
-                        key={interview.id}
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4 + i * 0.05 }}
-                        className="group flex gap-6 items-start p-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 rounded-2xl transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-700/50"
-                      >
-                        <div className="flex flex-col items-center justify-center shrink-0 w-12 h-14 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
-                          <span className="text-[10px] font-black uppercase text-slate-400 leading-none mb-1">{month}</span>
-                          <span className="text-lg font-black text-slate-900 dark:text-white leading-none">{day}</span>
-                        </div>
-                        <div className="flex-1 space-y-1">
-                          <Link to={`/interview/${interview.id}/report`} className="text-sm font-black text-slate-900 dark:text-white group-hover:text-indigo-500 transition-colors block leading-tight">
-                            {interview.position}
-                          </Link>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-slate-500">
-                              {d.toLocaleTimeString(localeTag, { hour: '2-digit', minute: '2-digit' })} · {interview.language} · {interview.duration} {t('dashboard.durMin')}
-                            </span>
-                            <button
-                              onClick={() => requestDeleteInterview(interview.id, interview.position)}
-                              className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 transition-all hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )
-                  })
-                )}
-              </div>
-            </motion.div>
-
-            {/* Gamification Level Map */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="card-premium p-8 space-y-10"
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black text-slate-900 dark:text-white font-serif tracking-tight">{t('profile.game.lvlMap')}</h3>
-                <div className="px-3 py-1 bg-primary-50 dark:bg-primary-950/30 rounded-full text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest border border-primary-100 dark:border-primary-900/50">
-                  Level {gameStats?.level || 1}
-                </div>
-              </div>
-
-              {/* Connected Level Path */}
-              <div className="relative py-6">
-                {/* Connection Line */}
-                <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-slate-100 dark:bg-slate-800 -translate-y-1/2" />
-                
-                <div className="relative flex justify-between gap-4 overflow-x-auto pb-8 scrollbar-hide snap-x">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((lvl) => {
-                    const currentLvl = gameStats?.level || 1
-                    const isPassed = lvl < currentLvl
-                    const isActive = lvl === currentLvl
-                    const isLocked = lvl > currentLvl
-                    
-                    return (
-                      <div key={lvl} className="flex flex-col items-center shrink-0 w-20 snap-center relative">
-                        {/* Connecting Line (Success state) */}
-                        {isPassed && (
-                          <div className="absolute top-1/2 left-[50%] w-full h-[2px] bg-primary-500 -translate-y-1/2 z-0" />
-                        )}
-
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          className={`
-                            relative z-10 w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500
-                            ${isActive ? 'bg-primary-500 text-white shadow-xl shadow-primary-500/40 ring-4 ring-primary-100 dark:ring-primary-950/50' : 
-                              isPassed ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-2 border-primary-500' : 
-                              'bg-white dark:bg-slate-900 text-slate-300 dark:text-slate-700 border-2 border-slate-100 dark:border-slate-800'}
-                          `}
-                        >
-                          {isPassed ? <CheckCircle2 className="w-6 h-6" /> : 
-                           isLocked ? <Lock className="w-5 h-5" /> :
-                           <span className="text-lg font-black">{lvl}</span>}
-                          
-                          {isActive && (
-                            <motion.div 
-                              layoutId="activeGlow"
-                              className="absolute -inset-2 rounded-[1.5rem] bg-primary-500/20 animate-pulse -z-10" 
-                            />
-                          )}
-                        </motion.div>
-                        
-                        <div className={`mt-4 text-[10px] font-black uppercase tracking-tighter text-center leading-tight transition-colors duration-500 ${
-                          isActive ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400'
-                        }`}>
-                          {t(`profile.game.lvls.${lvl}`)}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Next Highlight Challenge */}
-              <div className="p-6 bg-slate-900 dark:bg-white rounded-[2rem] flex items-center justify-between group cursor-pointer hover:shadow-2xl hover:shadow-primary-500/10 transition-all">
-                <div className="flex gap-5 items-center">
-                   <div className="w-12 h-12 rounded-2xl bg-white/10 dark:bg-slate-100 flex items-center justify-center text-primary-500">
-                     <Zap className="w-6 h-6 animate-pulse" />
-                   </div>
-                   <div className="space-y-1">
-                      <div className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">{t('profile.game.nextQuest')}</div>
-                      <div className="text-white dark:text-slate-900 font-bold text-lg leading-none">
-                        {gameStats?.nextLevelQuest ? t(`profile.game.quests.${gameStats.nextLevelQuest}`) : 'Complete 1 more mock'}
-                      </div>
-                   </div>
-                </div>
-                <div className="w-10 h-10 rounded-full border border-white/20 dark:border-slate-200 flex items-center justify-center text-white dark:text-slate-900 group-hover:bg-primary-500 group-hover:border-primary-500 transition-all">
-                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </motion.div>
-
-          </div>
-        </div>
-
-
-        {/* Promotional Banner */}
-        {interviews.length > 0 && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="mt-20 p-10 bg-slate-900 dark:bg-slate-900 rounded-[2.5rem] relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500 opacity-10 blur-[100px] pointer-events-none" />
-            <div className="relative z-[1] flex flex-col md:flex-row items-center justify-between gap-10">
-              <div className="space-y-4">
-                <h3 className="text-3xl font-black text-white font-serif">{t('dashboard.bannerTitle')}</h3>
-                <p className="text-lg text-slate-400 max-w-xl">{t('dashboard.bannerSub')}</p>
-              </div>
-              <Link to="/setup" className="btn-primary-white px-10 py-5 text-lg">
-                {t('dashboard.bannerBtn')}
-                <ArrowRight className="w-6 h-6 ml-2" />
-              </Link>
-            </div>
-          </motion.div>
+        {!growthOverview?.offerSprint?.plan && readiness?.nextPracticeTask && (
+          <section className="grid gap-5 lg:grid-cols-[1.4fr_0.6fr]">
+            <article className="rounded-[2rem] bg-gradient-to-br from-primary-600 to-indigo-700 p-7 text-white shadow-xl shadow-primary-900/10 sm:p-8"><div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"><div className="max-w-3xl"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-primary-100">{t('dashboard.growth.task.eyebrow')}</p><h2 className="mt-3 font-serif text-2xl font-black">{readiness.nextPracticeTask.title || readiness.nextPracticeTask.questionText}</h2><p className="mt-3 text-sm leading-relaxed text-primary-50/80">{readiness.nextPracticeTask.reason}</p><p className="mt-3 text-xs font-bold text-primary-100">{t('dashboard.growth.task.minutes', { count: readiness.nextPracticeTask.estimatedMinutes || 8 })}</p>{taskError && <p className="mt-3 rounded-lg bg-red-950/30 px-3 py-2 text-xs font-bold text-red-100">{t('dashboard.growth.task.failed')}</p>}</div><button type="button" disabled={taskBusy || readiness.nextPracticeTask.questionIndex === null || readiness.nextPracticeTask.questionIndex === undefined || !Number.isInteger(Number(readiness.nextPracticeTask.questionIndex))} onClick={() => void startRecommendedTask()} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-black text-slate-950 disabled:opacity-50">{taskBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}{t('dashboard.growth.task.start')}</button></div></article>
+            <article className="card-premium flex flex-col justify-center p-7"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">{t('dashboard.growth.task.weekly')}</p><p className="mt-3 text-3xl font-black text-slate-950 dark:text-white">{t('dashboard.growth.task.weeklyCount', { count: readiness.weeklyTasks?.length || 1 })}</p><div className="mt-3 space-y-2">{(readiness.weeklyTasks || [readiness.nextPracticeTask]).slice(0, 5).map((task, index) => <p key={task.id || index} className="line-clamp-1 text-xs font-bold text-slate-500"><span className="mr-2 text-primary-500">{index + 1}.</span>{task.title || task.questionText}</p>)}</div><p className="mt-3 text-xs leading-relaxed text-slate-400">{t('dashboard.growth.task.weeklyBody')}</p></article>
+          </section>
         )}
-      </div>
 
-      <AnimatePresence>
-        {pendingDelete && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={closeDeleteModal}
-              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl overflow-hidden"
-            >
-              <div className="absolute top-0 left-0 w-full h-1.5 bg-red-500" />
-              <div className="space-y-6">
-                <div className="w-14 h-14 bg-red-50 dark:bg-red-950/30 rounded-2xl flex items-center justify-center text-red-500">
-                  <AlertTriangle className="w-8 h-8" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-black text-slate-900 dark:text-white font-serif mb-2">{t('dashboard.deleteModalTitle')}</h2>
-                  <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-                    {t('dashboard.deleteConfirm')}
-                    {pendingDelete.position && <span className="block mt-2 font-bold text-slate-900 dark:text-white">"{pendingDelete.position}"</span>}
-                  </p>
-                </div>
-                {deleteModalError && (
-                  <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/50 rounded-xl text-sm text-red-600 dark:text-red-400 font-bold">
-                    {deleteModalError}
-                  </div>
-                )}
-                <div className="grid grid-cols-2 gap-4 pt-4">
-                  <button onClick={closeDeleteModal} className="btn-secondary py-4 font-bold">{t('dashboard.deleteModalCancel')}</button>
-                  <button 
-                    onClick={() => void confirmDeleteInterview()} 
-                    disabled={deletingId === pendingDelete.id}
-                    className="btn-primary bg-red-600 hover:bg-red-700 py-4 font-bold disabled:opacity-50"
-                  >
-                    {deletingId === pendingDelete.id ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : t('dashboard.deleteModalConfirm')}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+        <section className="card-premium p-6 sm:p-8">
+          <div className="mb-6 flex items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">{t('dashboard.growth.collections.eyebrow')}</p><h2 className="mt-2 font-serif text-2xl font-black text-slate-950 dark:text-white">{t('dashboard.growth.collections.title')}</h2></div><Link to="/notes" className="inline-flex items-center gap-2 text-sm font-black text-primary-600 dark:text-primary-400">{t('dashboard.growth.collections.viewAll')}<ArrowRight className="h-4 w-4" /></Link></div>
+          {growthOverview?.recentCollections?.length > 0 ? <div className="grid gap-4 md:grid-cols-3">{growthOverview.recentCollections.map(collection => <Link key={collection.id} to="/notes" className="group rounded-2xl border border-slate-200 p-5 transition hover:-translate-y-1 hover:border-primary-300 dark:border-slate-800 dark:hover:border-primary-800"><div className="flex items-center justify-between gap-3"><span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black text-amber-700 dark:bg-amber-950/30 dark:text-amber-300">{t('dashboard.growth.collections.toReview')}</span>{collection.is_pinned && <BookmarkCheck className="h-4 w-4 text-primary-500" />}</div><h3 className="mt-4 line-clamp-3 text-sm font-black leading-relaxed text-slate-950 dark:text-white">{collection.question_text}</h3><p className="mt-3 text-xs font-bold text-slate-400">{collection.position}</p></Link>)}</div> : <div className="rounded-2xl border-2 border-dashed border-slate-200 p-6 text-sm text-slate-500 dark:border-slate-800">{t('dashboard.growth.collections.empty')}</div>}
+        </section>
+
+        <section className="card-premium overflow-hidden p-6 sm:p-8">
+          <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-black uppercase tracking-[0.18em] text-primary-600 dark:text-primary-400">{t('dashboard.growth.latest.eyebrow')}</p><h2 className="mt-2 font-serif text-2xl font-black text-slate-950 dark:text-white">{t('dashboard.growth.latest.title')}</h2></div>{latestReviewCandidate && !isGenerating(latestReviewCandidate) && <span className="text-xs font-bold text-slate-400">{new Date(sessionDate(latestReviewCandidate)).toLocaleDateString(localeTag, { year: 'numeric', month: 'short', day: 'numeric' })}</span>}</div>
+          {loading ? <div className="flex min-h-40 items-center justify-center"><Loader2 className="h-7 w-7 animate-spin text-primary-500" /></div>
+            : loadError ? <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm font-bold text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">{t('dashboard.growth.loadFailed')}</div>
+              : !latestReviewCandidate ? <div className="flex flex-col items-start justify-between gap-6 rounded-[1.75rem] border-2 border-dashed border-slate-200 p-7 dark:border-slate-800 sm:flex-row sm:items-center"><div className="flex gap-4"><div className="rounded-2xl bg-slate-100 p-3 text-slate-400 dark:bg-slate-900"><Sparkles className="h-6 w-6" /></div><div><h3 className="font-black text-slate-950 dark:text-white">{t('dashboard.growth.latest.emptyTitle')}</h3><p className="mt-1 text-sm text-slate-500">{t('dashboard.growth.latest.emptyBody')}</p></div></div><Link to="/setup" className="btn-primary inline-flex w-full items-center justify-center gap-2 px-6 py-3 sm:w-auto">{t('dashboard.growth.startBaseline')} <ArrowRight className="h-4 w-4" /></Link></div>
+                : isGenerating(latestReviewCandidate) ? <div className="flex items-center gap-5 rounded-[1.75rem] border border-indigo-100 bg-indigo-50/70 p-7 dark:border-indigo-900/50 dark:bg-indigo-950/20" role="status"><div className="rounded-2xl bg-white p-3 text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-300"><Loader2 className="h-6 w-6 animate-spin" /></div><div><h3 className="font-black text-slate-950 dark:text-white">{t('dashboard.growth.latest.generatingTitle')}</h3><p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{t('dashboard.growth.latest.generatingBody')}</p></div></div>
+                  : hasReport(latestReviewCandidate) ? <div className="grid gap-6 rounded-[1.75rem] bg-slate-950 p-7 text-white md:grid-cols-[1fr_auto] md:items-end"><div className="space-y-4"><div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400"><span>{latestReviewCandidate.position}</span><span>·</span><span>{latestReviewCandidate.language}</span><span>·</span><span>{latestReviewCandidate.duration} {t('dashboard.durMin')}</span></div><p className="max-w-3xl text-lg font-bold leading-relaxed">{reportSummary(latestReviewCandidate) || t('dashboard.growth.latest.reportReadyBody')}</p>{reportStrength(latestReviewCandidate) && <p className="flex items-start gap-2 text-sm text-emerald-300"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />{reportStrength(latestReviewCandidate)}</p>}</div><Link to={`/interview/${latestReviewCandidate.id}/report`} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-4 text-sm font-black text-slate-950 transition hover:bg-primary-50 md:w-auto">{t('dashboard.growth.viewReport')} <ArrowRight className="h-4 w-4" /></Link></div>
+                    : isResumable(latestReviewCandidate) ? <div className="flex flex-col items-start justify-between gap-6 rounded-[1.75rem] border border-amber-200 bg-amber-50/70 p-7 dark:border-amber-900/50 dark:bg-amber-950/20 sm:flex-row sm:items-center"><div className="flex gap-4"><PauseCircle className="h-7 w-7 shrink-0 text-amber-600" /><div><h3 className="font-black text-slate-950 dark:text-white">{t('dashboard.growth.latest.unfinishedTitle')}</h3><p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{t('dashboard.growth.latest.unfinishedBody', { position: latestReviewCandidate.position })}</p></div></div><Link to={`/interview/${latestReviewCandidate.id}`} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 py-4 text-sm font-black text-white dark:bg-white dark:text-slate-950 sm:w-auto">{t('dashboard.growth.continuePractice')} <ArrowRight className="h-4 w-4" /></Link></div>
+                      : <div className="flex flex-col items-start justify-between gap-6 rounded-[1.75rem] border border-slate-200 p-7 dark:border-slate-800 sm:flex-row sm:items-center"><div><h3 className="font-black text-slate-950 dark:text-white">{t('dashboard.growth.latest.noReportTitle')}</h3><p className="mt-1 text-sm text-slate-500">{t('dashboard.growth.latest.noReportBody')}</p></div><Link to={`/interview/${latestReviewCandidate.id}/report`} className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-6 py-3 text-sm font-black text-slate-800 dark:border-slate-700 dark:text-white sm:w-auto">{t('dashboard.growth.checkReportStatus')} <ArrowRight className="h-4 w-4" /></Link></div>}
+        </section>
+
+        <section className="space-y-6" aria-labelledby="review-history-title">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">{t('dashboard.growth.history.eyebrow')}</p><h2 id="review-history-title" className="mt-2 font-serif text-3xl font-black text-slate-950 dark:text-white">{t('dashboard.growth.history.title')}</h2><p className="mt-2 text-sm text-slate-500">{t('dashboard.growth.history.subtitle')}</p></div><div className="flex rounded-xl bg-white p-1 shadow-sm dark:bg-slate-900" role="group" aria-label={t('dashboard.growth.history.filterLabel')}>{['all', 'reports', 'continue'].map(option => <button key={option} type="button" onClick={() => setFilter(option)} className={`rounded-lg px-4 py-2 text-xs font-black transition ${filter === option ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950' : 'text-slate-500 hover:text-slate-950 dark:hover:text-white'}`}>{t(`dashboard.growth.history.filters.${option}`)}</button>)}</div></div>
+          {loading ? <div className="flex min-h-48 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary-500" /></div>
+            : filteredInterviews.length === 0 ? <div className="card-premium flex min-h-56 flex-col items-center justify-center gap-5 p-8 text-center"><FileText className="h-10 w-10 text-slate-300" /><div><h3 className="font-black text-slate-950 dark:text-white">{filter === 'all' ? t('dashboard.growth.history.emptyTitle') : t('dashboard.growth.history.noMatchTitle')}</h3><p className="mt-1 text-sm text-slate-500">{filter === 'all' ? t('dashboard.growth.history.emptyBody') : t('dashboard.growth.history.noMatchBody')}</p></div>{filter === 'all' && <Link to="/setup" className="btn-primary inline-flex items-center gap-2 px-6 py-3">{t('dashboard.growth.startBaseline')} <ArrowRight className="h-4 w-4" /></Link>}</div>
+              : <div className="grid gap-5 lg:grid-cols-2">{filteredInterviews.map((interview, index) => {
+                const action = getAction(interview, t)
+                const ActionIcon = action.icon
+                const date = new Date(sessionDate(interview))
+                const summary = reportSummary(interview)
+                return <motion.article key={interview.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index * 0.04, 0.25) }} role={action.route ? 'link' : undefined} tabIndex={action.route ? 0 : undefined} onClick={() => openInterview(interview)} onKeyDown={event => { if (action.route && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); openInterview(interview) } }} className={`card-premium group relative flex flex-col gap-6 p-6 transition sm:p-7 ${action.route ? 'cursor-pointer hover:-translate-y-1 hover:border-primary-200 hover:shadow-xl dark:hover:border-primary-900' : ''}`}>
+                  <div className="flex items-start justify-between gap-4"><div className="min-w-0 space-y-2"><span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${hasReport(interview) ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300' : isGenerating(interview) ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-300' : isResumable(interview) ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-800'}`}>{isGenerating(interview) && <Loader2 className="h-3 w-3 animate-spin" />}{statusLabel(interview, t)}</span><h3 className="truncate text-xl font-black text-slate-950 dark:text-white">{interview.position || t('dashboard.growth.history.untitled')}</h3></div><button type="button" onClick={event => { event.stopPropagation(); setPendingDelete({ id: interview.id, position: interview.position || '' }) }} className="relative z-10 rounded-xl p-2 text-slate-300 transition hover:bg-red-50 hover:text-red-500 focus:text-red-500 dark:hover:bg-red-950/30" aria-label={t('dashboard.delete')}><Trash2 className="h-4 w-4" /></button></div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs font-bold text-slate-500"><span>{date.toLocaleDateString(localeTag, { year: 'numeric', month: 'short', day: 'numeric' })}</span><span>{interview.language}</span><span>{interview.mode === 'practice' ? t('dashboard.growth.history.practiceMode') : t('dashboard.growth.history.formalMode')}</span><span>{interview.duration} {t('dashboard.durMin')}</span></div>
+                  <p className="min-h-10 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{summary || (isResumable(interview) ? t('dashboard.growth.history.resumeHint') : isGenerating(interview) ? t('dashboard.growth.latest.generatingBody') : t('dashboard.growth.history.noSummary'))}</p>
+                  <div className="mt-auto border-t border-slate-100 pt-5 dark:border-slate-800"><span className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-black sm:w-auto ${action.tone === 'primary' ? 'bg-primary-600 text-white' : action.tone === 'dark' ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300'}`}><ActionIcon className={`h-4 w-4 ${isGenerating(interview) ? 'animate-spin' : ''}`} />{action.label}{action.route && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />}</span></div>
+                </motion.article>
+              })}</div>}
+        </section>
+      </main>
+
+      <AnimatePresence>{pendingDelete && <div className="fixed inset-0 z-[100] flex items-center justify-center p-4"><motion.button type="button" aria-label={t('dashboard.deleteModalCancel')} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={closeDeleteModal} className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" /><motion.div role="dialog" aria-modal="true" initial={{ opacity: 0, scale: 0.96, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 16 }} className="relative w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl dark:bg-slate-900"><div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500 dark:bg-red-950/30"><AlertTriangle className="h-7 w-7" /></div><h2 className="font-serif text-2xl font-black text-slate-950 dark:text-white">{t('dashboard.deleteModalTitle')}</h2><p className="mt-3 text-sm leading-relaxed text-slate-500 dark:text-slate-300">{t('dashboard.deleteConfirm')}</p>{pendingDelete.position && <p className="mt-2 font-bold text-slate-950 dark:text-white">“{pendingDelete.position}”</p>}{deleteModalError && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-600 dark:bg-red-950/30 dark:text-red-300">{deleteModalError}</p>}<div className="mt-8 grid grid-cols-2 gap-3"><button type="button" onClick={closeDeleteModal} className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-black text-slate-700 dark:border-slate-700 dark:text-slate-200">{t('dashboard.deleteModalCancel')}</button><button type="button" onClick={() => void confirmDeleteInterview()} disabled={deletingId === pendingDelete.id} className="rounded-xl bg-red-600 px-4 py-3 text-sm font-black text-white disabled:opacity-60">{deletingId === pendingDelete.id ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : t('dashboard.deleteModalConfirm')}</button></div></motion.div></div>}</AnimatePresence>
     </div>
   )
 }

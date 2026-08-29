@@ -8,9 +8,10 @@
     "de": "Deutsch"
   },
   "nav": {
+    "notes": "Question Library",
     "home": "Home",
     "startInterview": "Start Interview",
-    "history": "History",
+    "history": "Growth Center",
     "login": "Login",
     "signUpFree": "Sign Up Free",
     "signOut": "Sign Out",
@@ -82,7 +83,7 @@
     "about": "About",
     "home": "Home",
     "startPractice": "Start Practice",
-    "history": "History",
+    "history": "Growth Center",
     "loginRegister": "Login/Register",
     "supportLang": "German & English Support",
     "roles": "Covers Werkstudent / Praktikum",
@@ -767,6 +768,70 @@
     "achievements": "Achievement Wall",
     "roleAssistant": "Interviewer",
     "roleUser": "Your Answer",
+    "growth": {
+      "eyebrow": "Offer preparation action hub",
+      "title": "Growth Center",
+      "subtitle": "Every effective practice session moves you closer to your offer. Review the latest result, then continue the work that matters most.",
+      "overview": "Growth overview",
+      "loadFailed": "Growth data could not be loaded. Refresh and try again.",
+      "minutes": "{{count}} min effective training",
+      "hoursMinutes": "{{hours}} hr {{minutes}} min effective training",
+      "viewReport": "View Full Report",
+      "continuePractice": "Continue Practice",
+      "generating": "Report Generating",
+      "checkReportStatus": "Check Report Status",
+      "unavailable": "Session Closed",
+      "viewEvidence": "View Report Evidence",
+      "viewLatestReport": "View Latest Report",
+      "startBaseline": "Start Baseline Mock",
+      "readiness": {
+        "initial": "Initial assessment",
+        "established": "Ongoing assessment",
+        "insufficient": "Insufficient evidence; no inference",
+        "dimensions": { "technical": "Technical", "experience": "Experience evidence", "structure": "Structure", "communication": "Collaboration", "strategy": "Role strategy" },
+        "title": "Career Readiness",
+        "description": "Your current interview readiness based only on explicit report evidence. It is not a probability of receiving an offer.",
+        "pendingTitle": "Awaiting a reliable assessment",
+        "pendingBody": "The current report format has no standardized base score, so no estimated value is shown. You can still review the complete feedback."
+      },
+      "practice": { "title": "Practice Total", "count": "effective sessions" },
+      "rhythm": { "title": "Weekly Rhythm", "weeklyDays": "effective training days", "streak": "{{count}}-day streak" },
+      "task": { "eyebrow": "Your one task for today", "minutes": "About {{count}} minutes", "start": "Start focused practice", "failed": "Practice could not be created. Check your energy balance and try again.", "weekly": "This week's rhythm", "weeklyCount": "{{count}} tasks", "weeklyBody": "The weekly list keeps at most five evidence-backed tasks so it stays actionable." },
+      "collections": { "eyebrow": "To review", "title": "Recent question collections", "viewAll": "View all", "toReview": "To review", "empty": "No review cards yet. Add a practice note or collect an individual question from a report." },
+      "latest": {
+        "eyebrow": "Latest result",
+        "title": "Latest Review",
+        "emptyTitle": "Complete a mock to establish your baseline",
+        "emptyBody": "Once a report is ready, its conclusion, strengths, and next action appear here.",
+        "generatingTitle": "Your report is being generated",
+        "generatingBody": "Analysis is still running. Refresh shortly to open the full review.",
+        "reportReadyBody": "The full report is ready with question-level feedback and improvement steps.",
+        "unfinishedTitle": "You have an unfinished session",
+        "unfinishedBody": "Continue the {{position}} session with its questions, answers, hints, notes, configuration, and timer restored.",
+        "noReportTitle": "No report is available for this session yet",
+        "noReportBody": "Open the report page to check generation status. Your existing conversation remains saved."
+      },
+      "status": {
+        "reportReady": "Report Ready", "generating": "Generating", "paused": "Paused",
+        "inProgress": "In Progress", "noReport": "No Report", "closed": "Closed"
+      },
+      "history": {
+        "eyebrow": "Training and results",
+        "title": "Interview Review Records",
+        "subtitle": "Each card opens directly, while the primary action clearly distinguishes reports from resumable sessions.",
+        "filterLabel": "Filter review records",
+        "filters": { "all": "All", "reports": "Reports", "continue": "Continue" },
+        "emptyTitle": "No interview review records yet",
+        "emptyBody": "Start or complete a mock and it will appear here.",
+        "noMatchTitle": "No records match this filter",
+        "noMatchBody": "Choose another filter to see your other sessions.",
+        "untitled": "Untitled role",
+        "practiceMode": "Practice",
+        "formalMode": "Formal mock",
+        "resumeHint": "Resume this interviewId and restore the existing session; no new interview is created.",
+        "noSummary": "No report summary is available for this session yet."
+      }
+    },
     "insights": {
       "language": "Your German vocabulary has room for improvement. We recommend targeted mocks to enhance your expression.",
       "softSkills": "Your soft skills scored very high, showing strong communication potential.",
@@ -774,6 +839,166 @@
       "experience": "Experience descriptions need more specific STAR cases. Use interview practice to find your highlights.",
       "portfolio": "Portfolio richness can be optimized; showcase more actual problem-solving processes.",
       "networking": "Networking is in its early stages. Try engaging with alumni or attending campus career events."
+    }
+  },
+  "notes": {
+    "title": "Question Library",
+    "eyebrow": "One review workspace",
+    "subtitle": "Organize questions, answers, feedback snapshots, and private notes from practice and reports, then start focused training from any card.",
+    "back": "Back to Growth Center",
+    "cards": "cards",
+    "filters": "Collection filters",
+    "search": "Search questions, answers, feedback, notes, positions, or tags",
+    "allPositions": "All positions",
+    "allTags": "All tags",
+    "dateFrom": "From date",
+    "dateTo": "To date",
+    "reset": "Reset filters",
+    "loadFailed": "Question collections could not be loaded. Please try again.",
+    "saveFailed": "The collection could not be updated.",
+    "deleteFailed": "The collection could not be removed.",
+    "practiceFailed": "Focused practice could not be created. Check your energy balance and try again.",
+    "emptyTitle": "No matching question cards",
+    "emptyBody": "Add a note during practice or collect an individual question from a report to build this library.",
+    "unknownPosition": "Untitled position",
+    "answer": "Your answer",
+    "feedback": "Feedback",
+    "personalNote": "Private note",
+    "notePlaceholder": "Capture the evidence or wording you want to improve next time…",
+    "tagsPlaceholder": "Tags separated by commas",
+    "save": "Save note and tags",
+    "practiceAgain": "Practice again",
+    "markReviewed": "Mark reviewed",
+    "markToReview": "Move to review",
+    "openOrigin": "Open original",
+    "pin": "Pin or unpin",
+    "remove": "Remove collection",
+    "source": { "all": "All sources", "practice": "Practice", "report": "Interview report" },
+    "interviewer": { "all": "All interviewers", "mixed": "Mixed", "technical": "Technical", "hr": "Behavioral / HR" },
+    "review": { "all": "All review states", "to_review": "To review", "reviewed": "Reviewed" }
+  },
+  "growthSprint": {
+    "eyebrow": "Offer sprint",
+    "empty": {
+      "title": "Turn your next interview into an executable route",
+      "body": "Set a target role and milestones. Each week you will get 3–5 tasks grounded in your real reports, weakest dimensions, and saved questions.",
+      "create": "Create sprint plan",
+      "steps": {
+        "position": "Choose the target role and optionally add its job description",
+        "interview": "Add your next interview or target Offer date",
+        "rhythm": "Choose a 3, 5, or 7-day weekly training rhythm"
+      }
+    },
+    "form": {
+      "editTitle": "Adjust sprint target",
+      "createTitle": "Create an Offer sprint",
+      "position": "Target role",
+      "positionPlaceholder": "e.g. Senior Frontend Engineer",
+      "interviewer": "Priority interviewer type",
+      "nextInterview": "Next interview date (optional)",
+      "offerDate": "Target Offer date (optional)",
+      "jd": "Target job description (optional)",
+      "jdPlaceholder": "Paste responsibilities and requirements for more relevant tasks…",
+      "weeklyTarget": "Effective training target per week",
+      "days": "{{count}} days",
+      "reminders": {
+        "inApp": "In-app milestone reminders",
+        "browser": "Browser notifications",
+        "email": "Email reminders",
+        "weeklyReport": "Weekly growth report reminder"
+      },
+      "notConfigured": "Service not connected",
+      "save": "Save and generate this week",
+      "cancel": "Cancel",
+      "remove": "Delete plan",
+      "removeConfirm": "Delete this Offer sprint and its weekly tasks and reminders? Reports, collections, and interview history will stay intact."
+    },
+    "errors": {
+      "save": "The sprint plan could not be saved. Try again.",
+      "delete": "The sprint plan could not be deleted.",
+      "task": "The task could not be updated. Try again.",
+      "reminder": "The reminder could not be updated."
+    },
+    "reminders": {
+      "interview_7d": { "title": "Your interview is in 7 days", "body": "{{position}} is now in focused preparation. Start with the highest-priority task." },
+      "interview_2d": { "title": "The final 48 hours have started", "body": "Consolidate your introduction, evidence stories, and checklist for {{position}}." },
+      "interview_day": { "title": "Today is interview day", "body": "Run the short {{position}} checklist and protect a calm rhythm." },
+      "weekly_report": { "title": "Your weekly growth report is ready", "body": "Review effective training, completed tasks, and evidence-backed changes." },
+      "dismiss": "Got it"
+    },
+    "recovery": {
+      "continue": { "title": "One short task today keeps the rhythm going", "body": "Your weekly target has {{count}} days left. Do not catch up—just continue with today's task." },
+      "restart": { "title": "A pause does not erase your progress", "body": "Your weekly target has {{count}} days left. One short task is enough for a gentle restart." }
+    },
+    "stage": {
+      "foundation": "Capability coverage: build the role's required skills and evidence",
+      "focused": "Focused preparation: train weak dimensions and run formal mocks",
+      "imminent": "Interview approaching: prioritize a formal mock, review, and checklist",
+      "final48": "Final 48 hours: consolidate delivery instead of adding volume",
+      "interview_day": "Interview day: keep preparation light and practical",
+      "renew": "The previous milestone has passed; update your next target"
+    },
+    "countdown": {
+      "interview": "Until interview",
+      "offer": "Until target Offer",
+      "days": "{{count}} days",
+      "update": "Update needed"
+    },
+    "progress": {
+      "title": "Weekly task progress",
+      "days": "{{current}} effective training days this week; target {{target}}"
+    },
+    "tasks": {
+      "eyebrow": "Adaptive weekly tasks",
+      "title": "The 3–5 things that matter this week",
+      "limit": "Only outcome-producing tasks",
+      "today": "Do this today",
+      "checklistReview": "Priority review before the interview",
+      "minutes": "About {{count}} minutes",
+      "start": "Start now",
+      "completeChecklist": "Checked and complete",
+      "complete": "Mark complete",
+      "skip": "Skip this task",
+      "types": {
+        "baseline": { "title": "Complete a formal baseline interview", "reason": "Establish a traceable baseline so future guidance has evidence.", "unlock": "Unlock your first formal baseline" },
+        "focus_question": { "title": "Solve your next pivotal question", "reason": "Run one focused attempt on {{dimension}}, your current priority.", "unlock": "Add evidence for the next comparison" },
+        "formal_mock": { "title": "Run a formal target-role mock", "reason": "Test readiness at the realistic pace of a {{position}} interview.", "unlock": "Generate a comparable formal report" },
+        "review_collection": { "title": "Retry one saved review question", "reason": "Turn a known gap into a new answer attempt.", "unlock": "Turn collection into improvement" },
+        "pre_interview_checklist": { "title": "Complete the pre-interview checklist", "reason": "Confirm timing, equipment, materials, evidence stories, and your questions.", "unlock": "Reduce last-minute omissions" },
+        "self_intro": { "title": "Refine your target-role introduction", "reason": "Build a concise opening around role-relevant evidence.", "unlock": "Create a stable interview opening" },
+        "weekly_review": { "title": "Run a light weekly review", "reason": "Review reports and saved questions, then choose the next evidence to improve.", "unlock": "Keep next week focused" }
+      }
+    },
+    "weekly": {
+      "eyebrow": "In-app weekly growth report",
+      "title": "What changed this week",
+      "days": "Effective days",
+      "minutes": "Effective minutes",
+      "completed": "Tasks done",
+      "stable": "Stable",
+      "noTrend": "Training is recorded, but current report evidence cannot support a capability change, so no inferred trend is shown.",
+      "return": "Complete a weekly task and real training activity will be summarized here."
+    },
+    "milestones": {
+      "eyebrow": "Growth milestones",
+      "title": "Progress verified by evidence",
+      "empty": "Your first formal report, a 5-day effective streak, or a 15-point dimension gain will appear here.",
+      "types": {
+        "first_formal_report": "Completed the first formal report",
+        "streak_5": "Reached a 5-day effective streak",
+        "readiness_gain_15": "Improved one readiness dimension by 15+ points"
+      }
+    },
+    "premium": {
+      "eyebrow": "Advanced preparation preview",
+      "title": "Go deeper only after the core loop proves valuable",
+      "body": "These capabilities are still planned; this page does not invent a plan, price, or purchase flow.",
+      "features": {
+        "drills": { "title": "High-frequency skill drills", "body": "Longer deliberate-practice tracks organized by capability." },
+        "jdPlan": { "title": "Role-specific sprint plan", "body": "A more detailed route based on the full JD and evidence gaps." },
+        "deepReport": { "title": "Deep comparison report", "body": "Stable trends and high-value evidence across more formal interviews." }
+      },
+      "ownership": "Existing reports, history, collections, and the core free training loop remain accessible whether or not advanced capabilities arrive."
     }
   },
   "interview": {
@@ -829,6 +1054,17 @@
     "modalSub": "Are you sure you want to end this session?",
     "continue": "Continue",
     "confirmEnd": "End Now",
+    "endNotice": {
+      "generatingTitle": "Your report is being generated",
+      "generatingBody": "This interview has ended. You can leave now and review the finished report in Growth Center.",
+      "readyTitle": "Your report is in Growth Center",
+      "readyBody": "The report is ready with evidence, readiness dimensions, and your next practice step.",
+      "failedTitle": "Report generation needs another try",
+      "failedBody": "Your interview text is saved. Retry now or check the status later in Growth Center.",
+      "openGrowth": "Open Growth Center",
+      "stay": "Stay here",
+      "retry": "Retry"
+    },
     "minShort": "{{n}} min",
     "digitalHuman": "AI Interviewer",
     "digitalZoomTitle": "Interviewer",
@@ -891,6 +1127,30 @@
     }
   },
   "report": {
+    "collection": {
+      "save": "Collect question",
+      "saved": "Collected",
+      "failed": "The question collection could not be updated.",
+      "practiceFailed": "Focused practice could not be created. Check your energy balance and try again."
+    },
+    "readiness": {
+      "title": "Five-dimension interview readiness",
+      "evidenceTitle": "Every assessment is tied to evidence",
+      "description": "Scores express verified performance in this report, not the probability of receiving an offer. Expand a dimension to inspect its evidence and action.",
+      "initial": "Initial assessment",
+      "partial": "Evidence still incomplete",
+      "insufficientEvidence": "This report has insufficient evidence, so no trend or inference is shown.",
+      "nextTask": "Your next best question",
+      "minutes": "About {{count}} minutes",
+      "startTask": "Start focused practice",
+      "dimensions": {
+        "technical": "Technical ability",
+        "experience": "Experience and evidence depth",
+        "structure": "Structured expression",
+        "communication": "Communication and collaboration",
+        "strategy": "Interview strategy and role fit"
+      }
+    },
     "title": "Interview Report",
     "docLabel": "Assessment Summary",
     "subtitle": "Generated by the most powerful LLM technology",
@@ -901,7 +1161,7 @@
     "generatingSub": "Analyzing session transcript. This may take a minute...",
     "loading": "Loading...",
     "loadError": "Could not load record",
-    "backDashboard": "Back to Dashboard",
+    "backDashboard": "Back to Growth Center",
     "noReport": "No report content found. Generation may have failed or was skipped.",
     "retryHint": "If session data exists, you can try regenerating the report below.",
     "retryGenerate": "Regenerate Report",

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
@@ -7,8 +7,11 @@ import {
   ArrowLeft, Briefcase, Globe2, Clock, FileText, Loader2, RefreshCw,
   Sparkles, ListChecks, Target, MessageSquareQuote, GitCompare,
   User, CheckCircle2, AlertTriangle, Lightbulb, Zap, ArrowRight,
+  Bookmark, BookmarkCheck, PlayCircle, TrendingUp,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { authenticatedFetch } from '../lib/authenticatedFetch'
+import { createInterviewRequestId } from '../lib/interviewEvents'
 
 function normalizeUiCode(code) {
   const c = String(code || '').toLowerCase()
@@ -278,7 +281,7 @@ function LegacySectionBody({ body, t }) {
 
 function normalizeQaItem(x) {
   if (!x || typeof x !== 'object') return null
-  const questionIndex = Number(x.questionIndex)
+  const questionIndex = x.questionIndex === null || x.questionIndex === undefined ? NaN : Number(x.questionIndex)
   const questionSummary = String(x.questionSummary || x.question || '').trim()
   const questionText = String(x.questionText || x.exactQuestion || x.interviewerQuestion || '').trim()
   const yourAnswerSummary = String(x.yourAnswerSummary || x.candidateAnswer || x.yourAnswer || '').trim()
@@ -326,7 +329,7 @@ function buildTranscriptLineReviewMap(report) {
   return map
 }
 
-function StructuredReportBody({ report, transcript, t }) {
+function StructuredReportBody({ report, transcript, t, collections, collectionBusy, onToggleCollection, onStartTask }) {
   const transcriptQuestions = interviewerQuestionsFromTranscript(transcript)
   const qaReview = Array.isArray(report?.qaReview)
     ? report.qaReview.map(normalizeQaItem).filter(Boolean).map((item, index) => {
@@ -353,9 +356,22 @@ function StructuredReportBody({ report, transcript, t }) {
       }))
       .filter((x) => x.title || x.why || x.how)
     : []
+  const readiness = report?.careerReadiness && typeof report.careerReadiness === 'object' ? report.careerReadiness : null
+  const readinessDimensions = Array.isArray(readiness?.dimensions) ? readiness.dimensions : []
+  const nextTask = report?.nextPracticeTask && typeof report.nextPracticeTask === 'object' ? report.nextPracticeTask : null
 
   return (
     <div className="space-y-16">
+      {(readinessDimensions.length > 0 || nextTask) && (
+        <section className="overflow-hidden rounded-[2.5rem] bg-slate-950 p-8 text-white shadow-2xl shadow-slate-900/15 sm:p-10">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-2xl space-y-3"><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-primary-300"><TrendingUp className="h-4 w-4" />{t('report.readiness.title')}</div><h2 className="font-serif text-3xl font-black">{t('report.readiness.evidenceTitle')}</h2><p className="text-sm leading-relaxed text-slate-300">{t('report.readiness.description')}</p></div>
+            <div className="shrink-0 rounded-2xl bg-white/10 px-6 py-4"><span className="text-4xl font-black tabular-nums">{readiness?.overallScore ?? '—'}</span><span className="ml-2 text-xs font-bold text-slate-400">/ 100</span><p className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400">{t(`report.readiness.${readiness?.assessment || 'partial'}`)}</p></div>
+          </div>
+          {readinessDimensions.length > 0 && <div className="mt-8 grid gap-3 md:grid-cols-5">{readinessDimensions.map(dimension => <details key={dimension.key} className="group rounded-2xl bg-white/[0.07] p-4"><summary className="cursor-pointer list-none"><div className="flex items-center justify-between gap-2"><span className="text-xs font-black">{t(`report.readiness.dimensions.${dimension.key}`)}</span><span className="text-sm font-black text-primary-300">{dimension.score ?? '—'}</span></div><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-primary-400" style={{ width: `${dimension.score ?? 0}%` }} /></div></summary><p className="mt-4 text-xs leading-relaxed text-slate-300">{dimension.evidence?.excerpt || t('report.readiness.insufficientEvidence')}</p>{dimension.action?.title && <p className="mt-3 border-t border-white/10 pt-3 text-xs font-bold text-primary-200">{dimension.action.title}</p>}</details>)}</div>}
+          {nextTask && <div className="mt-8 flex flex-col gap-5 rounded-2xl bg-white p-6 text-slate-950 md:flex-row md:items-center md:justify-between"><div><p className="text-[10px] font-black uppercase tracking-widest text-primary-600">{t('report.readiness.nextTask')}</p><h3 className="mt-2 text-lg font-black">{nextTask.title || nextTask.questionText}</h3><p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-500">{nextTask.reason}</p><p className="mt-3 text-xs font-bold text-slate-400">{t('report.readiness.minutes', { count: nextTask.estimatedMinutes || 8 })}</p></div>{nextTask.questionIndex !== null && nextTask.questionIndex !== undefined && Number.isInteger(Number(nextTask.questionIndex)) && Number(nextTask.questionIndex) >= 0 && <button type="button" onClick={() => onStartTask?.(nextTask)} disabled={collectionBusy !== null} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white disabled:opacity-50"><PlayCircle className="h-4 w-4" />{t('report.readiness.startTask')}</button>}</div>}
+        </section>
+      )}
       {/* Bento Grid for Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Core Summary */}
@@ -481,7 +497,7 @@ function StructuredReportBody({ report, transcript, t }) {
                 viewport={{ once: true }}
                 className="group relative bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden"
               >
-                <div className="bg-slate-50 dark:bg-slate-800/50 px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div className="flex flex-col gap-4 border-b border-slate-100 bg-slate-50 px-8 py-6 dark:border-slate-800 dark:bg-slate-800/50 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-4">
                     <span className="px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-[10px] font-black text-indigo-600 uppercase tracking-widest">
                       {t('report.qaRound', { n: i + 1 })}
@@ -490,6 +506,10 @@ function StructuredReportBody({ report, transcript, t }) {
                       {qa.questionSummary || t('report.qaQuestionFallback')}
                     </h3>
                   </div>
+                  <button type="button" disabled={collectionBusy === (qa.questionIndex >= 0 ? qa.questionIndex : i)} onClick={() => onToggleCollection?.(qa.questionIndex >= 0 ? qa.questionIndex : i)} className={`ml-4 inline-flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition ${collections?.[qa.questionIndex >= 0 ? qa.questionIndex : i] ? 'bg-primary-100 text-primary-700 dark:bg-primary-950/40 dark:text-primary-300' : 'bg-white text-slate-500 shadow-sm dark:bg-slate-900 dark:text-slate-300'}`}>
+                    {collectionBusy === (qa.questionIndex >= 0 ? qa.questionIndex : i) ? <Loader2 className="h-4 w-4 animate-spin" /> : collections?.[qa.questionIndex >= 0 ? qa.questionIndex : i] ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
+                    {t(collections?.[qa.questionIndex >= 0 ? qa.questionIndex : i] ? 'report.collection.saved' : 'report.collection.save')}
+                  </button>
                 </div>
 
                 {qa.questionText && (
@@ -578,11 +598,14 @@ function StructuredReportBody({ report, transcript, t }) {
 export default function InterviewReportPage() {
   const { t, i18n } = useTranslation()
   const { interviewId } = useParams()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState(null)
   const [interview, setInterview] = useState(null)
   const [retrying, setRetrying] = useState(false)
   const [reportTranslating, setReportTranslating] = useState(false)
+  const [collections, setCollections] = useState({})
+  const [collectionBusy, setCollectionBusy] = useState(null)
   const finalizeInFlightRef = useRef(false)
   const interviewRef = useRef(null)
   const reportLangRef = useRef('')
@@ -619,6 +642,13 @@ export default function InterviewReportPage() {
       const j = await res.json()
       reportLangRef.current = normalizeUiCode(j?.interview?.report_ui_locale || j?.interview?.language)
       setInterview(j.interview)
+      const collectionResponse = await fetch(`${backendUrl}/api/growth-center/collections?interviewId=${encodeURIComponent(interviewId)}&source=report`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (collectionResponse.ok) {
+        const collectionBody = await collectionResponse.json()
+        setCollections(Object.fromEntries((collectionBody.collections || []).map(item => [Number(item.question_index), item])))
+      }
     } catch {
       setErr(tRef.current('report.loadError'))
     } finally {
@@ -627,6 +657,55 @@ export default function InterviewReportPage() {
   }, [backendUrl, interviewId])
 
   useEffect(() => { void fetchInterview() }, [fetchInterview])
+
+  const ensureReportCollection = useCallback(async (questionIndex) => {
+    const existing = collections[questionIndex]
+    if (existing) return existing
+    const response = await authenticatedFetch(`${backendUrl}/api/growth-center/collections`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ interviewId, questionIndex, source: 'report' }),
+    })
+    const body = await response.json().catch(() => ({}))
+    if (!response.ok || !body.collection) throw new Error(body.error || 'collection failed')
+    setCollections(current => ({ ...current, [Number(body.collection.question_index)]: body.collection }))
+    return body.collection
+  }, [backendUrl, collections, interviewId])
+
+  const toggleCollection = useCallback(async (questionIndex) => {
+    setCollectionBusy(questionIndex)
+    setErr(null)
+    try {
+      const existing = collections[questionIndex]
+      if (existing) {
+        const response = await authenticatedFetch(`${backendUrl}/api/growth-center/collections/${existing.id}`, { method: 'DELETE' })
+        if (!response.ok) throw new Error('delete failed')
+        setCollections(current => {
+          const next = { ...current }
+          delete next[questionIndex]
+          return next
+        })
+      } else await ensureReportCollection(questionIndex)
+    } catch { setErr(t('report.collection.failed')) } finally { setCollectionBusy(null) }
+  }, [backendUrl, collections, ensureReportCollection, t])
+
+  const startRecommendedTask = useCallback(async (task) => {
+    const questionIndex = task?.questionIndex === null || task?.questionIndex === undefined ? NaN : Number(task.questionIndex)
+    if (!Number.isInteger(questionIndex) || questionIndex < 0) return
+    setCollectionBusy(questionIndex)
+    setErr(null)
+    try {
+      const collection = await ensureReportCollection(questionIndex)
+      const response = await authenticatedFetch(`${backendUrl}/api/growth-center/collections/${collection.id}/practice`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Request-Id': createInterviewRequestId() },
+        body: JSON.stringify({ idempotencyKey: createInterviewRequestId() }),
+      })
+      const body = await response.json().catch(() => ({}))
+      if (!response.ok || !body.interviewId) throw new Error(body.error || 'practice failed')
+      navigate(`/interview/${body.interviewId}`)
+    } catch { setErr(t('report.collection.practiceFailed')) } finally { setCollectionBusy(null) }
+  }, [backendUrl, ensureReportCollection, navigate, t])
 
   useEffect(() => {
     const iv = interview
@@ -790,6 +869,8 @@ export default function InterviewReportPage() {
           </Link>
         </motion.div>
 
+        {err && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300" role="alert">{err}</div>}
+
         <article className="space-y-16">
           <motion.header
             initial={{ opacity: 0, y: 20 }}
@@ -863,7 +944,7 @@ export default function InterviewReportPage() {
                 )}
               </div>
             ) : hasStructuredReport ? (
-              <StructuredReportBody report={parsedReport} transcript={transcript} t={t} />
+              <StructuredReportBody report={parsedReport} transcript={transcript} t={t} collections={collections} collectionBusy={collectionBusy} onToggleCollection={toggleCollection} onStartTask={startRecommendedTask} />
             ) : (
               <div className="space-y-16">
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">

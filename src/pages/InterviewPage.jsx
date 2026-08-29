@@ -14,7 +14,7 @@ import { InterviewThemeToggle } from '../components/ThemeToggle'
 import {
   Clock, Globe2, Briefcase, ArrowLeft, AlertCircle,
   Play, ChevronDown, ChevronUp,
-  Loader2, Video, VideoOff, Mic,
+  Loader2, Video, VideoOff, Mic, FileText,
 } from 'lucide-react'
 import BackgroundAurora from '../components/BackgroundAurora'
 
@@ -109,7 +109,13 @@ export default function InterviewPage() {
   }, [t, i18n.language])
 
   useEffect(() => {
-    if (location.state || !routeInterviewId) {
+    if (location.state?.sessionLaunch) {
+      setRestoredState(location.state)
+      setRestoreLoading(false)
+      navigate(`${location.pathname}${location.search}`, { replace: true, state: null })
+      return undefined
+    }
+    if (restoredState || !routeInterviewId) {
       setRestoreLoading(false)
       return undefined
     }
@@ -128,6 +134,24 @@ export default function InterviewPage() {
         const iv = body.interview
         if (iv.status === 'completed' && iv.report_json) {
           navigate(`/interview/${iv.id}/report`, { replace: true })
+          return
+        }
+        if ((iv.mode || 'formal') === 'formal') {
+          const requestId = createInterviewRequestId()
+          void fetch(`${getBackendBaseUrl()}/api/interviews/${iv.id}/finalize`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${session.access_token}`,
+              'X-Request-Id': requestId,
+            },
+            body: JSON.stringify({ messages: [], reportUiLanguage: i18n.language }),
+            keepalive: true,
+          }).catch(() => {})
+          navigate('/dashboard', {
+            replace: true,
+            state: { reportGenerating: true, interviewId: iv.id },
+          })
           return
         }
         if (!cancelled) setRestoredState({
@@ -152,12 +176,13 @@ export default function InterviewPage() {
       }
     })()
     return () => { cancelled = true }
-  }, [location.state, navigate, routeInterviewId, t])
+  }, [i18n.language, location.pathname, location.search, location.state, navigate, restoredState, routeInterviewId, t])
 
   const [chatPhase, setChatPhase] = useState('idle')
   const [showEndModal,   setShowEndModal]   = useState(false)
   const [finalizing,     setFinalizing]     = useState(false)
   const [finalizeError,  setFinalizeError]  = useState(null)
+  const [endNotice,      setEndNotice]      = useState(null)
   const chatRef = useRef(null)
   const finalizeInFlightRef = useRef(false)
   const finalizeCompletedRef = useRef(false)
@@ -336,15 +361,17 @@ export default function InterviewPage() {
 
   const finalizeAndGoReport = useCallback(async (trigger = 'manual') => {
     if (finalizeInFlightRef.current) return
+    const background = trigger === 'manual'
     finalizeInFlightRef.current = true
     chatRef.current?.stopInterview?.()
     setShowEndModal(false); setFinalizeError(null)
+    if (background) setEndNotice({ status: 'generating' })
     if (!interviewId) {
       finalizeInFlightRef.current = false
       navigate('/dashboard')
       return
     }
-    setFinalizing(true)
+    setFinalizing(!background)
     const requestId = createInterviewRequestId()
     const transcript = chatRef.current?.getTranscript?.() ?? []
     let token = authTokenRef.current
@@ -354,7 +381,11 @@ export default function InterviewPage() {
         token = session?.access_token
         authTokenRef.current = token || null
       }
-      if (!token) { setFinalizeError(t('report.finalizeNoAuth')); return }
+      if (!token) {
+        setFinalizeError(t('report.finalizeNoAuth'))
+        if (background) setEndNotice({ status: 'failed' })
+        return
+      }
 
       await recordInterviewClientEvent({
         interviewId,
@@ -459,10 +490,13 @@ export default function InterviewPage() {
           messageCount: transcript.length,
           metadata: { trigger, responseRequestId },
         })
-        setFinalizeError(detail); return
+        setFinalizeError(detail)
+        if (background) setEndNotice({ status: 'failed' })
+        return
       }
       finalizeCompletedRef.current = true
-      navigate(`/interview/${interviewId}/report`)
+      if (background) setEndNotice({ status: 'ready' })
+      else navigate(`/interview/${interviewId}/report`)
     } catch (e) {
       console.error('[finalize]', e)
       await recordInterviewClientEvent({
@@ -476,6 +510,7 @@ export default function InterviewPage() {
         metadata: { trigger },
       })
       setFinalizeError(t('report.finalizeNetwork'))
+      if (background) setEndNotice({ status: 'failed' })
     } finally {
       finalizeInFlightRef.current = false
       setFinalizing(false)
@@ -510,10 +545,11 @@ export default function InterviewPage() {
     const handlePageHide = () => {
       if (finalizeCompletedRef.current || finalizeInFlightRef.current) return
       const transcript = chatRef.current?.getTranscript?.() ?? []
+      const requestId = createInterviewRequestId()
       void recordInterviewClientEvent({
         interviewId,
         token: authTokenRef.current,
-        requestId: createInterviewRequestId(),
+        requestId,
         eventType: 'interview_exit',
         stage: 'client',
         messageCount: transcript.length,
@@ -524,10 +560,33 @@ export default function InterviewPage() {
         },
         keepalive: true,
       })
+      if (mode === 'formal' && authTokenRef.current) {
+        void fetch(`${getBackendBaseUrl()}/api/interviews/${interviewId}/finalize`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authTokenRef.current}`,
+            'X-Request-Id': requestId,
+          },
+          body: JSON.stringify({ messages: [], reportUiLanguage: language }),
+          keepalive: true,
+        }).catch(() => {})
+      } else if (mode === 'practice' && authTokenRef.current) {
+        void fetch(`${getBackendBaseUrl()}/api/interview-sessions/${interviewId}/pause`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authTokenRef.current}`,
+            'X-Request-Id': requestId,
+          },
+          body: JSON.stringify({ idempotencyKey: requestId }),
+          keepalive: true,
+        }).catch(() => {})
+      }
     }
     window.addEventListener('pagehide', handlePageHide)
     return () => window.removeEventListener('pagehide', handlePageHide)
-  }, [interviewId])
+  }, [interviewId, language, mode])
 
   if (restoreLoading || !position) {
     return <div className="flex min-h-screen items-center justify-center bg-white text-sm font-bold text-slate-500 dark:bg-slate-950">{restoreError || t('interview.restoring')}</div>
@@ -968,6 +1027,25 @@ export default function InterviewPage() {
               >
                 {t('interview.continue')}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {endNotice && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/45 p-6 backdrop-blur-sm" role="dialog" aria-modal="true" aria-live="polite">
+          <div className="w-full max-w-md rounded-[2.5rem] border border-slate-200 bg-white p-9 shadow-2xl dark:border-slate-800 dark:bg-slate-950">
+            <div className="mb-7 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-300">
+              {endNotice.status === 'generating' ? <Loader2 className="h-8 w-8 animate-spin" /> : endNotice.status === 'ready' ? <FileText className="h-8 w-8" /> : <AlertCircle className="h-8 w-8 text-red-500" />}
+            </div>
+            <h3 className="font-serif text-3xl font-black text-slate-950 dark:text-white">{t(`interview.endNotice.${endNotice.status}Title`)}</h3>
+            <p className="mt-4 text-base leading-relaxed text-slate-500 dark:text-slate-300">{t(`interview.endNotice.${endNotice.status}Body`)}</p>
+            {endNotice.status === 'failed' && finalizeError && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700 dark:bg-red-950/30 dark:text-red-300">{finalizeError}</p>}
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              <button type="button" onClick={() => navigate('/dashboard')} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white dark:bg-white dark:text-slate-950">{t('interview.endNotice.openGrowth')}</button>
+              {endNotice.status === 'failed'
+                ? <button type="button" onClick={() => void finalizeAndGoReport('manual')} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-black text-slate-800 dark:border-slate-700 dark:text-white">{t('interview.endNotice.retry')}</button>
+                : <button type="button" onClick={() => setEndNotice(null)} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-black text-slate-800 dark:border-slate-700 dark:text-white">{t('interview.endNotice.stay')}</button>}
             </div>
           </div>
         </div>

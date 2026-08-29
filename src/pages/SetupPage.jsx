@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
@@ -315,15 +315,19 @@ function EnergyBadge({ amount, label, t }) {
 export default function SetupPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
+  const offerSprintDefaults = location.state?.offerSprintDefaults || {}
   const [selectedCategory, setSelectedCategory] = useState('')
   const [form, setForm] = useState({
-    position: '',
-    jobDescription: '',
+    position: String(offerSprintDefaults.position || ''),
+    jobDescription: String(offerSprintDefaults.jobDescription || ''),
     language: 'English',
-    duration: 10,
+    duration: Math.max(5, Math.min(60, Number(offerSprintDefaults.duration) || 10)),
     interviewerStyle: 'balanced',
-    interviewerType: 'mixed',
-    mode: 'formal',
+    interviewerType: ['hr', 'technical', 'mixed'].includes(offerSprintDefaults.interviewerType)
+      ? offerSprintDefaults.interviewerType
+      : 'mixed',
+    mode: offerSprintDefaults.mode === 'practice' ? 'practice' : 'formal',
     difficulty: 'medium',
     employmentType: 'full_time',
   })
@@ -584,6 +588,7 @@ export default function SetupPage() {
     navigate(`/interview/${interviewId}`, {
       state: {
         ...form,
+        sessionLaunch: true,
         roleTrack: 'work',
         interviewId,
         deadlineAt: createdInterview?.deadline_at || null,
