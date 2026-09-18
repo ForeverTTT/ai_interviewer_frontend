@@ -760,13 +760,13 @@
     "roleAssistant": "Interviewer",
     "roleUser": "Ihre Antwort",
     "growth": {
-      "eyebrow": "Aktionszentrum für die Offer-Vorbereitung",
+      "eyebrow": "Interview-Vorbereitung",
       "title": "Wachstumszentrum",
-      "subtitle": "Jede wirksame Übung bringt Sie Ihrem Offer näher. Prüfen Sie das letzte Ergebnis und setzen Sie dann die wichtigste Übung fort.",
+      "subtitle": "Heute zählt nur der nächste Schritt.",
       "overview": "Wachstumsübersicht",
       "loadFailed": "Wachstumsdaten konnten nicht geladen werden. Bitte aktualisieren Sie die Seite.",
-      "minutes": "{{count}} Min. wirksames Training",
-      "hoursMinutes": "{{hours}} Std. {{minutes}} Min. wirksames Training",
+      "minutes": "{{count}} Min.",
+      "hoursMinutes": "{{hours}} Std. {{minutes}} Min.",
       "viewReport": "Vollständigen Bericht öffnen",
       "continuePractice": "Übung fortsetzen",
       "generating": "Bericht wird erstellt",
@@ -781,9 +781,9 @@
         "insufficient": "Zu wenig Belege; keine Vermutung",
         "dimensions": { "technical": "Technik", "experience": "Erfahrungsbelege", "structure": "Struktur", "communication": "Zusammenarbeit", "strategy": "Rollenstrategie" },
         "title": "Interview-Bereitschaft",
-        "description": "Ihre aktuelle Vorbereitung nur auf Basis eindeutiger Berichtsbelege. Keine Wahrscheinlichkeit für ein Offer.",
-        "pendingTitle": "Zuverlässige Bewertung ausstehend",
-        "pendingBody": "Das aktuelle Berichtsformat enthält keinen standardisierten Basiswert. Deshalb zeigen wir keine Schätzung an."
+        "description": "Aus Ihrem letzten Interviewbericht.",
+        "pendingTitle": "Noch keine Bewertung",
+        "pendingBody": "Nach einem formellen Mock erscheint sie hier."
       },
       "practice": { "title": "Übungsfortschritt", "count": "wirksame Sessions" },
       "rhythm": { "title": "Wochenrhythmus", "weeklyDays": "wirksame Trainingstage", "streak": "{{count}} Tage in Folge" },
@@ -809,7 +809,7 @@
       "history": {
         "eyebrow": "Training und Ergebnisse",
         "title": "Interview-Review-Verlauf",
-        "subtitle": "Jede Karte ist direkt öffnbar; die Hauptaktion unterscheidet Bericht und Fortsetzung klar.",
+        "subtitle": "Bericht öffnen oder eine Übung fortsetzen.",
         "filterLabel": "Review-Verlauf filtern",
         "filters": { "all": "Alle", "reports": "Berichte", "continue": "Fortsetzen" },
         "emptyTitle": "Noch keine Interview-Reviews",
@@ -871,9 +871,9 @@
   "growthSprint": {
     "eyebrow": "Offer-Sprint",
     "empty": {
-      "title": "Machen Sie aus dem nächsten Interview einen konkreten Weg",
-      "body": "Legen Sie Zielrolle und Termine fest. Jede Woche entstehen 3–5 Aufgaben aus echten Berichten, schwachen Dimensionen und gespeicherten Fragen.",
-      "create": "Sprint-Plan anlegen",
+      "title": "Auf das nächste Interview vorbereiten",
+      "body": "Rolle und Datum eintragen, Wochenplan erhalten.",
+      "create": "Plan erstellen",
       "steps": {
         "position": "Zielrolle wählen und optional die Stellenbeschreibung ergänzen",
         "interview": "Nächstes Interview oder Zieltermin für das Offer eintragen",
@@ -892,6 +892,7 @@
       "jdPlaceholder": "Aufgaben und Anforderungen für passendere Aufgaben einfügen…",
       "weeklyTarget": "Ziel für wirksame Trainingstage pro Woche",
       "days": "{{count}} Tage",
+      "moreSettings": "Stellenbeschreibung und Erinnerungen",
       "reminders": {
         "inApp": "Hinweise in der App",
         "browser": "Browser-Benachrichtigungen",
@@ -899,7 +900,7 @@
         "weeklyReport": "Erinnerung an den Wochenbericht"
       },
       "notConfigured": "Dienst nicht verbunden",
-      "save": "Speichern und Wochenplan erstellen",
+      "save": "Plan speichern",
       "cancel": "Abbrechen",
       "remove": "Plan löschen",
       "removeConfirm": "Diesen Offer-Sprint mit Wochenaufgaben und Erinnerungen löschen? Berichte, Sammlungen und Interviewverlauf bleiben erhalten."
@@ -922,12 +923,12 @@
       "restart": { "title": "Eine Pause löscht den Fortschritt nicht", "body": "Bis zum Wochenziel fehlen {{count}} Tage. Eine kurze Aufgabe reicht für einen sanften Neustart." }
     },
     "stage": {
-      "foundation": "Kompetenzen abdecken: Fähigkeiten und Belege für die Rolle aufbauen",
-      "focused": "Fokussierte Vorbereitung: schwache Dimensionen trainieren und formell simulieren",
-      "imminent": "Interview rückt näher: Simulation, Review und Checkliste priorisieren",
-      "final48": "Letzte 48 Stunden: Ausdruck festigen statt Umfang erhöhen",
-      "interview_day": "Interviewtag: Vorbereitung leicht und praktisch halten",
-      "renew": "Der vorige Termin ist vorbei; bitte das nächste Ziel aktualisieren"
+      "foundation": "Grundlagen aufbauen",
+      "focused": "Schwächen gezielt üben",
+      "imminent": "Interview bald — jetzt simulieren",
+      "final48": "Letzte 48 Stunden — prüfen",
+      "interview_day": "Heute nur leicht vorbereiten",
+      "renew": "Zieldatum aktualisieren"
     },
     "countdown": {
       "interview": "Bis zum Interview",
@@ -936,8 +937,13 @@
       "update": "Aktualisierung nötig"
     },
     "progress": {
-      "title": "Fortschritt dieser Woche",
-      "days": "{{current}} wirksame Trainingstage; Ziel {{target}}"
+      "title": "Diese Woche",
+      "days": "{{current}} / {{target}} Trainingstage"
+    },
+    "summary": {
+      "practice": "{{count}} Übungen · {{duration}}",
+      "otherTasks": "{{count}} weitere Aufgaben",
+      "allDone": "Diese Woche ist geschafft"
     },
     "tasks": {
       "eyebrow": "Adaptive Wochenaufgaben",
@@ -951,13 +957,13 @@
       "complete": "Als erledigt markieren",
       "skip": "Aufgabe überspringen",
       "types": {
-        "baseline": { "title": "Ein formelles Basisinterview abschließen", "reason": "Eine nachvollziehbare Basis schaffen, damit spätere Hinweise belegt sind.", "unlock": "Erste formelle Basis freischalten" },
-        "focus_question": { "title": "Die nächste Schlüsselfrage lösen", "reason": "Ein gezielter Versuch für die aktuelle Priorität {{dimension}}.", "unlock": "Beleg für den nächsten Vergleich sammeln" },
-        "formal_mock": { "title": "Formelle Simulation für die Zielrolle", "reason": "Vorbereitung im realistischen Tempo eines Interviews für {{position}} prüfen.", "unlock": "Vergleichbaren Bericht erzeugen" },
-        "review_collection": { "title": "Eine gespeicherte Frage erneut üben", "reason": "Eine bekannte Lücke in einen neuen Antwortversuch verwandeln.", "unlock": "Sammlung in Verbesserung umsetzen" },
-        "pre_interview_checklist": { "title": "Checkliste vor dem Interview abschließen", "reason": "Zeit, Technik, Unterlagen, Praxisbelege und Rückfragen bestätigen.", "unlock": "Kurzfristige Auslassungen vermeiden" },
-        "self_intro": { "title": "Einleitung für die Zielrolle verbessern", "reason": "Einen klaren Einstieg mit rollenrelevanten Belegen aufbauen.", "unlock": "Stabilen Intervieweinstieg schaffen" },
-        "weekly_review": { "title": "Kurzes Wochenreview durchführen", "reason": "Berichte und gespeicherte Fragen prüfen und den nächsten Beleg auswählen.", "unlock": "Nächste Woche fokussiert halten" }
+        "baseline": { "title": "Formellen Mock starten", "reason": "Aktuellen Stand prüfen.", "unlock": "Erste formelle Basis freischalten" },
+        "focus_question": { "title": "Eine wichtige Frage üben", "reason": "{{dimension}} gezielt üben.", "unlock": "Beleg für den nächsten Vergleich sammeln" },
+        "formal_mock": { "title": "Zielrolle simulieren", "reason": "Ein vollständiges {{position}}-Interview üben.", "unlock": "Vergleichbaren Bericht erzeugen" },
+        "review_collection": { "title": "Gespeicherte Frage wiederholen", "reason": "Eine Review-Frage neu beantworten.", "unlock": "Sammlung in Verbesserung umsetzen" },
+        "pre_interview_checklist": { "title": "Vorbereitung prüfen", "reason": "Zeit, Technik, Unterlagen und Rückfragen prüfen.", "unlock": "Kurzfristige Auslassungen vermeiden" },
+        "self_intro": { "title": "Selbstvorstellung üben", "reason": "Den Einstieg vorbereiten.", "unlock": "Stabilen Intervieweinstieg schaffen" },
+        "weekly_review": { "title": "Woche prüfen", "reason": "Berichte und gespeicherte Fragen ansehen.", "unlock": "Nächste Woche fokussiert halten" }
       }
     },
     "weekly": {

@@ -769,13 +769,13 @@
     "roleAssistant": "Interviewer",
     "roleUser": "Your Answer",
     "growth": {
-      "eyebrow": "Offer preparation action hub",
+      "eyebrow": "Interview prep",
       "title": "Growth Center",
-      "subtitle": "Every effective practice session moves you closer to your offer. Review the latest result, then continue the work that matters most.",
+      "subtitle": "Do the one thing that matters today.",
       "overview": "Growth overview",
       "loadFailed": "Growth data could not be loaded. Refresh and try again.",
-      "minutes": "{{count}} min effective training",
-      "hoursMinutes": "{{hours}} hr {{minutes}} min effective training",
+      "minutes": "{{count}} min",
+      "hoursMinutes": "{{hours}} hr {{minutes}} min",
       "viewReport": "View Full Report",
       "continuePractice": "Continue Practice",
       "generating": "Report Generating",
@@ -790,9 +790,9 @@
         "insufficient": "Insufficient evidence; no inference",
         "dimensions": { "technical": "Technical", "experience": "Experience evidence", "structure": "Structure", "communication": "Collaboration", "strategy": "Role strategy" },
         "title": "Career Readiness",
-        "description": "Your current interview readiness based only on explicit report evidence. It is not a probability of receiving an offer.",
-        "pendingTitle": "Awaiting a reliable assessment",
-        "pendingBody": "The current report format has no standardized base score, so no estimated value is shown. You can still review the complete feedback."
+        "description": "Based on your latest interview report.",
+        "pendingTitle": "No score yet",
+        "pendingBody": "Complete a formal mock to see it."
       },
       "practice": { "title": "Practice Total", "count": "effective sessions" },
       "rhythm": { "title": "Weekly Rhythm", "weeklyDays": "effective training days", "streak": "{{count}}-day streak" },
@@ -818,7 +818,7 @@
       "history": {
         "eyebrow": "Training and results",
         "title": "Interview Review Records",
-        "subtitle": "Each card opens directly, while the primary action clearly distinguishes reports from resumable sessions.",
+        "subtitle": "Open a report or continue an unfinished session.",
         "filterLabel": "Filter review records",
         "filters": { "all": "All", "reports": "Reports", "continue": "Continue" },
         "emptyTitle": "No interview review records yet",
@@ -880,9 +880,9 @@
   "growthSprint": {
     "eyebrow": "Offer sprint",
     "empty": {
-      "title": "Turn your next interview into an executable route",
-      "body": "Set a target role and milestones. Each week you will get 3–5 tasks grounded in your real reports, weakest dimensions, and saved questions.",
-      "create": "Create sprint plan",
+      "title": "Prepare for your next interview",
+      "body": "Add a role and date to get this week's plan.",
+      "create": "Create plan",
       "steps": {
         "position": "Choose the target role and optionally add its job description",
         "interview": "Add your next interview or target Offer date",
@@ -901,6 +901,7 @@
       "jdPlaceholder": "Paste responsibilities and requirements for more relevant tasks…",
       "weeklyTarget": "Effective training target per week",
       "days": "{{count}} days",
+      "moreSettings": "Job description and reminders",
       "reminders": {
         "inApp": "In-app milestone reminders",
         "browser": "Browser notifications",
@@ -908,7 +909,7 @@
         "weeklyReport": "Weekly growth report reminder"
       },
       "notConfigured": "Service not connected",
-      "save": "Save and generate this week",
+      "save": "Save plan",
       "cancel": "Cancel",
       "remove": "Delete plan",
       "removeConfirm": "Delete this Offer sprint and its weekly tasks and reminders? Reports, collections, and interview history will stay intact."
@@ -931,12 +932,12 @@
       "restart": { "title": "A pause does not erase your progress", "body": "Your weekly target has {{count}} days left. One short task is enough for a gentle restart." }
     },
     "stage": {
-      "foundation": "Capability coverage: build the role's required skills and evidence",
-      "focused": "Focused preparation: train weak dimensions and run formal mocks",
-      "imminent": "Interview approaching: prioritize a formal mock, review, and checklist",
-      "final48": "Final 48 hours: consolidate delivery instead of adding volume",
-      "interview_day": "Interview day: keep preparation light and practical",
-      "renew": "The previous milestone has passed; update your next target"
+      "foundation": "Build the basics",
+      "focused": "Focus on weak areas",
+      "imminent": "Interview soon — start simulating",
+      "final48": "Final 48 hours — review",
+      "interview_day": "Keep it light today",
+      "renew": "Update your target date"
     },
     "countdown": {
       "interview": "Until interview",
@@ -945,8 +946,13 @@
       "update": "Update needed"
     },
     "progress": {
-      "title": "Weekly task progress",
-      "days": "{{current}} effective training days this week; target {{target}}"
+      "title": "This week",
+      "days": "{{current}} / {{target}} training days"
+    },
+    "summary": {
+      "practice": "{{count}} sessions · {{duration}}",
+      "otherTasks": "{{count}} other tasks",
+      "allDone": "You're done for this week"
     },
     "tasks": {
       "eyebrow": "Adaptive weekly tasks",
@@ -960,13 +966,13 @@
       "complete": "Mark complete",
       "skip": "Skip this task",
       "types": {
-        "baseline": { "title": "Complete a formal baseline interview", "reason": "Establish a traceable baseline so future guidance has evidence.", "unlock": "Unlock your first formal baseline" },
-        "focus_question": { "title": "Solve your next pivotal question", "reason": "Run one focused attempt on {{dimension}}, your current priority.", "unlock": "Add evidence for the next comparison" },
-        "formal_mock": { "title": "Run a formal target-role mock", "reason": "Test readiness at the realistic pace of a {{position}} interview.", "unlock": "Generate a comparable formal report" },
-        "review_collection": { "title": "Retry one saved review question", "reason": "Turn a known gap into a new answer attempt.", "unlock": "Turn collection into improvement" },
-        "pre_interview_checklist": { "title": "Complete the pre-interview checklist", "reason": "Confirm timing, equipment, materials, evidence stories, and your questions.", "unlock": "Reduce last-minute omissions" },
-        "self_intro": { "title": "Refine your target-role introduction", "reason": "Build a concise opening around role-relevant evidence.", "unlock": "Create a stable interview opening" },
-        "weekly_review": { "title": "Run a light weekly review", "reason": "Review reports and saved questions, then choose the next evidence to improve.", "unlock": "Keep next week focused" }
+        "baseline": { "title": "Run a formal mock", "reason": "See where you stand.", "unlock": "Unlock your first formal baseline" },
+        "focus_question": { "title": "Practice one key question", "reason": "Work on {{dimension}}.", "unlock": "Add evidence for the next comparison" },
+        "formal_mock": { "title": "Mock the target role", "reason": "Practice a full {{position}} interview.", "unlock": "Generate a comparable formal report" },
+        "review_collection": { "title": "Retry a saved question", "reason": "Answer one review question again.", "unlock": "Turn collection into improvement" },
+        "pre_interview_checklist": { "title": "Check interview prep", "reason": "Check time, equipment, materials, and questions.", "unlock": "Reduce last-minute omissions" },
+        "self_intro": { "title": "Practice your introduction", "reason": "Get your opening ready.", "unlock": "Create a stable interview opening" },
+        "weekly_review": { "title": "Review this week", "reason": "Check your reports and saved questions.", "unlock": "Keep next week focused" }
       }
     },
     "weekly": {

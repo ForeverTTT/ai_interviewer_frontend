@@ -57,13 +57,23 @@ export async function authenticatedFetch(url, options = {}) {
   const refreshedSession = await getValidSession(true, session.access_token)
   response = await send(refreshedSession.access_token)
   if (response.status === 401) {
-    // The backend has rejected both the stored token and a newly refreshed
-    // token. Keeping that session in browser storage leaves protected pages
-    // accessible but every API call fails, so clear it and let the route guard
-    // take the user back to sign-in.
-    await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
+    // A backend 401 does not prove that the Supabase session is invalid: the
+    // API may be pointed at the wrong project or have its own auth/config
+    // problem. Validate the refreshed token with Supabase before clearing the
+    // browser session so an unrelated API failure cannot log the user out.
+    const { data: userData, error: userError } = await supabase.auth.getUser(
+      refreshedSession.access_token,
+    )
+
+    if (userError || !userData.user) {
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
+      const authError = new Error(userError?.message || 'Authentication session expired')
+      authError.code = 'AUTH_EXPIRED'
+      throw authError
+    }
+
     const authError = new Error('Backend rejected a freshly renewed session')
-    authError.code = 'AUTH_REJECTED'
+    authError.code = 'BACKEND_AUTH_REJECTED'
     throw authError
   }
   return response

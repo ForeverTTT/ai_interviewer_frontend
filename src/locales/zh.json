@@ -770,13 +770,13 @@
     "roleAssistant": "面试官",
     "roleUser": "你的回答",
     "growth": {
-      "eyebrow": "Offer 准备行动中心",
+      "eyebrow": "面试准备",
       "title": "成长中心",
-      "subtitle": "每一次有效练习，都离你的 Offer 更近一步。先看清最近结果，再继续最值得完成的训练。",
+      "subtitle": "先做今天最重要的一步。",
       "overview": "成长概览",
       "loadFailed": "成长数据加载失败，请刷新页面后重试。",
-      "minutes": "{{count}} 分钟有效训练",
-      "hoursMinutes": "{{hours}} 小时 {{minutes}} 分钟有效训练",
+      "minutes": "{{count}} 分钟",
+      "hoursMinutes": "{{hours}} 小时 {{minutes}} 分钟",
       "viewReport": "查看完整报告",
       "continuePractice": "继续练习",
       "generating": "报告生成中",
@@ -791,9 +791,9 @@
         "insufficient": "证据不足，暂不推断",
         "dimensions": { "technical": "技术", "experience": "经历证据", "structure": "结构表达", "communication": "沟通协作", "strategy": "策略匹配" },
         "title": "职场胜算",
-        "description": "表示当前面试准备度，只采用面试报告中的明确证据，不代表获得 Offer 的概率。",
-        "pendingTitle": "等待可靠评估",
-        "pendingBody": "当前报告尚未提供统一的基础分数，因此这里不展示推测值。完成模拟后仍可先查看完整反馈。"
+        "description": "来自最近的面试报告。",
+        "pendingTitle": "还没有评分",
+        "pendingBody": "完成一次正式模拟后显示。"
       },
       "practice": { "title": "练习积累", "count": "次有效练习" },
       "rhythm": { "title": "本周节奏", "weeklyDays": "天有效训练", "streak": "连续 {{count}} 天" },
@@ -823,7 +823,7 @@
       "history": {
         "eyebrow": "训练与结果",
         "title": "面试复盘记录",
-        "subtitle": "整张卡片可打开；主按钮会明确区分查看报告与继续原练习。",
+        "subtitle": "查看报告，或继续未完成的练习。",
         "filterLabel": "筛选复盘记录",
         "filters": { "all": "全部", "reports": "报告", "continue": "待继续" },
         "emptyTitle": "还没有面试复盘记录",
@@ -885,9 +885,9 @@
   "growthSprint": {
     "eyebrow": "Offer 冲刺计划",
     "empty": {
-      "title": "把下一次面试变成一条可执行路线",
-      "body": "设定目标职位和时间节点，系统会按你的真实报告、薄弱维度与收藏内容，每周生成 3–5 个可直接开始的任务。",
-      "create": "建立冲刺计划",
+      "title": "为下一场面试做准备",
+      "body": "设置岗位和日期，马上得到本周计划。",
+      "create": "创建计划",
       "steps": {
         "position": "选择目标职位，可补充职位描述",
         "interview": "填写下一次面试或期望拿到 Offer 的日期",
@@ -906,6 +906,7 @@
       "jdPlaceholder": "粘贴职责与要求，后续任务会更贴合岗位……",
       "weeklyTarget": "每周有效训练目标",
       "days": "{{count}} 天",
+      "moreSettings": "职位描述和提醒",
       "reminders": {
         "inApp": "站内节点提醒",
         "browser": "浏览器通知",
@@ -913,7 +914,7 @@
         "weeklyReport": "周成长报告提醒"
       },
       "notConfigured": "服务暂未接入",
-      "save": "保存并生成本周任务",
+      "save": "保存计划",
       "cancel": "取消",
       "remove": "删除计划",
       "removeConfirm": "确定删除当前 Offer 冲刺计划及其周任务和提醒吗？报告、收藏和面试历史不会受到影响。"
@@ -936,12 +937,12 @@
       "restart": { "title": "中断不等于清零", "body": "本周目标还差 {{count}} 天，完成一个短任务即可温和重启。" }
     },
     "stage": {
-      "foundation": "能力覆盖阶段：优先补齐岗位所需能力与证据",
-      "focused": "聚焦准备阶段：围绕薄弱维度安排练习与正式模拟",
-      "imminent": "临近面试阶段：优先正式模拟、复盘和面试清单",
-      "final48": "最后 48 小时：收束表达，避免无效堆量",
-      "interview_day": "面试当天：只做轻量检查与状态准备",
-      "renew": "原时间节点已结束，请更新下一目标"
+      "foundation": "打好基础",
+      "focused": "集中练弱项",
+      "imminent": "面试临近，开始模拟",
+      "final48": "最后 48 小时，查漏补缺",
+      "interview_day": "今天轻量准备",
+      "renew": "请更新目标日期"
     },
     "countdown": {
       "interview": "距离面试",
@@ -950,8 +951,13 @@
       "update": "待更新"
     },
     "progress": {
-      "title": "本周任务进度",
-      "days": "本周已有效训练 {{current}} 天，目标 {{target}} 天"
+      "title": "本周进度",
+      "days": "已练 {{current}} / {{target}} 天"
+    },
+    "summary": {
+      "practice": "累计 {{count}} 次练习 · {{duration}}",
+      "otherTasks": "其他 {{count}} 个任务",
+      "allDone": "本周任务已完成"
     },
     "tasks": {
       "eyebrow": "自适应周任务",
@@ -965,13 +971,13 @@
       "complete": "标记完成",
       "skip": "跳过本任务",
       "types": {
-        "baseline": { "title": "完成一次正式基线面试", "reason": "先建立可追踪的能力基线，后续建议才有证据。", "unlock": "解锁首份正式能力基线" },
-        "focus_question": { "title": "攻克下一道关键题", "reason": "针对当前最需要提升的 {{dimension}} 做一次聚焦练习。", "unlock": "为下一次能力比较补充证据" },
-        "formal_mock": { "title": "完成目标岗位正式模拟", "reason": "按 {{position}} 的真实面试节奏验证准备状态。", "unlock": "生成可比较的正式报告" },
-        "review_collection": { "title": "重练一张待复习题卡", "reason": "把已发现的问题转化成一次新的回答。", "unlock": "让收藏从记录变成改进" },
-        "pre_interview_checklist": { "title": "完成面试前检查清单", "reason": "确认时间、设备、材料、核心案例与反问问题。", "unlock": "降低临场遗漏风险" },
-        "self_intro": { "title": "打磨目标岗位自我介绍", "reason": "用岗位相关证据收束开场表达。", "unlock": "建立稳定的面试开场" },
-        "weekly_review": { "title": "完成本周轻复盘", "reason": "查看收藏与报告，选择下一条最值得改进的证据。", "unlock": "让下周任务保持聚焦" }
+        "baseline": { "title": "做一次正式模拟", "reason": "先看看当前水平。", "unlock": "解锁首份正式能力基线" },
+        "focus_question": { "title": "练一道关键题", "reason": "练习当前弱项：{{dimension}}。", "unlock": "为下一次能力比较补充证据" },
+        "formal_mock": { "title": "模拟目标岗位面试", "reason": "按 {{position}} 的节奏完整练一次。", "unlock": "生成可比较的正式报告" },
+        "review_collection": { "title": "重练一道收藏题", "reason": "重新回答一道待复习题。", "unlock": "让收藏从记录变成改进" },
+        "pre_interview_checklist": { "title": "检查面试准备", "reason": "检查时间、设备、材料和反问。", "unlock": "降低临场遗漏风险" },
+        "self_intro": { "title": "练自我介绍", "reason": "练好面试开场。", "unlock": "建立稳定的面试开场" },
+        "weekly_review": { "title": "看本周复盘", "reason": "看看本周报告和收藏题。", "unlock": "让下周任务保持聚焦" }
       }
     },
     "weekly": {

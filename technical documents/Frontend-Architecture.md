@@ -530,9 +530,11 @@ colors: {
 
 OAuth 登录页面，支持 Google 和 LinkedIn OIDC 两种登录方式，使用 Supabase Auth SDK。
 
-### AuthCallbackPage (151 行)
+### AuthCallbackPage
 
-OAuth 回调处理页面，调用 `exchangeCodeForSession` 将授权码换为会话 token，成功后跳转 `/dashboard`。
+OAuth 回调处理页面，调用 `exchangeCodeForSession` 将授权码换为会话 token，成功后跳转 `/setup`。授权码只可兑换一次；页面会复用同一次进行中的兑换请求，以兼容 React StrictMode 在开发环境对 Effect 的重放，避免第二次兑换失败后误判为登录失败。回调错误会保留在页面上供用户查看和手动返回登录页，不会自动清除会话或强制跳转。
+
+后端接口返回 `401` 时，`authenticatedFetch` 会刷新 token 并重试。若重试仍为 `401`，前端会再向 Supabase 验证刷新后的 token：只有 Supabase 同样确认会话无效时才清除本地登录态；若 Supabase 会话仍有效，则保留登录状态并将问题作为后端鉴权错误上报，避免单个接口或后端配置异常导致用户被强制退出。
 
 ### SetupPage
 
@@ -568,12 +570,16 @@ OAuth 回调处理页面，调用 `exchangeCodeForSession` 将授权码换为会
 - 面试进度条
 - 面试结束 → 根据模式生成不同侧重点的报告
 
-### DashboardPage (584 行)
+### DashboardPage
 
-仪表盘，展示：
-- 面试历史列表（含删除、查看报告）
-- 游戏化统计（签到、经验值、等级）
-- 快速操作入口
+成长中心，按“行动 → 结果 → 复盘”组织：
+
+- Offer 冲刺计划置顶：目标日期、倒计时、本周进度与唯一“今天先做”任务；其余周任务默认折叠
+- 总有效练习次数和有效时长并入冲刺卡，本周有效天数并入计划进度，不再重复显示“练习积累 / 本周节奏”卡
+- 职场胜算只使用正式面试报告证据，展示技术、经历证据、结构表达、沟通协作、策略匹配五维
+- 最新复盘提供醒目的完整报告入口；暂停中的练习可从原 `interviewId` 继续
+- 最近待复习题卡提供 `/notes` 入口，完整收藏库不挤占成长中心
+- 面试复盘记录支持报告、待继续筛选及删除；进入页面不会批量触发历史报告生成
 
 ### ProfilePage (2062 行)
 
