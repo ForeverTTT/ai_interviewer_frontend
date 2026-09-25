@@ -5,14 +5,15 @@ import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import {
   ArrowLeft, Briefcase, Globe2, Clock, FileText, Loader2, RefreshCw,
-  Sparkles, ListChecks, Target, MessageSquareQuote, GitCompare,
+  Sparkles, ListChecks, Target, MessageSquareQuote,
   User, CheckCircle2, AlertTriangle, Lightbulb, Zap, ArrowRight,
-  Bookmark, BookmarkCheck, PlayCircle, TrendingUp,
+  Bookmark, BookmarkCheck, PlayCircle,
   ChevronLeft, ChevronRight, Eye, EyeOff, LayoutList, Layers,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { authenticatedFetch } from '../lib/authenticatedFetch'
 import { createInterviewRequestId } from '../lib/interviewEvents'
+import { normalizeCjkSpacing } from '../lib/textNormalization'
 
 function normalizeUiCode(code) {
   const c = String(code || '').toLowerCase()
@@ -287,7 +288,7 @@ function normalizeQaItem(x) {
   const questionIndex = x.questionIndex === null || x.questionIndex === undefined ? NaN : Number(x.questionIndex)
   const questionSummary = String(x.questionSummary || x.question || '').trim()
   const questionText = String(x.questionText || x.exactQuestion || x.interviewerQuestion || '').trim()
-  const yourAnswerSummary = String(x.yourAnswerSummary || x.candidateAnswer || x.yourAnswer || '').trim()
+  const yourAnswerSummary = normalizeCjkSpacing(String(x.yourAnswerSummary || x.candidateAnswer || x.yourAnswer || '').trim())
   const referenceExample = String(x.referenceExample || x.referenceAnswer || '').trim()
   const gaps = Array.isArray(x.gaps) ? x.gaps.map((g) => String(g || '').trim()).filter(Boolean) : []
   const howToImprove = String(x.howToImprove || x.improvementTip || '').trim()
@@ -372,7 +373,7 @@ function buildQaCards(qaReview, transcript, lineReviewByIndex) {
 
   let current = null
   transcript.forEach((message, index) => {
-    const content = String(message?.content || '').trim()
+    const content = normalizeCjkSpacing(String(message?.content || '').trim())
     const review = lineReviewByIndex.get(index)
     if (message?.role === 'assistant') {
       pushCard(current)
@@ -386,7 +387,6 @@ function buildQaCards(qaReview, transcript, lineReviewByIndex) {
         howToImprove: '',
         reviews: [],
       }
-      if (review) current.reviews.push(review)
       return
     }
     if (!current) {
@@ -432,117 +432,108 @@ function buildQaCards(qaReview, transcript, lineReviewByIndex) {
   return cards
 }
 
-/** 小节外壳：左侧总结栏的三张卡共用 */
-function AsideSection({ icon: Icon, tone = 'ink', title, children }) {
-  const toneCls = {
-    ink: 'text-brand-ink',
-    success: 'text-brand-success',
-    danger: 'text-brand-danger',
-  }[tone]
-  return (
-    <section className="brand-float rounded-[20px] px-5 py-5">
-      <div className="mb-4 flex items-center gap-2.5">
-        <Icon className={`h-4 w-4 shrink-0 ${toneCls}`} />
-        <h2 className="font-brand text-[15px] font-semibold tracking-[-0.01em] text-brand-ink">{title}</h2>
-      </div>
-      {children}
-    </section>
-  )
+function getCardStudyContent(card) {
+  const fallbackReference = card.reviews.find((review) => review.modelAnswer)?.modelAnswer || ''
+  const referenceText = card.referenceExample || fallbackReference
+  const adviceItems = [
+    card.howToImprove,
+    ...card.reviews.flatMap((review) => [review.parse, ...(review.improvements || [])]),
+  ]
+    .map((item) => String(item || '').trim())
+    .filter(Boolean)
+    .filter((item, index, items) => {
+      const normalized = item.replace(/\s+/g, '').toLowerCase()
+      return items.findIndex((candidate) => candidate.replace(/\s+/g, '').toLowerCase() === normalized) === index
+    })
+  return { referenceText, adviceItems }
 }
 
-/** 题卡正面/背面共用的一块标注内容 */
-function CardBlock({ icon: Icon, tone, label, children }) {
-  const tones = {
-    ink: { rail: 'bg-brand-ink', text: 'text-brand-ink', box: 'border-brand-line bg-brand-inset' },
-    violet: { rail: 'bg-brand-violet', text: 'text-brand-violet', box: 'border-brand-violet/25 bg-brand-violet/[0.05]' },
-    success: { rail: 'bg-brand-success', text: 'text-brand-success', box: 'border-brand-success/25 bg-brand-success/[0.05]' },
-    danger: { rail: 'bg-brand-danger', text: 'text-brand-danger', box: 'border-brand-danger/25 bg-brand-danger/[0.05]' },
+/** 一张题卡的背面：回答对比 + 差距 + 合并后的改进建议 */
+function StudySectionHeading({ icon: Icon, label, tone = 'ink' }) {
+  const toneCls = {
+    ink: 'bg-brand-inset text-brand-ink',
+    success: 'bg-brand-success/10 text-brand-success',
+    danger: 'bg-brand-danger/10 text-brand-danger',
+    violet: 'bg-brand-violet/10 text-brand-violet',
   }[tone]
+
   return (
-    <div className="space-y-2">
-      <div className={`flex items-center gap-2 text-[11.5px] font-semibold ${tones.text}`}>
-        <span className={`h-3 w-[2px] rounded-full ${tones.rail}`} aria-hidden="true" />
-        {Icon && <Icon className="h-3.5 w-3.5" />}
-        {label}
-      </div>
-      <div className={`rounded-xl border px-4 py-3.5 text-[14px] leading-relaxed text-brand-ink ${tones.box}`}>
-        {children}
-      </div>
+    <div className="flex items-center gap-3">
+      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${toneCls}`}>
+        <Icon className="h-[17px] w-[17px]" />
+      </span>
+      <h3 className="min-w-0 text-[16px] font-semibold leading-tight text-brand-ink">{label}</h3>
     </div>
   )
 }
 
-/** 一张题卡的「背面」：参考答案 / 差距 / 建议 / AI 点评 */
-function CardBack({ card, t }) {
+/** 差距与行动属于同一个反馈闭环，用双栏关系取代两张孤立卡片。 */
+function FeedbackPair({ gaps, adviceItems, t, compact = false }) {
+  if (gaps.length === 0 && adviceItems.length === 0) return null
+  const hasBoth = gaps.length > 0 && adviceItems.length > 0
+
   return (
-    <div className="space-y-4">
-      {card.referenceExample && (
-        <CardBlock icon={CheckCircle2} tone="success" label={t('report.referenceExampleLabel')}>
-          <p className="whitespace-pre-wrap"><RichText text={card.referenceExample} /></p>
-        </CardBlock>
-      )}
+    <section className="overflow-hidden rounded-2xl border border-brand-line">
+      <div className={`grid ${hasBoth ? 'md:grid-cols-2' : ''}`}>
+        {gaps.length > 0 && (
+          <div className={`bg-brand-danger/[0.055] ${compact ? 'px-5 py-5' : 'px-5 py-6 sm:px-7 sm:py-7'}`}>
+            <StudySectionHeading icon={AlertTriangle} label={t('report.gapsLabel')} tone="danger" />
+            <ul className="mt-5 space-y-3.5">
+              {gaps.map((gap, index) => (
+                <li key={index} className="flex gap-3 text-[15.5px] leading-[1.8] text-brand-ink sm:text-[16px]">
+                  <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-danger" />
+                  <span><RichText text={gap} /></span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-      {card.gaps.length > 0 && (
-        <CardBlock icon={AlertTriangle} tone="danger" label={t('report.gapsLabel')}>
-          <ul className="space-y-2">
-            {card.gaps.map((g, j) => (
-              <li key={j} className="flex gap-2.5">
-                <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-brand-danger" aria-hidden="true" />
-                <span><RichText text={g} /></span>
-              </li>
-            ))}
-          </ul>
-        </CardBlock>
-      )}
+        {adviceItems.length > 0 && (
+          <div className={`relative border-brand-line bg-brand-success/[0.065] ${hasBoth ? 'border-t md:border-l md:border-t-0' : ''} ${compact ? 'px-5 py-5' : 'px-5 py-6 sm:px-7 sm:py-7'}`}>
+            {hasBoth && (
+              <span className="absolute -left-[17px] top-7 hidden h-8 w-8 items-center justify-center rounded-full border border-brand-line bg-brand-card text-brand-success shadow-sm md:flex" aria-hidden="true">
+                <ArrowRight className="h-4 w-4" />
+              </span>
+            )}
+            <StudySectionHeading icon={Lightbulb} label={t('report.improveTipLabel')} tone="success" />
+            <ol className="mt-5 space-y-3.5">
+              {adviceItems.map((item, index) => (
+                <li key={index} className="flex gap-3 text-[15.5px] leading-[1.8] text-brand-ink sm:text-[16px]">
+                  <span className="mt-0.5 flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-brand-success/10 px-1.5 text-[11px] font-semibold tabular-nums text-brand-success">{index + 1}</span>
+                  <span><RichText text={item} /></span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
 
-      {card.howToImprove && (
-        <CardBlock icon={Lightbulb} tone="violet" label={t('report.improveTipLabel')}>
-          <p><RichText text={card.howToImprove} /></p>
-        </CardBlock>
-      )}
+function CardBack({ card, t }) {
+  const { referenceText, adviceItems } = getCardStudyContent(card)
 
-      {/*
-        AI 点评只保留「解析」。原来还带「改进点」和「参考标答」，但上面的
-        主要差距 / 改进建议 / 标准回答样例已经把这两块讲过一遍了，重复读很累。
-        兜底：只有当上面确实没有对应内容时（例如这一轮没有 qaReview，只有逐条点评），
-        才把它们补出来，避免信息真的丢掉。
-      */}
-      {card.reviews.map((review, ri) => {
-        const showImprovements = review.improvements?.length > 0
-          && card.gaps.length === 0 && !card.howToImprove
-        const showModelAnswer = review.modelAnswer && !card.referenceExample
-        if (!review.parse && !showImprovements && !showModelAnswer) return null
-        return (
-          <CardBlock key={ri} icon={Sparkles} tone="violet" label={t('report.aiFeedback')}>
-            <div className="space-y-3.5">
-              {review.parse && (
-                <p className="text-[13.5px] leading-relaxed text-brand-ink">
-                  <RichText text={review.parse} />
-                </p>
-              )}
-              {showImprovements && (
-                <div className="space-y-1.5">
-                  <p className="text-[11.5px] font-semibold text-brand-muted">{t('report.lineImprovements')}</p>
-                  <ul className="space-y-1.5">
-                    {review.improvements.map((g, j) => (
-                      <li key={j} className="flex gap-2 text-[13.5px] text-brand-ink">
-                        <ArrowRight className="mt-1 h-3.5 w-3.5 shrink-0 text-brand-violet" />
-                        <span><RichText text={g} /></span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {showModelAnswer && (
-                <div className="space-y-1 border-t border-brand-violet/20 pt-3">
-                  <p className="text-[11.5px] font-semibold text-brand-success">{t('report.lineModelAnswer')}</p>
-                  <p className="text-[13.5px] text-brand-ink"><RichText text={review.modelAnswer} /></p>
-                </div>
-              )}
-            </div>
-          </CardBlock>
-        )
-      })}
+  return (
+    <div className="space-y-5">
+      <div className={`grid overflow-hidden rounded-2xl border border-brand-line bg-brand-line gap-px ${referenceText ? 'md:grid-cols-2' : ''}`}>
+        <section className="bg-brand-card px-5 py-6 sm:px-7 sm:py-7">
+          <StudySectionHeading icon={User} label={t('report.yourAnswerLabel')} />
+          {card.yourAnswer
+            ? <p className="mt-5 whitespace-pre-wrap text-[16px] leading-[1.85] text-brand-ink sm:text-[17px]"><RichText text={card.yourAnswer} /></p>
+            : <p className="mt-5 text-[16px] leading-relaxed text-brand-muted sm:text-[17px]">{t('report.yourAnswerEmpty')}</p>}
+        </section>
+
+        {referenceText && (
+          <section className="bg-brand-card px-5 py-6 sm:px-7 sm:py-7">
+            <StudySectionHeading icon={CheckCircle2} label={t('report.referenceExampleLabel')} tone="success" />
+            <p className="mt-5 whitespace-pre-wrap text-[16px] leading-[1.85] text-brand-ink sm:text-[17px]"><RichText text={referenceText} /></p>
+          </section>
+        )}
+      </div>
+
+      <FeedbackPair gaps={card.gaps} adviceItems={adviceItems} t={t} />
     </div>
   )
 }
@@ -554,23 +545,25 @@ function CardBack({ card, t }) {
  * 只有标签带语义色，正文一律纯黑，块与块之间用一条细横线分隔。
  */
 function OverviewRow({ label, tone = 'ink', children }) {
-  const labelCls = {
-    ink: 'text-brand-muted',
-    success: 'text-brand-success',
-    danger: 'text-brand-danger',
-    violet: 'text-brand-violet',
+  const markerCls = {
+    ink: 'bg-brand-muted',
+    success: 'bg-brand-success',
+    danger: 'bg-brand-danger',
+    violet: 'bg-brand-violet',
   }[tone]
   return (
-    <div className="grid gap-1.5 py-4 sm:grid-cols-[128px_minmax(0,1fr)] sm:gap-6">
-      <div className={`pt-[3px] text-[12px] font-medium leading-snug ${labelCls}`}>{label}</div>
-      <div className="min-w-0 text-[14px] leading-relaxed text-brand-ink">{children}</div>
+    <div className="grid gap-3 py-5 sm:grid-cols-[160px_minmax(0,1fr)] sm:gap-7">
+      <div className="flex items-start gap-2.5 pt-0.5">
+        <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${markerCls}`} />
+        <span className="pt-0.5 text-[14px] font-semibold leading-snug text-brand-ink">{label}</span>
+      </div>
+      <div className="min-w-0 text-[16px] leading-[1.75] text-brand-ink">{children}</div>
     </div>
   )
 }
 
 /** 逐题复习：单题卡（一次一题、可翻面）与所有题总览两种视图 */
-function QaDeck({ cards, t, collections, collectionBusy, onToggleCollection }) {
-  const [mode, setMode] = useState('card')
+function QaDeck({ cards, mode = 'card', t, collections, collectionBusy, onToggleCollection }) {
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
 
@@ -585,6 +578,21 @@ function QaDeck({ cards, t, collections, collectionBusy, onToggleCollection }) {
     })
   }
 
+  useEffect(() => {
+    if (mode !== 'card') return undefined
+    const onKeyDown = (event) => {
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLButtonElement) return
+      if (event.key === 'ArrowLeft') go(-1)
+      if (event.key === 'ArrowRight') go(1)
+      if (event.code === 'Space') {
+        event.preventDefault()
+        setRevealed((value) => !value)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [mode, total])
+
   if (total === 0) {
     return (
       <div className="brand-float rounded-[22px] px-6 py-16 text-center text-[13px] text-brand-muted">
@@ -593,112 +601,117 @@ function QaDeck({ cards, t, collections, collectionBusy, onToggleCollection }) {
     )
   }
 
-  const modes = [
-    { key: 'card', label: t('report.tabCards'), icon: Layers },
-    { key: 'list', label: t('report.tabOverview'), icon: LayoutList },
-  ]
-
   return (
-    <section className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="min-w-0">
-          <h2 className="font-brand text-[18px] font-semibold tracking-[-0.01em] text-brand-ink">
-            {t('report.deckTitle')}
-          </h2>
-          <p className="mt-1.5 max-w-xl text-[12.5px] leading-relaxed text-brand-muted">
-            {t('report.deckSub')}
-          </p>
-        </div>
-        <div className="flex shrink-0 gap-1 rounded-xl border border-brand-line bg-brand-inset p-1">
-          {modes.map((m) => (
-            <button
-              key={m.key}
-              type="button"
-              onClick={() => setMode(m.key)}
-              aria-pressed={mode === m.key}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
-                mode === m.key ? 'bg-brand-card text-brand-ink shadow-sm' : 'text-brand-muted hover:text-brand-ink'
-              }`}
-            >
-              <m.icon className="h-3.5 w-3.5" />
-              {m.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
+    <section>
       {mode === 'card' ? (
-        <div className="brand-float overflow-hidden rounded-[22px]">
-          {/* 卡头：轮次 + 进度 + 前后翻页 */}
-          <div className="flex items-center justify-between gap-3 border-b border-brand-line bg-brand-inset px-5 py-3.5">
-            <span className="shrink-0 rounded-full border border-brand-line bg-brand-card px-2.5 py-1 text-[11px] font-medium text-brand-ink">
-              {t('report.qaRound', { n: index + 1 })}
-            </span>
-            <div className="flex items-center gap-2">
-              <CollectButton card={current} fallbackIndex={index} t={t} collections={collections} collectionBusy={collectionBusy} onToggleCollection={onToggleCollection} />
-              <span className="text-[12px] tabular-nums text-brand-muted">{index + 1} / {total}</span>
-              <button
-                type="button"
-                onClick={() => go(-1)}
-                disabled={index === 0}
-                aria-label={t('report.cardPrev')}
-                className="grid h-7 w-7 place-items-center rounded-lg border border-brand-line bg-brand-card text-brand-ink transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-35"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => go(1)}
-                disabled={index >= total - 1}
-                aria-label={t('report.cardNext')}
-                className="grid h-7 w-7 place-items-center rounded-lg border border-brand-line bg-brand-card text-brand-ink transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-35"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
+        <div className="overflow-hidden rounded-[26px] border border-brand-line bg-brand-card shadow-[0_18px_70px_rgb(24_24_31/0.08)]">
+          <div className="h-1.5 bg-brand-inset">
+            <motion.div
+              className="h-full rounded-r-full bg-brand-violet"
+              animate={{ width: `${((index + 1) / total) * 100}%` }}
+              transition={{ duration: 0.3 }}
+            />
           </div>
 
-          <div className="space-y-5 px-5 py-5">
-            {/* 正面：问题 + 你的回答 */}
-            <CardBlock icon={MessageSquareQuote} tone="ink" label={t('report.qaExactQuestionLabel')}>
-              <p className="whitespace-pre-wrap font-semibold">
-                {current.question || current.questionSummary || t('report.qaQuestionFallback')}
-              </p>
-            </CardBlock>
+          <div className="flex items-center justify-between gap-3 border-b border-brand-line px-5 py-4 sm:px-7">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="shrink-0 rounded-full bg-brand-inset px-3 py-1 text-[11px] font-semibold text-brand-ink">
+                {t('report.qaRound', { n: index + 1 })}
+              </span>
+              <span className="truncate text-[12px] text-brand-muted">{index + 1} / {total}</span>
+            </div>
+            <CollectButton card={current} fallbackIndex={index} t={t} collections={collections} collectionBusy={collectionBusy} onToggleCollection={onToggleCollection} />
+          </div>
 
-            <CardBlock icon={User} tone="ink" label={t('report.yourAnswerLabel')}>
-              {current.yourAnswer
-                ? <p className="whitespace-pre-wrap"><RichText text={current.yourAnswer} /></p>
-                : <p className="text-brand-muted">{t('report.yourAnswerEmpty')}</p>}
-            </CardBlock>
-
-            <button
-              type="button"
-              onClick={() => setRevealed((v) => !v)}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-ink px-5 py-3 text-[13.5px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90"
-            >
-              {revealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              {revealed ? t('report.cardHide') : t('report.cardReveal')}
-            </button>
-
-            <AnimatePresence initial={false}>
-              {revealed && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                  className="overflow-hidden"
+          <AnimatePresence mode="wait" initial={false}>
+            {!revealed ? (
+              <motion.div
+                key={`front-${index}`}
+                initial={{ opacity: 0, rotateY: -8, y: 8 }}
+                animate={{ opacity: 1, rotateY: 0, y: 0 }}
+                exit={{ opacity: 0, rotateY: 8, y: -8 }}
+                transition={{ duration: 0.22 }}
+                className="relative flex min-h-[480px] flex-col overflow-hidden px-6 py-8 sm:px-10 sm:py-10"
+              >
+                <div className="pointer-events-none absolute -right-12 -top-12 h-52 w-52 rounded-full bg-brand-glow/15 blur-3xl" />
+                <div className="relative flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-muted">
+                  <MessageSquareQuote className="h-4 w-4 text-brand-violet" />
+                  {t('report.qaExactQuestionLabel')}
+                </div>
+                <div className="relative flex flex-1 items-center justify-center py-10">
+                  <div className="max-w-3xl text-center">
+                    {current.questionSummary && current.questionSummary !== current.question && (
+                      <p className="mb-5 text-[12px] font-medium text-brand-violet">{current.questionSummary}</p>
+                    )}
+                    <p className="whitespace-pre-wrap font-brand text-[25px] font-semibold leading-[1.42] tracking-[-0.02em] text-brand-ink sm:text-[30px]">
+                      {current.question || current.questionSummary || t('report.qaQuestionFallback')}
+                    </p>
+                    <p className="mx-auto mt-6 max-w-md text-[13px] leading-relaxed text-brand-muted">{t('report.deckSub')}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRevealed(true)}
+                  className="relative mx-auto flex min-w-[220px] items-center justify-center gap-2 rounded-xl bg-brand-ink px-6 py-3.5 text-[13.5px] font-semibold text-brand-on-ink transition-all hover:-translate-y-0.5 hover:opacity-90"
                 >
-                  <div className="pt-1"><CardBack card={current} t={t} /></div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  <Eye className="h-4 w-4" />
+                  {t('report.cardReveal')}
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={`back-${index}`}
+                initial={{ opacity: 0, rotateY: 8, y: 8 }}
+                animate={{ opacity: 1, rotateY: 0, y: 0 }}
+                exit={{ opacity: 0, rotateY: -8, y: -8 }}
+                transition={{ duration: 0.22 }}
+                className="min-h-[480px] px-5 py-6 sm:px-7 sm:py-7"
+              >
+                <div className="mb-5 flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-violet">{t('report.qaRound', { n: index + 1 })}</p>
+                    <p className="mt-1.5 line-clamp-2 text-[15px] font-semibold leading-snug text-brand-ink">
+                      {current.question || current.questionSummary || t('report.qaQuestionFallback')}
+                    </p>
+                  </div>
+                  <button type="button" onClick={() => setRevealed(false)} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-brand-line px-3 py-2 text-[11.5px] font-medium text-brand-muted hover:text-brand-ink">
+                    <EyeOff className="h-3.5 w-3.5" />{t('report.cardHide')}
+                  </button>
+                </div>
+                <CardBack card={current} t={t} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="flex items-center justify-between border-t border-brand-line bg-brand-inset/60 px-5 py-4 sm:px-7">
+            <button
+              type="button" onClick={() => go(-1)} disabled={index === 0}
+              className="inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-[12.5px] font-medium text-brand-ink hover:bg-brand-card disabled:cursor-not-allowed disabled:opacity-30"
+            >
+              <ChevronLeft className="h-4 w-4" />{t('report.cardPrev')}
+            </button>
+            <div className="hidden items-center gap-1.5 sm:flex" aria-hidden="true">
+              {cards.map((_, cardIndex) => (
+                <button
+                  key={cardIndex} type="button" tabIndex={-1}
+                  onClick={() => { setIndex(cardIndex); setRevealed(false) }}
+                  className={`h-1.5 rounded-full transition-all ${cardIndex === index ? 'w-6 bg-brand-violet' : 'w-1.5 bg-brand-line hover:bg-brand-muted'}`}
+                />
+              ))}
+            </div>
+            <button
+              type="button" onClick={() => go(1)} disabled={index >= total - 1}
+              className="inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-[12.5px] font-medium text-brand-ink hover:bg-brand-card disabled:cursor-not-allowed disabled:opacity-30"
+            >
+              {t('report.cardNext')}<ChevronRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
       ) : (
         <div className="space-y-4">
-          {cards.map((card, i) => (
+          {cards.map((card, i) => {
+            const { referenceText, adviceItems } = getCardStudyContent(card)
+            return (
             <div key={i} className="brand-float overflow-hidden rounded-[22px]">
               {/* 题头：轮次 + 小结 + 本轮实际问题，问题本身就是最大的一行黑字 */}
               <div className="border-b border-brand-line bg-brand-inset px-6 py-4">
@@ -723,65 +736,123 @@ function QaDeck({ cards, t, collections, collectionBusy, onToggleCollection }) {
                     : <p className="text-brand-muted">{t('report.yourAnswerEmpty')}</p>}
                 </OverviewRow>
 
-                {card.referenceExample && (
+                {referenceText && (
                   <OverviewRow label={t('report.referenceExampleLabel')} tone="success">
-                    <p className="whitespace-pre-wrap"><RichText text={card.referenceExample} /></p>
+                    <p className="whitespace-pre-wrap"><RichText text={referenceText} /></p>
                   </OverviewRow>
                 )}
 
-                {card.gaps.length > 0 && (
-                  <OverviewRow label={t('report.gapsLabel')} tone="danger">
-                    <ul className="space-y-1.5">
-                      {card.gaps.map((g, j) => (
-                        <li key={j} className="flex gap-2.5">
-                          <span className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-brand-danger" aria-hidden="true" />
-                          <span><RichText text={g} /></span>
-                        </li>
-                      ))}
-                    </ul>
-                  </OverviewRow>
+                {(card.gaps.length > 0 || adviceItems.length > 0) && (
+                  <div className="py-5">
+                    <FeedbackPair gaps={card.gaps} adviceItems={adviceItems} t={t} compact />
+                  </div>
                 )}
-
-                {card.howToImprove && (
-                  <OverviewRow label={t('report.improveTipLabel')} tone="violet">
-                    <p><RichText text={card.howToImprove} /></p>
-                  </OverviewRow>
-                )}
-
-                {card.reviews.map((review, ri) => {
-                  const showImprovements = review.improvements?.length > 0
-                    && card.gaps.length === 0 && !card.howToImprove
-                  const showModelAnswer = review.modelAnswer && !card.referenceExample
-                  if (!review.parse && !showImprovements && !showModelAnswer) return null
-                  return (
-                    <OverviewRow key={ri} label={t('report.aiFeedback')} tone="violet">
-                      <div className="space-y-2.5">
-                        {review.parse && <p><RichText text={review.parse} /></p>}
-                        {showImprovements && (
-                          <ul className="space-y-1.5">
-                            {review.improvements.map((g, j) => (
-                              <li key={j} className="flex gap-2">
-                                <ArrowRight className="mt-1 h-3.5 w-3.5 shrink-0 text-brand-violet" />
-                                <span><RichText text={g} /></span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        {showModelAnswer && <p><RichText text={review.modelAnswer} /></p>}
-                      </div>
-                    </OverviewRow>
-                  )
-                })}
               </div>
             </div>
-          ))}
+          )})}
         </div>
       )}
     </section>
   )
 }
 
-function StructuredReportBody({ report, transcript, lineReviewByIndex, t, collections, collectionBusy, onToggleCollection, onStartTask }) {
+function ReportSummaryView({ summary, strengths, toImprove, readiness, readinessDimensions, readinessScore, hasReadinessScore, nextTask, t, collectionBusy, taskError, onStartTask }) {
+  return (
+    <div className="overflow-hidden rounded-[24px] border border-brand-line bg-brand-card">
+      <div className="grid divide-y divide-brand-line lg:grid-cols-[300px_minmax(0,1fr)] lg:divide-x lg:divide-y-0">
+        <section className="px-6 py-7 sm:px-8">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-muted">{t('report.readiness.title')}</p>
+          <div className="mt-5 flex items-center gap-4">
+            <div
+              className="relative grid h-[88px] w-[88px] shrink-0 place-items-center rounded-full"
+              style={{ background: hasReadinessScore ? `conic-gradient(rgb(var(--brand-violet)) ${readinessScore}%, rgb(var(--brand-line)) ${readinessScore}% 100%)` : 'rgb(var(--brand-line))' }}
+            >
+              <span className="absolute inset-[7px] rounded-full bg-brand-card" />
+              <span className="relative text-[25px] font-semibold tabular-nums text-brand-ink">{hasReadinessScore ? Math.round(readinessScore) : '—'}</span>
+            </div>
+            <p className="text-[12.5px] leading-relaxed text-brand-muted">{t(`report.readiness.${readiness?.assessment || 'partial'}`)}</p>
+          </div>
+
+          {readinessDimensions.length > 0 && (
+            <div className="mt-6 space-y-3.5 border-t border-brand-line pt-5">
+              {readinessDimensions.map(dimension => (
+                <div key={dimension.key} className="flex items-center gap-3">
+                  <span className="w-[76px] shrink-0 text-[11.5px] text-brand-ink">{t(`report.readiness.dimensions.${dimension.key}`)}</span>
+                  <span className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-brand-inset"><span className="block h-full rounded-full bg-brand-violet" style={{ width: `${dimension.score ?? 0}%` }} /></span>
+                  <span className="w-7 text-right text-[11.5px] font-semibold tabular-nums text-brand-ink">{dimension.score ?? '—'}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="px-6 py-7 sm:px-8">
+          <div className="flex items-center gap-2 text-[12px] font-semibold text-brand-ink"><Sparkles className="h-4 w-4 text-brand-violet" />{t('report.sectionSummary')}</div>
+          {summary.length > 0 ? (
+            <ol className="mt-5 space-y-4">
+              {summary.map((item, index) => (
+                <li key={index} className="grid grid-cols-[24px_minmax(0,1fr)] gap-3 text-[14px] leading-relaxed text-brand-ink">
+                  <span className="pt-0.5 text-[11px] tabular-nums text-brand-muted">{String(index + 1).padStart(2, '0')}</span>
+                  <span><RichText text={item} /></span>
+                </li>
+              ))}
+            </ol>
+          ) : <p className="mt-4 text-[13px] text-brand-muted">—</p>}
+        </section>
+      </div>
+
+      <div className="grid divide-y divide-brand-line border-t border-brand-line lg:grid-cols-2 lg:divide-x lg:divide-y-0">
+        <section className="px-6 py-7 sm:px-8">
+          <div className="flex items-center gap-2 text-[12px] font-semibold text-brand-success"><ListChecks className="h-4 w-4" />{t('report.sectionStrengths')}</div>
+          <ul className="mt-4 space-y-3">
+            {strengths.map((item, index) => (
+              <li key={index} className="flex gap-2.5 text-[13.5px] leading-relaxed text-brand-ink"><CheckCircle2 className="mt-1 h-3.5 w-3.5 shrink-0 text-brand-success" /><span><RichText text={item} /></span></li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="px-6 py-7 sm:px-8">
+          <div className="flex items-center gap-2 text-[12px] font-semibold text-brand-danger"><Target className="h-4 w-4" />{t('report.sectionImprove')}</div>
+          <ol className="mt-4 space-y-4">
+            {toImprove.map((item, index) => (
+              <li key={index} className="grid grid-cols-[24px_minmax(0,1fr)] gap-2.5">
+                <span className="grid h-6 w-6 place-items-center rounded-full bg-brand-danger/10 text-[10px] font-semibold text-brand-danger">{index + 1}</span>
+                <div><p className="text-[13.5px] font-semibold leading-snug text-brand-ink">{item.title}</p>{item.how && <p className="mt-1.5 text-[12.5px] leading-relaxed text-brand-muted"><RichText text={item.how} /></p>}</div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </div>
+
+      {nextTask && (
+        <section className="border-t border-brand-line bg-brand-inset/60 px-6 py-6 sm:px-8">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-muted"><PlayCircle className="h-3.5 w-3.5" />{t('report.readiness.nextTask')}</p>
+              <p className="mt-2 text-[14px] font-semibold text-brand-ink">{nextTask.title || nextTask.questionText}</p>
+              {nextTask.reason && <p className="mt-1 text-[12.5px] leading-relaxed text-brand-muted">{nextTask.reason}</p>}
+            </div>
+            {nextTask.questionIndex !== null && nextTask.questionIndex !== undefined && Number.isInteger(Number(nextTask.questionIndex)) && Number(nextTask.questionIndex) >= 0 && (
+              <button type="button" onClick={() => onStartTask?.(nextTask)} disabled={collectionBusy !== null} className="inline-flex min-w-[150px] shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-ink px-5 py-3 text-[12.5px] font-semibold text-brand-on-ink hover:opacity-90 disabled:cursor-wait disabled:opacity-55">
+                {collectionBusy !== null ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <PlayCircle className="h-3.5 w-3.5" />}
+                {t('report.readiness.startTask')}
+              </button>
+            )}
+          </div>
+          {taskError && (
+            <div className="mt-4 flex flex-col gap-3 rounded-xl border border-brand-danger/25 bg-brand-danger/[0.07] px-4 py-3 text-[12.5px] leading-relaxed text-brand-ink sm:flex-row sm:items-center sm:justify-between" role="alert">
+              <span>{taskError.message}</span>
+              {taskError.code === 'INSUFFICIENT_TOKENS' && <Link to="/profile" className="shrink-0 font-semibold text-brand-danger underline underline-offset-4">{t('common.rechargeNow')}</Link>}
+            </div>
+          )}
+        </section>
+      )}
+    </div>
+  )
+}
+
+function StructuredReportBody({ report, transcript, lineReviewByIndex, t, collections, collectionBusy, taskError, onToggleCollection, onStartTask }) {
+  const [view, setView] = useState('card')
   const transcriptQuestions = interviewerQuestionsFromTranscript(transcript)
   const qaReview = Array.isArray(report?.qaReview)
     ? report.qaReview.map(normalizeQaItem).filter(Boolean).map((item, index) => {
@@ -812,118 +883,41 @@ function StructuredReportBody({ report, transcript, lineReviewByIndex, t, collec
   const readiness = report?.careerReadiness && typeof report.careerReadiness === 'object' ? report.careerReadiness : null
   const readinessDimensions = Array.isArray(readiness?.dimensions) ? readiness.dimensions : []
   const nextTask = report?.nextPracticeTask && typeof report.nextPracticeTask === 'object' ? report.nextPracticeTask : null
+  const readinessScore = Number(readiness?.overallScore)
+  const hasReadinessScore = Number.isFinite(readinessScore) && readinessScore >= 0 && readinessScore <= 100
 
   const cards = buildQaCards(qaReview, Array.isArray(transcript) ? transcript : [], lineReviewByIndex)
+  const views = [
+    { key: 'card', label: t('report.tabCards'), icon: Layers },
+    { key: 'list', label: t('report.tabOverview'), icon: LayoutList },
+    { key: 'summary', label: t('report.summaryAside'), icon: FileText },
+  ]
 
   return (
-    <div className="grid gap-5 lg:grid-cols-12">
-
-      {/* ── 左栏：整份报告的总结，长页面滚动时吸顶 ── */}
-      <aside className="space-y-4 lg:col-span-4 lg:sticky lg:top-[calc(var(--ui-nav-h)+1.5rem)] lg:self-start lg:max-h-[calc(100dvh-var(--ui-nav-h)-3rem)] lg:overflow-y-auto lg:pr-1 custom-scrollbar">
-        {summary.length > 0 && (
-          <AsideSection icon={Sparkles} tone="ink" title={t('report.sectionSummary')}>
-            <ul className="space-y-2.5">
-              {summary.map((item, i) => (
-                <li key={i} className="flex gap-3 text-[14px] leading-relaxed text-brand-ink">
-                  <span className="shrink-0 text-[11px] font-medium tabular-nums text-brand-muted">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span><RichText text={item} /></span>
-                </li>
-              ))}
-            </ul>
-          </AsideSection>
-        )}
-
-        {strengths.length > 0 && (
-          <AsideSection icon={ListChecks} tone="success" title={t('report.sectionStrengths')}>
-            <ul className="space-y-2.5">
-              {strengths.map((item, i) => (
-                <li key={i} className="flex gap-2.5 text-[14px] leading-relaxed text-brand-ink">
-                  <CheckCircle2 className="mt-[3px] h-3.5 w-3.5 shrink-0 text-brand-success" />
-                  <span><RichText text={item} /></span>
-                </li>
-              ))}
-            </ul>
-          </AsideSection>
-        )}
-
-        {readinessDimensions.length > 0 && (
-          <AsideSection icon={TrendingUp} tone="ink" title={t('report.readiness.evidenceTitle')}>
-            <p className="mb-3 text-[12.5px] leading-relaxed text-brand-muted">{t('report.readiness.description')}</p>
-            <div className="mb-3 flex items-baseline gap-2 border-b border-brand-line pb-3">
-              <span className="text-[26px] font-semibold leading-none tabular-nums text-brand-ink">{readiness?.overallScore ?? '—'}</span>
-              <span className="text-[12px] text-brand-muted">/ 100</span>
-              <span className="ml-auto text-[11.5px] text-brand-muted">{t(`report.readiness.${readiness?.assessment || 'partial'}`)}</span>
-            </div>
-            <div className="divide-y divide-brand-line">
-              {readinessDimensions.map(dimension => (
-                <details key={dimension.key} className="py-2.5">
-                  <summary className="flex cursor-pointer list-none items-center gap-3">
-                    <span className="w-[68px] shrink-0 text-[12.5px] text-brand-ink">{t(`report.readiness.dimensions.${dimension.key}`)}</span>
-                    <span className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-brand-inset">
-                      <span className="block h-full rounded-full bg-brand-violet" style={{ width: `${dimension.score ?? 0}%` }} />
-                    </span>
-                    <span className="w-7 shrink-0 text-right text-[12.5px] font-semibold tabular-nums text-brand-ink">{dimension.score ?? '—'}</span>
-                  </summary>
-                  <p className="mt-2 text-[12px] leading-relaxed text-brand-muted">
-                    {dimension.evidence?.excerpt || t('report.readiness.insufficientEvidence')}
-                  </p>
-                  {dimension.action?.title && (
-                    <p className="mt-2 border-t border-brand-line pt-2 text-[12px] font-medium text-brand-ink">{dimension.action.title}</p>
-                  )}
-                </details>
-              ))}
-            </div>
-          </AsideSection>
-        )}
-
-        {nextTask && (
-          <AsideSection icon={PlayCircle} tone="ink" title={t('report.readiness.nextTask')}>
-            <p className="text-[13.5px] font-semibold leading-snug text-brand-ink">{nextTask.title || nextTask.questionText}</p>
-            {nextTask.reason && <p className="mt-1.5 text-[12.5px] leading-relaxed text-brand-muted">{nextTask.reason}</p>}
-            <p className="mt-2 text-[12px] text-brand-muted">{t('report.readiness.minutes', { count: nextTask.estimatedMinutes || 8 })}</p>
-            {nextTask.questionIndex !== null && nextTask.questionIndex !== undefined
-              && Number.isInteger(Number(nextTask.questionIndex)) && Number(nextTask.questionIndex) >= 0 && (
-              <button
-                type="button" onClick={() => onStartTask?.(nextTask)} disabled={collectionBusy !== null}
-                className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-brand-ink px-4 py-2.5 text-[12.5px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90 disabled:opacity-40"
-              >
-                <PlayCircle className="h-3.5 w-3.5" />{t('report.readiness.startTask')}
-              </button>
-            )}
-          </AsideSection>
-        )}
-
-        {toImprove.length > 0 && (
-          <AsideSection icon={Target} tone="danger" title={t('report.sectionImprove')}>
-            <ol className="space-y-3.5">
-              {toImprove.map((item, i) => (
-                <li key={i} className="border-l-2 border-brand-danger/40 pl-3.5">
-                  <p className="text-[13.5px] font-semibold leading-snug text-brand-ink">{item.title}</p>
-                  {item.why && (
-                    <p className="mt-1.5 text-[13px] leading-relaxed text-brand-ink">
-                      <span className="text-brand-muted">{t('report.whyLabel')}</span>
-                      <RichText text={item.why} />
-                    </p>
-                  )}
-                  {item.how && (
-                    <p className="mt-1 text-[13px] leading-relaxed text-brand-ink">
-                      <span className="text-brand-muted">{t('report.howLabel')}</span>
-                      <RichText text={item.how} />
-                    </p>
-                  )}
-                </li>
-              ))}
-            </ol>
-          </AsideSection>
-        )}
-      </aside>
-
-      {/* ── 右栏：逐题复习（单题卡 / 所有题总览）── */}
-      <div className="min-w-0 lg:col-span-8">
-        <QaDeck cards={cards} t={t} collections={collections} collectionBusy={collectionBusy} onToggleCollection={onToggleCollection} />
+    <div className="mx-auto max-w-[1080px] space-y-5">
+      <div className="flex flex-col gap-4 border-b border-brand-line pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="font-brand text-[19px] font-semibold tracking-[-0.01em] text-brand-ink">{view === 'summary' ? t('report.summaryAside') : t('report.deckTitle')}</h2>
+          <p className="mt-1.5 max-w-xl text-[12.5px] leading-relaxed text-brand-muted">{view === 'summary' ? t('report.subtitle') : t('report.deckSub')}</p>
+        </div>
+        <div className="flex w-full shrink-0 gap-1 rounded-xl border border-brand-line bg-brand-inset p-1 sm:w-auto" role="tablist">
+          {views.map(({ key, label, icon: Icon }) => (
+            <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)} className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors sm:flex-none ${view === key ? 'bg-brand-card text-brand-ink shadow-sm' : 'text-brand-muted hover:text-brand-ink'}`}>
+              <Icon className="h-3.5 w-3.5" />{label}
+            </button>
+          ))}
+        </div>
       </div>
+
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div key={view} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}>
+          {view === 'summary' ? (
+            <ReportSummaryView summary={summary} strengths={strengths} toImprove={toImprove} readiness={readiness} readinessDimensions={readinessDimensions} readinessScore={readinessScore} hasReadinessScore={hasReadinessScore} nextTask={nextTask} t={t} collectionBusy={collectionBusy} taskError={taskError} onStartTask={onStartTask} />
+          ) : (
+            <QaDeck cards={cards} mode={view} t={t} collections={collections} collectionBusy={collectionBusy} onToggleCollection={onToggleCollection} />
+          )}
+        </motion.div>
+      </AnimatePresence>
     </div>
   )
 }
@@ -939,6 +933,7 @@ export default function InterviewReportPage() {
   const [reportTranslating, setReportTranslating] = useState(false)
   const [collections, setCollections] = useState({})
   const [collectionBusy, setCollectionBusy] = useState(null)
+  const [practiceTaskError, setPracticeTaskError] = useState(null)
   const finalizeInFlightRef = useRef(false)
   const interviewRef = useRef(null)
   const reportLangRef = useRef('')
@@ -1027,17 +1022,31 @@ export default function InterviewReportPage() {
     if (!Number.isInteger(questionIndex) || questionIndex < 0) return
     setCollectionBusy(questionIndex)
     setErr(null)
+    setPracticeTaskError(null)
     try {
       const collection = await ensureReportCollection(questionIndex)
+      const requestId = createInterviewRequestId()
       const response = await authenticatedFetch(`${backendUrl}/api/growth-center/collections/${collection.id}/practice`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Request-Id': createInterviewRequestId() },
-        body: JSON.stringify({ idempotencyKey: createInterviewRequestId() }),
+        headers: { 'Content-Type': 'application/json', 'X-Request-Id': requestId },
+        body: JSON.stringify({ idempotencyKey: requestId }),
       })
       const body = await response.json().catch(() => ({}))
-      if (!response.ok || !body.interviewId) throw new Error(body.error || 'practice failed')
+      if (!response.ok || !body.interviewId) {
+        const cause = new Error(body.error || 'practice failed')
+        cause.code = body.code || 'PRACTICE_FAILED'
+        throw cause
+      }
       navigate(`/interview/${body.interviewId}`)
-    } catch { setErr(t('report.collection.practiceFailed')) } finally { setCollectionBusy(null) }
+    } catch (cause) {
+      const code = cause?.code || 'PRACTICE_FAILED'
+      setPracticeTaskError({
+        code,
+        message: code === 'INSUFFICIENT_TOKENS'
+          ? t('common.insufficientTokensDesc', { cost: 300 })
+          : t('report.collection.practiceFailed'),
+      })
+    } finally { setCollectionBusy(null) }
   }, [backendUrl, ensureReportCollection, navigate, t])
 
   useEffect(() => {
@@ -1204,44 +1213,44 @@ export default function InterviewReportPage() {
 
         {err && <div className="rounded-2xl border border-brand-danger/30 bg-brand-danger/[0.06] p-4 text-sm font-bold text-brand-danger/30 bg-brand-inset" role="alert">{err}</div>}
 
-        <article className="space-y-16">
+        <article className="space-y-8">
           <motion.header
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-10"
+            className="space-y-6"
           >
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-brand-line">
-              <div className="space-y-6 max-w-2xl">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-brand-card dark:bg-white text-white shadow-xl shadow-slate-900/10 transition-transform hover:rotate-3">
-                    <Zap className="w-8 h-8" />
+            <div className="flex flex-col justify-between gap-5 border-b border-brand-line pb-6 md:flex-row md:items-end">
+              <div className="max-w-2xl">
+                <div className="flex items-center gap-3.5">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-ink text-brand-on-ink">
+                    <Zap className="h-5 w-5" />
                   </div>
                   <div className="space-y-1">
-                    <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-md bg-brand-inset text-[10px] font-semibold uppercase tracking-widest text-brand-ink">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-muted">
                       {t('report.docLabel')}
                     </div>
-                    <h1 className="text-4xl sm:text-5xl font-semibold font-brand tracking-tight text-brand-ink dark:text-white">
+                    <h1 className="font-brand text-[29px] font-semibold tracking-[-0.025em] text-brand-ink sm:text-[34px]">
                       {t('report.title')}
                     </h1>
                   </div>
                 </div>
-                <p className="text-lg text-brand-muted font-medium leading-relaxed">
+                <p className="mt-3 text-[13.5px] leading-relaxed text-brand-muted">
                   {t('report.subtitle')}
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="px-4 py-2.5 rounded-2xl bg-brand-inset border border-brand-line flex items-center gap-3">
-                  <Briefcase className="w-4 h-4 text-brand-muted" />
-                  <span className="text-xs font-bold text-brand-muted text-brand-muted truncate max-w-[140px]">{interview?.position}</span>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11.5px] text-brand-muted">
+                <div className="flex items-center gap-1.5">
+                  <Briefcase className="h-3.5 w-3.5" />
+                  <span className="max-w-[180px] truncate">{interview?.position}</span>
                 </div>
-                <div className="px-4 py-2.5 rounded-2xl bg-brand-inset border border-brand-line flex items-center gap-3">
-                  <Globe2 className="w-4 h-4 text-brand-muted" />
-                  <span className="text-xs font-bold text-brand-muted text-brand-muted">{interview?.language}</span>
+                <div className="flex items-center gap-1.5">
+                  <Globe2 className="h-3.5 w-3.5" />
+                  <span>{interview?.language}</span>
                 </div>
-                <div className="px-4 py-2.5 rounded-2xl bg-brand-inset border border-brand-line flex items-center gap-3">
-                  <Clock className="w-4 h-4 text-brand-muted" />
-                  <span className="text-xs font-bold text-brand-muted text-brand-muted">{interview?.duration} {t('dashboard.durMin')}</span>
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>{interview?.duration} {t('dashboard.durMin')}</span>
                 </div>
               </div>
             </div>
@@ -1277,7 +1286,7 @@ export default function InterviewReportPage() {
                 )}
               </div>
             ) : hasStructuredReport ? (
-              <StructuredReportBody report={parsedReport} transcript={transcript} lineReviewByIndex={lineReviewByIndex} t={t} collections={collections} collectionBusy={collectionBusy} onToggleCollection={toggleCollection} onStartTask={startRecommendedTask} />
+              <StructuredReportBody report={parsedReport} transcript={transcript} lineReviewByIndex={lineReviewByIndex} t={t} collections={collections} collectionBusy={collectionBusy} taskError={practiceTaskError} onToggleCollection={toggleCollection} onStartTask={startRecommendedTask} />
             ) : (
               <div className="space-y-16">
                 <div className="p-4 rounded-xl bg-brand-inset border border-brand-line text-[10px] font-semibold uppercase tracking-widest text-brand-muted">
