@@ -1,15 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import {
   ArrowLeft, Briefcase, Globe2, Clock, FileText, Loader2, RefreshCw,
-  Sparkles, ListChecks, Target, MessageSquareQuote,
+  Sparkles, ListChecks, Target, MessageSquareQuote, GitCompare,
   User, CheckCircle2, AlertTriangle, Lightbulb, Zap, ArrowRight,
+  Bookmark, BookmarkCheck, PlayCircle, TrendingUp,
   ChevronLeft, ChevronRight, Eye, EyeOff, LayoutList, Layers,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { authenticatedFetch } from '../lib/authenticatedFetch'
+import { createInterviewRequestId } from '../lib/interviewEvents'
 
 function normalizeUiCode(code) {
   const c = String(code || '').toLowerCase()
@@ -79,8 +82,7 @@ function RichText({ text, className, strongClassName }) {
   if (!text) return null
   const parts = String(text).split(/(\*\*[^*\n]+\*\*)/g)
   if (parts.length === 1) return <span className={className}>{text}</span>
-  /* 重点不再靠「变紫 + 加粗」，改成薰衣草马克笔底 + 近黑字：在冷灰页面里更像划重点，
-     box-decoration-clone 保证跨行高亮两端都有圆角和内边距 */
+  /* 重点用薰衣草马克笔底 + 近黑字，而不是变色加粗；跨行时靠 box-decoration-clone 保持圆角 */
   const strongCls = strongClassName
     || 'rounded-[3px] bg-brand-glow/40 px-1 py-[2px] font-semibold text-brand-ink [box-decoration-break:clone] [-webkit-box-decoration-break:clone]'
   return (
@@ -197,7 +199,7 @@ function LegacySectionBody({ body, t }) {
   const blocks = parseLegacyBodyBlocks(body)
   if (!blocks.length) {
     return (
-      <p className="text-[14px] leading-relaxed text-brand-ink whitespace-pre-wrap">
+      <p className="text-[15px] leading-relaxed text-brand-muted text-brand-muted whitespace-pre-wrap">
         {stripMdNoise(body)}
       </p>
     )
@@ -210,7 +212,7 @@ function LegacySectionBody({ body, t }) {
           return (
             <p
               key={idx}
-              className="text-[14px] leading-[1.7] text-brand-ink whitespace-pre-wrap"
+              className="text-[15px] leading-[1.7] text-brand-muted text-brand-muted whitespace-pre-wrap"
             >
               {b.text}
             </p>
@@ -220,8 +222,8 @@ function LegacySectionBody({ body, t }) {
           return (
             <ul key={idx} className="space-y-2.5 pl-1">
               {b.items.map((item, j) => (
-                <li key={j} className="flex gap-3 text-[14px] leading-relaxed text-brand-ink">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-violet" aria-hidden />
+                <li key={j} className="flex gap-3 text-[15px] leading-relaxed text-brand-muted text-brand-muted">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-inset" aria-hidden />
                   <span className="min-w-0 flex-1">{item}</span>
                 </li>
               ))}
@@ -232,13 +234,13 @@ function LegacySectionBody({ body, t }) {
           return (
             <div
               key={idx}
-              className="rounded-xl border border-brand-violet/25 bg-brand-violet/[0.06] px-4 py-3"
+              className="rounded-xl border border-brand-line/80 bg-brand-inset/60 px-4 py-3/50/25"
             >
-              <div className="mb-1.5 flex items-center gap-2 text-[12.5px] font-bold text-brand-violet">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-brand-ink mb-1.5">
                 <MessageSquareQuote className="w-3.5 h-3.5" aria-hidden />
                 {t('report.legacyQuestionLabel')}
               </div>
-              <p className="text-[14px] font-medium leading-relaxed text-brand-ink">{b.text || '—'}</p>
+              <p className="text-[15px] font-medium text-brand-ink text-brand-muted leading-relaxed">{b.text || '—'}</p>
             </div>
           )
         }
@@ -246,25 +248,25 @@ function LegacySectionBody({ body, t }) {
           return (
             <div
               key={idx}
-              className="rounded-xl border border-brand-line bg-brand-inset px-4 py-3"
+              className="rounded-xl border border-brand-line/90 bg-brand-inset/90 px-4 py-3 bg-brand-card/50"
             >
-              <div className="mb-2 flex items-center gap-2 text-[12.5px] font-bold text-brand-muted">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-brand-muted mb-2">
                 <ListChecks className="w-3.5 h-3.5" aria-hidden />
                 {t('report.legacyAnswerLabel')}
               </div>
               {b.lead ? (
-                <p className="mb-2 text-[14px] leading-relaxed text-brand-ink">{b.lead}</p>
+                <p className="text-[15px] text-brand-ink text-brand-muted leading-relaxed mb-2">{b.lead}</p>
               ) : null}
               {b.rest?.length ? (
                 <ul className="space-y-2">
                   {b.rest.map((r, j) =>
                     r.kind === 'li' ? (
-                      <li key={j} className="flex gap-2.5 text-[13px] leading-relaxed text-brand-ink">
-                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-muted" aria-hidden />
+                      <li key={j} className="flex gap-2.5 text-[14px] leading-relaxed text-brand-muted text-brand-muted">
+                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-inset" aria-hidden />
                         <span>{r.text}</span>
                       </li>
                     ) : (
-                      <li key={j} className="list-none text-[13.5px] leading-relaxed text-brand-ink">
+                      <li key={j} className="text-[14px] leading-relaxed text-brand-muted list-none">
                         {r.text}
                       </li>
                     ),
@@ -282,7 +284,7 @@ function LegacySectionBody({ body, t }) {
 
 function normalizeQaItem(x) {
   if (!x || typeof x !== 'object') return null
-  const questionIndex = Number(x.questionIndex)
+  const questionIndex = x.questionIndex === null || x.questionIndex === undefined ? NaN : Number(x.questionIndex)
   const questionSummary = String(x.questionSummary || x.question || '').trim()
   const questionText = String(x.questionText || x.exactQuestion || x.interviewerQuestion || '').trim()
   const yourAnswerSummary = String(x.yourAnswerSummary || x.candidateAnswer || x.yourAnswer || '').trim()
@@ -328,6 +330,24 @@ function buildTranscriptLineReviewMap(report) {
     map.set(idx, { parse, improvements, modelAnswer })
   }
   return map
+}
+
+/** 收藏／取消收藏某一题。索引优先用 qaReview 的 questionIndex，退化到题卡序号。 */
+function CollectButton({ card, fallbackIndex, t, collections, collectionBusy, onToggleCollection }) {
+  if (!onToggleCollection) return null
+  const idx = Number.isInteger(card?.questionIndex) && card.questionIndex >= 0 ? card.questionIndex : fallbackIndex
+  const saved = Boolean(collections?.[idx])
+  const busy = collectionBusy === idx
+  return (
+    <button
+      type="button" disabled={busy} onClick={() => onToggleCollection(idx)}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11.5px] font-medium transition-colors disabled:opacity-40 ${
+        saved ? 'border-brand-ink bg-brand-card text-brand-ink' : 'border-brand-line bg-brand-card text-brand-muted hover:border-brand-ink hover:text-brand-ink'}`}
+    >
+      {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : saved ? <BookmarkCheck className="h-3.5 w-3.5" /> : <Bookmark className="h-3.5 w-3.5" />}
+      {t(saved ? 'report.collection.saved' : 'report.collection.save')}
+    </button>
+  )
 }
 
 /**
@@ -549,7 +569,7 @@ function OverviewRow({ label, tone = 'ink', children }) {
 }
 
 /** 逐题复习：单题卡（一次一题、可翻面）与所有题总览两种视图 */
-function QaDeck({ cards, t }) {
+function QaDeck({ cards, t, collections, collectionBusy, onToggleCollection }) {
   const [mode, setMode] = useState('card')
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
@@ -615,6 +635,7 @@ function QaDeck({ cards, t }) {
               {t('report.qaRound', { n: index + 1 })}
             </span>
             <div className="flex items-center gap-2">
+              <CollectButton card={current} fallbackIndex={index} t={t} collections={collections} collectionBusy={collectionBusy} onToggleCollection={onToggleCollection} />
               <span className="text-[12px] tabular-nums text-brand-muted">{index + 1} / {total}</span>
               <button
                 type="button"
@@ -681,13 +702,14 @@ function QaDeck({ cards, t }) {
             <div key={i} className="brand-float overflow-hidden rounded-[22px]">
               {/* 题头：轮次 + 小结 + 本轮实际问题，问题本身就是最大的一行黑字 */}
               <div className="border-b border-brand-line bg-brand-inset px-6 py-4">
-                <div className="flex items-baseline gap-3">
+                <div className="flex items-center gap-3">
                   <span className="shrink-0 text-[11px] font-medium tabular-nums text-brand-muted">
                     {t('report.qaRound', { n: i + 1 })}
                   </span>
                   {card.questionSummary && (
-                    <span className="truncate text-[12.5px] text-brand-muted">{card.questionSummary}</span>
+                    <span className="min-w-0 flex-1 truncate text-[12.5px] text-brand-muted">{card.questionSummary}</span>
                   )}
+                  <CollectButton card={card} fallbackIndex={i} t={t} collections={collections} collectionBusy={collectionBusy} onToggleCollection={onToggleCollection} />
                 </div>
                 <p className="mt-2 whitespace-pre-wrap text-[15.5px] font-semibold leading-snug text-brand-ink">
                   {card.question || card.questionSummary || t('report.qaQuestionFallback')}
@@ -759,7 +781,7 @@ function QaDeck({ cards, t }) {
   )
 }
 
-function StructuredReportBody({ report, transcript, lineReviewByIndex, t }) {
+function StructuredReportBody({ report, transcript, lineReviewByIndex, t, collections, collectionBusy, onToggleCollection, onStartTask }) {
   const transcriptQuestions = interviewerQuestionsFromTranscript(transcript)
   const qaReview = Array.isArray(report?.qaReview)
     ? report.qaReview.map(normalizeQaItem).filter(Boolean).map((item, index) => {
@@ -786,6 +808,10 @@ function StructuredReportBody({ report, transcript, lineReviewByIndex, t }) {
       }))
       .filter((x) => x.title || x.why || x.how)
     : []
+
+  const readiness = report?.careerReadiness && typeof report.careerReadiness === 'object' ? report.careerReadiness : null
+  const readinessDimensions = Array.isArray(readiness?.dimensions) ? readiness.dimensions : []
+  const nextTask = report?.nextPracticeTask && typeof report.nextPracticeTask === 'object' ? report.nextPracticeTask : null
 
   const cards = buildQaCards(qaReview, Array.isArray(transcript) ? transcript : [], lineReviewByIndex)
 
@@ -822,6 +848,53 @@ function StructuredReportBody({ report, transcript, lineReviewByIndex, t }) {
           </AsideSection>
         )}
 
+        {readinessDimensions.length > 0 && (
+          <AsideSection icon={TrendingUp} tone="ink" title={t('report.readiness.evidenceTitle')}>
+            <p className="mb-3 text-[12.5px] leading-relaxed text-brand-muted">{t('report.readiness.description')}</p>
+            <div className="mb-3 flex items-baseline gap-2 border-b border-brand-line pb-3">
+              <span className="text-[26px] font-semibold leading-none tabular-nums text-brand-ink">{readiness?.overallScore ?? '—'}</span>
+              <span className="text-[12px] text-brand-muted">/ 100</span>
+              <span className="ml-auto text-[11.5px] text-brand-muted">{t(`report.readiness.${readiness?.assessment || 'partial'}`)}</span>
+            </div>
+            <div className="divide-y divide-brand-line">
+              {readinessDimensions.map(dimension => (
+                <details key={dimension.key} className="py-2.5">
+                  <summary className="flex cursor-pointer list-none items-center gap-3">
+                    <span className="w-[68px] shrink-0 text-[12.5px] text-brand-ink">{t(`report.readiness.dimensions.${dimension.key}`)}</span>
+                    <span className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-brand-inset">
+                      <span className="block h-full rounded-full bg-brand-violet" style={{ width: `${dimension.score ?? 0}%` }} />
+                    </span>
+                    <span className="w-7 shrink-0 text-right text-[12.5px] font-semibold tabular-nums text-brand-ink">{dimension.score ?? '—'}</span>
+                  </summary>
+                  <p className="mt-2 text-[12px] leading-relaxed text-brand-muted">
+                    {dimension.evidence?.excerpt || t('report.readiness.insufficientEvidence')}
+                  </p>
+                  {dimension.action?.title && (
+                    <p className="mt-2 border-t border-brand-line pt-2 text-[12px] font-medium text-brand-ink">{dimension.action.title}</p>
+                  )}
+                </details>
+              ))}
+            </div>
+          </AsideSection>
+        )}
+
+        {nextTask && (
+          <AsideSection icon={PlayCircle} tone="ink" title={t('report.readiness.nextTask')}>
+            <p className="text-[13.5px] font-semibold leading-snug text-brand-ink">{nextTask.title || nextTask.questionText}</p>
+            {nextTask.reason && <p className="mt-1.5 text-[12.5px] leading-relaxed text-brand-muted">{nextTask.reason}</p>}
+            <p className="mt-2 text-[12px] text-brand-muted">{t('report.readiness.minutes', { count: nextTask.estimatedMinutes || 8 })}</p>
+            {nextTask.questionIndex !== null && nextTask.questionIndex !== undefined
+              && Number.isInteger(Number(nextTask.questionIndex)) && Number(nextTask.questionIndex) >= 0 && (
+              <button
+                type="button" onClick={() => onStartTask?.(nextTask)} disabled={collectionBusy !== null}
+                className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-brand-ink px-4 py-2.5 text-[12.5px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90 disabled:opacity-40"
+              >
+                <PlayCircle className="h-3.5 w-3.5" />{t('report.readiness.startTask')}
+              </button>
+            )}
+          </AsideSection>
+        )}
+
         {toImprove.length > 0 && (
           <AsideSection icon={Target} tone="danger" title={t('report.sectionImprove')}>
             <ol className="space-y-3.5">
@@ -849,7 +922,7 @@ function StructuredReportBody({ report, transcript, lineReviewByIndex, t }) {
 
       {/* ── 右栏：逐题复习（单题卡 / 所有题总览）── */}
       <div className="min-w-0 lg:col-span-8">
-        <QaDeck cards={cards} t={t} />
+        <QaDeck cards={cards} t={t} collections={collections} collectionBusy={collectionBusy} onToggleCollection={onToggleCollection} />
       </div>
     </div>
   )
@@ -858,11 +931,14 @@ function StructuredReportBody({ report, transcript, lineReviewByIndex, t }) {
 export default function InterviewReportPage() {
   const { t, i18n } = useTranslation()
   const { interviewId } = useParams()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState(null)
   const [interview, setInterview] = useState(null)
   const [retrying, setRetrying] = useState(false)
   const [reportTranslating, setReportTranslating] = useState(false)
+  const [collections, setCollections] = useState({})
+  const [collectionBusy, setCollectionBusy] = useState(null)
   const finalizeInFlightRef = useRef(false)
   const interviewRef = useRef(null)
   const reportLangRef = useRef('')
@@ -899,6 +975,13 @@ export default function InterviewReportPage() {
       const j = await res.json()
       reportLangRef.current = normalizeUiCode(j?.interview?.report_ui_locale || j?.interview?.language)
       setInterview(j.interview)
+      const collectionResponse = await fetch(`${backendUrl}/api/growth-center/collections?interviewId=${encodeURIComponent(interviewId)}&source=report`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (collectionResponse.ok) {
+        const collectionBody = await collectionResponse.json()
+        setCollections(Object.fromEntries((collectionBody.collections || []).map(item => [Number(item.question_index), item])))
+      }
     } catch {
       setErr(tRef.current('report.loadError'))
     } finally {
@@ -907,6 +990,55 @@ export default function InterviewReportPage() {
   }, [backendUrl, interviewId])
 
   useEffect(() => { void fetchInterview() }, [fetchInterview])
+
+  const ensureReportCollection = useCallback(async (questionIndex) => {
+    const existing = collections[questionIndex]
+    if (existing) return existing
+    const response = await authenticatedFetch(`${backendUrl}/api/growth-center/collections`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ interviewId, questionIndex, source: 'report' }),
+    })
+    const body = await response.json().catch(() => ({}))
+    if (!response.ok || !body.collection) throw new Error(body.error || 'collection failed')
+    setCollections(current => ({ ...current, [Number(body.collection.question_index)]: body.collection }))
+    return body.collection
+  }, [backendUrl, collections, interviewId])
+
+  const toggleCollection = useCallback(async (questionIndex) => {
+    setCollectionBusy(questionIndex)
+    setErr(null)
+    try {
+      const existing = collections[questionIndex]
+      if (existing) {
+        const response = await authenticatedFetch(`${backendUrl}/api/growth-center/collections/${existing.id}`, { method: 'DELETE' })
+        if (!response.ok) throw new Error('delete failed')
+        setCollections(current => {
+          const next = { ...current }
+          delete next[questionIndex]
+          return next
+        })
+      } else await ensureReportCollection(questionIndex)
+    } catch { setErr(t('report.collection.failed')) } finally { setCollectionBusy(null) }
+  }, [backendUrl, collections, ensureReportCollection, t])
+
+  const startRecommendedTask = useCallback(async (task) => {
+    const questionIndex = task?.questionIndex === null || task?.questionIndex === undefined ? NaN : Number(task.questionIndex)
+    if (!Number.isInteger(questionIndex) || questionIndex < 0) return
+    setCollectionBusy(questionIndex)
+    setErr(null)
+    try {
+      const collection = await ensureReportCollection(questionIndex)
+      const response = await authenticatedFetch(`${backendUrl}/api/growth-center/collections/${collection.id}/practice`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Request-Id': createInterviewRequestId() },
+        body: JSON.stringify({ idempotencyKey: createInterviewRequestId() }),
+      })
+      const body = await response.json().catch(() => ({}))
+      if (!response.ok || !body.interviewId) throw new Error(body.error || 'practice failed')
+      navigate(`/interview/${body.interviewId}`)
+    } catch { setErr(t('report.collection.practiceFailed')) } finally { setCollectionBusy(null) }
+  }, [backendUrl, ensureReportCollection, navigate, t])
 
   useEffect(() => {
     const iv = interview
@@ -1035,9 +1167,9 @@ export default function InterviewReportPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-brand-paper">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-violet" />
-        <span className="text-[13px] font-medium text-brand-muted">{t('report.loading')}</span>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-slate-100 to-slate-50 dark:from-slate-950 dark:to-slate-900">
+        <Loader2 className="w-10 h-10 animate-spin text-brand-ink" />
+        <span className="text-sm font-medium text-brand-muted">{t('report.loading')}</span>
         <span className="sr-only">{t('report.loading')}</span>
       </div>
     )
@@ -1045,9 +1177,9 @@ export default function InterviewReportPage() {
 
   if (err && !interview) {
     return (
-      <div className="ui-container min-h-screen max-w-lg bg-brand-paper pb-24 pt-[calc(var(--ui-nav-h)+2rem)] text-center">
-        <p className="text-[14px] text-brand-danger">{err}</p>
-        <Link to="/dashboard" className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-brand-ink px-6 py-3 text-[14px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90">
+      <div className="max-w-lg mx-auto pt-28 pb-24 px-4 text-center">
+        <p className="text-brand-danger">{err}</p>
+        <Link to="/dashboard" className="btn-primary inline-flex mt-8 px-6 py-3 rounded-xl font-bold">
           {t('report.backDashboard')}
         </Link>
       </div>
@@ -1063,51 +1195,53 @@ export default function InterviewReportPage() {
         >
           <Link
             to="/dashboard"
-            className="group inline-flex items-center gap-2 text-[12.5px] font-bold text-brand-muted transition-colors hover:text-brand-ink"
+            className="group inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-brand-muted hover:text-brand-ink dark:hover:text-white transition-all"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             {t('report.backDashboard')}
           </Link>
         </motion.div>
 
-        <article className="space-y-10">
+        {err && <div className="rounded-2xl border border-brand-danger/30 bg-brand-danger/[0.06] p-4 text-sm font-bold text-brand-danger/30 bg-brand-inset" role="alert">{err}</div>}
+
+        <article className="space-y-16">
           <motion.header
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
+            className="space-y-10"
           >
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-brand-line">
-              <div className="space-y-3 max-w-2xl">
-                <div className="flex items-center gap-3.5">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-brand-ink text-brand-on-ink">
-                    <Zap className="w-6 h-6" />
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-brand-line">
+              <div className="space-y-6 max-w-2xl">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-brand-card dark:bg-white text-white shadow-xl shadow-slate-900/10 transition-transform hover:rotate-3">
+                    <Zap className="w-8 h-8" />
                   </div>
                   <div className="space-y-1">
-                    <div className="inline-flex items-center gap-2 rounded-md border border-brand-line bg-brand-inset px-2 py-0.5 text-[11px] font-medium text-brand-muted">
+                    <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-md bg-brand-inset text-[10px] font-semibold uppercase tracking-widest text-brand-ink">
                       {t('report.docLabel')}
                     </div>
-                    <h1 className="font-brand text-[28px] font-semibold leading-tight tracking-[-0.02em] text-brand-ink sm:text-[32px]">
+                    <h1 className="text-4xl sm:text-5xl font-semibold font-brand tracking-tight text-brand-ink dark:text-white">
                       {t('report.title')}
                     </h1>
                   </div>
                 </div>
-                <p className="text-[14px] leading-relaxed text-brand-ink">
+                <p className="text-lg text-brand-muted font-medium leading-relaxed">
                   {t('report.subtitle')}
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2.5 rounded-xl border border-brand-line bg-brand-card px-3.5 py-2">
+                <div className="px-4 py-2.5 rounded-2xl bg-brand-inset border border-brand-line flex items-center gap-3">
                   <Briefcase className="w-4 h-4 text-brand-muted" />
-                  <span className="max-w-[140px] truncate text-[12.5px] font-bold text-brand-ink">{interview?.position}</span>
+                  <span className="text-xs font-bold text-brand-muted text-brand-muted truncate max-w-[140px]">{interview?.position}</span>
                 </div>
-                <div className="flex items-center gap-2.5 rounded-xl border border-brand-line bg-brand-card px-3.5 py-2">
+                <div className="px-4 py-2.5 rounded-2xl bg-brand-inset border border-brand-line flex items-center gap-3">
                   <Globe2 className="w-4 h-4 text-brand-muted" />
-                  <span className="text-[12.5px] font-bold text-brand-ink">{interview?.language}</span>
+                  <span className="text-xs font-bold text-brand-muted text-brand-muted">{interview?.language}</span>
                 </div>
-                <div className="flex items-center gap-2.5 rounded-xl border border-brand-line bg-brand-card px-3.5 py-2">
+                <div className="px-4 py-2.5 rounded-2xl bg-brand-inset border border-brand-line flex items-center gap-3">
                   <Clock className="w-4 h-4 text-brand-muted" />
-                  <span className="text-[12.5px] font-bold text-brand-ink">{interview?.duration} {t('dashboard.durMin')}</span>
+                  <span className="text-xs font-bold text-brand-muted text-brand-muted">{interview?.duration} {t('dashboard.durMin')}</span>
                 </div>
               </div>
             </div>
@@ -1116,45 +1250,45 @@ export default function InterviewReportPage() {
           <div className="min-h-[400px]">
             {reportTranslating ? (
               <div className="flex flex-col items-center justify-center gap-6 py-24">
-                <Loader2 className="h-7 w-7 animate-spin text-brand-violet" />
-                <p className="text-[12.5px] font-bold text-brand-muted">
+                <Loader2 className="h-8 w-8 animate-spin text-brand-ink" />
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-brand-muted">
                   {t('report.translating', { lang: t(`profile.langName.${normalizeUiCode(i18n.resolvedLanguage || i18n.language)}`) })}
                 </p>
               </div>
             ) : !hasAnyReport ? (
-              <div className="space-y-6 rounded-[22px] border border-dashed border-brand-line bg-brand-card px-8 py-16 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[20px] bg-brand-inset">
-                  <FileText className="w-7 h-7 text-brand-muted" />
+              <div className="text-center py-20 px-8 rounded-[3rem] border-2 border-dashed border-brand-line space-y-8">
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[2rem] bg-brand-inset">
+                  <FileText className="w-10 h-10 text-brand-muted" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="font-brand text-[20px] font-semibold tracking-tight text-brand-ink">{t('report.noReport')}</h3>
-                  <p className="mx-auto max-w-sm text-[13px] text-brand-ink">{t('report.retryHint')}</p>
+                  <h3 className="text-2xl font-semibold font-brand text-brand-ink dark:text-white">{t('report.noReport')}</h3>
+                  <p className="text-sm text-brand-muted max-w-sm mx-auto">{t('report.retryHint')}</p>
                 </div>
                 {transcript.length > 0 && (
                   <button
                     type="button"
                     disabled={retrying}
                     onClick={() => void finalizeReport()}
-                    className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-ink px-8 py-3.5 text-[14px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="btn-primary px-10 py-4 text-sm font-semibold uppercase tracking-widest group"
                   >
-                    {retrying ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />}
+                    {retrying ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />}
                     {retrying ? t('report.retrying') : t('report.retryGenerate')}
                   </button>
                 )}
               </div>
             ) : hasStructuredReport ? (
-              <StructuredReportBody report={parsedReport} transcript={transcript} lineReviewByIndex={lineReviewByIndex} t={t} />
+              <StructuredReportBody report={parsedReport} transcript={transcript} lineReviewByIndex={lineReviewByIndex} t={t} collections={collections} collectionBusy={collectionBusy} onToggleCollection={toggleCollection} onStartTask={startRecommendedTask} />
             ) : (
-              <div className="space-y-10">
-                <div className="rounded-xl border border-brand-line bg-brand-inset px-4 py-3 text-[12.5px] font-bold text-brand-muted">
+              <div className="space-y-16">
+                <div className="p-4 rounded-xl bg-brand-inset border border-brand-line text-[10px] font-semibold uppercase tracking-widest text-brand-muted">
                   {t('report.legacyFormatHint')}
                 </div>
                 {sections.map((sec, i) => (
-                  <section key={`${sec.title}-${i}`} className="space-y-4">
+                  <section key={`${sec.title}-${i}`} className="space-y-8">
                     {sec.title ? (
-                      <div className="flex items-center gap-3">
-                        <div className="h-7 w-1.5 rounded-full bg-brand-ink" />
-                        <h2 className="font-brand text-[18px] font-semibold tracking-tight text-brand-ink">
+                      <div className="flex items-center gap-4">
+                        <div className="h-8 w-1.5 rounded-full bg-brand-card dark:bg-white" />
+                        <h2 className="text-2xl font-semibold font-brand tracking-tight text-brand-ink dark:text-white">
                           {stripMdNoise(sec.title)}
                         </h2>
                       </div>
@@ -1165,73 +1299,72 @@ export default function InterviewReportPage() {
               </div>
             )}
 
-            {/* 结构化报告下，对话记录已经并进右侧题卡，不再重复渲染一遍；
-                旧版 Markdown 报告和「没有报告」的情况仍然需要它 */}
+            {/* 结构化报告下，对话记录已并进右侧题卡；旧版 Markdown / 无报告时仍然需要它 */}
             {!reportTranslating && transcript.length > 0 && !hasStructuredReport && (
-              <section className="mt-14 space-y-6 border-t border-brand-line pt-12">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-inset text-brand-ink">
-                      <MessageSquareQuote className="w-5 h-5" />
+              <section className="mt-24 pt-24 border-t border-brand-line space-y-12">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-2xl bg-brand-inset bg-brand-card text-brand-muted">
+                      <MessageSquareQuote className="w-6 h-6" />
                     </div>
-                    <h2 className="font-brand text-[22px] font-semibold tracking-tight text-brand-ink">
+                    <h2 className="text-3xl font-semibold font-brand tracking-tight text-brand-ink dark:text-white">
                       {t('report.transcriptTitle')}
                     </h2>
                   </div>
-                  <p className="max-w-xl text-[13px] text-brand-muted">
+                  <p className="text-brand-muted max-w-xl font-medium">
                     {t('report.transcriptSub')}
                   </p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {transcript.map((m, i) => {
                     const coach = lineReviewByIndex.get(i)
                     return (
                       <div
                         key={i}
-                        className={`group relative rounded-[20px] border border-brand-line px-5 py-5 transition-colors ${
+                        className={`group relative p-8 rounded-[2rem] border transition-all ${
                           m.role === 'assistant'
-                            ? 'bg-brand-card'
-                            : 'bg-brand-inset md:ml-16'
+                            ? 'bg-white border-brand-line shadow-sm'
+                            : 'bg-brand-inset/50 border-brand-line md:ml-20'
                         }`}
                       >
-                        <div className="mb-3 flex items-center gap-3">
-                          <span className="text-[11px] font-bold tabular-nums text-brand-muted">
+                        <div className="flex items-center gap-4 mb-4">
+                          <span className="text-[10px] font-semibold uppercase tracking-widest text-brand-muted">
                             {String(i + 1).padStart(2, '0')}
                           </span>
-                          <span className={`rounded px-2 py-0.5 text-[11px] font-bold ${
-                            m.role === 'assistant' ? 'bg-brand-inset text-brand-muted' : 'bg-brand-violet/10 text-brand-violet'
+                          <span className={`text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded ${
+                            m.role === 'assistant' ? 'bg-brand-inset bg-brand-card text-brand-muted' : 'bg-brand-inset/40 text-brand-ink'
                           }`}>
                             {m.role === 'assistant' ? t('dashboard.roleAssistant') : t('dashboard.roleUser')}
                           </span>
                         </div>
-                        <p className="text-[13.5px] font-medium leading-relaxed text-brand-ink">
+                        <p className="text-sm font-medium leading-relaxed text-brand-muted">
                           {m.content}
                         </p>
 
                         {coach && (
-                          <div className="mt-5 space-y-4 rounded-xl border border-brand-violet/25 bg-brand-violet/[0.06] px-4 py-4">
-                            <div className="flex items-center gap-2.5">
-                              <Sparkles className="w-3.5 h-3.5 text-brand-violet" />
-                              <span className="text-[12px] font-bold text-brand-violet">AI Feedback</span>
+                          <div className="mt-8 p-6 rounded-2xl bg-brand-inset/50 bg-brand-inset border border-brand-line/50/20 space-y-6">
+                            <div className="flex items-center gap-3">
+                              <Sparkles className="w-4 h-4 text-brand-success" />
+                              <span className="text-[10px] font-semibold uppercase tracking-widest text-brand-success">AI Feedback</span>
                             </div>
                             
-                            <div className="grid md:grid-cols-2 gap-5">
+                            <div className="grid md:grid-cols-2 gap-8">
                               {coach.parse && (
                                 <div className="space-y-2">
-                                  <label className="text-[11.5px] font-bold text-brand-muted">Analysis</label>
-                                  <p className="text-[13px] leading-relaxed text-brand-ink">
+                                  <label className="text-[9px] font-semibold uppercase tracking-widest text-brand-muted">Analysis</label>
+                                  <p className="text-xs text-brand-muted leading-relaxed italic">
                                     <RichText text={coach.parse} />
                                   </p>
                                 </div>
                               )}
                               {coach.improvements?.length > 0 && (
                                 <div className="space-y-3">
-                                  <label className="text-[11.5px] font-bold text-brand-muted">Points to Note</label>
+                                  <label className="text-[9px] font-semibold uppercase tracking-widest text-brand-muted">Points to Note</label>
                                   <ul className="space-y-1.5">
                                     {coach.improvements.map((g, j) => (
-                                      <li key={j} className="flex gap-2 text-[12.5px] font-bold text-brand-ink">
-                                        <ArrowRight className="mt-0.5 w-3.5 h-3.5 shrink-0 text-brand-violet" />
+                                      <li key={j} className="flex gap-2 text-xs text-brand-success/70/70 font-bold">
+                                        <ArrowRight className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                                         <RichText text={g} />
                                       </li>
                                     ))}
@@ -1241,9 +1374,9 @@ export default function InterviewReportPage() {
                             </div>
                             
                             {coach.modelAnswer && (
-                              <div className="space-y-2 border-t border-brand-violet/20 pt-3.5">
-                                <label className="text-[11.5px] font-bold text-brand-success">Better Expression</label>
-                                <p className="text-[12.5px] font-bold leading-relaxed text-brand-ink">
+                              <div className="pt-4 border-t border-brand-line/50/20 space-y-2">
+                                <label className="text-[9px] font-semibold uppercase tracking-widest text-brand-success">Better Expression</label>
+                                <p className="text-xs text-brand-muted text-brand-muted leading-relaxed font-bold">
                                   <RichText text={coach.modelAnswer} />
                                 </p>
                               </div>
@@ -1259,7 +1392,7 @@ export default function InterviewReportPage() {
           </div>
         </article>
 
-        <p className="text-center text-[11px] text-brand-muted">
+        <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-brand-muted">
           End of Interview Report
         </p>
       </div>

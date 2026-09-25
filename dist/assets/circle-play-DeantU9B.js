@@ -1,0 +1,1 @@
+import{t as e}from"./createLucideIcon-B07tG6zs.js";var t=e(`BookmarkCheck`,[[`path`,{d:`m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z`,key:`169p4p`}],[`path`,{d:`m9 10 2 2 4-4`,key:`1gnqz4`}]]),n=e(`CirclePlay`,[[`circle`,{cx:`12`,cy:`12`,r:`10`,key:`1mglay`}],[`polygon`,{points:`10 8 16 12 10 16 10 8`,key:`1cimsy`}]]);export{t as n,n as t};

@@ -12,6 +12,7 @@ const LoginPage = lazyWithReload(() => import('./pages/LoginPage'))
 const SetupPage = lazyWithReload(() => import('./pages/SetupPage'))
 const InterviewPage = lazyWithReload(() => import('./pages/InterviewPage'))
 const DashboardPage = lazyWithReload(() => import('./pages/DashboardPage'))
+const NotesPage = lazyWithReload(() => import('./pages/NotesPage'))
 const InterviewReportPage = lazyWithReload(() => import('./pages/InterviewReportPage'))
 const AuthCallbackPage = lazyWithReload(() => import('./pages/AuthCallbackPage'))
 const ProfilePage = lazyWithReload(() => import('./pages/ProfilePage'))
@@ -88,6 +89,14 @@ export default function App() {
             <ProtectedRoute>
               <Layout>
                 <DashboardPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/notes" element={
+            <ProtectedRoute>
+              <Layout>
+                <NotesPage />
               </Layout>
             </ProtectedRoute>
           } />

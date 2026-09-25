@@ -8,7 +8,7 @@ import { useTheme } from '../context/ThemeContext'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import { authenticatedFetch } from '../lib/authenticatedFetch'
-import { Menu, X, BrainCircuit, ChevronDown, LogOut, LayoutDashboard, UserCircle, Briefcase, BookOpen, FilePenLine } from 'lucide-react'
+import { Menu, X, BrainCircuit, ChevronDown, LogOut, LayoutDashboard, UserCircle, Briefcase, BookOpen, FilePenLine, StickyNote } from 'lucide-react'
 
 export default function Navbar() {
   const { t } = useTranslation()
@@ -227,6 +227,14 @@ export default function Navbar() {
                       {t('nav.personalCenter')}
                     </Link>
                     <Link
+                      to="/notes"
+                      className="flex items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-brand-muted transition-colors hover:bg-brand-inset hover:text-brand-ink"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <StickyNote className="w-4 h-4" />
+                      {t('nav.notes')}
+                    </Link>
+                    <Link
                       to="/resume-tailor"
                       className="flex items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-brand-muted transition-colors hover:bg-brand-inset hover:text-brand-ink"
                       onClick={() => setDropdownOpen(false)}
@@ -309,6 +317,7 @@ export default function Navbar() {
           ))}
           {user ? (
             <>
+              <Link to="/notes" className="block font-brand text-xl font-semibold tracking-tight text-brand-ink" onClick={() => setMobileOpen(false)}>{t('nav.notes')}</Link>
               <Link to="/profile" className="block font-brand text-xl font-semibold tracking-tight text-brand-ink" onClick={() => setMobileOpen(false)}>{t('nav.profile')}</Link>
               <button onClick={handleSignOut} className="w-full py-3 text-left font-brand text-xl font-semibold tracking-tight text-brand-danger">{t('nav.signOut')}</button>
             </>

@@ -21,7 +21,8 @@
     "experiences": "Erfahrungen",
     "myExperiences": "Meine Erfahrungen",
     "chooseAvatar": "Profilbild wählen",
-    "tokens": "Energie"
+    "tokens": "Energie",
+    "notes": "Fragensammlung"
   },
   "resumeTailor": {
     "badge": "Arbeitsbereich für gezielte Bewerbungen",
@@ -827,7 +828,106 @@
       "networking": "Networking ist im Anfangsstadium. Nutzen Sie LinkedIn für Alumni-Kontakte."
     },
     "scoreLabel": "Gesamtbereitschaft",
-    "lvlMapSub": "Dein Wachstumspfad"
+    "lvlMapSub": "Dein Wachstumspfad",
+    "growth": {
+      "eyebrow": "Aktionszentrum für die Offer-Vorbereitung",
+      "title": "Wachstumszentrum",
+      "subtitle": "Jede wirksame Übung bringt Sie Ihrem Offer näher. Prüfen Sie das letzte Ergebnis und setzen Sie dann die wichtigste Übung fort.",
+      "overview": "Wachstumsübersicht",
+      "loadFailed": "Wachstumsdaten konnten nicht geladen werden. Bitte aktualisieren Sie die Seite.",
+      "minutes": "{{count}} Min. wirksames Training",
+      "hoursMinutes": "{{hours}} Std. {{minutes}} Min. wirksames Training",
+      "viewReport": "Vollständigen Bericht öffnen",
+      "continuePractice": "Übung fortsetzen",
+      "generating": "Bericht wird erstellt",
+      "checkReportStatus": "Berichtsstatus prüfen",
+      "unavailable": "Session beendet",
+      "viewEvidence": "Berichtsbelege ansehen",
+      "viewLatestReport": "Letzten Bericht ansehen",
+      "startBaseline": "Ersten Mock starten",
+      "readiness": {
+        "initial": "Ersteinschätzung",
+        "established": "Fortlaufende Einschätzung",
+        "insufficient": "Zu wenig Belege; keine Vermutung",
+        "dimensions": {
+          "technical": "Technik",
+          "experience": "Erfahrungsbelege",
+          "structure": "Struktur",
+          "communication": "Zusammenarbeit",
+          "strategy": "Rollenstrategie"
+        },
+        "title": "Interview-Bereitschaft",
+        "description": "Ihre aktuelle Vorbereitung nur auf Basis eindeutiger Berichtsbelege. Keine Wahrscheinlichkeit für ein Offer.",
+        "pendingTitle": "Zuverlässige Bewertung ausstehend",
+        "pendingBody": "Das aktuelle Berichtsformat enthält keinen standardisierten Basiswert. Deshalb zeigen wir keine Schätzung an."
+      },
+      "practice": {
+        "title": "Übungsfortschritt",
+        "count": "wirksame Sessions"
+      },
+      "rhythm": {
+        "title": "Wochenrhythmus",
+        "weeklyDays": "wirksame Trainingstage",
+        "streak": "{{count}} Tage in Folge"
+      },
+      "task": {
+        "eyebrow": "Ihre eine Aufgabe für heute",
+        "minutes": "Etwa {{count}} Minuten",
+        "start": "Gezieltes Training starten",
+        "failed": "Das Training konnte nicht erstellt werden. Bitte Energie prüfen und erneut versuchen.",
+        "weekly": "Rhythmus dieser Woche",
+        "weeklyCount": "{{count}} Aufgaben",
+        "weeklyBody": "Die Wochenliste enthält höchstens fünf belegte Aufgaben und bleibt dadurch umsetzbar."
+      },
+      "collections": {
+        "eyebrow": "Zu prüfen",
+        "title": "Neueste Fragensammlungen",
+        "viewAll": "Alle anzeigen",
+        "toReview": "Zu prüfen",
+        "empty": "Noch keine Review-Karten. Notiz im Training oder einzelne Frage aus einem Bericht sammeln."
+      },
+      "latest": {
+        "eyebrow": "Letztes Ergebnis",
+        "title": "Letztes Review",
+        "emptyTitle": "Mit einem Mock eine Ausgangsbasis schaffen",
+        "emptyBody": "Sobald der Bericht fertig ist, erscheinen Fazit, Stärken und der nächste Schritt hier.",
+        "generatingTitle": "Ihr Bericht wird erstellt",
+        "generatingBody": "Die Analyse läuft noch. Aktualisieren Sie die Seite in Kürze.",
+        "reportReadyBody": "Der vollständige Bericht mit Feedback und Verbesserungen ist bereit.",
+        "unfinishedTitle": "Sie haben eine unvollständige Session",
+        "unfinishedBody": "Setzen Sie {{position}} mit Fragen, Antworten, Hinweisen, Notizen, Konfiguration und Timer fort.",
+        "noReportTitle": "Für diese Session ist noch kein Bericht verfügbar",
+        "noReportBody": "Prüfen Sie den Status auf der Berichtsseite. Das Gespräch bleibt gespeichert."
+      },
+      "status": {
+        "reportReady": "Bericht bereit",
+        "generating": "Wird erstellt",
+        "paused": "Pausiert",
+        "inProgress": "In Arbeit",
+        "noReport": "Kein Bericht",
+        "closed": "Beendet"
+      },
+      "history": {
+        "eyebrow": "Training und Ergebnisse",
+        "title": "Interview-Review-Verlauf",
+        "subtitle": "Jede Karte ist direkt öffnbar; die Hauptaktion unterscheidet Bericht und Fortsetzung klar.",
+        "filterLabel": "Review-Verlauf filtern",
+        "filters": {
+          "all": "Alle",
+          "reports": "Berichte",
+          "continue": "Fortsetzen"
+        },
+        "emptyTitle": "Noch keine Interview-Reviews",
+        "emptyBody": "Starten oder beenden Sie einen Mock; danach erscheint er hier.",
+        "noMatchTitle": "Keine passenden Einträge",
+        "noMatchBody": "Wählen Sie einen anderen Filter.",
+        "untitled": "Rolle ohne Titel",
+        "practiceMode": "Übung",
+        "formalMode": "Formaler Mock",
+        "resumeHint": "Diese interviewId wird fortgesetzt; es wird kein neues Interview erstellt.",
+        "noSummary": "Für diese Session ist noch keine Zusammenfassung verfügbar."
+      }
+    }
   },
   "interview": {
     "live": "Live Interview",
@@ -949,7 +1049,18 @@
     "videoCamera": "Kamera",
     "connectionLabel": "Verbindung",
     "connectionOk": "Verbunden",
-    "connectionWait": "Verbinde"
+    "connectionWait": "Verbinde",
+    "endNotice": {
+      "generatingTitle": "Ihr Bericht wird erstellt",
+      "generatingBody": "Dieses Interview ist beendet. Sie können die Seite verlassen und den fertigen Bericht später im Growth Center ansehen.",
+      "readyTitle": "Ihr Bericht ist im Growth Center",
+      "readyBody": "Der Bericht ist mit Belegen, Kompetenzdimensionen und dem nächsten Trainingsschritt verfügbar.",
+      "failedTitle": "Berichtserstellung erneut versuchen",
+      "failedBody": "Ihr Interviewtext ist gespeichert. Versuchen Sie es erneut oder prüfen Sie den Status später im Growth Center.",
+      "openGrowth": "Growth Center öffnen",
+      "stay": "Hier bleiben",
+      "retry": "Erneut versuchen"
+    }
   },
   "report": {
     "title": "Interview Bericht",
@@ -1011,7 +1122,31 @@
     "deckSub": "Eine Frage nach der anderen: erst selbst überlegen, dann Musterantwort und Lücken aufdecken.",
     "aiFeedback": "KI-Feedback",
     "summaryAside": "Zusammenfassung",
-    "yourAnswerEmpty": "Für diese Runde wurde keine Antwort gespeichert."
+    "yourAnswerEmpty": "Für diese Runde wurde keine Antwort gespeichert.",
+    "collection": {
+      "save": "Frage sammeln",
+      "saved": "Gesammelt",
+      "failed": "Die Fragensammlung konnte nicht aktualisiert werden.",
+      "practiceFailed": "Das gezielte Training konnte nicht erstellt werden. Bitte Energie prüfen und erneut versuchen."
+    },
+    "readiness": {
+      "title": "Interviewbereitschaft in fünf Dimensionen",
+      "evidenceTitle": "Jede Bewertung ist mit einem Beleg verknüpft",
+      "description": "Die Werte zeigen belegte Leistung in diesem Bericht, nicht die Wahrscheinlichkeit eines Angebots. Dimension öffnen, um Beleg und Aktion zu sehen.",
+      "initial": "Ersteinschätzung",
+      "partial": "Belege noch unvollständig",
+      "insufficientEvidence": "Dieser Bericht enthält zu wenig Belege; deshalb werden kein Trend und keine Vermutung angezeigt.",
+      "nextTask": "Ihre nächste beste Frage",
+      "minutes": "Etwa {{count}} Minuten",
+      "startTask": "Gezieltes Training starten",
+      "dimensions": {
+        "technical": "Technische Kompetenz",
+        "experience": "Tiefe von Erfahrung und Belegen",
+        "structure": "Strukturierter Ausdruck",
+        "communication": "Kommunikation und Zusammenarbeit",
+        "strategy": "Interviewstrategie und Rollenfit"
+      }
+    }
   },
   "chat": {
     "startTriggerEn": "Please start the interview now.",
@@ -1228,6 +1363,240 @@
       "presenceIndex": "Präsenz-Index",
       "roadmapBtn": "Roadmap ansehen",
       "disclaimer": "* Basierend auf Ihren Talenten im Kontext deutscher Unternehmensstandards."
+    }
+  },
+  "notes": {
+    "title": "Fragensammlung",
+    "eyebrow": "Ein gemeinsamer Review-Bereich",
+    "subtitle": "Fragen, Antworten, Feedback-Snapshots und private Notizen aus Training und Berichten sammeln und aus jeder Karte ein gezieltes Training starten.",
+    "back": "Zurück zum Growth Center",
+    "cards": "Karten",
+    "filters": "Sammlung filtern",
+    "search": "Fragen, Antworten, Feedback, Notizen, Stellen oder Tags durchsuchen",
+    "allPositions": "Alle Stellen",
+    "allTags": "Alle Tags",
+    "dateFrom": "Von Datum",
+    "dateTo": "Bis Datum",
+    "reset": "Filter zurücksetzen",
+    "loadFailed": "Die Fragensammlung konnte nicht geladen werden.",
+    "saveFailed": "Die Sammlung konnte nicht aktualisiert werden.",
+    "deleteFailed": "Die Sammlung konnte nicht entfernt werden.",
+    "practiceFailed": "Das gezielte Training konnte nicht erstellt werden. Bitte Energie prüfen und erneut versuchen.",
+    "emptyTitle": "Keine passenden Fragekarten",
+    "emptyBody": "Notizen im Training oder einzelne Fragen aus einem Bericht bauen diese Sammlung auf.",
+    "unknownPosition": "Unbenannte Stelle",
+    "answer": "Ihre Antwort",
+    "feedback": "Feedback",
+    "personalNote": "Private Notiz",
+    "notePlaceholder": "Belege oder Formulierungen für den nächsten Versuch festhalten…",
+    "tagsPlaceholder": "Tags durch Kommas trennen",
+    "save": "Notiz und Tags speichern",
+    "practiceAgain": "Erneut üben",
+    "markReviewed": "Als geprüft markieren",
+    "markToReview": "Zur Prüfung vormerken",
+    "openOrigin": "Original öffnen",
+    "pin": "Anheften oder lösen",
+    "remove": "Aus Sammlung entfernen",
+    "source": {
+      "all": "Alle Quellen",
+      "practice": "Training",
+      "report": "Interviewbericht"
+    },
+    "interviewer": {
+      "all": "Alle Interviewer",
+      "mixed": "Gemischt",
+      "technical": "Technisch",
+      "hr": "Verhalten / HR"
+    },
+    "review": {
+      "all": "Alle Prüfstatus",
+      "to_review": "Zu prüfen",
+      "reviewed": "Geprüft"
+    },
+    "reveal": "Antwort und Feedback anzeigen",
+    "hide": "Antwort ausblenden",
+    "prevCard": "Vorherige Karte",
+    "nextCard": "Nächste Karte",
+    "cardView": "Kartenansicht",
+    "listView": "Listenansicht"
+  },
+  "growthSprint": {
+    "eyebrow": "Offer-Sprint",
+    "empty": {
+      "title": "Machen Sie aus dem nächsten Interview einen konkreten Weg",
+      "body": "Legen Sie Zielrolle und Termine fest. Jede Woche entstehen 3–5 Aufgaben aus echten Berichten, schwachen Dimensionen und gespeicherten Fragen.",
+      "create": "Sprint-Plan anlegen",
+      "steps": {
+        "position": "Zielrolle wählen und optional die Stellenbeschreibung ergänzen",
+        "interview": "Nächstes Interview oder Zieltermin für das Offer eintragen",
+        "rhythm": "Einen Rhythmus von 3, 5 oder 7 Trainingstagen wählen"
+      }
+    },
+    "form": {
+      "editTitle": "Sprint-Ziel anpassen",
+      "createTitle": "Offer-Sprint anlegen",
+      "position": "Zielrolle",
+      "positionPlaceholder": "z. B. Senior Frontend Engineer",
+      "interviewer": "Schwerpunkt Interviewtyp",
+      "nextInterview": "Nächstes Interview (optional)",
+      "offerDate": "Zieldatum für das Offer (optional)",
+      "jd": "Stellenbeschreibung (optional)",
+      "jdPlaceholder": "Aufgaben und Anforderungen für passendere Aufgaben einfügen…",
+      "weeklyTarget": "Ziel für wirksame Trainingstage pro Woche",
+      "days": "{{count}} Tage",
+      "reminders": {
+        "inApp": "Hinweise in der App",
+        "browser": "Browser-Benachrichtigungen",
+        "email": "E-Mail-Erinnerungen",
+        "weeklyReport": "Erinnerung an den Wochenbericht"
+      },
+      "notConfigured": "Dienst nicht verbunden",
+      "save": "Speichern und Wochenplan erstellen",
+      "cancel": "Abbrechen",
+      "remove": "Plan löschen",
+      "removeConfirm": "Diesen Offer-Sprint mit Wochenaufgaben und Erinnerungen löschen? Berichte, Sammlungen und Interviewverlauf bleiben erhalten."
+    },
+    "errors": {
+      "save": "Der Sprint-Plan konnte nicht gespeichert werden.",
+      "delete": "Der Sprint-Plan konnte nicht gelöscht werden.",
+      "task": "Die Aufgabe konnte nicht aktualisiert werden.",
+      "reminder": "Die Erinnerung konnte nicht aktualisiert werden."
+    },
+    "reminders": {
+      "interview_7d": {
+        "title": "Das Interview ist in 7 Tagen",
+        "body": "Für {{position}} beginnt die fokussierte Vorbereitung. Starten Sie mit der wichtigsten Aufgabe."
+      },
+      "interview_2d": {
+        "title": "Die letzten 48 Stunden beginnen",
+        "body": "Einleitung, Praxisbelege und Checkliste für {{position}} jetzt festigen."
+      },
+      "interview_day": {
+        "title": "Heute ist Interviewtag",
+        "body": "Die kurze Checkliste für {{position}} prüfen und einen ruhigen Rhythmus halten."
+      },
+      "weekly_report": {
+        "title": "Ihr Wachstumsbericht ist bereit",
+        "body": "Wirksames Training, erledigte Aufgaben und belegte Veränderungen ansehen."
+      },
+      "dismiss": "Verstanden"
+    },
+    "recovery": {
+      "continue": {
+        "title": "Eine kurze Aufgabe hält heute den Rhythmus",
+        "body": "Bis zum Wochenziel fehlen {{count}} Tage. Nichts nachholen – einfach mit der heutigen Aufgabe fortsetzen."
+      },
+      "restart": {
+        "title": "Eine Pause löscht den Fortschritt nicht",
+        "body": "Bis zum Wochenziel fehlen {{count}} Tage. Eine kurze Aufgabe reicht für einen sanften Neustart."
+      }
+    },
+    "stage": {
+      "foundation": "Kompetenzen abdecken: Fähigkeiten und Belege für die Rolle aufbauen",
+      "focused": "Fokussierte Vorbereitung: schwache Dimensionen trainieren und formell simulieren",
+      "imminent": "Interview rückt näher: Simulation, Review und Checkliste priorisieren",
+      "final48": "Letzte 48 Stunden: Ausdruck festigen statt Umfang erhöhen",
+      "interview_day": "Interviewtag: Vorbereitung leicht und praktisch halten",
+      "renew": "Der vorige Termin ist vorbei; bitte das nächste Ziel aktualisieren"
+    },
+    "countdown": {
+      "interview": "Bis zum Interview",
+      "offer": "Bis zum Ziel-Offer",
+      "days": "{{count}} Tage",
+      "update": "Aktualisierung nötig"
+    },
+    "progress": {
+      "title": "Fortschritt dieser Woche",
+      "days": "{{current}} wirksame Trainingstage; Ziel {{target}}"
+    },
+    "tasks": {
+      "eyebrow": "Adaptive Wochenaufgaben",
+      "title": "Die 3–5 wichtigsten Schritte dieser Woche",
+      "limit": "Nur Aufgaben mit erkennbarem Ergebnis",
+      "today": "Heute zuerst",
+      "checklistReview": "Priorität vor dem Interview prüfen",
+      "minutes": "Etwa {{count}} Minuten",
+      "start": "Direkt starten",
+      "completeChecklist": "Geprüft und erledigt",
+      "complete": "Als erledigt markieren",
+      "skip": "Aufgabe überspringen",
+      "types": {
+        "baseline": {
+          "title": "Ein formelles Basisinterview abschließen",
+          "reason": "Eine nachvollziehbare Basis schaffen, damit spätere Hinweise belegt sind.",
+          "unlock": "Erste formelle Basis freischalten"
+        },
+        "focus_question": {
+          "title": "Die nächste Schlüsselfrage lösen",
+          "reason": "Ein gezielter Versuch für die aktuelle Priorität {{dimension}}.",
+          "unlock": "Beleg für den nächsten Vergleich sammeln"
+        },
+        "formal_mock": {
+          "title": "Formelle Simulation für die Zielrolle",
+          "reason": "Vorbereitung im realistischen Tempo eines Interviews für {{position}} prüfen.",
+          "unlock": "Vergleichbaren Bericht erzeugen"
+        },
+        "review_collection": {
+          "title": "Eine gespeicherte Frage erneut üben",
+          "reason": "Eine bekannte Lücke in einen neuen Antwortversuch verwandeln.",
+          "unlock": "Sammlung in Verbesserung umsetzen"
+        },
+        "pre_interview_checklist": {
+          "title": "Checkliste vor dem Interview abschließen",
+          "reason": "Zeit, Technik, Unterlagen, Praxisbelege und Rückfragen bestätigen.",
+          "unlock": "Kurzfristige Auslassungen vermeiden"
+        },
+        "self_intro": {
+          "title": "Einleitung für die Zielrolle verbessern",
+          "reason": "Einen klaren Einstieg mit rollenrelevanten Belegen aufbauen.",
+          "unlock": "Stabilen Intervieweinstieg schaffen"
+        },
+        "weekly_review": {
+          "title": "Kurzes Wochenreview durchführen",
+          "reason": "Berichte und gespeicherte Fragen prüfen und den nächsten Beleg auswählen.",
+          "unlock": "Nächste Woche fokussiert halten"
+        }
+      }
+    },
+    "weekly": {
+      "eyebrow": "Wöchentlicher Wachstumsbericht",
+      "title": "Was diese Woche passiert ist",
+      "days": "Wirksame Tage",
+      "minutes": "Wirksame Minuten",
+      "completed": "Aufgaben erledigt",
+      "stable": "Stabil",
+      "noTrend": "Training ist erfasst, aber die aktuellen Berichte belegen noch keine Kompetenzveränderung. Deshalb wird kein Trend abgeleitet.",
+      "return": "Nach einer Wochenaufgabe werden echte Trainingsaktivitäten hier zusammengefasst."
+    },
+    "milestones": {
+      "eyebrow": "Meilensteine",
+      "title": "Durch Belege bestätigter Fortschritt",
+      "empty": "Der erste formelle Bericht, eine wirksame 5-Tage-Serie oder ein Anstieg um 15 Punkte erscheinen hier.",
+      "types": {
+        "first_formal_report": "Ersten formellen Bericht abgeschlossen",
+        "streak_5": "Wirksame 5-Tage-Serie erreicht",
+        "readiness_gain_15": "Eine Bereitschaftsdimension um mindestens 15 Punkte verbessert"
+      }
+    },
+    "premium": {
+      "eyebrow": "Vorschau auf erweiterte Vorbereitung",
+      "title": "Erst vertiefen, wenn der Basiszyklus Wert geschaffen hat",
+      "body": "Diese Funktionen sind noch geplant; die Seite erfindet weder Tarif noch Preis oder Kaufprozess.",
+      "features": {
+        "drills": {
+          "title": "Häufige Kompetenz-Drills",
+          "body": "Längere, nach Kompetenzen geordnete Übungswege."
+        },
+        "jdPlan": {
+          "title": "Rollenspezifischer Sprint-Plan",
+          "body": "Ein detaillierter Weg aus vollständiger JD und belegten Lücken."
+        },
+        "deepReport": {
+          "title": "Tiefer Vergleichsbericht",
+          "body": "Stabile Trends und hochwertige Belege über mehr formelle Interviews."
+        }
+      },
+      "ownership": "Bestehende Berichte, Verlauf, Sammlungen und der kostenlose Basiszyklus bleiben unabhängig von erweiterten Funktionen zugänglich."
     }
   }
 }
