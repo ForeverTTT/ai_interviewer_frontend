@@ -20,7 +20,7 @@ import {
   MapPin, ClipboardList, CheckCircle2, Telescope,
   ChevronDown, ChevronUp, Plus, Trash2, User, X,
   Briefcase, GraduationCap, FolderKanban, BookOpen, Tags, Languages, Award, Wand2,
-  Pencil, Eye, ArrowUpRight, Zap, ArrowRight, BrainCircuit, Share2, MessageCircle, ExternalLink,
+  Pencil, Eye, ArrowUpRight, Zap, ArrowRight, Share2, MessageCircle, ExternalLink,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import xiaohongshuQr from '../assets/xiaohongshu_qr.png'
@@ -54,7 +54,7 @@ function RichText({ text, className }) {
     <span className={className}>
       {parts.map((part, i) => {
         const m = part.match(/^\*\*([^*\n]+)\*\*$/)
-        if (m) return <strong key={i} className="font-semibold text-slate-900 dark:text-white">{m[1]}</strong>
+        if (m) return <strong key={i} className="font-semibold text-brand-ink">{m[1]}</strong>
         return part || null
       })}
     </span>
@@ -80,11 +80,11 @@ function SanitizedListText({ text, className }) {
 
 function SectionTitle({ icon: Icon, children }) {
   return (
-    <div className="mb-6 flex items-center gap-3">
-      <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-        <Icon className="w-5 h-5" aria-hidden />
+    <div className="mb-5 flex items-center gap-3">
+      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-brand-line bg-brand-inset text-brand-violet">
+        <Icon className="h-4 w-4" aria-hidden />
       </div>
-      <h2 className="text-xl font-bold font-serif tracking-tight text-slate-900 dark:text-white">{children}</h2>
+      <h2 className="font-brand text-[18px] font-semibold tracking-tight text-brand-ink">{children}</h2>
     </div>
   )
 }
@@ -109,7 +109,7 @@ function ResumeScoreGauge({ score, size = 200 }) {
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeLinecap="round"
-          className="text-slate-100 dark:text-slate-800"
+          className="text-brand-line"
         />
         {/* Progress Fill */}
         <motion.circle
@@ -127,22 +127,23 @@ function ResumeScoreGauge({ score, size = 200 }) {
         />
         <defs>
           <linearGradient id="gauge-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#f97316" />
-            <stop offset="100%" stopColor="#fbbf24" />
+            <stop offset="0%" stopColor="rgb(var(--brand-violet))" />
+            <stop offset="100%" stopColor="rgb(var(--brand-glow))" />
           </linearGradient>
         </defs>
       </svg>
       {/* Central Content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
         <div className="flex items-baseline justify-center">
-          <span className="text-5xl font-black font-serif text-slate-900 dark:text-white leading-none">
+          <span className="font-brand text-[44px] font-semibold leading-none tracking-tight text-brand-ink">
             {Math.round(percentage)}
           </span>
-          <span className="text-xl font-bold text-slate-400 dark:text-slate-600 ml-1">/100</span>
+          <span className="ml-1 text-[16px] font-bold text-brand-muted">/100</span>
         </div>
-        <div className={`mt-2 text-xs font-black uppercase tracking-widest ${percentage > 80 ? 'text-emerald-500' :
-          percentage > 60 ? 'text-primary-500' :
-            'text-orange-500'
+        {/* 完整类名字符串，不做拼接，避免生产构建 purge */}
+        <div className={`mt-2 text-[11px] font-bold ${percentage > 80 ? 'text-brand-success' :
+          percentage > 60 ? 'text-brand-violet' :
+            'text-brand-muted'
           }`}>
           {percentage > 90 ? 'Exceptional' :
             percentage > 80 ? 'Excellent' :
@@ -177,74 +178,72 @@ function CoachReport({ coach, t }) {
   ]
 
   return (
-    <div className="space-y-12">
-      {/* New Compact Professional Resume Score Section */}
+    <div className="space-y-10">
+      {/* Resume Score Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card-premium p-8 bg-white dark:bg-slate-950 overflow-hidden relative group"
+        className="brand-float relative overflow-hidden rounded-[22px] px-6 py-6 sm:px-8"
       >
-        <div className="flex flex-col lg:flex-row items-center gap-8 relative z-10">
+        <div className="relative z-10 flex flex-col items-center gap-8 lg:flex-row">
           {/* Left: Compact Gauge */}
           <div className="shrink-0">
             <ResumeScoreGauge score={overallScore} size={160} />
           </div>
 
           {/* Right: Info & CTA */}
-          <div className="flex-1 space-y-6 text-center lg:text-left">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-              <div className="flex items-center gap-4 justify-center lg:justify-start">
-                <div className="p-3 bg-primary-50 dark:bg-primary-950/30 rounded-2xl border border-primary-100 dark:border-primary-900/50 shadow-sm">
-                  <FileText className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+          <div className="min-w-0 flex-1 space-y-5 text-center lg:text-left">
+            <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+              <div className="flex items-center justify-center gap-3.5 lg:justify-start">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-brand-line bg-brand-inset text-brand-violet">
+                  <FileText className="h-5 w-5" />
                 </div>
-                <div>
-                  <h3 className="text-2xl font-black font-serif tracking-tight text-slate-900 dark:text-white leading-tight"><span className="font-sans tracking-tighter">Land<span className="text-[#E8A832] italic">It</span></span> Resume Score</h3>
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1">AI Diagnostic Engine</p>
+                <div className="min-w-0">
+                  <h3 className="font-brand text-[22px] font-semibold leading-tight tracking-tight text-brand-ink">
+                    <span className="whitespace-nowrap">Land<span className="italic text-brand-violet">It</span></span> Resume Score
+                  </h3>
+                  <p className="mt-1 text-[11px] text-brand-muted">AI Diagnostic Engine</p>
                 </div>
               </div>
               <button
                 onClick={scrollToSummary}
-                className="px-6 py-2.5 rounded-full border border-slate-900 dark:border-white text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-900 transition-all shadow-lg active:scale-95"
+                className="shrink-0 rounded-xl border border-brand-line bg-brand-card px-4 py-2.5 text-[12.5px] font-bold text-brand-ink transition-colors hover:border-brand-ink"
               >
                 {t('profile.scoreDetails', '查看诊断详情')}
               </button>
             </div>
 
-            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-bold max-w-2xl bg-slate-50 dark:bg-slate-900/50 p-5 rounded-3xl border border-slate-100 dark:border-slate-800">
+            <p className="max-w-2xl rounded-[18px] border border-brand-line bg-brand-inset p-4 text-[13px] font-medium leading-relaxed text-brand-muted">
               {t('profile.scoreInsight', "您的简历在内容深度和逻辑性上表现出色。通过进一步细化量化指标，可以显著提升针对 Top 级雇主的竞争力。")}
             </p>
 
-            {/* Other scores with upgraded contrast */}
-            <div className="flex flex-wrap lg:flex-nowrap gap-3 pt-2">
+            {/* Other scores */}
+            <div className="flex flex-wrap gap-2.5 pt-1 lg:flex-nowrap">
               {otherScores.map(c => (
-                <div key={c.key} className="flex-1 min-w-[120px] flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm hover:border-primary-500 transition-colors group/pill">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-slate-400 opacity-70 group-hover/pill:opacity-100 whitespace-nowrap">{c.label}</span>
-                  <div className="flex items-baseline">
-                    <span className="text-lg font-black font-serif text-slate-900 dark:text-white">{c.val || 0}</span>
-                    <span className="text-[10px] font-bold text-slate-400 ml-0.5">/10</span>
+                <div key={c.key} className="flex min-w-[120px] flex-1 items-center justify-between gap-3 rounded-xl border border-brand-line bg-brand-card px-3.5 py-2.5 transition-colors hover:border-brand-ink">
+                  <span className="min-w-0 truncate text-[12px] font-bold text-brand-muted">{c.label}</span>
+                  <div className="flex shrink-0 items-baseline">
+                    <span className="text-[17px] font-semibold tabular-nums text-brand-ink">{c.val || 0}</span>
+                    <span className="ml-0.5 text-[11px] font-bold text-brand-muted">/10</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
-
-        {/* Decorative corner accent */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-primary-600/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
       </motion.div>
 
       <motion.section
         ref={summaryRef}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card-premium p-8 sm:p-12 bg-slate-900 text-white border-0 overflow-visible relative scroll-mt-24"
+        className="brand-float relative scroll-mt-28 overflow-hidden rounded-[22px] px-6 py-6 sm:px-8"
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
-        <SectionTitle icon={Sparkles}>
-          <span className="text-white">{t('profile.coachSummary')}</span>
-        </SectionTitle>
         <div className="relative z-10">
-          <div className="text-lg leading-relaxed text-slate-300 whitespace-pre-wrap font-medium">
+          <SectionTitle icon={Sparkles}>
+            {t('profile.coachSummary')}
+          </SectionTitle>
+          <div className="whitespace-pre-wrap text-[14px] font-medium leading-relaxed text-brand-muted">
             <RichText text={coach.overallEvaluation} />
           </div>
         </div>
@@ -255,17 +254,17 @@ function CoachReport({ coach, t }) {
           <SectionTitle icon={Telescope}>
             {t('profile.coachMacro')}
           </SectionTitle>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {coach.macroInsights.map((line, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="flex gap-4 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 items-start"
+                className="brand-float flex items-start gap-3 rounded-[18px] px-5 py-4"
               >
-                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary-600 shrink-0" />
-                <RichText text={line} className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed" />
+                <div className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-violet" aria-hidden="true" />
+                <RichText text={line} className="text-[13px] font-medium leading-relaxed text-brand-muted" />
               </motion.div>
             ))}
           </div>
@@ -277,17 +276,17 @@ function CoachReport({ coach, t }) {
           <SectionTitle icon={ListChecks}>
             {t('profile.coachStrengths')}
           </SectionTitle>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {coach.highlights.map((h, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="flex gap-4 p-5 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/40 dark:bg-emerald-950/20 items-start shadow-sm shadow-emerald-500/5"
+                className="flex items-start gap-3 rounded-[18px] border border-brand-line bg-brand-inset px-5 py-4"
               >
-                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 ring-4 ring-emerald-500/10" />
-                <RichText text={h} className="text-sm font-bold text-slate-800 dark:text-emerald-50 leading-relaxed" />
+                <div className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-ink" aria-hidden="true" />
+                <RichText text={h} className="text-[13px] font-bold leading-relaxed text-brand-ink" />
               </motion.div>
             ))}
           </div>
@@ -299,40 +298,36 @@ function CoachReport({ coach, t }) {
           <SectionTitle icon={AlertTriangle}>
             {t('profile.coachCritical')}
           </SectionTitle>
-          <div className="space-y-6">
+          <div className="space-y-5">
             {coach.priorityImprovements.map((p, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="group relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 transition-all hover:border-slate-900 dark:hover:border-white"
+                className="brand-float overflow-hidden rounded-[22px] px-6 py-5"
               >
                 <div className="flex flex-col gap-4">
-                  <h3 className="text-lg font-black font-serif text-slate-900 dark:text-white">{p.title}</h3>
-                  <div className="grid gap-6 md:grid-cols-2">
-                    <div className="space-y-4 p-5 rounded-2xl bg-orange-50/40 dark:bg-orange-950/10 border border-orange-200 dark:border-orange-900/30 relative overflow-hidden">
-                      <div className="relative z-10 space-y-2">
-                        <span className="text-[10px] uppercase font-black tracking-widest text-orange-600">{t('profile.coachIssue')}</span>
-                        <div className="flex gap-3 items-start">
-                          <div className="mt-2 w-1 h-1 rounded-full bg-orange-400 shrink-0" />
-                          <p className="text-sm font-bold text-slate-800 dark:text-orange-50 leading-relaxed"><RichText text={p.problem} /></p>
-                        </div>
+                  <h3 className="font-brand text-[17px] font-semibold tracking-tight text-brand-ink">{p.title}</h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2 rounded-[18px] border border-brand-danger/30 bg-brand-danger/[0.06] p-4">
+                      <span className="text-[11px] font-bold text-brand-danger">{t('profile.coachIssue')}</span>
+                      <div className="flex items-start gap-3">
+                        <div className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-brand-danger" aria-hidden="true" />
+                        <p className="text-[13px] font-bold leading-relaxed text-brand-ink"><RichText text={p.problem} /></p>
                       </div>
                     </div>
-                    <div className="space-y-4 p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
-                      <div className="space-y-2">
-                        <span className="text-[10px] uppercase font-black tracking-widest text-primary-600">{t('profile.coachAction')}</span>
-                        <div className="flex gap-3 items-start">
-                          <div className="mt-2 w-1 h-1 rounded-full bg-primary-400 shrink-0" />
-                          <p className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed"><RichText text={p.suggestedAction} /></p>
-                        </div>
+                    <div className="space-y-2 rounded-[18px] border border-brand-line bg-brand-inset p-4">
+                      <span className="text-[11px] font-bold text-brand-violet">{t('profile.coachAction')}</span>
+                      <div className="flex items-start gap-3">
+                        <div className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-brand-violet" aria-hidden="true" />
+                        <p className="text-[13px] font-bold leading-relaxed text-brand-ink"><RichText text={p.suggestedAction} /></p>
                       </div>
                     </div>
                   </div>
                   {p.rewriteExample && (
-                    <div className="mt-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                      <span className="text-[10px] uppercase font-black tracking-widest text-emerald-600 mb-2 block">{t('profile.coachExample')}</span>
-                      <div className="text-sm italic text-slate-700 dark:text-slate-300"><SanitizedListText text={p.rewriteExample} /></div>
+                    <div className="mt-1 rounded-xl border border-brand-line bg-brand-inset p-4">
+                      <span className="mb-2 block text-[11px] font-bold text-brand-ink">{t('profile.coachExample')}</span>
+                      <div className="text-[13px] italic text-brand-muted"><SanitizedListText text={p.rewriteExample} /></div>
                     </div>
                   )}
                 </div>
@@ -347,39 +342,42 @@ function CoachReport({ coach, t }) {
           <SectionTitle icon={Layers}>
             {t('profile.coachSections')}
           </SectionTitle>
-          <div className="space-y-8">
+          <div className="space-y-6">
             {coach.moduleDeepDives.map((m, i) => (
-              <div key={i} className="p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-8 transition-all hover:border-slate-300">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-600">
-                  <Zap className="w-3 h-3 text-primary-600" />
+              <div key={i} className="brand-float space-y-6 rounded-[22px] px-6 py-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-brand-line bg-brand-inset px-3 py-1 text-[12px] font-bold text-brand-ink">
+                  <Zap className="h-3 w-3 text-brand-violet" />
                   {m.moduleTitle}
                 </div>
 
-                <div className="grid gap-8 md:grid-cols-3">
-                  <div className="space-y-3">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-slate-100 pb-1 block w-fit">{t('profile.coachFinding')}</span>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed"><RichText text={m.finding} /></p>
+                <div className="grid gap-6 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <span className="block w-fit border-b border-brand-line pb-1 text-[11px] text-brand-muted">{t('profile.coachFinding')}</span>
+                    <p className="text-[13px] font-bold leading-relaxed text-brand-ink"><RichText text={m.finding} /></p>
                   </div>
-                  <div className="space-y-3">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-slate-100 pb-1 block w-fit">{t('profile.coachWhy')}</span>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed"><RichText text={m.whyImportant} /></p>
+                  <div className="space-y-2">
+                    <span className="block w-fit border-b border-brand-line pb-1 text-[11px] text-brand-muted">{t('profile.coachWhy')}</span>
+                    <p className="text-[13px] font-bold leading-relaxed text-brand-ink"><RichText text={m.whyImportant} /></p>
                   </div>
-                  <div className="space-y-3">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-primary-600 border-b border-primary-100 pb-1 block w-fit">{t('profile.coachSuggest')}</span>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed italic"><RichText text={m.modificationSuggestion} /></p>
+                  <div className="space-y-2">
+                    <span className="block w-fit border-b border-brand-violet/40 pb-1 text-[11px] font-bold text-brand-violet">{t('profile.coachSuggest')}</span>
+                    <p className="text-[13px] font-bold italic leading-relaxed text-brand-ink"><RichText text={m.modificationSuggestion} /></p>
                   </div>
                 </div>
 
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <div className="p-6 rounded-2xl border border-orange-200 dark:border-orange-900/30 bg-orange-50/30">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-orange-600 mb-3 block">{t('profile.coachBefore')}</span>
-                    <div className="text-sm font-medium text-slate-600 dark:text-orange-200 leading-relaxed font-mono">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-[18px] border border-brand-line bg-brand-inset p-5">
+                    <span className="mb-2.5 block text-[11px] text-brand-muted">{t('profile.coachBefore')}</span>
+                    <div className="font-mono text-[13px] font-medium leading-relaxed text-brand-muted">
                       <SanitizedListText text={m.before} />
                     </div>
                   </div>
-                  <div className="p-6 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/40">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-emerald-600 mb-3 block">{t('profile.coachAfter')}</span>
-                    <div className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed">
+                  <div className="rounded-[18px] border border-brand-ink bg-brand-card p-5 ring-1 ring-brand-ink">
+                    <span className="mb-2.5 flex items-center gap-1.5 text-[11px] font-bold text-brand-ink">
+                      <span className="h-1.5 w-1.5 rounded-full bg-brand-ink" aria-hidden="true" />
+                      {t('profile.coachAfter')}
+                    </span>
+                    <div className="text-[13px] font-bold leading-relaxed text-brand-ink">
                       <SanitizedListText text={m.after} />
                     </div>
                   </div>
@@ -395,11 +393,11 @@ function CoachReport({ coach, t }) {
           <SectionTitle icon={MapPin}>
             {t('profile.coachMarket')}
           </SectionTitle>
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-5 md:grid-cols-2">
             {coach.positioning.map((p, i) => (
-              <div key={i} className="space-y-3">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">{p.title}</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed"><RichText text={p.content} /></p>
+              <div key={i} className="space-y-2">
+                <h3 className="text-[15px] font-bold text-brand-ink">{p.title}</h3>
+                <p className="text-[13px] leading-relaxed text-brand-muted"><RichText text={p.content} /></p>
               </div>
             ))}
           </div>
@@ -411,17 +409,17 @@ function CoachReport({ coach, t }) {
           <SectionTitle icon={ClipboardList}>
             {t('profile.coachChecklist')}
           </SectionTitle>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-2">
             {coach.actionChecklist.map((a, i) => (
-              <div key={i} className="flex gap-4 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 items-start">
-                <div className="w-8 h-8 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center text-xs font-black shrink-0">
+              <div key={i} className="flex items-start gap-4 rounded-[18px] border border-brand-line bg-brand-card p-5">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-ink text-[12.5px] font-semibold text-brand-on-ink">
                   {i + 1}
                 </div>
                 <div className="min-w-0 flex-1 space-y-2">
-                  <p className="font-bold text-slate-900 dark:text-white leading-tight">{a.title}</p>
+                  <p className="text-[13.5px] font-bold leading-tight text-brand-ink">{a.title}</p>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">{t('profile.coachOutcome')}</span>
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-relaxed"><RichText text={a.expectedOutcome} /></p>
+                    <span className="text-[11px] text-brand-muted">{t('profile.coachOutcome')}</span>
+                    <p className="text-[12.5px] font-medium leading-relaxed text-brand-muted"><RichText text={a.expectedOutcome} /></p>
                   </div>
                 </div>
               </div>
@@ -510,9 +508,9 @@ function profileHasVisibleData(cvProfile, resumeText, resumeNotes) {
 }
 
 const displayCellClass =
-  'p-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 transition-all hover:border-slate-900 dark:hover:border-white'
-const displayLabelClass = 'text-[10px] uppercase font-black tracking-widest text-slate-400 mb-1'
-const displayValueClass = 'text-sm font-bold text-slate-800 dark:text-slate-100 break-words'
+  'rounded-[18px] border border-brand-line bg-brand-card p-4 transition-colors hover:border-brand-ink'
+const displayLabelClass = 'mb-1 text-[11px] text-brand-muted'
+const displayValueClass = 'break-words text-[13.5px] font-bold text-brand-ink'
 
 function DisplayCell({ label, value, t, asLink, mailto }) {
   const v = String(value || '').trim()
@@ -523,13 +521,13 @@ function DisplayCell({ label, value, t, asLink, mailto }) {
       <div className={displayLabelClass}>{label}</div>
       <div className={displayValueClass}>
         {empty ? (
-          <span className="font-normal text-slate-300 dark:text-slate-600">{t('profile.viewSectionEmpty')}</span>
+          <span className="font-normal text-brand-muted">{t('profile.viewSectionEmpty')}</span>
         ) : mailto ? (
-          <a href={`mailto:${v}`} className="hover:text-primary-600 transition-colors">
+          <a href={`mailto:${v}`} className="transition-colors hover:text-brand-violet">
             {v}
           </a>
         ) : webHref ? (
-          <a href={webHref} target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 transition-colors">
+          <a href={webHref} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-brand-violet">
             {v}
           </a>
         ) : (
@@ -550,42 +548,41 @@ function GallupAdCard({ t }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="group relative overflow-hidden rounded-3xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 p-8 transition-all hover:border-slate-900 dark:hover:border-white"
+      className="brand-float group relative overflow-hidden rounded-[22px] px-6 py-6"
     >
-      <div className="relative z-10 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-100 dark:bg-primary-900/30 text-[10px] font-black uppercase tracking-widest text-primary-700 dark:text-primary-400">
+      <div className="relative z-10 space-y-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="inline-flex items-center gap-2 rounded-full border border-brand-line bg-brand-inset px-3 py-1 text-[12px] font-bold text-brand-violet">
             <Zap className="h-3 w-3" />
             {t('profile.gallupAdBadge')}
           </div>
-          <ArrowUpRight className="h-5 w-5 text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors" />
+          <ArrowUpRight className="h-5 w-5 shrink-0 text-brand-muted transition-colors group-hover:text-brand-ink" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-2xl font-black font-serif tracking-tight text-slate-900 dark:text-white leading-tight">
+          <h3 className="font-brand text-[22px] font-semibold leading-tight tracking-tight text-brand-ink">
             {t('profile.gallupAdTitle')}
           </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs">
+          <p className="max-w-xs text-[13px] leading-relaxed text-brand-muted">
             {t('profile.gallupAdDesc')}
           </p>
         </div>
         <Link
           to="/gallup-test"
-          className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white border-b-2 border-slate-900 dark:border-white pb-1 hover:gap-4 transition-all"
+          className="inline-flex items-center gap-2 border-b-2 border-brand-ink pb-1 text-[13px] font-bold text-brand-ink transition-all hover:gap-4"
         >
           {t('profile.gallupAdBtn')}
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
-      <div className="absolute top-0 right-0 w-32 h-32 bg-primary-600/5 rounded-full -translate-y-16 translate-x-16 blur-3xl group-hover:bg-primary-600/10 transition-colors" />
     </motion.div>
   )
 }
 
 function SectionHeader({ icon: Icon, title, t }) {
   return (
-    <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800 mb-6">
-      <Icon className="h-4 w-4 text-primary-600" aria-hidden />
-      <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">
+    <div className="mb-5 flex items-center gap-3 border-b border-brand-line pb-3.5">
+      <Icon className="h-4 w-4 shrink-0 text-brand-violet" aria-hidden />
+      <h3 className="font-brand text-[18px] font-semibold tracking-tight text-brand-ink">
         {title}
       </h3>
     </div>
@@ -594,33 +591,33 @@ function SectionHeader({ icon: Icon, title, t }) {
 
 function ProfileSectionsView({ cvProfile, t }) {
   return (
-    <div className="space-y-12">
+    <div className="space-y-10">
       {/* Education */}
       <section>
         <SectionHeader icon={GraduationCap} title={t('profile.cv.education')} t={t} />
-        <div className="grid gap-6">
+        <div className="grid gap-4">
           {cvProfile.education.length === 0 ? (
-            <p className="text-sm text-slate-400 italic">{t('profile.cv.emptySection')}</p>
+            <p className="text-[13px] italic text-brand-muted">{t('profile.cv.emptySection')}</p>
           ) : (
             cvProfile.education.map((ed, i) => (
-              <div key={i} className="group p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 transition-all hover:border-slate-300 space-y-4">
-                <div className="flex flex-wrap items-baseline justify-between gap-4">
-                  <h4 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary-600 transition-colors">{ed.institution || t('profile.viewSectionEmpty')}</h4>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              <div key={i} className="brand-float group space-y-3 rounded-[22px] px-6 py-5">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+                  <h4 className="font-brand text-[18px] font-semibold tracking-tight text-brand-ink transition-colors group-hover:text-brand-violet">{ed.institution || t('profile.viewSectionEmpty')}</h4>
+                  <span className="text-[11px] text-brand-muted">
                     {[ed.duration, ed.startDate, ed.endDate].filter(Boolean).slice(0, 1).join(' – ') || null}
                   </span>
                 </div>
-                <div className="text-sm font-bold text-slate-500 dark:text-slate-400">
+                <div className="text-[13px] font-bold text-brand-muted">
                   {[ed.degree, ed.field].filter(Boolean).join(' · ') || null}
                   {ed.gpa ? ` · GPA ${ed.gpa}` : ''}
                 </div>
                 {(() => {
                   const bullets = parseBullets(ed.details || ed.description)
                   return bullets.length > 0 ? (
-                    <ul className="mt-4 space-y-3">
+                    <ul className="mt-3 space-y-2">
                       {bullets.map((b, idx) => (
-                        <li key={idx} className="flex gap-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed items-start">
-                          <div className="mt-2 w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600 shrink-0" />
+                        <li key={idx} className="flex items-start gap-3 text-[13px] leading-relaxed text-brand-muted">
+                          <div className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-brand-violet" aria-hidden="true" />
                           <RichText text={b} />
                         </li>
                       ))}
@@ -636,29 +633,29 @@ function ProfileSectionsView({ cvProfile, t }) {
       {/* Work Experience */}
       <section>
         <SectionHeader icon={Briefcase} title={t('profile.cv.work')} t={t} />
-        <div className="grid gap-8">
+        <div className="grid gap-4">
           {cvProfile.workExperience.length === 0 ? (
-            <p className="text-sm text-slate-400 italic">{t('profile.cv.emptySection')}</p>
+            <p className="text-[13px] italic text-brand-muted">{t('profile.cv.emptySection')}</p>
           ) : (
             cvProfile.workExperience.map((w, i) => (
-              <div key={i} className="group p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 transition-all hover:border-slate-300 space-y-4">
-                <div className="flex flex-wrap items-baseline justify-between gap-4">
-                  <h4 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary-600 transition-colors">{w.title || t('profile.viewSectionEmpty')}</h4>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              <div key={i} className="brand-float group space-y-3 rounded-[22px] px-6 py-5">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+                  <h4 className="font-brand text-[18px] font-semibold tracking-tight text-brand-ink transition-colors group-hover:text-brand-violet">{w.title || t('profile.viewSectionEmpty')}</h4>
+                  <span className="text-[11px] text-brand-muted">
                     {[w.duration, w.startDate, w.endDate].filter(Boolean).slice(0, 1).join(' – ') || null}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  {w.company && <span className="text-sm font-black uppercase tracking-widest text-primary-600">{w.company}</span>}
-                  {w.location && <span className="text-xs font-bold text-slate-400">· {w.location}</span>}
+                <div className="flex flex-wrap items-center gap-2">
+                  {w.company && <span className="text-[12.5px] font-bold text-brand-violet">{w.company}</span>}
+                  {w.location && <span className="text-[12px] text-brand-muted">· {w.location}</span>}
                 </div>
                 {(() => {
                   const bullets = parseBullets(w.highlights)
                   return bullets.length > 0 ? (
-                    <ul className="mt-4 space-y-3">
+                    <ul className="mt-3 space-y-2">
                       {bullets.map((b, idx) => (
-                        <li key={idx} className="flex gap-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed items-start">
-                          <div className="mt-2 w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600 shrink-0" />
+                        <li key={idx} className="flex items-start gap-3 text-[13px] leading-relaxed text-brand-muted">
+                          <div className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-brand-violet" aria-hidden="true" />
                           <RichText text={b} />
                         </li>
                       ))}
@@ -674,26 +671,26 @@ function ProfileSectionsView({ cvProfile, t }) {
       {/* Projects */}
       <section>
         <SectionHeader icon={FolderKanban} title={t('profile.cv.projects')} t={t} />
-        <div className="grid gap-6">
+        <div className="grid gap-4">
           {cvProfile.projects.length === 0 ? (
-            <p className="text-sm text-slate-400 italic">{t('profile.cv.emptySection')}</p>
+            <p className="text-[13px] italic text-brand-muted">{t('profile.cv.emptySection')}</p>
           ) : (
             cvProfile.projects.map((pr, i) => (
-              <div key={i} className="group p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 transition-all hover:border-slate-300 space-y-4">
-                <div className="flex flex-wrap items-baseline justify-between gap-4">
-                  <h4 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary-600 transition-colors">{pr.name || t('profile.viewSectionEmpty')}</h4>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              <div key={i} className="brand-float group space-y-3 rounded-[22px] px-6 py-5">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+                  <h4 className="font-brand text-[18px] font-semibold tracking-tight text-brand-ink transition-colors group-hover:text-brand-violet">{pr.name || t('profile.viewSectionEmpty')}</h4>
+                  <span className="text-[11px] text-brand-muted">
                     {[pr.duration, pr.startDate, pr.endDate].filter(Boolean).slice(0, 1).join(' – ') || null}
                   </span>
                 </div>
-                {pr.role && <div className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{pr.role}</div>}
+                {pr.role && <div className="text-[13px] font-bold text-brand-muted">{pr.role}</div>}
                 {(() => {
                   const bullets = parseBullets(pr.description)
                   return bullets.length > 0 ? (
-                    <ul className="mt-4 space-y-3">
+                    <ul className="mt-3 space-y-2">
                       {bullets.map((b, idx) => (
-                        <li key={idx} className="flex gap-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed items-start">
-                          <div className="mt-2 w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600 shrink-0" />
+                        <li key={idx} className="flex items-start gap-3 text-[13px] leading-relaxed text-brand-muted">
+                          <div className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-brand-violet" aria-hidden="true" />
                           <RichText text={b} />
                         </li>
                       ))}
@@ -709,19 +706,19 @@ function ProfileSectionsView({ cvProfile, t }) {
       {/* Publications */}
       <section>
         <SectionHeader icon={BookOpen} title={t('profile.cv.publications')} t={t} />
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           {cvProfile.publications.length === 0 ? (
-            <p className="text-sm text-slate-400 italic">{t('profile.cv.emptySection')}</p>
+            <p className="text-[13px] italic text-brand-muted">{t('profile.cv.emptySection')}</p>
           ) : (
             cvProfile.publications.map((pub, i) => (
-              <div key={i} className="p-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-3">
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">{pub.title || t('profile.viewSectionEmpty')}</h4>
-                <div className="text-xs text-slate-500">
+              <div key={i} className="space-y-2.5 rounded-[18px] border border-brand-line bg-brand-card p-4">
+                <h4 className="text-[13.5px] font-bold leading-tight text-brand-ink">{pub.title || t('profile.viewSectionEmpty')}</h4>
+                <div className="text-[12px] text-brand-muted">
                   {[pub.venue, pub.year].filter(Boolean).join(' · ')}
                   {pub.authors ? ` · ${pub.authors}` : ''}
                 </div>
                 {pub.url && (
-                  <a href={safeExternalHref(pub.url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs font-bold text-primary-600 hover:gap-2 transition-all">
+                  <a href={safeExternalHref(pub.url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[12px] font-bold text-brand-violet transition-all hover:gap-2">
                     Link <ArrowUpRight className="h-3 w-3" />
                   </a>
                 )}
@@ -731,16 +728,16 @@ function ProfileSectionsView({ cvProfile, t }) {
         </div>
       </section>
 
-      <div className="grid gap-12 lg:grid-cols-2">
+      <div className="grid gap-10 lg:grid-cols-2">
         {/* Skills */}
         <section>
           <SectionHeader icon={Tags} title={t('profile.cv.skills')} t={t} />
           <div className="flex flex-wrap gap-2">
             {cvProfile.skills.length === 0 ? (
-              <p className="text-sm text-slate-400 italic">{t('profile.cv.emptySection')}</p>
+              <p className="text-[13px] italic text-brand-muted">{t('profile.cv.emptySection')}</p>
             ) : (
               cvProfile.skills.map((s, i) => (
-                <span key={i} className="px-3 py-1.5 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                <span key={i} className="rounded-lg border border-brand-line bg-brand-inset px-2.5 py-1 text-[12px] font-bold text-brand-ink">
                   {s}
                 </span>
               ))
@@ -751,14 +748,14 @@ function ProfileSectionsView({ cvProfile, t }) {
         {/* Languages */}
         <section>
           <SectionHeader icon={Languages} title={t('profile.cv.languages')} t={t} />
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {cvProfile.languages.length === 0 ? (
-              <p className="text-sm text-slate-400 italic">{t('profile.cv.emptySection')}</p>
+              <p className="text-[13px] italic text-brand-muted">{t('profile.cv.emptySection')}</p>
             ) : (
               cvProfile.languages.map((lang, i) => (
-                <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950">
-                  <span className="text-sm font-bold text-slate-900 dark:text-white">{lang.name || t('profile.viewSectionEmpty')}</span>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-primary-600">{lang.proficiency || ''}</span>
+                <div key={i} className="flex items-center justify-between gap-3 rounded-xl border border-brand-line bg-brand-card p-3.5">
+                  <span className="min-w-0 truncate text-[13.5px] font-bold text-brand-ink">{lang.name || t('profile.viewSectionEmpty')}</span>
+                  <span className="shrink-0 text-[12px] font-bold text-brand-violet">{lang.proficiency || ''}</span>
                 </div>
               ))
             )}
@@ -769,14 +766,14 @@ function ProfileSectionsView({ cvProfile, t }) {
       {/* Awards */}
       <section>
         <SectionHeader icon={Award} title={t('profile.cv.awards')} t={t} />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {cvProfile.awards.length === 0 ? (
-            <p className="text-sm text-slate-400 italic">{t('profile.cv.emptySection')}</p>
+            <p className="text-[13px] italic text-brand-muted">{t('profile.cv.emptySection')}</p>
           ) : (
             cvProfile.awards.map((aw, i) => (
-              <div key={i} className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50">
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">{aw.title || t('profile.viewSectionEmpty')}</h4>
-                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              <div key={i} className="rounded-xl border border-brand-line bg-brand-inset p-3.5">
+                <h4 className="mb-1 text-[13.5px] font-bold text-brand-ink">{aw.title || t('profile.viewSectionEmpty')}</h4>
+                <div className="text-[11px] text-brand-muted">
                   {[aw.year, aw.issuer].filter(Boolean).join(' · ')}
                 </div>
               </div>
@@ -795,163 +792,159 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
   const scrollToCoach = () => coachRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-10">
+      {/* 悬浮快捷入口：小屏隐藏（头部已有同样的两个入口，且会遮住正文），
+          大屏时底部留出安全区，避免压在 iOS 手势条上 */}
       {showFloatingEditButton ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="fixed bottom-8 right-8 z-40 flex flex-col gap-3 items-end"
+          className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-[calc(1.5rem+env(safe-area-inset-right))] z-40 hidden flex-col items-end gap-3 sm:flex"
         >
           {coach && (
             <button
               onClick={scrollToCoach}
-              className="btn-setup-action-pill px-8 py-4 shadow-2xl"
+              className="brand-float flex items-center gap-2 rounded-full border border-brand-line px-5 py-3 text-[13px] font-bold text-brand-ink transition-colors hover:border-brand-ink"
             >
-              <BarChart3 className="h-4 w-4 text-indigo-500" />
-              <span className="font-bold">{t('profile.coachViewReport')}</span>
+              <BarChart3 className="h-4 w-4 text-brand-violet" />
+              <span>{t('profile.coachViewReport')}</span>
             </button>
           )}
           <Link
             to="/profile/edit"
-            className="btn-setup-action-pill px-8 py-4 shadow-2xl"
+            className="flex items-center gap-2 rounded-full bg-brand-ink px-5 py-3 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90"
           >
             <Pencil className="h-4 w-4" />
-            <span className="font-bold">{t('profile.editProfile')}</span>
+            <span>{t('profile.editProfile')}</span>
           </Link>
         </motion.div>
       ) : null}
 
-      {/* Energy Status Card */}
+      {/*
+        能量值条。原来是一整张卡：16×16 图标、44px 数字、三个用途胶囊分两行、
+        右侧一竖排按钮，外加一枚 28×28 的水印图标和一颗柔光圆，高度约 220px。
+        它承载的其实只有「余额 + 用途 + 充值」三件事，收成一条横排就够了。
+      */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card-premium p-8 bg-white dark:bg-slate-950 border-emerald-100 dark:border-emerald-500/20 shadow-xl shadow-emerald-500/5 overflow-hidden relative"
+        className="brand-float flex flex-wrap items-center gap-x-5 gap-y-3 rounded-[18px] px-5 py-3.5"
       >
-        <div className="absolute top-0 right-0 p-8 opacity-10">
-          <BrainCircuit className="w-32 h-32 text-emerald-500" />
+        <div className="flex items-center gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-brand-line bg-brand-inset text-brand-ink">
+            <Zap className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <div className="flex items-baseline gap-2">
+              <span className="font-brand text-[22px] font-semibold leading-none tracking-tight tabular-nums text-brand-ink">{tokens}</span>
+              <span className="text-[12px] text-brand-muted">{t('profile.tokens')}</span>
+            </div>
+            <p className="mt-1 truncate text-[11.5px] text-brand-muted">
+              {t('profile.initialTokensHint', 'Full access to AI-powered career tools.')}
+            </p>
+          </div>
         </div>
-        <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-          <div className="shrink-0 flex flex-col items-center gap-2">
-            <div className="w-20 h-20 rounded-3xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-              <Zap className="w-10 h-10 text-white fill-current" />
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">{t('profile.tokens')}</span>
-          </div>
 
-          <div className="flex-1 space-y-4 text-center md:text-left">
-            <div>
-              <div className="flex items-baseline justify-center md:justify-start gap-2">
-                <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">{tokens}</span>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Energy Points</span>
-              </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400 font-bold mt-1">
-                {t('profile.initialTokensHint', 'Full access to AI-powered career tools.')}
-              </p>
-            </div>
+        <span className="hidden h-9 w-px bg-brand-line sm:block" aria-hidden="true" />
 
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('profile.tokenUsageInterview')}</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary-500" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('profile.tokenUsageCoach')}</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('profile.tokenUsageExtract')}</span>
-              </div>
-            </div>
-          </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {[
+            { key: 'interview', label: t('profile.tokenUsageInterview'), dot: 'bg-brand-ink' },
+            { key: 'coach', label: t('profile.tokenUsageCoach'), dot: 'bg-brand-violet' },
+            { key: 'extract', label: t('profile.tokenUsageExtract'), dot: 'bg-brand-muted' },
+          ].map((item) => (
+            <span key={item.key} className="flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-inset px-2.5 py-1">
+              <span className={`h-1.5 w-1.5 rounded-full ${item.dot}`} aria-hidden="true" />
+              <span className="text-[11px] text-brand-muted">{item.label}</span>
+            </span>
+          ))}
+        </div>
 
-          <div className="shrink-0 flex flex-col gap-3 w-full md:w-auto">
-            <button
-              onClick={recharge}
-              className="px-8 py-4 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center justify-center gap-2"
-            >
-              <Zap className="w-4 h-4" />
-              {t('profile.recharge')}
-            </button>
-            <div className="px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-center">
-              <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{t('profile.tokenRewardContribution')}</p>
-            </div>
-          </div>
+        <div className="ml-auto flex items-center gap-3">
+          <p className="hidden text-[11px] text-brand-muted lg:block">{t('profile.tokenRewardContribution')}</p>
+          <button
+            onClick={recharge}
+            className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-ink px-4 py-2.5 text-[12.5px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90"
+          >
+            <Zap className="h-3.5 w-3.5" />
+            {t('profile.recharge')}
+          </button>
         </div>
       </motion.div>
 
-      <header className="space-y-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-slate-100 dark:border-slate-800">
-          <div className="space-y-6 max-w-2xl">
+      <header>
+        <div className="flex flex-col justify-between gap-7 border-b border-brand-line pb-8 md:flex-row md:items-end">
+          <div className="min-w-0 max-w-2xl space-y-5">
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-100 dark:border-slate-800">
+              <div className="h-[72px] w-[72px] shrink-0 overflow-hidden rounded-2xl border border-brand-line bg-brand-inset">
                 {avatarId ? (
-                  <img src={avatarId} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={avatarId} alt="Avatar" className="h-full w-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-300">
-                    <User className="w-10 h-10" />
+                  <div className="flex h-full w-full items-center justify-center text-brand-muted">
+                    <User className="h-9 w-9" />
                   </div>
                 )}
               </div>
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-500">
+              <div className="min-w-0 space-y-1.5">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-inset px-2.5 py-0.5 text-[11px] text-brand-muted">
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand-violet" aria-hidden="true" />
                   {jobStatusDisplay(jobSearchStatus, t)}
                 </div>
-                <h1 className="text-5xl font-black font-serif tracking-tight text-slate-900 dark:text-white">
+                <h1 className="font-brand text-[34px] font-semibold leading-tight tracking-tight text-brand-ink sm:text-[40px]">
                   {cvProfile.fullName || t('profile.displayTitle')}
                 </h1>
               </div>
             </div>
-            <p className="text-lg text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+            <p className="text-[14px] leading-relaxed text-brand-ink">
               {cvProfile.summary || t('profile.displaySub')}
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <Link
-              to="/profile/edit"
-              className="btn-setup-action-pill px-8 py-4"
-            >
-              <Pencil className="h-4 w-4" />
-              <span className="font-bold">{t('profile.editProfile')}</span>
-            </Link>
+          <div className="flex shrink-0 flex-wrap items-center gap-3">
             {coach && (
               <button
                 onClick={scrollToCoach}
-                className="btn-setup-action-pill px-8 py-4"
+                className="flex items-center gap-2 rounded-xl border border-brand-line bg-brand-card px-4 py-2.5 text-[13px] font-bold text-brand-ink transition-colors hover:border-brand-ink"
               >
-                <BarChart3 className="h-4 w-4 text-indigo-500" />
-                <span className="font-bold">{t('profile.coachViewReport')}</span>
+                <BarChart3 className="h-4 w-4 text-brand-violet" />
+                <span>{t('profile.coachViewReport')}</span>
               </button>
             )}
+            <Link
+              to="/profile/edit"
+              className="flex items-center gap-2 rounded-xl bg-brand-ink px-4 py-2.5 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90"
+            >
+              <Pencil className="h-4 w-4" />
+              <span>{t('profile.editProfile')}</span>
+            </Link>
           </div>
         </div>
       </header>
 
-      <div className="space-y-16">
+      <div className="space-y-12">
         {!hasData ? (
-          <div className="p-12 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-800 text-center space-y-6">
+          <div className="space-y-5 rounded-[22px] border-2 border-dashed border-brand-line p-10 text-center">
             <div className="space-y-2">
-              <h3 className="text-2xl font-black font-serif text-slate-900 dark:text-white">{t('profile.viewEmptyTitle')}</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">{t('profile.viewEmptySub')}</p>
+              <h3 className="font-brand text-[22px] font-semibold tracking-tight text-brand-ink">{t('profile.viewEmptyTitle')}</h3>
+              <p className="mx-auto max-w-sm text-[13px] text-brand-muted">{t('profile.viewEmptySub')}</p>
             </div>
             <Link
               to="/profile/edit"
-              className="btn-setup-action-pill px-8 py-4"
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-ink px-5 py-3 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90"
             >
-              <Pencil className="w-4 h-4" />
-              <span className="font-bold">{t('profile.editProfile')}</span>
+              <Pencil className="h-4 w-4" />
+              <span>{t('profile.editProfile')}</span>
             </Link>
           </div>
         ) : (
-          <div className="space-y-16">
+          <div className="space-y-12">
             <section>
               <SectionHeader icon={User} title={t('profile.cv.basic')} t={t} />
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                 <DisplayCell label={t('profile.cv.fullName')} value={cvProfile.fullName} t={t} />
-                <div className="p-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950">
-                  <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mb-1">{t('profile.cv.gender')}</div>
-                  <div className="text-sm font-bold text-slate-800 dark:text-slate-100">{genderDisplay(cvProfile.gender, t)}</div>
+                <div className={displayCellClass}>
+                  <div className={displayLabelClass}>{t('profile.cv.gender')}</div>
+                  <div className={displayValueClass}>{genderDisplay(cvProfile.gender, t)}</div>
                 </div>
                 <DisplayCell label={t('profile.cv.email')} value={cvProfile.email} t={t} mailto />
                 <DisplayCell label={t('profile.cv.phone')} value={cvProfile.phone} t={t} />
@@ -965,11 +958,11 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
 
             {/* Moved to top: AI Diagnostic & Resume Score */}
             {coach ? (
-              <div ref={coachRef} className="space-y-12">
+              <div ref={coachRef} className="space-y-10">
                 <CoachReport coach={coach} t={t} />
                 {timeStr && (
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 pt-6 border-t border-slate-100 dark:border-slate-800">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                  <div className="flex items-center gap-2 border-t border-brand-line pt-5 text-[11px] text-brand-muted">
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-brand-success" />
                     {t('profile.coachPersistNote', { time: timeStr })}
                   </div>
                 )}
@@ -978,23 +971,22 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
               <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="card-premium p-12 bg-slate-900 text-white border-0 text-center space-y-8 overflow-visible relative group"
+                className="brand-float relative overflow-hidden rounded-[22px] px-6 py-10 text-center sm:px-10"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative z-10 max-w-lg mx-auto space-y-6">
-                  <div className="w-16 h-16 rounded-2xl bg-primary-600 flex items-center justify-center mx-auto shadow-2xl shadow-primary-500/20 mb-8">
-                    <Sparkles className="w-8 h-8 text-white" />
+                <div className="relative z-10 mx-auto max-w-lg space-y-5">
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-brand-line bg-brand-inset text-brand-violet">
+                    <Sparkles className="h-7 w-7" />
                   </div>
-                  <h3 className="text-3xl font-black font-serif">{t('profile.coachPreviewTitle', '您的 AI 简历报告已就绪')}</h3>
-                  <p className="text-slate-400 leading-relaxed">
+                  <h3 className="font-brand text-[26px] font-semibold tracking-tight text-brand-ink">{t('profile.coachPreviewTitle', '您的 AI 简历报告已就绪')}</h3>
+                  <p className="text-[13.5px] leading-relaxed text-brand-muted">
                     {t('landing.coachBannerSub', '点击生成深度简历诊断。我们将基于德国人才市场标准和 ATS 算法为您提供全方位复盘。')}
                   </p>
                   <button
                     onClick={runCoach}
                     disabled={coachGenerating || !hasData}
-                    className="btn-primary-dark w-full py-5 text-base rounded-2xl group hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-brand-ink px-5 py-3.5 text-[15px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    {coachGenerating ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Zap className="w-5 h-5 mr-2 text-primary-500" />}
+                    {coachGenerating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
                     {coachGenerating ? t('profile.cv.extracting') : t('profile.coachCta')}
                   </button>
                 </div>
@@ -1002,27 +994,24 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
             )}
 
             {tr && (
-              <div className="p-8 rounded-3xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">{t('profile.coachTargetRole')}</span>
-                <p className="text-2xl font-black font-serif text-slate-900 dark:text-white">{tr}</p>
+              <div className="brand-float rounded-[22px] px-6 py-5">
+                <span className="mb-2 block text-[11px] text-brand-muted">{t('profile.coachTargetRole')}</span>
+                <p className="font-brand text-[22px] font-semibold tracking-tight text-brand-ink">{tr}</p>
               </div>
             )}
 
-
-
-
-            <div className="grid gap-8">
+            <div className="grid gap-5">
               {resumeText.trim() && (
-                <details className="group space-y-4">
-                  <summary className="flex items-center justify-between p-6 rounded-2xl border border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors list-none uppercase font-black tracking-widest text-[10px] text-slate-400">
-                    <span className="flex items-center gap-3">
-                      <FileText className="w-4 h-4 text-slate-400" />
+                <details className="group space-y-3">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-[18px] border border-brand-line bg-brand-card p-5 text-[12.5px] font-bold text-brand-ink transition-colors hover:border-brand-ink">
+                    <span className="flex min-w-0 items-center gap-3">
+                      <FileText className="h-4 w-4 shrink-0 text-brand-violet" />
                       {t('profile.cv.rawResumeTitle')}
                     </span>
-                    <ChevronDown className="w-4 h-4 group-open:rotate-180 transition-transform" />
+                    <ChevronDown className="h-4 w-4 shrink-0 text-brand-muted transition-transform group-open:rotate-180" />
                   </summary>
-                  <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                    <pre className="text-xs text-slate-600 dark:text-slate-400 whitespace-pre-wrap font-sans leading-relaxed">
+                  <div className="rounded-[18px] border border-brand-line bg-brand-inset p-5">
+                    <pre className="whitespace-pre-wrap font-sans text-[12.5px] leading-relaxed text-brand-muted">
                       {resumeText}
                     </pre>
                   </div>
@@ -1030,9 +1019,9 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
               )}
 
               {resumeNotes.trim() && (
-                <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.sectionNotes')}</span>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{resumeNotes}</p>
+                <div className="space-y-3 rounded-[18px] border border-brand-line bg-brand-card p-5">
+                  <span className="text-[11px] text-brand-muted">{t('profile.sectionNotes')}</span>
+                  <p className="whitespace-pre-wrap text-[13px] font-medium leading-relaxed text-brand-muted">{resumeNotes}</p>
                 </div>
               )}
             </div>
@@ -1044,17 +1033,17 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
 }
 
 const inputClass =
-  'w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-slate-900 dark:focus:border-white outline-none transition-all placeholder:text-slate-300 dark:placeholder:text-slate-700'
+  'w-full rounded-xl border border-brand-line bg-brand-inset px-3.5 py-3 text-[13.5px] text-brand-ink outline-none transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:ring-4 focus:ring-brand-ink/10'
 
 function MultiLineInput({ lines, label, placeholder, onChange, t, inputClass }) {
   const safeLines = Array.isArray(lines) ? lines : []
   const textValue = safeLines.join('\n')
 
   return (
-    <div className="space-y-4">
-      <label className="block text-[10px] font-black uppercase tracking-widest text-slate-600">{label}</label>
+    <div className="space-y-2">
+      <label className="block text-[12.5px] font-bold text-brand-ink">{label}</label>
       <textarea
-        className={`${inputClass} min-h-[160px] leading-relaxed resize-none`}
+        className={`${inputClass} min-h-[160px] resize-none leading-relaxed`}
         placeholder={placeholder || t('profile.cv.phHighlightsHint')}
         value={textValue}
         onChange={(e) => {
@@ -1076,74 +1065,74 @@ function RechargeModal({ isOpen, onClose, t }) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-brand-ink/40 backdrop-blur-sm"
       />
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800"
+        className="brand-float relative max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-[22px] border border-brand-line"
       >
-        <div className="p-8 sm:p-10 space-y-8">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h2 className="text-3xl font-black font-serif text-slate-900 dark:text-white leading-tight">
+        <div className="space-y-7 p-6 sm:p-8">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 space-y-1">
+              <h2 className="font-brand text-[26px] font-semibold leading-tight tracking-tight text-brand-ink">
                 {t('profile.rechargeModal.title')}
               </h2>
-              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+              <p className="text-[12.5px] text-brand-muted">
                 {t('profile.rechargeModal.subtitle')}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all hover:rotate-90"
+              className="shrink-0 rounded-xl border border-brand-line bg-brand-inset p-2.5 text-brand-muted transition-colors hover:border-brand-ink hover:text-brand-ink"
             >
-              <X className="w-5 h-5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="grid gap-6">
-            <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-emerald-500 transition-all space-y-4 text-left">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600">
-                  <Share2 className="w-6 h-6" />
+          <div className="grid gap-4">
+            <div className="space-y-3.5 rounded-[20px] border border-brand-line bg-brand-inset p-5 text-left transition-colors hover:border-brand-ink">
+              <div className="flex items-center gap-3.5">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-brand-line bg-brand-card text-brand-violet">
+                  <Share2 className="h-5 w-5" />
                 </div>
-                <div>
-                  <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-sm">
+                <div className="min-w-0">
+                  <h3 className="text-[14px] font-semibold text-brand-ink">
                     {t('profile.rechargeModal.method1Title')}
                   </h3>
                 </div>
               </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+              <p className="text-[13px] font-medium leading-relaxed text-brand-muted">
                 {t('profile.rechargeModal.method1Desc')}
               </p>
               <Link
                 to="/experiences"
                 onClick={onClose}
-                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 hover:gap-4 transition-all"
+                className="inline-flex items-center gap-2 text-[12.5px] font-bold text-brand-violet transition-all hover:gap-4"
               >
                 {t('profile.rechargeModal.method1Btn')}
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 
-            <div className="group p-6 rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 hover:border-emerald-500 transition-all space-y-6 text-left">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500">
-                  <ExternalLink className="w-6 h-6" />
+            <div className="space-y-4 rounded-[20px] border border-brand-line bg-brand-inset p-5 text-left transition-colors hover:border-brand-ink">
+              <div className="flex items-center gap-3.5">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-brand-line bg-brand-card text-brand-danger">
+                  <ExternalLink className="h-5 w-5" />
                 </div>
-                <div>
-                  <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-wider text-sm">
+                <div className="min-w-0">
+                  <h3 className="text-[14px] font-semibold text-brand-ink">
                     {t('profile.rechargeModal.method2Title')}
                   </h3>
                 </div>
               </div>
-              <div className="space-y-4">
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+              <div className="space-y-3.5">
+                <p className="text-[13px] font-medium leading-relaxed text-brand-muted">
                   {t('profile.rechargeModal.method2Desc')}
                 </p>
-                <div className="w-48 mx-auto rounded-3xl overflow-hidden shadow-lg">
-                  <img src={xiaohongshuQr} alt="Xiaohongshu QR Code" className="w-full h-full object-cover" />
+                <div className="mx-auto w-44 overflow-hidden rounded-[20px] border border-brand-line bg-brand-card">
+                  <img src={xiaohongshuQr} alt="Xiaohongshu QR Code" className="h-full w-full object-cover" />
                 </div>
               </div>
             </div>
@@ -1151,7 +1140,7 @@ function RechargeModal({ isOpen, onClose, t }) {
 
           <button
             onClick={onClose}
-            className="w-full py-5 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-xl active:scale-[0.98]"
+            className="w-full rounded-xl border border-brand-line bg-brand-card py-3.5 text-[13.5px] font-bold text-brand-ink transition-colors hover:border-brand-ink"
           >
             {t('profile.rechargeModal.cancel')}
           </button>
@@ -1442,11 +1431,8 @@ export default function ProfilePage() {
   }
 
   const runExtractCv = async () => {
-    console.log('[runExtractCv] clicked');
     const src = (pendingRaw || resumeText || '').trim()
-    console.log('[runExtractCv] src length:', src.length);
     if (src.length < 50) {
-      console.warn('[runExtractCv] text too short');
       setNote({ type: 'err', text: t('profile.cv.extractNeedText') })
       setTimeout(() => setNote(null), 5000)
       return
@@ -1454,7 +1440,6 @@ export default function ProfilePage() {
     setExtractBusy(true)
     setNote(null)
     try {
-      console.log('[runExtractCv] calling backend...');
       const { data: { session } } = await supabase.auth.getSession()
       const token = session?.access_token
       if (!token) throw new Error('auth')
@@ -1587,16 +1572,15 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-[#FAF9F6] dark:bg-slate-950">
+      <div className="theme-quiet flex min-h-screen flex-col items-center justify-center gap-7 bg-brand-paper">
         <div className="relative">
-          <Loader2 className="h-10 w-10 animate-spin text-slate-900 dark:text-white" />
-          <div className="absolute inset-0 bg-primary-500/10 blur-xl animate-pulse rounded-full" />
+          <Loader2 className="h-9 w-9 animate-spin text-brand-ink" />
         </div>
-        <div className="space-y-1 text-center">
-          <p className="text-[10px] uppercase font-black tracking-widest text-slate-400 animate-pulse">{t('profile.title')}</p>
-          <div className="h-0.5 w-12 bg-slate-200 dark:bg-slate-800 mx-auto rounded-full overflow-hidden">
+        <div className="space-y-2 text-center">
+          <p className="animate-pulse text-[11px] text-brand-muted">{t('profile.title')}</p>
+          <div className="mx-auto h-0.5 w-12 overflow-hidden rounded-full bg-brand-line">
             <motion.div
-              className="h-full bg-primary-600"
+              className="h-full bg-brand-violet"
               initial={{ x: "-100%" }}
               animate={{ x: "100%" }}
               transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
@@ -1627,9 +1611,9 @@ export default function ProfilePage() {
         variants={pageExitVariants}
         initial="initial"
         animate="animate"
-        className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-24"
+        className="theme-quiet min-h-screen bg-brand-paper pb-14 pt-[calc(var(--ui-nav-h)+2rem)]"
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="ui-container relative z-10">
           <ProfileDisplayView
             cvProfile={cvProfile}
             resumeText={resumeText}
@@ -1668,9 +1652,9 @@ export default function ProfilePage() {
       variants={pageExitVariants}
       initial="initial"
       animate="animate"
-      className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-24"
+      className="theme-quiet min-h-screen bg-brand-paper pb-14 pt-[calc(var(--ui-nav-h)+2rem)]"
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="ui-container relative z-10">
           <ProfileEditView
             cvProfile={cvProfile} setCvProfile={setCvProfile} resumeText={resumeText} setResumeText={setResumeText}
             resumeNotes={resumeNotes} setResumeNotes={setResumeNotes} targetRole={targetRole} setTargetRole={setTargetRole}
@@ -1720,61 +1704,64 @@ function ProfileEditView({
   ]
 
   return (
-    <div className="space-y-12">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-10 border-b border-slate-200 dark:border-slate-800">
-        <div className="space-y-4">
-          <h1 className="text-5xl font-black font-serif tracking-tight text-slate-900 dark:text-white uppercase leading-none">
+    <div className="space-y-10">
+      <header className="flex flex-col justify-between gap-7 border-b border-brand-line pb-8 md:flex-row md:items-end">
+        <div className="min-w-0 space-y-2">
+          {/* 中文标题不加 uppercase */}
+          <h1 className="font-brand text-[34px] font-semibold leading-tight tracking-tight text-brand-ink sm:text-[40px]">
             {t('profile.editProfile')}
           </h1>
-          <p className="text-lg text-slate-500 dark:text-slate-400 font-medium tracking-tight">
+          <p className="text-[14px] leading-relaxed text-brand-muted">
             {t('profile.editHint')}
           </p>
         </div>
 
-        <div className="flex flex-col items-end gap-3">
+        <div className="flex shrink-0 flex-col items-stretch gap-3 md:items-end">
           {coachGenerating && (
-            <div className="text-[11px] font-bold text-amber-600 dark:text-amber-400 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/20 rounded-xl animate-pulse">
+            <div className="flex animate-pulse items-center gap-2 self-start rounded-xl border border-brand-line bg-brand-inset px-3 py-1.5 text-[11px] font-bold text-brand-ink md:self-end">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-ink" aria-hidden="true" />
               {t('profile.coachGeneratingHint')}
             </div>
           )}
-          <div className="flex items-center gap-3 flex-nowrap overflow-x-auto">
-          {coachErr && (
-            <div className="text-[10px] font-bold text-red-500 uppercase tracking-widest px-3 py-1 bg-red-50 dark:bg-red-950/20 rounded-lg shrink-0">
-              {coachErr}
-            </div>
-          )}
-          <button
-            onClick={runCoach}
-            disabled={coachGenerating || (resumeText.trim().length < 80)}
-            className="btn-setup-action-pill px-5 py-3 shrink-0"
-          >
-            {coachGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-emerald-500" />}
-            <span className="font-bold text-sm">{coachGenerating ? t('profile.coachRunning') : t('profile.coachRun')}</span>
-          </button>
-          {!coachGenerating && coachJustGenerated && coach && (
+          {/* 移动端换行显示，不再横向滚动——否则「保存」会被推出可视区 */}
+          <div className="flex flex-wrap items-center gap-2.5 md:justify-end">
+            {coachErr && (
+              <div className="rounded-lg border border-brand-danger/30 bg-brand-danger/[0.06] px-3 py-1.5 text-[11px] font-bold text-brand-danger">
+                {coachErr}
+              </div>
+            )}
+            <button
+              onClick={runCoach}
+              disabled={coachGenerating || (resumeText.trim().length < 80)}
+              className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-brand-line bg-brand-card px-4 py-2.5 text-[13px] font-bold text-brand-ink transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-brand-line"
+            >
+              {coachGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-brand-violet" />}
+              <span>{coachGenerating ? t('profile.coachRunning') : t('profile.coachRun')}</span>
+            </button>
+            {!coachGenerating && coachJustGenerated && coach && (
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-brand-line bg-brand-card px-4 py-2.5 text-[13px] font-bold text-brand-ink transition-colors hover:border-brand-ink"
+              >
+                <BarChart3 className="h-4 w-4 text-brand-violet" />
+                <span>{t('profile.coachViewReport')}</span>
+              </Link>
+            )}
+            <button
+              onClick={save}
+              disabled={saving}
+              className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-brand-ink px-4 py-2.5 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              <span>{saving ? t('common.saving') : t('common.save')}</span>
+            </button>
             <Link
               to="/profile"
-              className="btn-setup-action-pill px-5 py-3 shrink-0"
+              className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-brand-line bg-brand-card px-4 py-2.5 text-[13px] font-bold text-brand-ink transition-colors hover:border-brand-ink"
             >
-              <BarChart3 className="w-4 h-4 text-indigo-500" />
-              <span className="font-bold text-sm">{t('profile.coachViewReport')}</span>
+              <ArrowRight className="h-4 w-4 rotate-180" />
+              <span>{t('common.back')}</span>
             </Link>
-          )}
-          <button
-            onClick={save}
-            disabled={saving}
-            className="btn-setup-action-pill px-5 py-3 shrink-0"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
-            <span className="font-bold text-sm">{saving ? t('common.saving') : t('common.save')}</span>
-          </button>
-          <Link
-            to="/profile"
-            className="btn-setup-action-pill px-5 py-3 shrink-0"
-          >
-            <ArrowRight className="w-4 h-4 rotate-180" />
-            <span className="font-bold text-sm">{t('common.back')}</span>
-          </Link>
           </div>
           <AnimatePresence>
             {note && (
@@ -1782,9 +1769,9 @@ function ProfileEditView({
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                className={`self-end px-4 py-2 rounded-xl text-[11px] font-bold leading-snug shadow-sm ring-1 ring-black/5 ${note.type === 'ok'
-                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-200'
-                    : 'bg-red-50 text-red-700 dark:bg-red-950/20 dark:text-red-200'
+                className={`self-start rounded-xl border px-3.5 py-2 text-[12px] font-bold leading-snug md:self-end ${note.type === 'ok'
+                    ? 'border-brand-success/30 bg-brand-success/[0.08] text-brand-success'
+                    : 'border-brand-danger/30 bg-brand-danger/[0.06] text-brand-danger'
                   }`}
               >
                 {note.text}
@@ -1794,26 +1781,28 @@ function ProfileEditView({
         </div>
       </header>
 
-      <div className="grid lg:grid-cols-4 gap-12">
-        <aside className="lg:col-span-1">
-          <nav className="flex flex-col gap-1 sticky top-32">
+      <div className="grid gap-8 lg:grid-cols-4 lg:gap-10">
+        <aside className="min-w-0 lg:col-span-1">
+          {/* <lg：横向可滚动的 tab 条（scrollbar-hide 已在 index.css 有真实实现）
+              lg+：左侧 sticky 纵向侧栏 */}
+          <nav className="scrollbar-hide flex snap-x gap-2 overflow-x-auto pb-1 lg:sticky lg:top-[calc(var(--ui-nav-h)+1.5rem)] lg:flex-col lg:gap-1 lg:overflow-x-visible lg:pb-0">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab.id
-                  ? 'bg-slate-50 text-slate-900 border border-slate-300 dark:bg-slate-800 dark:text-white dark:border-slate-700 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50/50 dark:hover:bg-slate-900/50'
+                className={`flex shrink-0 snap-start items-center gap-2.5 whitespace-nowrap rounded-xl border px-4 py-2.5 text-[13px] font-bold transition-colors lg:w-full lg:px-5 lg:py-3.5 ${activeTab === tab.id
+                  ? 'border-brand-ink bg-brand-card text-brand-ink ring-1 ring-brand-ink'
+                  : 'border-brand-line bg-brand-card text-brand-muted hover:border-brand-ink hover:text-brand-ink'
                   }`}
               >
-                <tab.icon className="w-4 h-4" />
+                <tab.icon className="h-4 w-4 shrink-0" />
                 {tab.label}
               </button>
             ))}
           </nav>
         </aside>
 
-        <main className="lg:col-span-3 space-y-12">
+        <main className="min-w-0 space-y-10 lg:col-span-3">
           {activeTab === 'basic' && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -1824,56 +1813,56 @@ function ProfileEditView({
                 <SectionTitle icon={User}>{t('profile.cv.basic')}</SectionTitle>
 
                 {/* Structured Extraction UI */}
-                <div className="p-8 rounded-3xl border border-primary-100 bg-primary-50/30 dark:border-primary-900/40 dark:bg-primary-950/20 space-y-6">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="space-y-1">
-                      <h3 className="text-lg font-black font-serif text-slate-900 dark:text-white">{t('profile.cv.structuredTitle')}</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{t('profile.cv.structuredHint')}</p>
+                <div className="space-y-5 rounded-[22px] border border-brand-line bg-brand-inset p-5 sm:p-6">
+                  <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
+                    <div className="min-w-0 space-y-1">
+                      <h3 className="font-brand text-[18px] font-semibold tracking-tight text-brand-ink">{t('profile.cv.structuredTitle')}</h3>
+                      <p className="text-[12.5px] text-brand-muted">{t('profile.cv.structuredHint')}</p>
                     </div>
-                    <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-2.5">
                       <input ref={fileRef} type="file" accept="application/pdf" className="hidden" onChange={(e) => void onPdf(e)} />
                       <button
                         onClick={() => fileRef.current?.click()}
                         disabled={parseBusy}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all disabled:opacity-50 shadow-sm"
+                        className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-brand-line bg-brand-card px-4 py-2.5 text-[13px] font-bold text-brand-ink transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        {parseBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                        {parseBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                         {t('profile.uploadPdf')}
                       </button>
                       <button
                         onClick={() => void runExtractCv()}
                         disabled={extractBusy || parseBusy || !(pendingRaw || resumeText || '').trim()}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 dark:bg-[#E8A832] text-white text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-[#d49a2b] transition-all disabled:opacity-50 shadow-lg shadow-slate-900/10 dark:shadow-[#E8A832]/20"
+                        className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-brand-ink px-4 py-2.5 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                       >
-                        {extractBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                        {extractBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
                         {extractBusy ? t('profile.cv.extracting') : t('profile.cv.extractBtn')}
                       </button>
                     </div>
                   </div>
 
                   {pendingRaw.trim() && (
-                    <div className="pt-6 border-t border-primary-100 dark:border-primary-900/30 space-y-4">
-                      <div className="flex items-center justify-between flex-wrap gap-3">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">{t('profile.cv.extractedPreviewLabel')}</p>
-                        <div className="flex items-center gap-3">
+                    <div className="space-y-3.5 border-t border-brand-line pt-5">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <p className="text-[11px] text-brand-muted">{t('profile.cv.extractedPreviewLabel')}</p>
+                        <div className="flex flex-wrap items-center gap-2.5">
                           <button
                             onClick={() => setPendingPreviewOpen(!pendingPreviewOpen)}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+                            className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-brand-line bg-brand-card px-4 py-2.5 text-[13px] font-bold text-brand-ink transition-colors hover:border-brand-ink"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Eye className="h-4 w-4" />
                             {pendingPreviewOpen ? t('common.hide') : t('common.show')}
                           </button>
-                          <div className="relative group/tip">
+                          <div className="group/tip relative">
                             <button
                               onClick={applyPendingToResume}
-                              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#E8A832] dark:bg-[#E8A832] text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#d49a2b] dark:hover:bg-[#d49a2b] transition-all shadow-lg shadow-[#E8A832]/20"
+                              className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-brand-ink px-4 py-2.5 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90"
                             >
-                              <ArrowRight className="w-4 h-4" />
+                              <ArrowRight className="h-4 w-4" />
                               {t('profile.cv.applyToInterviewResume')}
                             </button>
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-medium leading-relaxed w-64 text-center opacity-0 pointer-events-none group-hover/tip:opacity-100 transition-opacity duration-200 shadow-xl z-50">
+                            <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 rounded-xl bg-brand-ink px-3.5 py-2.5 text-center text-[12px] font-medium leading-relaxed text-brand-on-ink opacity-0 transition-opacity duration-200 group-hover/tip:opacity-100">
                               {t('profile.cv.applyToInterviewResumeHint')}
-                              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-2 h-2 rotate-45 bg-slate-900 dark:bg-white" />
+                              <div className="absolute left-1/2 top-full -mt-1 h-2 w-2 -translate-x-1/2 rotate-45 bg-brand-ink" />
                             </div>
                           </div>
                           <AnimatePresence>
@@ -1882,9 +1871,9 @@ function ProfileEditView({
                                 initial={{ opacity: 0, x: -8 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -8 }}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold"
+                                className="flex items-center gap-1.5 rounded-lg border border-brand-success/30 bg-brand-success/[0.08] px-2.5 py-1.5 text-[11px] font-bold text-brand-success"
                               >
-                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <CheckCircle2 className="h-3.5 w-3.5" />
                                 {t('profile.cv.applySuccess')}
                               </motion.div>
                             )}
@@ -1898,7 +1887,7 @@ function ProfileEditView({
                           value={pendingRaw}
                           onChange={(e) => setPendingRaw(e.target.value)}
                           spellCheck={false}
-                          className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-primary-100 dark:border-primary-900/30 text-xs font-mono text-slate-600 dark:text-slate-400 overflow-auto max-h-60 leading-relaxed resize-y min-h-[120px] w-full"
+                          className="max-h-60 min-h-[120px] w-full resize-y overflow-auto rounded-[18px] border border-brand-line bg-brand-card p-5 font-mono text-[12.5px] leading-relaxed text-brand-muted"
                         />
                       )}
                     </div>
@@ -1908,18 +1897,18 @@ function ProfileEditView({
                 {/* Avatar Selection */}
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.chooseAvatar')}</label>
+                    <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.chooseAvatar')}</label>
                   </div>
-                  <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-4">
+                  <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-8">
                     {/* Default User Icon */}
                     <button
                       onClick={() => setAvatarId(null)}
-                      className={`relative flex items-center justify-center h-20 rounded-2xl border-2 transition-all ${!avatarId
-                          ? 'border-slate-900 dark:border-white shadow-xl shadow-slate-900/10 dark:shadow-white/5 ring-4 ring-slate-900/5 dark:ring-white/5'
-                          : 'border-slate-100 dark:border-slate-800 grayscale opacity-40 hover:opacity-100 hover:grayscale-0 hover:border-slate-300'
+                      className={`relative flex h-20 items-center justify-center rounded-2xl border transition-colors ${!avatarId
+                          ? 'border-brand-ink bg-brand-card text-brand-ink ring-1 ring-brand-ink'
+                          : 'border-brand-line bg-brand-card opacity-50 hover:border-brand-ink hover:opacity-100'
                         }`}
                     >
-                      <User className="w-6 h-6 text-slate-400" />
+                      <User className="h-6 w-6 text-brand-muted" />
                     </button>
 
                     {/* Presets */}
@@ -1927,15 +1916,15 @@ function ProfileEditView({
                       <button
                         key={url}
                         onClick={() => setAvatarId(url)}
-                        className={`relative group h-20 rounded-2xl overflow-hidden border-2 transition-all ${avatarId === url
-                            ? 'border-slate-900 dark:border-white scale-[1.05] z-10 shadow-xl'
-                            : 'border-slate-100 dark:border-slate-800 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 hover:scale-[1.05]'
+                        className={`group relative h-20 overflow-hidden rounded-2xl border transition-transform ${avatarId === url
+                            ? 'z-10 scale-[1.05] border-brand-ink ring-1 ring-brand-ink'
+                            : 'border-brand-line opacity-70 grayscale hover:scale-[1.05] hover:opacity-100 hover:grayscale-0'
                           }`}
                       >
                         <img src={url} alt="Avatar" className="w-full h-full object-cover" />
                         {avatarId === url && (
-                          <div className="absolute top-1 right-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 p-1 rounded-full shadow-lg">
-                            <CheckCircle2 className="w-3 h-3" />
+                          <div className="absolute right-1 top-1 grid h-[18px] w-[18px] place-items-center rounded-full bg-brand-ink text-brand-on-ink">
+                            <CheckCircle2 className="h-3 w-3" />
                           </div>
                         )}
                       </button>
@@ -1989,24 +1978,25 @@ function ProfileEditView({
                     />
                     <label
                       htmlFor="avatar-upload"
-                      className={`relative flex flex-col items-center justify-center h-20 rounded-2xl border-2 border-dashed cursor-pointer transition-all ${uploadingAvatar ? 'opacity-50 pointer-events-none' : ''} ${(avatarId && !avatars.includes(avatarId))
-                          ? 'border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-900'
-                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900'
+                      className={`relative flex h-20 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed transition-colors ${uploadingAvatar ? 'pointer-events-none opacity-50' : ''} ${(avatarId && !avatars.includes(avatarId))
+                          ? 'border-brand-ink bg-brand-inset'
+                          : 'border-brand-line bg-brand-card hover:border-brand-ink hover:bg-brand-inset'
                         }`}
                     >
                       {uploadingAvatar ? (
-                        <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+                        <Loader2 className="h-5 w-5 animate-spin text-brand-muted" />
                       ) : (avatarId && !avatars.includes(avatarId)) ? (
-                        <div className="relative w-full h-full rounded-2xl overflow-hidden">
-                          <img src={avatarId} alt="Custom" className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-slate-900/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
-                            <Upload className="w-5 h-5 text-white" />
+                        <div className="relative h-full w-full overflow-hidden rounded-2xl">
+                          <img src={avatarId} alt="Custom" className="h-full w-full object-cover" />
+                          <div className="absolute inset-0 flex items-center justify-center bg-brand-ink/40 opacity-0 transition-opacity hover:opacity-100">
+                            <Upload className="h-5 w-5 text-brand-on-ink" />
                           </div>
                         </div>
                       ) : (
                         <>
-                          <Plus className="w-5 h-5 text-slate-400" />
-                          <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-1">{t('common.upload') || 'Upload'}</span>
+                          <Plus className="h-5 w-5 text-brand-muted" />
+                          {/* i18next 找不到 key 时会返回 key 字符串（真值），所以 `|| 'Upload'` 永远不生效 */}
+                          <span className="mt-1 text-[11px] text-brand-muted">{t('common.upload')}</span>
                         </>
                       )}
                     </label>
@@ -2014,12 +2004,12 @@ function ProfileEditView({
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.fullName')}</label>
+                  <div className="space-y-2">
+                    <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.fullName')}</label>
                     <input className={inputClass} value={cvProfile.fullName} onChange={(e) => setCvProfile({ ...cvProfile, fullName: e.target.value })} />
                   </div>
-                  <div className="space-y-4">
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.gender')}</label>
+                  <div className="space-y-2">
+                    <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.gender')}</label>
                     <select className={inputClass} value={cvProfile.gender} onChange={(e) => setCvProfile({ ...cvProfile, gender: e.target.value })}>
                       <option value="">{t('profile.cv.genderEmpty')}</option>
                       <option value="male">{t('profile.cv.genderMale')}</option>
@@ -2027,18 +2017,18 @@ function ProfileEditView({
                       <option value="other">{t('profile.cv.genderOther')}</option>
                     </select>
                   </div>
-                  <div className="space-y-4">
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.email')}</label>
+                  <div className="space-y-2">
+                    <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.email')}</label>
                     <input className={inputClass} value={cvProfile.email} onChange={(e) => setCvProfile({ ...cvProfile, email: e.target.value })} />
                   </div>
-                  <div className="space-y-4">
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.phone')}</label>
+                  <div className="space-y-2">
+                    <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.phone')}</label>
                     <input className={inputClass} value={cvProfile.phone} onChange={(e) => setCvProfile({ ...cvProfile, phone: e.target.value })} />
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.summary')}</label>
+                <div className="space-y-2">
+                  <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.summary')}</label>
                   <textarea className={`${inputClass} min-h-[160px] resize-none leading-relaxed`} value={cvProfile.summary} onChange={(e) => setCvProfile({ ...cvProfile, summary: e.target.value })} />
                 </div>
               </section>
@@ -2055,20 +2045,20 @@ function ProfileEditView({
                 <SectionTitle icon={Briefcase}>{t('profile.cv.work')}</SectionTitle>
                 <div className="space-y-8">
                   {(cvProfile.workExperience || []).map((exp, idx) => (
-                    <div key={idx} className="group relative p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-6">
+                    <div key={idx} className="brand-float group relative space-y-5 rounded-[22px] px-6 py-6">
                       <button
                         type="button"
                         onClick={() => {
                           const newExp = (cvProfile.workExperience || []).filter((_, i) => i !== idx)
                           setCvProfile({ ...cvProfile, workExperience: newExp })
                         }}
-                        className="absolute top-6 right-6 p-2 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                        className="absolute right-4 top-4 rounded-lg p-2 text-brand-muted opacity-0 transition-all hover:bg-brand-danger/10 hover:text-brand-danger group-hover:opacity-100"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                       <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.phCompany')}</label>
+                        <div className="space-y-2">
+                          <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.phCompany')}</label>
                           <input
                             className={inputClass}
                             value={exp.company}
@@ -2079,8 +2069,8 @@ function ProfileEditView({
                             }}
                           />
                         </div>
-                        <div className="space-y-4">
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.phExpTitle')}</label>
+                        <div className="space-y-2">
+                          <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.phExpTitle')}</label>
                           <input
                             className={inputClass}
                             value={exp.title}
@@ -2091,8 +2081,8 @@ function ProfileEditView({
                             }}
                           />
                         </div>
-                        <div className="space-y-4">
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.phDuration')}</label>
+                        <div className="space-y-2">
+                          <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.phDuration')}</label>
                           <input
                             className={inputClass}
                             placeholder="e.g. 2020 - 2023"
@@ -2104,8 +2094,8 @@ function ProfileEditView({
                             }}
                           />
                         </div>
-                        <div className="space-y-4">
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.phLocation')}</label>
+                        <div className="space-y-2">
+                          <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.phLocation')}</label>
                           <input
                             className={inputClass}
                             value={exp.location}
@@ -2133,9 +2123,9 @@ function ProfileEditView({
                   <button
                     type="button"
                     onClick={() => setCvProfile({ ...cvProfile, workExperience: [...(cvProfile.workExperience || []), emptyWork()] })}
-                    className="w-full py-8 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-600 font-bold hover:border-slate-400 hover:text-slate-900 transition-all flex items-center justify-center gap-2 bg-slate-50/20"
+                    className="flex w-full items-center justify-center gap-2 rounded-[22px] border border-dashed border-brand-line bg-brand-card py-6 text-[13.5px] font-bold text-brand-muted transition-colors hover:border-brand-ink hover:text-brand-ink"
                   >
-                    <Plus className="w-5 h-5 text-emerald-500" />
+                    <Plus className="h-5 w-5 text-brand-violet" />
                     {t('profile.cv.add')}
                   </button>
                 </div>
@@ -2153,20 +2143,20 @@ function ProfileEditView({
                 <SectionTitle icon={GraduationCap}>{t('profile.cv.education')}</SectionTitle>
                 <div className="space-y-8">
                   {cvProfile.education.map((edu, idx) => (
-                    <div key={idx} className="group relative p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-6">
+                    <div key={idx} className="brand-float group relative space-y-5 rounded-[22px] px-6 py-6">
                       <button
                         type="button"
                         onClick={() => {
                           const newEdu = cvProfile.education.filter((_, i) => i !== idx)
                           setCvProfile({ ...cvProfile, education: newEdu })
                         }}
-                        className="absolute top-6 right-6 p-2 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                        className="absolute right-4 top-4 rounded-lg p-2 text-brand-muted opacity-0 transition-all hover:bg-brand-danger/10 hover:text-brand-danger group-hover:opacity-100"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                       <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.phSchool')}</label>
+                        <div className="space-y-2">
+                          <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.phSchool')}</label>
                           <input
                             className={inputClass}
                             value={edu.institution || edu.school || ''}
@@ -2177,8 +2167,8 @@ function ProfileEditView({
                             }}
                           />
                         </div>
-                        <div className="space-y-4">
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.phField')}</label>
+                        <div className="space-y-2">
+                          <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.phField')}</label>
                           <input
                             className={inputClass}
                             value={edu.field || edu.major || ''}
@@ -2189,8 +2179,8 @@ function ProfileEditView({
                             }}
                           />
                         </div>
-                        <div className="space-y-4">
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.phDegree')}</label>
+                        <div className="space-y-2">
+                          <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.phDegree')}</label>
                           <input
                             className={inputClass}
                             value={edu.degree}
@@ -2201,8 +2191,8 @@ function ProfileEditView({
                             }}
                           />
                         </div>
-                        <div className="space-y-4">
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.phDuration')}</label>
+                        <div className="space-y-2">
+                          <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.phDuration')}</label>
                           <input
                             className={inputClass}
                             placeholder="e.g. 2020 - 2024"
@@ -2220,9 +2210,9 @@ function ProfileEditView({
                   <button
                     type="button"
                     onClick={() => setCvProfile({ ...cvProfile, education: [...cvProfile.education, emptyEducation()] })}
-                    className="w-full py-8 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-600 font-bold hover:border-slate-400 hover:text-slate-900 transition-all flex items-center justify-center gap-2 bg-slate-50/20"
+                    className="flex w-full items-center justify-center gap-2 rounded-[22px] border border-dashed border-brand-line bg-brand-card py-6 text-[13.5px] font-bold text-brand-muted transition-colors hover:border-brand-ink hover:text-brand-ink"
                   >
-                    <Plus className="w-5 h-5 text-emerald-500" />
+                    <Plus className="h-5 w-5 text-brand-violet" />
                     {t('profile.cv.add')}
                   </button>
                 </div>
@@ -2239,20 +2229,20 @@ function ProfileEditView({
                 <SectionTitle icon={FolderKanban}>{t('profile.cv.projects')}</SectionTitle>
                 <div className="space-y-8">
                   {cvProfile.projects.map((pr, idx) => (
-                    <div key={idx} className="group relative p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-6">
+                    <div key={idx} className="brand-float group relative space-y-5 rounded-[22px] px-6 py-6">
                       <button
                         type="button"
                         onClick={() => {
                           const newPr = cvProfile.projects.filter((_, i) => i !== idx)
                           setCvProfile({ ...cvProfile, projects: newPr })
                         }}
-                        className="absolute top-6 right-6 p-2 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                        className="absolute right-4 top-4 rounded-lg p-2 text-brand-muted opacity-0 transition-all hover:bg-brand-danger/10 hover:text-brand-danger group-hover:opacity-100"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                       <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.phProjName')}</label>
+                        <div className="space-y-2">
+                          <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.phProjName')}</label>
                           <input
                             className={inputClass}
                             value={pr.name}
@@ -2263,8 +2253,8 @@ function ProfileEditView({
                             }}
                           />
                         </div>
-                        <div className="space-y-4">
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.phProjRole')}</label>
+                        <div className="space-y-2">
+                          <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.phProjRole')}</label>
                           <input
                             className={inputClass}
                             value={pr.role}
@@ -2292,9 +2282,9 @@ function ProfileEditView({
                   <button
                     type="button"
                     onClick={() => setCvProfile({ ...cvProfile, projects: [...cvProfile.projects, emptyProject()] })}
-                    className="w-full py-8 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-600 font-bold hover:border-slate-400 hover:text-slate-900 transition-all flex items-center justify-center gap-2 bg-slate-50/20"
+                    className="flex w-full items-center justify-center gap-2 rounded-[22px] border border-dashed border-brand-line bg-brand-card py-6 text-[13.5px] font-bold text-brand-muted transition-colors hover:border-brand-ink hover:text-brand-ink"
                   >
-                    <Plus className="w-5 h-5 text-emerald-500" />
+                    <Plus className="h-5 w-5 text-brand-violet" />
                     {t('profile.cv.add')}
                   </button>
                 </div>
@@ -2312,7 +2302,7 @@ function ProfileEditView({
                 <section className="space-y-8">
                   <SectionTitle icon={Tags}>{t('profile.cv.skills')}</SectionTitle>
                   <div className="space-y-4">
-                    <p className="text-xs text-slate-400 font-medium">{t('profile.cv.skillsHint')}</p>
+                    <p className="text-[12px] text-brand-muted">{t('profile.cv.skillsHint')}</p>
                     <textarea
                       rows={12}
                       className={`${inputClass} font-mono text-xs leading-relaxed min-h-[400px]`}
@@ -2354,7 +2344,7 @@ function ProfileEditView({
                             const newLang = cvProfile.languages.filter((_, i) => i !== idx)
                             setCvProfile({ ...cvProfile, languages: newLang })
                           }}
-                          className="p-3 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all"
+                          className="shrink-0 rounded-lg p-2.5 text-brand-muted transition-colors hover:bg-brand-danger/10 hover:text-brand-danger"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -2363,9 +2353,9 @@ function ProfileEditView({
                     <button
                       type="button"
                       onClick={() => setCvProfile({ ...cvProfile, languages: [...cvProfile.languages, emptyLanguage()] })}
-                      className="w-full py-8 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-600 font-bold hover:border-slate-400 hover:text-slate-900 transition-all flex items-center justify-center gap-2 bg-slate-50/20"
+                      className="flex w-full items-center justify-center gap-2 rounded-[22px] border border-dashed border-brand-line bg-brand-card py-6 text-[13.5px] font-bold text-brand-muted transition-colors hover:border-brand-ink hover:text-brand-ink"
                     >
-                      <Plus className="w-5 h-5 text-emerald-500" />
+                      <Plus className="h-5 w-5 text-brand-violet" />
                       {t('profile.cv.add')}
                     </button>
                   </div>
@@ -2384,20 +2374,20 @@ function ProfileEditView({
                 <SectionTitle icon={Award}>{t('profile.cv.awards')}</SectionTitle>
                 <div className="space-y-4">
                   {cvProfile.awards.map((aw, idx) => (
-                    <div key={idx} className="group relative bg-white dark:bg-slate-950 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6">
+                    <div key={idx} className="brand-float group relative space-y-5 rounded-[22px] px-6 py-6">
                       <button
                         type="button"
                         onClick={() => {
                           const newAw = cvProfile.awards.filter((_, i) => i !== idx)
                           setCvProfile({ ...cvProfile, awards: newAw })
                         }}
-                        className="absolute top-6 right-6 p-2 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                        className="absolute right-4 top-4 rounded-lg p-2 text-brand-muted opacity-0 transition-all hover:bg-brand-danger/10 hover:text-brand-danger group-hover:opacity-100"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                       <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.phAwardTitle')}</label>
+                        <div className="space-y-2">
+                          <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.phAwardTitle')}</label>
                           <input
                             className={inputClass}
                             value={aw.title}
@@ -2408,8 +2398,8 @@ function ProfileEditView({
                             }}
                           />
                         </div>
-                        <div className="space-y-4">
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.phYear')}</label>
+                        <div className="space-y-2">
+                          <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.phYear')}</label>
                           <input
                             className={inputClass}
                             value={aw.year}
@@ -2421,8 +2411,8 @@ function ProfileEditView({
                           />
                         </div>
                       </div>
-                      <div className="space-y-4">
-                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.cv.phIssuer')}</label>
+                      <div className="space-y-2">
+                        <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.cv.phIssuer')}</label>
                         <input
                           className={inputClass}
                           value={aw.issuer}
@@ -2438,9 +2428,9 @@ function ProfileEditView({
                   <button
                     type="button"
                     onClick={() => setCvProfile({ ...cvProfile, awards: [...cvProfile.awards, emptyAward()] })}
-                    className="w-full py-8 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-600 font-bold hover:border-slate-400 hover:text-slate-900 transition-all flex items-center justify-center gap-2 bg-slate-50/20"
+                    className="flex w-full items-center justify-center gap-2 rounded-[22px] border border-dashed border-brand-line bg-brand-card py-6 text-[13.5px] font-bold text-brand-muted transition-colors hover:border-brand-ink hover:text-brand-ink"
                   >
-                    <Plus className="w-5 h-5 text-emerald-500" />
+                    <Plus className="h-5 w-5 text-brand-violet" />
                     {t('profile.cv.add')}
                   </button>
                 </div>
@@ -2457,7 +2447,7 @@ function ProfileEditView({
               <section className="space-y-8">
                 <SectionTitle icon={FileText}>{t('profile.cv.rawResumeTitle')}</SectionTitle>
                 <div className="space-y-6">
-                  <p className="text-sm text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
+                  <p className="max-w-2xl text-[13px] leading-relaxed text-brand-muted">
                     {t('profile.cv.rawResumeHint')}
                   </p>
                   <textarea
@@ -2466,8 +2456,8 @@ function ProfileEditView({
                     className={`${inputClass} min-h-[500px] font-mono text-sm leading-relaxed`}
                     placeholder={t('profile.placeholder')}
                   />
-                  <div className="space-y-4">
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">{t('profile.sectionNotes')}</label>
+                  <div className="space-y-2">
+                    <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.sectionNotes')}</label>
                     <textarea
                       value={resumeNotes}
                       onChange={(e) => setResumeNotes(e.target.value)}

@@ -10,6 +10,8 @@ import {
   Info, Sparkles, Upload, Loader2, X, Check, LayoutTemplate,
   ChevronDown, Copy, RotateCcw, History, Trash2,
   AlertCircle, Coins, Zap, Download,
+  Target, Users, Languages, BarChart3, ShieldCheck, Star, UserCog,
+  MonitorPlay, BadgeCheck, Code2, Scale, Leaf, Search, ChevronRight, Lightbulb,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -30,6 +32,14 @@ const JD_HISTORY_KEY = 'interviewde_jd_history'
 const JD_HISTORY_MAX = 10
 
 const EMPLOYMENT_TYPE_VALUES = ['internship', 'full_time', 'working_student', 'part_time', 'contract']
+
+/** 创建一场面试的能量消耗。校验、按钮徽章和提示文案共用这一个来源。 */
+const INTERVIEW_COST = 300
+/** 简历 PDF 体积上限；同时用于前端校验和界面提示，避免两处数字漂移。 */
+const RESUME_MAX_MB = 12
+const JD_MAX_CHARS = 5000
+const DURATION_MIN = 5
+const DURATION_MAX = 60
 
 function safeFileName(value) {
   return String(value || 'motivation-letter')
@@ -256,43 +266,47 @@ function CategorySelector({ value, options, onChange, placeholder, t }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex w-full items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-sm font-bold transition-all duration-300 ${isOpen
-            ? 'border-slate-900 bg-white dark:border-white dark:bg-slate-900'
-            : 'border-slate-100 bg-slate-50 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-600'
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        className={`flex w-full items-center justify-between gap-3 rounded-xl border bg-brand-inset px-4 py-3 text-[13.5px] font-medium transition-colors ${isOpen ? 'border-brand-ink ring-1 ring-brand-ink' : 'border-brand-line hover:border-brand-muted/50'
           }`}
       >
-        <div className="flex items-center gap-3 overflow-hidden">
-          <LayoutTemplate className={`h-4 w-4 shrink-0 ${value ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`} />
-          <span className={`truncate ${value ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>
+        <span className="flex min-w-0 items-center gap-2.5">
+          <LayoutTemplate className={`h-4 w-4 shrink-0 ${value ? 'text-brand-ink' : 'text-brand-muted'}`} />
+          <span className={`truncate ${value ? 'font-semibold text-brand-ink' : 'text-brand-muted'}`}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
-        </div>
-        <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-500 ${isOpen ? 'rotate-180' : ''}`} />
+        </span>
+        <ChevronDown className={`h-4 w-4 shrink-0 text-brand-muted transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
         {isOpen && (
           <motion.ul
-            initial={{ opacity: 0, y: 8, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            className="absolute left-0 right-0 z-50 mt-2 max-h-[320px] overflow-auto rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-[0_20px_48px_-12px_rgba(15,23,42,0.18)] backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-[0_20px_48px_-12px_rgba(0,0,0,0.5)]"
+            role="listbox"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.15 }}
+            className="absolute left-0 right-0 z-50 mt-2 max-h-72 overflow-auto rounded-xl border border-brand-line bg-brand-card p-1.5 "
           >
             {options.map((opt) => (
               <li key={opt.value}>
                 <button
                   type="button"
+                  role="option"
+                  aria-selected={value === opt.value}
                   onClick={() => {
                     onChange(opt.value)
                     setIsOpen(false)
                   }}
-                  className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-sm font-medium transition-colors ${value === opt.value
-                      ? 'bg-primary-50 text-primary-700 dark:bg-primary-950/40 dark:text-primary-300'
-                      : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/80'
+                  className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-[13px] transition-colors ${value === opt.value
+                    ? 'bg-brand-inset font-semibold text-brand-ink'
+                    : 'text-brand-muted hover:bg-brand-inset'
                     }`}
                 >
-                  {opt.label}
-                  {value === opt.value && <Check className="h-4 w-4" />}
+                  <span className="truncate">{opt.label}</span>
+                  {value === opt.value && <Check className="h-3.5 w-3.5 shrink-0 text-brand-ink" strokeWidth={2.5} />}
                 </button>
               </li>
             ))}
@@ -303,15 +317,123 @@ function CategorySelector({ value, options, onChange, placeholder, t }) {
   )
 }
 
-function EnergyBadge({ amount, label, t }) {
+/** 表单字段标题；required 时补一个品牌色星号 */
+function FieldLabel({ children, required = false, htmlFor }) {
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-300 dark:border-emerald-500/50 text-emerald-600 dark:text-emerald-400 text-[10px] font-black leading-none shadow-sm ring-4 ring-emerald-500/5 transition-transform group-hover:scale-105">
-      <Zap className="h-2.5 w-2.5 fill-emerald-600 dark:fill-emerald-400" />
-      <span className="whitespace-nowrap uppercase tracking-tighter">{amount} {label || t('nav.tokens')}</span>
-    </span>
+    <label htmlFor={htmlFor} className="mb-2 flex items-center gap-1 text-[13.5px] font-semibold text-brand-ink">
+      {children}
+      {required && <span className="text-brand-danger" aria-hidden="true">*</span>}
+    </label>
   )
 }
 
+/** 带标题栏的卡片外壳。标题比选项标题高一档，用显示字体加重。 */
+function SectionCard({ title, subtitle, action, children, className = '' }) {
+  return (
+    <section className={`brand-float rounded-[22px] px-6 py-5 ${className}`}>
+      <header className="mb-4 flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
+        <div className="min-w-0">
+          <h2 className="font-brand text-[16.5px] font-semibold tracking-[-0.01em] text-brand-ink">{title}</h2>
+          {subtitle && <p className="mt-1 text-[12.5px] text-brand-muted">{subtitle}</p>}
+        </div>
+        {action}
+      </header>
+      {children}
+    </section>
+  )
+}
+
+/**
+ * 紧凑设置行：标签左置、控件右排。
+ * 这是这一版的核心布局——标签独占一列后，整页高度比"标签压在控件上方"省掉约三分之一。
+ */
+function SettingRow({ label, htmlFor, children, className = '' }) {
+  return (
+    <div className={`grid gap-x-6 gap-y-2 py-3.5 sm:grid-cols-[104px_minmax(0,1fr)] ${className}`}>
+      <label htmlFor={htmlFor} className="pt-2 text-[13px] font-semibold leading-snug text-brand-ink">
+        {label}
+      </label>
+      <div className="min-w-0">{children}</div>
+    </div>
+  )
+}
+
+/** 单行选项（职位类型、难度、语言）。选中用黑框，不用紫框。 */
+function OptionPill({ selected, disabled, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-pressed={selected}
+      /* ring 而不是加粗 border：切换时零布局位移 */
+      className={`rounded-lg border px-4 py-2 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${selected
+        ? 'border-brand-ink bg-brand-card font-semibold text-brand-ink ring-1 ring-brand-ink'
+        : 'border-brand-line bg-brand-card text-brand-muted hover:border-brand-muted/50 hover:text-brand-ink'
+        }`}
+    >
+      {children}
+    </button>
+  )
+}
+
+/** 多行选项卡：图标 + 标题 + 一行说明。选中用黑框 + 黑色实心勾。 */
+function OptionCard({ selected, onClick, icon: Icon, title, desc, hint }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={`relative flex w-full items-start gap-3 rounded-xl border px-3.5 py-3 pr-9 text-left transition-colors ${selected
+        ? 'border-brand-ink bg-brand-card ring-1 ring-brand-ink'
+        : 'border-brand-line bg-brand-card hover:border-brand-muted/50'
+        }`}
+    >
+      {Icon && (
+        <span className={`mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg transition-colors ${selected ? 'bg-brand-inset text-brand-ink' : 'bg-brand-inset text-brand-muted'}`}>
+          <Icon className="h-3.5 w-3.5" />
+        </span>
+      )}
+      <span className="min-w-0">
+        <span className="block text-[13.5px] font-semibold leading-tight text-brand-ink">{title}</span>
+        {desc && <span className="mt-1 block text-[12px] leading-relaxed text-brand-muted">{desc}</span>}
+        {hint && <span className="mt-1 block text-[11.5px] text-brand-muted">{hint}</span>}
+      </span>
+      {selected && (
+        <span className="absolute right-3 top-1/2 grid h-[18px] w-[18px] -translate-y-1/2 place-items-center rounded-full bg-brand-ink text-brand-on-ink">
+          <Check className="h-2.5 w-2.5" strokeWidth={3} />
+        </span>
+      )}
+    </button>
+  )
+}
+
+/** 概览行：左侧图标 + 名称，右侧取值做成药丸 */
+function SummaryRow({ icon: Icon, label, value, muted = false }) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-[7px]">
+      <span className="flex min-w-0 items-center gap-2.5 text-[12.5px] text-brand-muted">
+        <Icon className="h-[15px] w-[15px] shrink-0 text-brand-muted" />
+        <span className="truncate">{label}</span>
+      </span>
+      <span
+        className={`max-w-[58%] shrink-0 truncate rounded-md px-2 py-1 text-[12px] font-medium ${muted ? 'bg-brand-inset text-brand-muted' : 'bg-brand-inset text-brand-ink'
+          }`}
+      >
+        {value}
+      </span>
+    </div>
+  )
+}
+
+function EnergyBadge({ amount, label, t }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-brand-line bg-brand-inset px-2 py-0.5 text-[10px] font-semibold leading-none text-brand-muted">
+      <Zap className="h-2.5 w-2.5" />
+      <span className="whitespace-nowrap">{amount} {label || t('nav.tokens')}</span>
+    </span>
+  )
+}
 export default function SetupPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
@@ -507,7 +629,7 @@ export default function SetupPage() {
       return
     }
 
-    if (tokens < 300) {
+    if (tokens < INTERVIEW_COST) {
       setFormNotice({ type: 'tokens', text: t('common.insufficientTokens', 'Insufficient Energy') })
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
@@ -606,7 +728,7 @@ export default function SetupPage() {
       setResumeNote({ type: 'err', text: t('setup.resumePdfOnly') })
       return
     }
-    if (file.size > 12 * 1024 * 1024) {
+    if (file.size > RESUME_MAX_MB * 1024 * 1024) {
       setResumeNote({ type: 'err', text: t('setup.resumeTooLarge') })
       return
     }
@@ -727,765 +849,575 @@ export default function SetupPage() {
     downloadBlob(buildSimplePdf(`${form.position} - Motivation Letter`, mlResult), `${safeFileName(form.position)}-motivation-letter.pdf`)
   }
 
+  const interviewerTypeOptions = [
+    { value: 'hr', icon: Users, label: t('setup.typeHr'), desc: t('setup.typeHrDesc'), hint: t('setup.typeHrHint') },
+    { value: 'technical', icon: Code2, label: t('setup.typeTechnical'), desc: t('setup.typeTechnicalDesc'), hint: t('setup.typeTechnicalHint') },
+    { value: 'mixed', icon: Star, label: t('setup.typeMixed'), desc: t('setup.typeMixedDesc'), hint: t('setup.typeMixedHint') },
+  ]
+
+  const modeOptions = [
+    { value: 'practice', icon: Lightbulb, label: t('setup.modePractice'), desc: t('setup.modePracticeDesc') },
+    { value: 'formal', icon: MonitorPlay, label: t('setup.modeFormal'), desc: t('setup.modeFormalDesc') },
+  ]
+
+  const difficultyOptions = [
+    { value: 'easy', label: t('setup.difficultyEasy'), desc: t('setup.difficultyEasyDesc') },
+    { value: 'medium', label: t('setup.difficultyMedium'), desc: t('setup.difficultyMediumDesc') },
+    { value: 'hard', label: t('setup.difficultyHard'), desc: t('setup.difficultyHardDesc') },
+    { value: 'adaptive', label: t('setup.difficultyAdaptive'), desc: t('setup.difficultyAdaptiveDesc') },
+  ]
+
+  const STYLE_ICONS = { balanced: Scale, supportive: Leaf, demanding: Zap, analytical: Search }
+
+  const isPractice = form.mode === 'practice'
+  const durationFillPct = ((form.duration - DURATION_MIN) / (DURATION_MAX - DURATION_MIN)) * 100
+  const jdAnalyzing = jdAnalysis.status === 'loading'
+  const canAnalyzeJd = form.jobDescription.trim().length >= 50
+
+  // 右侧概览用到的展示值，全部从 form 派生，不额外存状态
+  const categoryLabel = categories[selectedCategory]?.label || ''
+  const employmentLabel = employmentTypes.find(e => e.value === form.employmentType)?.label || ''
+  const languageLabel = languages.find(l => l.value === form.language)?.label || ''
+  const styleLabel = interviewerStyles.find(s => s.value === form.interviewerStyle)?.label || ''
+  const interviewerTypeLabel = interviewerTypeOptions.find(o => o.value === form.interviewerType)?.label || ''
+  const modeLabel = modeOptions.find(o => o.value === form.mode)?.label || ''
+  const selectedDifficulty = difficultyOptions.find(o => o.value === form.difficulty)
+  const difficultyLabel = selectedDifficulty?.label || ''
+  const durationLabel = isPractice
+    ? t('setup.practiceUnlimited')
+    : t('setup.durationMinutes', { n: form.duration })
+
+  const resumeStatusText = profileResumeLoading
+    ? t('setup.resumeChecking')
+    : sessionResumeText.trim()
+      ? t('setup.resumeUsingSession')
+      : profileResumeText.trim()
+        ? t('setup.resumeUsingProfile')
+        : t('setup.resumeNone')
+
+  const updateForm = (patch) => setForm(prev => ({ ...prev, ...patch }))
+
   return (
-    <div className="min-h-screen bg-[#FAF9F6] dark:bg-slate-950 pt-32 pb-20">
-      <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
+    <div className="theme-quiet relative min-h-screen bg-brand-paper pb-14 pt-[calc(var(--ui-nav-h)+2rem)]">
+      <div className="ui-container relative z-10">
+
+        <header className="mb-7">
+          <h1 className="font-brand text-[30px] font-semibold leading-tight tracking-[-0.02em] text-brand-ink sm:text-[34px]">
+            {t('setup.pageTitle')}
+          </h1>
+          <p className="mt-2.5 text-[14px] leading-relaxed text-brand-muted">{t('setup.pageSub')}</p>
+        </header>
+
         {formNotice && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 flex items-center justify-between"
+            role="alert"
+            className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-brand-danger/25 bg-brand-danger/[0.04] px-4 py-3"
           >
-            <div className="flex items-center gap-3">
-              <Info className="h-5 w-5 text-red-500" />
-              <div className="flex flex-col">
-                <span className="text-sm font-bold text-red-700 dark:text-red-400">{formNotice.text}</span>
-                {formNotice.type === 'tokens' && (
-                  <span className="text-[10px] font-bold text-red-500/80 uppercase tracking-widest">{t('profile.tokenUsageInterview')}: 300 ({t('profile.tokens')}: {tokens})</span>
-                )}
-              </div>
+            <AlertCircle className="h-4 w-4 shrink-0 text-brand-danger" />
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-semibold text-brand-ink">{formNotice.text}</p>
+              {formNotice.type === 'tokens' && (
+                <p className="mt-0.5 text-[12px] text-brand-muted">
+                  {t('profile.tokenUsageInterview')}: {INTERVIEW_COST} · {t('profile.tokens')}: {tokens}
+                </p>
+              )}
             </div>
             {formNotice.type === 'tokens' && (
-              <Link to="/profile" className="px-4 py-2 rounded-xl bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-[10px] font-black uppercase tracking-widest hover:bg-red-200 transition-colors">
+              <Link to="/profile" className="rounded-lg border border-brand-danger/30 px-3 py-1.5 text-[12px] font-semibold text-brand-danger transition-colors hover:bg-brand-danger/10">
                 {t('profile.recharge')}
               </Link>
             )}
             {formNotice.type === 'auth' && (
-              <Link to="/login" className="px-4 py-2 rounded-xl bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-[10px] font-black uppercase tracking-widest hover:bg-red-200 transition-colors">
+              <Link to="/login" className="rounded-lg border border-brand-danger/30 px-3 py-1.5 text-[12px] font-semibold text-brand-danger transition-colors hover:bg-brand-danger/10">
                 {t('setup.signInAgain')}
               </Link>
             )}
           </motion.div>
         )}
-        <header className="mb-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl space-y-6"
-          >
-            <div className="section-badge">{t('setup.badge')}</div>
-            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight font-serif">
-              {t('setup.title')}
-            </h1>
-            <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed">
-              {t('setup.sub')}
-            </p>
-          </motion.div>
-        </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-          <main className="lg:col-span-12">
-            <div className="bg-white dark:bg-slate-950 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 p-8 sm:p-12 shadow-sm">
-              <form onSubmit={handleSubmit} className="space-y-16">
-                <div className="flex flex-col gap-12">
-                  {/* Role Section */}
-                  <div className="space-y-8">
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest font-chinese-modern">{t('setup.sectionRole')}</h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">{t('setup.panelSub')}</p>
-                    </div>
+        <form onSubmit={handleSubmit} className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_372px]">
 
-                    <div className="space-y-6">
-                      <div className="space-y-4">
-                        <label className="text-xs font-bold uppercase tracking-widest text-slate-600">{t('setup.trackLabel')}</label>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-800">
-                          {employmentTypes.map((tab) => (
-                            <button
-                              key={tab.value}
-                              type="button"
-                              onClick={() => {
-                                setForm(prev => ({ ...prev, employmentType: tab.value }))
-                              }}
-                              className={`rounded-xl px-4 py-3 text-sm font-bold transition-all ${form.employmentType === tab.value
-                                  ? 'border border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white shadow-sm'
-                                  : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950 text-slate-600'
-                                }`}
-                            >
-                              {tab.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+          {/* ───────────── 左栏 ───────────── */}
+          <div className="min-w-0 space-y-5">
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                          <label className="text-xs font-bold uppercase tracking-widest text-slate-600">{t('setup.categoryLabel')}</label>
-                          <CategorySelector
-                            value={selectedCategory}
-                            options={categoryEntries.map(([k, item]) => ({ value: k, label: item.label }))}
-                            onChange={setSelectedCategory}
-                            placeholder={t('setup.categoryPlaceholder')}
-                            t={t}
-                          />
-                        </div>
+            <SectionCard
+              title={t('setup.jobDesc')}
+              subtitle={t('setup.jobDescSub')}
+              action={(
+                <div className="flex shrink-0 items-center gap-2">
+                  <div className="relative" ref={historyRef}>
+                    <button
+                      type="button"
+                      onClick={() => setHistoryOpen(!historyOpen)}
+                      aria-expanded={historyOpen}
+                      className="flex items-center gap-1.5 rounded-lg border border-brand-line bg-brand-card px-3 py-1.5 text-[12.5px] font-medium text-brand-muted transition-colors hover:border-brand-ink hover:text-brand-ink"
+                    >
+                      <History className="h-3.5 w-3.5" />
+                      {t('setup.historyTitle')}
+                      {jdHistory.length > 0 && (
+                        <span className="rounded-full bg-brand-inset px-1.5 text-[11px] tabular-nums">
+                          {jdHistory.length}
+                        </span>
+                      )}
+                    </button>
 
-                        <div className="space-y-4">
-                          <label className="text-xs font-bold uppercase tracking-widest text-slate-600" htmlFor="setup-position">
-                            {t('setup.position')} <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            value={form.position}
-                            onChange={(e) => {
-                              setForm({ ...form, position: e.target.value })
-                              setErrors({ ...errors, position: '' })
-                            }}
-                            id="setup-position"
-                            placeholder="e.g. Frontend Developer"
-                            className={`input-field-premium px-5 py-4 ${errors.position ? 'border-red-500' : ''}`}
-                          />
-                          {errors.position && (
-                            <p className="text-red-500 text-xs mt-2 flex items-center gap-1 font-bold italic">
-                              {errors.position}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
-                          {selectedRoles.length > 0 ? t('setup.subRoleHint') : t('setup.subRoleHintEmpty')}
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedRoles.map((pos) => (
-                            <button
-                              key={pos}
-                              type="button"
-                              onClick={() => {
-                                setForm({ ...form, position: pos })
-                                setErrors({ ...errors, position: '' })
-                              }}
-                              className="px-5 py-2.5 text-xs font-black border border-slate-200 dark:border-slate-800 rounded-2xl hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-900 transition-all text-slate-700 dark:text-slate-300 shadow-sm"
-                            >
-                              {pos}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Job Description Section */}
-                  <div className="order-first space-y-8">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest font-chinese-modern">{t('setup.jobDesc')} <span className="text-red-500">*</span></h3>
-                      <div className="flex flex-wrap items-center gap-3">
-                        {jdHistory.length > 0 && (
-                          <div className="relative" ref={historyRef}>
-                            <button
-                              type="button"
-                              onClick={() => setHistoryOpen(!historyOpen)}
-                              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${historyOpen
-                                  ? 'border-slate-900 bg-white text-slate-900 dark:border-white dark:bg-slate-900 dark:text-white shadow-sm'
-                                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-400 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400 dark:hover:border-slate-500 dark:hover:text-white'
-                                }`}
-                            >
-                              <History className="h-3.5 w-3.5" />
-                              {t('setup.historyTitle')}
-                              <span className="ml-0.5 px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 text-[10px] font-black">{jdHistory.length}</span>
-                            </button>
-
-                            <AnimatePresence>
-                              {historyOpen && (
-                                <motion.div
-                                  initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                                  exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                                  className="absolute right-0 z-50 mt-2 w-[420px] max-h-[480px] overflow-auto rounded-2xl border border-slate-200 bg-white/98 p-2 shadow-[0_20px_48px_-12px_rgba(15,23,42,0.18)] backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/98 dark:shadow-[0_20px_48px_-12px_rgba(0,0,0,0.5)]"
+                    <AnimatePresence>
+                      {historyOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 6 }}
+                          transition={{ duration: 0.15 }}
+                          /* 宽度跟随视口收敛，小屏不会被裁切 */
+                          className="brand-float absolute right-0 z-50 mt-2 max-h-[420px] w-[min(420px,calc(100vw-3rem))] overflow-auto rounded-xl border border-brand-line p-1.5"
+                        >
+                          {jdHistory.length === 0 ? (
+                            <p className="px-3 py-6 text-center text-[12.5px] text-brand-muted">{t('setup.historyEmpty')}</p>
+                          ) : (
+                            <>
+                              <div className="flex items-center justify-between px-2 py-1.5">
+                                <span className="text-[12px] text-brand-muted">{t('setup.historyCount', { n: jdHistory.length })}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (window.confirm(t('setup.historyClearConfirm'))) {
+                                      saveJdHistory([])
+                                      setJdHistory([])
+                                      setHistoryOpen(false)
+                                    }
+                                  }}
+                                  className="text-[12px] font-medium text-brand-muted transition-colors hover:text-brand-danger"
                                 >
-                                  <div className="flex items-center justify-between px-3 py-2 mb-1">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                      {t('setup.historyCount', { n: jdHistory.length })}
-                                    </span>
+                                  {t('setup.historyClear')}
+                                </button>
+                              </div>
+                              <ul className="space-y-0.5">
+                                {jdHistory.map((entry) => (
+                                  <li key={entry.id} className="group relative">
                                     <button
                                       type="button"
                                       onClick={() => {
-                                        if (window.confirm(t('setup.historyClearConfirm'))) {
-                                          saveJdHistory([])
-                                          setJdHistory([])
-                                          setHistoryOpen(false)
-                                        }
+                                        updateForm({
+                                          position: entry.position,
+                                          jobDescription: entry.jobDescription,
+                                          ...(entry.employmentType ? { employmentType: entry.employmentType } : {}),
+                                        })
+                                        if (entry.category && categories[entry.category]) setSelectedCategory(entry.category)
+                                        setErrors({})
+                                        setHistoryOpen(false)
                                       }}
-                                      className="text-[10px] font-bold text-red-400 hover:text-red-600 transition-colors uppercase tracking-wider"
+                                      className="w-full rounded-lg px-3 py-2.5 pr-10 text-left transition-colors hover:bg-brand-inset"
                                     >
-                                      {t('setup.historyClear')}
+                                      <span className="flex items-baseline justify-between gap-2">
+                                        <span className="truncate text-[13px] font-semibold text-brand-ink">{entry.position}</span>
+                                        <span className="shrink-0 text-[11px] text-brand-muted">
+                                          {t('setup.historyAgo', { t: formatTimeAgo(entry.createdAt, uiLang) })}
+                                        </span>
+                                      </span>
+                                      <span className="mt-0.5 line-clamp-2 block text-[12px] leading-relaxed text-brand-muted">
+                                        {entry.jobDescription.slice(0, 150)}{entry.jobDescription.length > 150 ? '…' : ''}
+                                      </span>
                                     </button>
-                                  </div>
-
-                                  {jdHistory.map((entry) => (
-                                    <div
-                                      key={entry.id}
-                                      className="group rounded-xl px-3.5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors"
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const updated = jdHistory.filter(e => e.id !== entry.id)
+                                        saveJdHistory(updated)
+                                        setJdHistory(updated)
+                                      }}
+                                      title={t('setup.historyDelete')}
+                                      aria-label={t('setup.historyDelete')}
+                                      /* 触屏没有 hover，所以常驻显示 */
+                                      className="absolute right-2 top-2.5 rounded-md p-1.5 text-brand-muted transition-colors hover:bg-brand-danger/10 hover:text-brand-danger"
                                     >
-                                      <div className="flex items-start justify-between gap-3">
-                                        <button
-                                          type="button"
-                                          onClick={() => {
-                                            setForm(prev => ({
-                                              ...prev,
-                                              position: entry.position,
-                                              jobDescription: entry.jobDescription,
-                                            }))
-                                            if (entry.employmentType) {
-                                              setForm(prev => ({ ...prev, employmentType: entry.employmentType }))
-                                            }
-                                            if (entry.category && categories[entry.category]) setSelectedCategory(entry.category)
-                                            setErrors({})
-                                            setHistoryOpen(false)
-                                          }}
-                                          className="flex-1 text-left min-w-0"
-                                        >
-                                          <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-sm font-bold text-slate-900 dark:text-white truncate">{entry.position}</span>
-                                            <span className="shrink-0 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                              {t('setup.historyAgo', { t: formatTimeAgo(entry.createdAt, uiLang) })}
-                                            </span>
-                                          </div>
-                                          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                                            {entry.jobDescription.slice(0, 150)}{entry.jobDescription.length > 150 ? '...' : ''}
-                                          </p>
-                                        </button>
-                                        <button
-                                          type="button"
-                                          onClick={() => {
-                                            const updated = jdHistory.filter(e => e.id !== entry.id)
-                                            saveJdHistory(updated)
-                                            setJdHistory(updated)
-                                            if (updated.length === 0) setHistoryOpen(false)
-                                          }}
-                                          className="shrink-0 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
-                                          title={t('setup.historyDelete')}
-                                        >
-                                          <Trash2 className="h-3.5 w-3.5" />
-                                        </button>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        )}
-                        <button
-                          type="button"
-                          disabled={jdAnalysis.status === 'loading' || form.jobDescription.trim().length < 50}
-                          onClick={() => void analyzeJobDescription(form.jobDescription, true)}
-                          className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-black text-white shadow-sm transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
-                        >
-                          {jdAnalysis.status === 'loading' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                          {jdAnalysis.status === 'loading' ? t('setup.jdAnalyzingButton') : t('setup.jdAnalyzeButton')}
-                        </button>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">{t('setup.pasteHint')}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <textarea
-                        id="setup-job-desc"
-                        value={form.jobDescription}
-                        onChange={(e) => {
-                          setForm({ ...form, jobDescription: e.target.value })
-                          setErrors({ ...errors, jobDescription: '' })
-                          setJdAnalysis({ status: 'idle', message: '' })
-                        }}
-                        placeholder={t('setup.placeholder')}
-                        rows={10}
-                        className={`textarea-field-premium ${errors.jobDescription ? 'border-red-500 ring-4 ring-red-500/10' : ''}`}
-                      />
-                      <div className="flex items-center justify-between">
-                        {errors.jobDescription ? (
-                          <p className="text-red-500 text-xs font-bold italic">{errors.jobDescription}</p>
-                        ) : (
-                          <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">{t('setup.hintDetail')}</p>
-                        )}
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">{form.jobDescription.length} {t('setup.chars')}</span>
-                      </div>
-                      {form.jobDescription.trim().length >= 50 && (
-                        <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/60">
-                          <div className="flex items-center gap-2 text-xs font-bold">
-                            {jdAnalysis.status === 'loading' && <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />}
-                            {jdAnalysis.status === 'success' && <Check className="h-4 w-4 text-emerald-600" />}
-                            {jdAnalysis.status === 'error' && <AlertCircle className="h-4 w-4 text-amber-600" />}
-                            <span className="text-slate-600 dark:text-slate-300">
-                              {jdAnalysis.status === 'loading' ? t('setup.jdAnalyzing') : jdAnalysis.message || t('setup.jdAnalysisReady')}
-                            </span>
-                          </div>
-                        </div>
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </>
+                          )}
+                        </motion.div>
                       )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* 一键识别职位信息：force=true，可对同一段 JD 重复触发 */}
+                  <button
+                    type="button"
+                    onClick={() => void analyzeJobDescription(form.jobDescription, true)}
+                    disabled={!canAnalyzeJd || jdAnalyzing}
+                    className="flex items-center gap-1.5 rounded-lg border border-brand-line bg-brand-card px-3 py-1.5 text-[12.5px] font-semibold text-brand-ink transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-45"
+                  >
+                    {jdAnalyzing
+                      ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />{t('setup.jdAnalyzingButton')}</>
+                      : <><Sparkles className="h-3.5 w-3.5" />{t('setup.jdAnalyzeButton')}</>}
+                  </button>
+                </div>
+              )}
+            >
+              <div className="relative">
+                <textarea
+                  id="setup-job-desc"
+                  rows={5}
+                  maxLength={JD_MAX_CHARS}
+                  value={form.jobDescription}
+                  onChange={(e) => {
+                    updateForm({ jobDescription: e.target.value })
+                    if (errors.jobDescription) setErrors(prev => ({ ...prev, jobDescription: '' }))
+                  }}
+                  placeholder={t('setup.placeholder')}
+                  className={`w-full resize-none rounded-xl border bg-brand-inset px-4 py-3.5 pb-9 text-[13.5px] leading-relaxed text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:outline-none focus:ring-4 focus:ring-brand-ink/10 ${errors.jobDescription ? 'border-brand-danger' : 'border-brand-line focus:border-brand-ink'
+                    }`}
+                />
+                <span className="pointer-events-none absolute bottom-3 right-4 text-[11.5px] tabular-nums text-brand-muted">
+                  {form.jobDescription.length} / {JD_MAX_CHARS}
+                </span>
+              </div>
+
+              {errors.jobDescription && (
+                <p className="mt-1.5 text-[12px] text-brand-danger">{errors.jobDescription}</p>
+              )}
+              {jdAnalysis.status === 'idle' && (
+                <p className="mt-1.5 text-[12px] text-brand-muted">
+                  {t('setup.jdAnalysisReady')} · {t('setup.hintDetail')}
+                </p>
+              )}
+              {jdAnalysis.status !== 'idle' && (
+                <p className={`mt-1.5 flex items-center gap-1.5 text-[12px] ${jdAnalysis.status === 'error' ? 'text-brand-danger' : jdAnalysis.status === 'success' ? 'text-brand-success' : 'text-brand-muted'
+                  }`}>
+                  {jdAnalyzing
+                    ? <><Loader2 className="h-3 w-3 animate-spin" />{t('setup.jdAnalyzing')}</>
+                    : <><Sparkles className="h-3 w-3" />{jdAnalysis.message}</>}
+                </p>
+              )}
+            </SectionCard>
+
+            <SectionCard title={t('setup.sectionInterviewSetup')}>
+              <div className="divide-y divide-brand-line">
+
+                <SettingRow label={t('setup.trackLabel')}>
+                  <div className="flex flex-wrap gap-2">
+                    {employmentTypes.map(item => (
+                      <OptionPill
+                        key={item.value}
+                        selected={form.employmentType === item.value}
+                        onClick={() => updateForm({ employmentType: item.value })}
+                      >
+                        {item.label}
+                      </OptionPill>
+                    ))}
+                  </div>
+                </SettingRow>
+
+                <SettingRow label={t('setup.categoryLabel')}>
+                  <div className="grid gap-3 lg:grid-cols-2">
+                    <CategorySelector
+                      value={selectedCategory}
+                      options={categoryEntries.map(([key, cat]) => ({ value: key, label: cat.label }))}
+                      onChange={setSelectedCategory}
+                      placeholder={t('setup.categoryPlaceholder')}
+                      t={t}
+                    />
+                    <div>
+                      <div className="flex items-center gap-2.5">
+                        <label htmlFor="setup-position" className="shrink-0 text-[12.5px] font-semibold text-brand-ink">
+                          {t('setup.position')}<span className="text-brand-danger" aria-hidden="true">*</span>
+                        </label>
+                        <input
+                          id="setup-position"
+                          type="text"
+                          value={form.position}
+                          onChange={(e) => {
+                            updateForm({ position: e.target.value })
+                            if (errors.position) setErrors(prev => ({ ...prev, position: '' }))
+                          }}
+                          placeholder={t('setup.positionPlaceholder')}
+                          className={`min-w-0 flex-1 rounded-xl border bg-brand-inset px-3.5 py-3 text-[13.5px] text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:outline-none focus:ring-4 focus:ring-brand-ink/10 ${errors.position ? 'border-brand-danger' : 'border-brand-line focus:border-brand-ink'
+                            }`}
+                        />
+                      </div>
+                      {errors.position && <p className="mt-1.5 text-[12px] text-brand-danger">{errors.position}</p>}
                     </div>
                   </div>
 
-                  {/* Resume Section */}
-                  <div className="card-premium p-8 space-y-8">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Upload className="h-4 w-4 text-slate-400" />
-                        <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest">{t('setup.resumeTitle')}</h3>
-                      </div>
-                      <Link
-                        to="/profile"
-                        className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
-                      >
+                  <p className="mt-2 text-[11.5px] text-brand-muted">
+                    {selectedRoles.length > 0 ? t('setup.subRoleHint') : t('setup.subRoleHintEmpty')}
+                  </p>
+                  {selectedRoles.length > 0 && (
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {selectedRoles.map(role => (
+                        <button
+                          key={role}
+                          type="button"
+                          onClick={() => {
+                            updateForm({ position: role })
+                            setErrors(prev => ({ ...prev, position: '' }))
+                          }}
+                          className="rounded-full border border-brand-line bg-brand-card px-2.5 py-1 text-[11.5px] text-brand-muted transition-colors hover:border-brand-ink hover:text-brand-ink"
+                        >
+                          {role}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </SettingRow>
+
+                <SettingRow label={t('setup.resumeUploadLabel')}>
+                  <input
+                    ref={resumeFileRef}
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    onChange={handleResumePdf}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => resumeFileRef.current?.click()}
+                    disabled={resumeParsing}
+                    className="flex w-full items-center gap-3 rounded-xl border border-dashed border-brand-line bg-brand-inset px-4 py-2.5 text-left transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-brand-line bg-brand-card text-brand-muted">
+                      {resumeParsing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-[13px] font-semibold text-brand-ink">{t('setup.resumeChoosePdf')}</span>
+                      <span className="block truncate text-[11.5px] text-brand-muted">{t('setup.resumeHintLimit', { mb: RESUME_MAX_MB })}</span>
+                    </span>
+                  </button>
+
+                  <div className="mt-2 space-y-1">
+                    {resumeNote && (
+                      <p className={`text-[12px] ${resumeNote.type === 'err' ? 'text-brand-danger' : resumeNote.type === 'warn' ? 'text-brand-ink' : 'text-brand-success'}`}>
+                        {resumeNote.text}
+                      </p>
+                    )}
+                    <p className="text-[11.5px] leading-relaxed text-brand-muted">{t('setup.resumeAutoMatch')}</p>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-brand-muted">
+                      <span className="min-w-0">{resumeStatusText}</span>
+                      {sessionResumeText.trim() && (
+                        <button type="button" onClick={() => setSessionResumeText('')} className="font-semibold text-brand-ink hover:underline">
+                          {t('setup.resumeClearSession')}
+                        </button>
+                      )}
+                      <Link to="/profile" className="font-semibold text-brand-muted transition-colors hover:text-brand-ink">
                         {t('setup.resumeProfileLink')}
                       </Link>
                     </div>
+                  </div>
+                </SettingRow>
 
-                    <div className="space-y-6">
-                      <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{t('setup.resumeAutoMatch')}</p>
-                      <input
-                        ref={resumeFileRef}
-                        type="file"
-                        accept="application/pdf"
-                        className="hidden"
-                        onChange={(e) => void handleResumePdf(e)}
+                <SettingRow label={t('setup.interviewerType')}>
+                  <div className="grid gap-2.5 md:grid-cols-3">
+                    {interviewerTypeOptions.map(option => (
+                      <OptionCard
+                        key={option.value}
+                        selected={form.interviewerType === option.value}
+                        onClick={() => updateForm({ interviewerType: option.value })}
+                        icon={option.icon}
+                        title={option.label}
+                        desc={option.desc}
+                        hint={option.hint}
                       />
-                      {profileResumeLoading ? (
-                        <div className="flex items-center gap-2 text-sm font-bold text-slate-500"><Loader2 className="h-4 w-4 animate-spin" />{t('setup.resumeChecking')}</div>
-                      ) : !profileResumeText.trim() ? <div className="flex flex-wrap items-center gap-4">
-                        <button
-                          type="button"
-                          disabled={resumeParsing}
-                          onClick={() => resumeFileRef.current?.click()}
-                          className="btn-setup-action px-10"
-                        >
-                          {resumeParsing ? (
-                            <span className="flex items-center gap-2">
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              <span>{t('setup.resumeChoosePdf')}</span>
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-2">
-                              <FileText className="h-4 w-4" />
-                              <span>{t('setup.resumeChoosePdf')}</span>
-                            </span>
-                          )}
-                        </button>
-                        {sessionResumeText.trim() && (
-                          <button
-                            type="button"
-                            onClick={() => { setSessionResumeText(''); setResumeNote(null) }}
-                            className="btn-secondary"
-                          >
-                            <X className="h-4 w-4 mr-2" />
-                            {t('setup.resumeClearSession')}
-                          </button>
-                        )}
-                      </div> : null}
-
-                      {resumeNote && (
-                        <div className={`p-4 rounded-2xl border text-sm font-bold ${resumeNote.type === 'ok' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                            resumeNote.type === 'warn' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                              'bg-red-50 text-red-700 border-red-100'
-                          }`}>
-                          {resumeNote.text}
-                        </div>
-                      )}
-
-                      <div className="bg-white dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
-                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                          {effectiveResume ? (
-                            <>
-                              {profileResumeText.trim() ? t('setup.resumeUsingProfile') : t('setup.resumeUsingSession')}
-                              <span className="ml-2 text-slate-900 dark:text-white">{effectiveResume.length} {t('setup.chars')}</span>
-                            </>
-                          ) : t('setup.resumeNone')}
-                        </p>
-                      </div>
-                    </div>
+                    ))}
                   </div>
+                  <p className="mt-2 text-[11.5px] text-brand-muted">{t('setup.interviewerTypeDesc')}</p>
+                </SettingRow>
 
-                  {/* AI Assistant Section */}
-                  <div className="hidden">
-                    <div className="flex items-center gap-3">
-                      <Sparkles className="h-4 w-4 text-slate-400" />
-                      <Sparkles className="h-4 w-4 text-slate-500" />
-                      <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest">{t('setup.aiAssistantTitle')}</h3>
-                    </div>
-
-                    <div className="space-y-10">
-                      <div className="space-y-6">
-                        <div className="flex flex-col gap-2">
-                          <h4 className="text-xl font-bold text-slate-900 dark:text-white">{t('setup.mlTitle')}</h4>
-                          <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{t('setup.mlDesc')}</p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          <div className="space-y-4">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                              {t('setup.mlLength')}
-                            </label>
-                            <div className="flex flex-wrap gap-2">
-                              {[100, 200, 300].map(len => (
-                                <button
-                                  key={len}
-                                  type="button"
-                                  onClick={() => setMlForm({ ...mlForm, length: len })}
-                                  className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${mlForm.length === len
-                                      ? 'bg-slate-50 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-white dark:border-slate-700 shadow-sm'
-                                      : 'bg-white dark:bg-slate-950 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-500 font-medium'
-                                    }`}
-                                >
-                                  {t(`setup.mlLength${len}`)}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="space-y-4">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                              {t('setup.mlLang')}
-                            </label>
-                            <div className="flex gap-2">
-                              {['English', 'Deutsch'].map(lang => (
-                                <button
-                                  key={lang}
-                                  type="button"
-                                  onClick={() => setMlForm({ ...mlForm, language: lang })}
-                                  className={`flex-1 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${mlForm.language === lang
-                                      ? 'bg-slate-50 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-white dark:border-slate-700 shadow-sm'
-                                      : 'bg-white dark:bg-slate-950 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-500 font-medium'
-                                    }`}
-                                >
-                                  {lang === 'English' ? '🇬🇧 EN' : '🇩🇪 DE'}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-4">
-                          <button
-                            type="button"
-                            disabled={mlLoading}
-                            onClick={handleGenerateML}
-                            className="btn-setup-action px-8 py-3"
-                          >
-                            {mlLoading ? (
-                              <span className="flex items-center gap-2">
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                <span>{t('setup.mlGenerating')}</span>
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-3">
-                                {mlResult ? <RotateCcw className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
-                                <span>{mlResult ? t('setup.mlBtnNew') : t('setup.mlBtn')}</span>
-                                <EnergyBadge amount="-100" label={t('common.energyShort')} t={t} />
-                              </span>
-                            )}
-                          </button>
-
-                          <div className="relative group">
-                            {mlError ? (
-                              <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="h-[500px] flex flex-col items-center justify-center p-8 text-center rounded-2xl bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800"
-                              >
-                                {mlError.type === 'insufficient_tokens' ? (
-                                  <>
-                                    <div className="p-4 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 mb-6">
-                                      <Coins className="h-10 w-10" />
-                                    </div>
-                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                                      {t('common.insufficientTokens')}
-                                    </h4>
-                                    <p className="text-sm text-slate-500 max-w-[280px] mb-8 leading-relaxed">
-                                      {t('common.insufficientTokensDesc', { cost: mlError.cost })}
-                                    </p>
-                                    <Link
-                                      to={{ pathname: "/profile", state: { openRecharge: true } }}
-                                      className="btn-setup-secondary px-8 py-3 bg-emerald-600 text-white border-none hover:bg-emerald-700 font-bold"
-                                    >
-                                      {t('common.rechargeNow')}
-                                    </Link>
-                                  </>
-                                ) : (
-                                  <>
-                                    <div className="p-4 rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-600 mb-6">
-                                      <AlertCircle className="h-10 w-10" />
-                                    </div>
-                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                                      {t('common.errorTitle')}
-                                    </h4>
-                                    <p className="text-sm text-slate-500 max-w-[280px] mb-8 leading-relaxed">
-                                      {t('common.errorDesc')}
-                                    </p>
-                                    <button
-                                      type="button"
-                                      onClick={handleGenerateML}
-                                      className="btn-setup-secondary px-8 py-3 font-bold"
-                                    >
-                                      {t('common.tryAgain')}
-                                    </button>
-                                  </>
-                                )}
-                              </motion.div>
-                            ) : (
-                              <>
-                                <textarea
-                                  readOnly
-                                  value={mlResult}
-                                  placeholder={t('setup.mlPlaceholder')}
-                                  className={`textarea-field-premium transition-all ${mlResult ? 'h-[500px] pt-20 shadow-sm' : 'h-[160px] border-dashed'
-                                    } scrollbar-hide`}
-                                />
-                                {mlResult && (
-                                  <div className="absolute right-4 top-4 flex flex-wrap justify-end gap-2">
-                                    <button type="button" onClick={handleCopyML} title={t('setup.mlCopy')} className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
-                                      {mlCopied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
-                                    </button>
-                                    <button type="button" onClick={handleExportWord} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                                      <Download className="h-4 w-4" />{t('setup.mlExportWord')}
-                                    </button>
-                                    <button type="button" onClick={handleExportPdf} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                                      <Download className="h-4 w-4" />{t('setup.mlExportPdf')}
-                                    </button>
-                                  </div>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                <SettingRow label={t('setup.interviewMode')}>
+                  <div className="grid gap-2.5 sm:grid-cols-2">
+                    {modeOptions.map(option => (
+                      <OptionCard
+                        key={option.value}
+                        selected={form.mode === option.value}
+                        onClick={() => updateForm({ mode: option.value })}
+                        icon={option.icon}
+                        title={option.label}
+                        desc={option.desc}
+                      />
+                    ))}
                   </div>
+                  <p className="mt-2 text-[11.5px] text-brand-muted">{t('setup.interviewModeDesc')}</p>
+                </SettingRow>
 
-                  {/* Interview Config */}
-                  <div className="space-y-8">
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">
-                        {t('setup.interviewerType')}
-                      </h3>
-                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                        {t('setup.interviewerTypeDesc')}
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {[
-                        { value: 'hr', label: t('setup.typeHr'), desc: t('setup.typeHrDesc') },
-                        { value: 'technical', label: t('setup.typeTechnical'), desc: t('setup.typeTechnicalDesc') },
-                        { value: 'mixed', label: t('setup.typeMixed'), desc: t('setup.typeMixedDesc') },
-                      ].map(option => (
-                        <button
-                          key={option.value}
-                          type="button"
-                          aria-pressed={form.interviewerType === option.value}
-                          onClick={() => setForm({ ...form, interviewerType: option.value })}
-                          className={`rounded-2xl border p-6 text-left transition-all ${form.interviewerType === option.value
-                              ? 'border-indigo-300 bg-indigo-50 text-slate-900 shadow-sm dark:border-indigo-700 dark:bg-indigo-950/30 dark:text-white'
-                              : 'border-slate-100 bg-white text-slate-600 hover:border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400'
-                            }`}
-                        >
-                          <div className="flex items-center justify-end">
-                            {form.interviewerType === option.value && <Check className="h-4 w-4" />}
-                          </div>
-                          <div className="mt-2 text-sm font-bold">{option.label}</div>
-                          <div className="mt-2 text-xs leading-relaxed opacity-75">{option.desc}</div>
-                        </button>
-                      ))}
-                    </div>
+                <SettingRow label={t('setup.difficulty')}>
+                  <div className="flex flex-wrap gap-2">
+                    {difficultyOptions.map(option => (
+                      <OptionPill
+                        key={option.value}
+                        selected={form.difficulty === option.value}
+                        onClick={() => updateForm({ difficulty: option.value })}
+                      >
+                        {option.label}
+                      </OptionPill>
+                    ))}
                   </div>
+                  {/* 只显示当前选中难度的说明，信息不丢又不撑高页面 */}
+                  <p className="mt-2 text-[11.5px] leading-relaxed text-brand-muted">{selectedDifficulty?.desc}</p>
+                </SettingRow>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-                    <div className="space-y-8">
-                      <div>
-                        <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">
-                          {t('setup.interviewMode', 'Interview mode')}
-                        </h3>
-                        <p className="mt-2 text-xs text-slate-500">
-                          {t('setup.interviewModeDesc', 'Practice gives immediate coaching; formal simulation withholds feedback until the end.')}
-                        </p>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        {[
-                          { value: 'practice', label: t('setup.modePractice', 'Practice'), desc: t('setup.modePracticeDesc', 'Hints, retries, notes and pause') },
-                          { value: 'formal', label: t('setup.modeFormal', 'Formal'), desc: t('setup.modeFormalDesc', 'Continuous timer and final feedback') },
-                        ].map(option => (
-                          <button
-                            key={option.value}
-                            type="button"
-                            onClick={() => setForm({ ...form, mode: option.value })}
-                            className={`rounded-2xl border p-5 text-left transition-all ${form.mode === option.value
-                                ? 'border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-800'
-                                : 'border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-950'
-                              }`}
-                          >
-                            <div className="text-sm font-bold text-slate-900 dark:text-white">{option.label}</div>
-                            <div className="mt-2 text-xs text-slate-500">{option.desc}</div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-8">
-                      <div>
-                        <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">
-                          {t('setup.difficulty', 'Difficulty')}
-                        </h3>
-                        <p className="mt-2 text-xs text-slate-500">
-                          {t('setup.difficultyDesc', 'Adaptive changes level using your previous scored answer.')}
-                        </p>
-                      </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {[
-                          { value: 'easy', label: t('setup.difficultyEasy'), desc: t('setup.difficultyEasyDesc') },
-                          { value: 'medium', label: t('setup.difficultyMedium'), desc: t('setup.difficultyMediumDesc') },
-                          { value: 'hard', label: t('setup.difficultyHard'), desc: t('setup.difficultyHardDesc') },
-                          { value: 'adaptive', label: t('setup.difficultyAdaptive'), desc: t('setup.difficultyAdaptiveDesc') },
-                        ].map(level => (
-                          <button
-                            key={level.value}
-                            type="button"
-                            onClick={() => setForm({ ...form, difficulty: level.value })}
-                            className={`rounded-2xl border px-3 py-4 text-left transition-all ${form.difficulty === level.value
-                                ? 'border-slate-300 bg-slate-50 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white'
-                                : 'border-slate-100 bg-white text-slate-500 dark:border-slate-800 dark:bg-slate-950'
-                              }`}
-                          >
-                            <span className="block text-xs font-black uppercase tracking-wider">{level.label}</span>
-                            <span className="mt-2 block text-[10px] font-medium normal-case leading-relaxed tracking-normal opacity-75">{level.desc}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                <SettingRow label={t('setup.interviewLang')}>
+                  <div className="flex flex-wrap gap-2">
+                    {languages.map(item => (
+                      <OptionPill
+                        key={item.value}
+                        selected={form.language === item.value}
+                        onClick={() => updateForm({ language: item.value })}
+                      >
+                        {item.label}
+                      </OptionPill>
+                    ))}
                   </div>
+                </SettingRow>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-                    <div className="space-y-8">
-                      <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">{t('setup.interviewLang')}</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        {languages.map((lang) => (
-                          <button
-                            key={lang.value}
-                            type="button"
-                            onClick={() => setForm({ ...form, language: lang.value })}
-                            className={`flex flex-col items-start gap-4 p-6 rounded-2xl border transition-all duration-300 ${form.language === lang.value
-                                ? 'border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white shadow-sm'
-                                : 'border-slate-100 bg-white hover:border-slate-200 dark:border-slate-800 dark:bg-slate-950'
-                              }`}
-                          >
-                            <div className="flex items-center justify-between w-full">
-                              <span className={`text-3xl ${form.language === lang.value ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-500'}`}>{lang.flag}</span>
-                              {form.language === lang.value && <Check className="w-4 h-4" />}
-                            </div>
-                            <div>
-                              <div className={`font-bold text-sm tracking-tight ${form.language === lang.value ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-500'}`}>{lang.label}</div>
-                              <div className={`text-[10px] uppercase font-bold mt-1 ${form.language === lang.value ? 'opacity-60' : 'text-slate-500'}`}>{lang.desc}</div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
+                <SettingRow label={t('setup.duration')} htmlFor="setup-duration">
+                  {isPractice ? (
+                    <p className="rounded-lg border border-brand-line bg-brand-inset px-3.5 py-2.5 text-[12px] leading-relaxed text-brand-muted">
+                      <span className="mr-2 inline-block rounded-md border border-brand-line bg-brand-card px-2 py-0.5 text-[11px] font-semibold text-brand-ink">
+                        {t('setup.practiceUnlimitedCount', { n: practiceTotalQuestions })}
+                      </span>
+                      {t('setup.practiceFlowDesc', {
+                        minutes: practiceEquivalentMinutes,
+                        core: practiceCoreQuestions,
+                        total: practiceTotalQuestions,
+                      })}
+                    </p>
+                  ) : (
+                    <div className="flex items-center gap-3.5 pt-1.5">
+                      <span className="shrink-0 text-[11.5px] text-brand-muted">{t('setup.durationMinutes', { n: DURATION_MIN })}</span>
+                      <input
+                        id="setup-duration"
+                        type="range"
+                        min={DURATION_MIN}
+                        max={DURATION_MAX}
+                        step={5}
+                        value={form.duration}
+                        onChange={(e) => updateForm({ duration: Number(e.target.value) })}
+                        className="brand-range"
+                        style={{ '--brand-range-fill': `${durationFillPct}%` }}
+                      />
+                      <span className="shrink-0 text-[11.5px] text-brand-muted">{t('setup.durationMinutes', { n: DURATION_MAX })}</span>
+                      <span className="shrink-0 rounded-lg border border-brand-ink px-2.5 py-1 text-[12.5px] font-semibold tabular-nums text-brand-ink">
+                        {t('setup.durationMinutes', { n: form.duration })}
+                      </span>
                     </div>
+                  )}
+                </SettingRow>
 
-                    <div className="space-y-8">
-                      <div className="flex items-center justify-between gap-4">
-                        <h3 className={`text-sm font-bold uppercase tracking-widest ${form.mode === 'practice' ? 'text-slate-400' : 'text-slate-900 dark:text-white'}`}>{t('setup.duration')}</h3>
-                        {form.mode === 'practice' && <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">{t('setup.practiceUnlimitedCount', { n: practiceTotalQuestions })}</span>}
-                      </div>
-                      <div className={`rounded-2xl border p-6 transition-all ${form.mode === 'practice' ? 'border-slate-100 bg-slate-50/60 opacity-40 dark:border-slate-800 dark:bg-slate-900/40' : 'border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-950'}`}>
-                        <div className="mb-5 flex items-end justify-between">
-                          <span className="text-xs font-bold text-slate-400">5 {t('dashboard.durMin')}</span>
-                          <span className="text-3xl font-black tabular-nums text-slate-900 dark:text-white">{form.duration} <span className="text-sm text-slate-400">{t('dashboard.durMin')}</span></span>
-                          <span className="text-xs font-bold text-slate-400">60 {t('dashboard.durMin')}</span>
-                        </div>
-                        <input type="range" min="5" max="60" step="1" value={form.duration}
-                          disabled={form.mode === 'practice'}
-                          onChange={(event) => setForm({ ...form, duration: Number(event.target.value) })}
-                          aria-label={t('setup.duration')}
-                          className="h-2 w-full cursor-pointer accent-slate-900 disabled:cursor-not-allowed dark:accent-white" />
-                      </div>
-                      {form.mode === 'practice' && <p className="text-xs font-medium leading-relaxed text-slate-500 dark:text-slate-400">{t('setup.practiceFlowDesc', { minutes: practiceEquivalentMinutes, core: practiceCoreQuestions, total: practiceTotalQuestions })}</p>}
-                    </div>
+                <SettingRow label={t('setup.interviewerStyle')}>
+                  <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+                    {interviewerStyles.map(item => (
+                      <OptionCard
+                        key={item.value}
+                        selected={form.interviewerStyle === item.value}
+                        onClick={() => updateForm({ interviewerStyle: item.value })}
+                        icon={STYLE_ICONS[item.value]}
+                        title={item.label}
+                        desc={item.desc}
+                      />
+                    ))}
                   </div>
+                  <p className="mt-2 text-[11.5px] text-brand-muted">{t('setup.interviewerStyleDesc')}</p>
+                </SettingRow>
+              </div>
+            </SectionCard>
+          </div>
 
-                  <div className="space-y-8">
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">{t('setup.interviewerStyle')}</h3>
-                      <p className="mt-2 text-xs font-medium text-slate-500 dark:text-slate-400">{t('setup.interviewerStyleDesc')}</p>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                      {interviewerStyles.map((style) => (
-                        <button
-                          key={style.value}
-                          type="button"
-                          onClick={() => setForm({ ...form, interviewerStyle: style.value })}
-                          aria-pressed={form.interviewerStyle === style.value}
-                          className={`flex min-h-44 flex-col items-start gap-4 rounded-2xl border p-6 text-left transition-all duration-300 ${form.interviewerStyle === style.value
-                              ? 'border-slate-300 bg-slate-50 text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white'
-                              : 'border-slate-100 bg-white text-slate-600 hover:border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400'
-                            }`}
-                        >
-                          <div className="flex w-full items-center justify-between">
-                            <span className="text-3xl" aria-hidden="true">{style.icon}</span>
-                            {form.interviewerStyle === style.value && <Check className="h-4 w-4" />}
-                          </div>
-                          <div>
-                            <div className="text-sm font-bold tracking-tight">{style.label}</div>
-                            <div className="mt-2 text-xs font-medium leading-relaxed opacity-70">{style.desc}</div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+          {/* ───────────── 右栏：预览 + 概览 ───────────── */}
+          <aside className="xl:sticky xl:top-[calc(var(--ui-nav-h)+1.5rem)] xl:max-h-[calc(100dvh-var(--ui-nav-h)-3rem)] xl:overflow-y-auto">
+            <div className="brand-float rounded-[22px] px-5 py-5">
+              <h2 className="mb-1 font-brand text-[16.5px] font-semibold tracking-[-0.01em] text-brand-ink">{t('setup.summaryOverview')}</h2>
+              <div className="divide-y divide-brand-line">
+                <div className="pb-1.5">
+                  <SummaryRow
+                    icon={Briefcase}
+                    label={t('setup.summaryPosition')}
+                    value={form.position.trim() || t('setup.summaryUnset')}
+                    muted={!form.position.trim()}
+                  />
+                  <SummaryRow icon={BadgeCheck} label={t('setup.summaryEmployment')} value={employmentLabel} />
+                  <SummaryRow
+                    icon={LayoutTemplate}
+                    label={t('setup.summaryCategory')}
+                    value={categoryLabel || t('setup.summaryCategoryUnset')}
+                    muted={!categoryLabel}
+                  />
+                  <SummaryRow
+                    icon={FileText}
+                    label={t('setup.summaryResume')}
+                    value={effectiveResume ? t('setup.summaryResumeReady') : t('setup.summaryResumeNone')}
+                    muted={!effectiveResume}
+                  />
                 </div>
-
-                {/* Footer Section */}
-                <div className="p-12 bg-slate-50 dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800">
-                  <p className="mb-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">{t('setup.summary')}</p>
-                  <div className="flex flex-wrap gap-4 mb-12">
-                    {form.position ? (
-                      <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm flex items-center gap-2">
-                        {form.position}
-                      </span>
-                    ) : (
-                      <span className="px-5 py-2.5 rounded-full border border-dashed border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-400">
-                        {t('setup.emptyPos')}
-                      </span>
-                    )}
-                    <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm">
-                      {form.language}
-                    </span>
-                    <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm">
-                      {form.duration} {t('setup.minSuffix')}
-                    </span>
-                    <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm">
-                      {interviewerStyles.find((style) => style.value === form.interviewerStyle)?.label}
-                    </span>
-                    <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm">
-                      {t(`setup.type${form.interviewerType === 'hr' ? 'Hr' : form.interviewerType === 'technical' ? 'Technical' : 'Mixed'}`)}
-                    </span>
-                    <span className="px-5 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white shadow-sm">
-                      {employmentTypes.find(item => item.value === form.employmentType)?.label}
-                    </span>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn-setup-action w-full py-6 text-xl"
-                  >
-                    {loading ? (
-                      <span className="flex items-center justify-center w-full">
-                        <Loader2 className="h-6 w-6 animate-spin text-white dark:text-slate-900" />
-                      </span>
-                    ) : (
-                      <span className="flex items-center justify-center w-full gap-4">
-                        <div className="flex items-center gap-4">
-                          <span>{t('setup.submit')}</span>
-                          <EnergyBadge amount="-300" t={t} />
-                        </div>
-                        <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform" />
-                      </span>
-                    )}
-                  </button>
+                <div className="pt-1.5">
+                  <SummaryRow icon={Users} label={t('setup.summaryType')} value={interviewerTypeLabel} />
+                  <SummaryRow icon={MonitorPlay} label={t('setup.summaryMode')} value={modeLabel} />
+                  <SummaryRow icon={Languages} label={t('setup.summaryLanguage')} value={languageLabel} />
+                  <SummaryRow icon={BarChart3} label={t('setup.summaryDifficulty')} value={difficultyLabel} />
+                  <SummaryRow icon={Clock} label={t('setup.summaryDuration')} value={durationLabel} />
+                  <SummaryRow icon={UserCog} label={t('setup.summaryStyle')} value={styleLabel} />
                 </div>
-              </form>
+              </div>
+
+              <div className="mt-4 rounded-xl border border-brand-line bg-brand-inset p-3.5">
+                <h3 className="mb-2 text-[13px] font-semibold text-brand-ink">{t('setup.benefitsTitle')}</h3>
+                <ul className="space-y-1.5">
+                  {[1, 2, 3].map(n => (
+                    <li key={n} className="flex items-start gap-2 text-[12px] leading-relaxed text-brand-muted">
+                      <Check className="mt-[3px] h-3 w-3 shrink-0 text-brand-success" strokeWidth={2.5} />
+                      <span>{t(`setup.benefit${n}`)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* 主 CTA：整页唯一的色块，走薰衣草渐变 */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="quiet-cta mt-4 flex w-full items-center justify-center gap-2.5 rounded-xl px-5 py-3.5 text-[14.5px] font-semibold transition-opacity duration-200 disabled:cursor-not-allowed disabled:opacity-55"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t('setup.submitting')}
+                  </>
+                ) : (
+                  <>
+                    {t('setup.submit')}
+                    <span className="inline-flex items-center gap-1 rounded-full bg-brand-on-ink/15 px-2 py-0.5 text-[11px] font-medium">
+                      <Star className="h-2.5 w-2.5 fill-current" />
+                      {t('setup.creditCost', { n: INTERVIEW_COST })}
+                    </span>
+                    <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+                  </>
+                )}
+              </button>
+
+              <p className="mt-2.5 flex items-center justify-center gap-1.5 text-center text-[11.5px] text-brand-muted">
+                <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+                {t('setup.previewReady')}
+              </p>
             </div>
-          </main>
-        </div>
+          </aside>
+        </form>
 
-        <p className="mx-auto mt-12 max-w-2xl text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 leading-relaxed">
-          {t('setup.footerTip')}
-        </p>
+        {/* 底部隐私说明条 */}
+        <div className="brand-float mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[18px] px-5 py-4">
+          <ShieldCheck className="h-4 w-4 shrink-0 text-brand-ink" />
+          <span className="text-[13px] font-semibold text-brand-ink">{t('setup.privacyTitle')}</span>
+          <span className="hidden h-4 w-px bg-brand-line sm:block" />
+          <p className="min-w-0 flex-1 text-[12.5px] leading-relaxed text-brand-muted">{t('setup.privacyBody')}</p>
+          <Link
+            to="/profile"
+            className="flex shrink-0 items-center gap-1 text-[12.5px] font-semibold text-brand-muted transition-colors hover:text-brand-ink"
+          >
+            {t('setup.privacyMore')}
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </div>
     </div>
   )

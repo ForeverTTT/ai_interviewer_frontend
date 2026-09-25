@@ -4,6 +4,211 @@
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * 布局尺寸变量。颜色一律走下面的 --brand-* 品牌 token，
+ * 全站只有一套色板（旧的 --ui-* 颜色已随开始面试页迁移一并删除）。
+ */
+@layer base {
+  :root {
+    /* Navbar 实际高度，页面用它计算顶部避让，避免各页面各写一个魔数 */
+    --ui-nav-h: 5rem;
+    /**
+     * 内容区宽度上限。低于它时页面完全跟随视口铺满；超过后居中留白，
+     * 否则在 2K/5K 屏上卡片会被拉到几百像素宽、文字密度过低。
+     * 顶栏不受此限制（logo 贴左、账号贴右在宽屏上是正常形态）。
+     */
+    --ui-max-w: 1760px;
+
+    /* 品牌橘直接沿用 tailwind.config.js 的 primary 色阶，不引入新色值 */
+  }
+
+  /**
+   * 品牌视觉 token —— "编辑式极简 + 几何点缀 + 柔和科技感"。
+   * 黑白灰是主角，紫色和荧光黄绿只做小面积点缀。
+   * 每个值只定义两次（light / .dark），消费方无需写任何 `dark:` 变体。
+   * 数值是空格分隔的 RGB 通道，以便 Tailwind 的 `<alpha-value>` 生效。
+   */
+  :root {
+    /* 全站统一一张画布：区块之间靠留白分层，不再交替换底色 */
+    --brand-paper: 246 246 249; /* #F6F6F9 冷灰，比旧的 #F5F5F5 多一丝蓝紫，绝不发暖 */
+    --brand-card: 255 255 255; /* 浮窗与卡片一律纯白 */
+    --brand-inset: 242 242 246; /* #F2F2F6 卡片内部的浅色凹槽 */
+    --brand-ink: 26 26 31; /* #1A1A1F 近黑但偏冷；纯黑在这套色板里太硬 */
+    --brand-muted: 90 90 102; /* #5A5A66 —— 次要文字。原来的 #6F6F7A 压在 #F6F6F9 上只有 4.56:1，
+                                  读长文很虚；这一档是 6.3:1 */
+    --brand-line: 228 228 234; /* #E4E4EA 中性描边 */
+    --brand-deep: 43 38 68; /* #2B2644 深靛，用于成对出现的暗色卡片 */
+    --brand-violet: 124 92 255; /* #7C5CFF 实色紫，用在按钮/圆点/线条 */
+    --brand-glow: 170 126 255; /* #AA7EFF 只用于半透明氛围圆，never 实色 */
+    --brand-lime: 201 243 29; /* #C9F31D 荧光黄绿 */
+    --brand-sky: 191 217 255; /* #BFD9FF AI 氛围 */
+    --brand-coral: 241 138 108; /* #F18A6C AI 氛围 */
+    --brand-success: 43 182 115;
+    --brand-danger: 226 76 75;
+    /* 落在 ink 实心块上的文字色，深浅色下需要反过来 */
+    --brand-on-ink: 250 250 252;
+  }
+
+  .dark {
+    --brand-paper: 17 17 20;
+    --brand-card: 25 25 29;
+    --brand-inset: 33 33 38;
+    --brand-ink: 238 238 243;
+    --brand-muted: 163 163 175; /* #A3A3AF 深色下同理往亮里提一档 */
+    --brand-line: 45 45 52;
+    --brand-deep: 43 38 68;
+    --brand-violet: 154 128 255;
+    --brand-glow: 170 126 255;
+    --brand-lime: 201 243 29;
+    --brand-sky: 120 158 224;
+    --brand-coral: 226 129 100;
+    --brand-success: 52 199 123;
+    --brand-danger: 248 113 113;
+    --brand-on-ink: 19 19 23;
+
+  }
+
+  /**
+   * 「Quiet Lavender」色板 —— 已迁移区域的强调色层。
+   * 规则：**交互色是墨色**（按钮、选中态、焦点），薰衣草只做小面积点缀和数据可视化；
+   * 不出现高饱和纯色块，
+   * 层次靠留白 + 1px 描边而不是阴影和几何装饰。
+   * 中性底色（paper / card / inset / ink / muted / line）已经是上面的全局值，全站共用一张画布；
+   * 这里只覆盖强调色和语义色，所以未迁移的页面仍然保留它们原来的荧光绿点缀。
+   * 用法：把 .theme-quiet 加在区域根节点上。已接入：Navbar、Footer、SetupPage。
+   */
+  .theme-quiet {
+    /* 中性底色已经是全局值，这里只覆盖「强调色 + 语义色」这层差集 */
+    --brand-violet: 122 110 168; /* #7A6EA8 强调色：图标 / 描边 / 次要文字 */
+    --brand-glow: 186 176 219; /* #BAB0DB Pantone Mystic Violet 一档，只做浅色填充 */
+    --brand-lime: 186 176 219; /* 荧光黄绿在这套色板里退役，兜底成薰衣草，避免漏色 */
+    --brand-sky: 202 208 226;
+    --brand-coral: 206 182 182;
+    --brand-success: 92 140 116; /* 去饱和的墨绿，替掉原来的亮绿 */
+    --brand-danger: 188 96 96;
+
+  }
+
+  .dark .theme-quiet {
+    --brand-violet: 178 167 220;
+    --brand-glow: 140 128 190;
+    --brand-lime: 178 167 220;
+    --brand-sky: 130 140 165;
+    --brand-coral: 178 148 148;
+    --brand-success: 108 168 138;
+    --brand-danger: 214 122 122;
+
+  }
+}
+
+@layer components {
+  /** 浮窗卡片：纯白 + 柔和大阴影，参考稿里所有交互界面都是这种「浮起来」的质感 */
+  .brand-float {
+    @apply rounded-[20px] bg-brand-card;
+    /* 这套风格不靠厚重阴影撑层次，克制到刚好能"浮"起来即可 */
+    box-shadow: 0 10px 40px rgb(20 20 20 / 0.06);
+  }
+
+  .dark .brand-float {
+    box-shadow: 0 10px 40px rgb(0 0 0 / 0.45);
+  }
+
+  /** Quiet Lavender 下卡片不靠阴影分层，换成一条 1px 冷灰描边，只留一丝落影 */
+  .theme-quiet .brand-float {
+    border: 1px solid rgb(var(--brand-line));
+    box-shadow: 0 1px 2px rgb(24 24 31 / 0.03);
+  }
+
+  .dark .theme-quiet .brand-float {
+    box-shadow: none;
+  }
+
+  /**
+   * 主按钮：墨色实心。
+   * 试过薰衣草渐变，用户反馈「整体太偏紫」，所以交互色（按钮、选中态）一律回到墨色，
+   * 薰衣草只留给数据可视化和极小面积的点缀。
+   */
+  .theme-quiet .quiet-cta {
+    @apply bg-brand-ink text-brand-on-ink;
+  }
+
+  .theme-quiet .quiet-cta:hover:not(:disabled) {
+    @apply opacity-90;
+  }
+
+  /**
+   * 首页的紫色按钮。比强调紫 #7A6EA8 深一档：#7A6EA8 配白字只有 4.4:1，不到 4.5，
+   * 压到 #6F6399 才有 5.35:1。观感还是同一支薰衣草，别再往浅了调。
+   */
+  .theme-quiet .quiet-violet {
+    background-color: #6F6399;
+    color: #FFFFFF;
+  }
+
+  .theme-quiet .quiet-violet:hover:not(:disabled) {
+    background-color: #7B6EA8;
+  }
+
+  .dark .theme-quiet .quiet-violet {
+    background-color: #7A6EA8;
+  }
+
+  .dark .theme-quiet .quiet-violet:hover:not(:disabled) {
+    background-color: #877AB8;
+  }
+
+  /** 内容区容器：窄屏铺满，宽屏在 --ui-max-w 处收口。改一处即可全站生效。 */
+  .ui-container {
+    @apply mx-auto w-full px-4 sm:px-6 lg:px-8;
+    max-width: var(--ui-max-w);
+  }
+
+  /* 时长滑块：轨道左侧品牌紫、右侧中性色，分割点由 --brand-range-fill 驱动 */
+  .brand-range {
+    @apply h-1.5 w-full cursor-pointer appearance-none rounded-full bg-transparent;
+    background-image: linear-gradient(
+      to right,
+      rgb(var(--brand-violet)) 0 var(--brand-range-fill, 0%),
+      rgb(var(--brand-line)) var(--brand-range-fill, 0%) 100%
+    );
+  }
+
+  .brand-range:disabled {
+    @apply cursor-not-allowed;
+  }
+
+  .brand-range::-webkit-slider-thumb {
+    @apply h-4 w-4 appearance-none rounded-full border-2 border-brand-card bg-[rgb(var(--brand-violet))];
+    box-shadow: 0 1px 4px rgb(var(--brand-violet) / 0.45);
+  }
+
+  .brand-range::-moz-range-thumb {
+    @apply h-4 w-4 appearance-none rounded-full border-2 border-brand-card bg-[rgb(var(--brand-violet))];
+    box-shadow: 0 1px 4px rgb(var(--brand-violet) / 0.45);
+  }
+
+  .brand-range:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 4px rgb(var(--brand-violet) / 0.25);
+  }
+
+  .brand-range:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 4px rgb(var(--brand-violet) / 0.25);
+  }
+}
+
+@layer utilities {
+  /* 这个类在项目里被用了两处，但从来没有定义过——一直是空操作，
+     导致横向滚动容器露出原生滚动条。这里补上真实实现。 */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @layer utilities {
   .font-chinese-modern {
     font-family: 'Noto Sans SC', 'Inter', system-ui, sans-serif;
@@ -42,19 +247,6 @@
   .dark .bg-dot-grid {
     background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   }
-  @keyframes aurora-blob {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
-  }
-  .animate-aurora-blob {
-    animation: aurora-blob 7s infinite alternate ease-in-out;
-  }
-  .animate-aurora-blob-delayed {
-    animation: aurora-blob 10s infinite alternate-reverse ease-in-out;
-    animation-delay: -3s;
-  }
-
   /* Digital Human Animations — Refined Minimalist */
   @keyframes dh-mouth {
     0%, 100% { transform: scaleY(0.5); opacity: 0.8; }
@@ -106,31 +298,27 @@
 
 @layer base {
   * {
-    @apply border-slate-200 dark:border-slate-800;
+    @apply border-brand-line;
   }
   
   html {
     scroll-behavior: smooth;
   }
   
+  /* body 也走 brand-paper —— 之前是纯白 / slate-950，回弹和加载瞬间会露出和页面对不上的底 */
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    @apply bg-white text-slate-900 antialiased;
-  }
-  
-  ::selection {
-    background-color: #ffedd5; /* orange-100 */
-    color: #7c2d12; /* orange-900 */
+    @apply bg-brand-paper text-brand-ink antialiased;
   }
 
-  .dark body {
-    @apply bg-slate-950 text-slate-100;
+  ::selection {
+    background-color: rgb(186 176 219 / 0.45); /* 淡薰衣草 */
+    color: #1a1a1f;
   }
-  
-  /* brand-900 with 30% alpha */
+
   .dark ::selection {
-    background-color: rgba(124, 45, 18, 0.3);
-    color: #ffedd5; /* orange-100 */
+    background-color: rgb(140 128 190 / 0.45);
+    color: #eeeef3;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -269,18 +457,14 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-slate-700 rounded-full border-[3px] border-transparent bg-clip-content;
+  @apply rounded-full border-[3px] border-transparent bg-brand-line bg-clip-content;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-400 dark:bg-slate-600;
+  @apply bg-brand-muted/50;
 }
 
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: theme('colors.slate.300') transparent;
-}
-
-.dark .custom-scrollbar {
-  scrollbar-color: theme('colors.slate.700') transparent;
+  scrollbar-color: rgb(var(--brand-line)) transparent;
 }

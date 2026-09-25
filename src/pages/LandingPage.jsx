@@ -1,5 +1,4 @@
 import { useMemo, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
 import { motion } from 'framer-motion'
@@ -8,14 +7,9 @@ import HowItWorksShowcase from '../components/HowItWorksShowcase'
 import AdvantagesShowcase from '../components/AdvantagesShowcase'
 import TechnologyShowcase from '../components/TechnologyShowcase'
 import TestimonialsMarquee from '../components/TestimonialsMarquee'
-import {
-  ArrowRight, Mic, Globe2, Clock,
-  Sparkles, Target, Zap, FileText, Star, Lightbulb,
-} from 'lucide-react'
-
-import darkInterviewMockup from '../assets/dark_interview_mockup.png'
-import darkResumeMockup from '../assets/resume_mockup_sage.png'
-import heroBg from '../assets/background.jpg'
+import InterviewPreview from '../components/brand/InterviewPreview'
+import { BrandButton } from '../components/brand/BrandKit'
+import { Mic, Globe2, Clock, Target } from 'lucide-react'
 
 const positions = [
   'Werkstudent Software Engineer', 'Praktikum Data Science',
@@ -28,19 +22,19 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3,
+      staggerChildren: 0.08,
+      delayChildren: 0.1,
     },
   },
 }
 
 const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
+  hidden: { y: 18, opacity: 0 },
   visible: {
     y: 0,
     opacity: 1,
     transition: {
-      duration: 0.8,
+      duration: 0.7,
       ease: [0.16, 1, 0.3, 1],
     },
   },
@@ -65,145 +59,114 @@ export default function LandingPage() {
 
   const features = useMemo(() => [
     {
-      icon: <Target className="w-5 h-5" />,
+      icon: <Target className="h-[18px] w-[18px]" />,
       title: t('landing.features.f1t'),
       description: t('landing.features.f1d'),
     },
     {
-      icon: <Globe2 className="w-5 h-5" />,
+      icon: <Globe2 className="h-[18px] w-[18px]" />,
       title: t('landing.features.f2t'),
       description: t('landing.features.f2d'),
     },
     {
-      icon: <Mic className="w-5 h-5" />,
+      icon: <Mic className="h-[18px] w-[18px]" />,
       title: t('landing.features.f3t'),
       description: t('landing.features.f3d'),
     },
     {
-      icon: <Clock className="w-5 h-5" />,
+      icon: <Clock className="h-[18px] w-[18px]" />,
       title: t('landing.features.f4t'),
       description: t('landing.features.f4d'),
     },
   ], [t])
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950">
-      <section className="relative min-h-[100vh] flex flex-col justify-end overflow-hidden">
-        {/* Full-bleed background illustration */}
-        <div className="absolute inset-0">
-          <img src={heroBg} alt="" className="w-full h-full object-cover object-center" />
-          {/* Gradient overlays for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#e8e4dd]/95 via-[#e8e4dd]/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-transparent h-32" />
-        </div>
+    <div className="theme-quiet bg-brand-paper">
 
+      {/* ───────────────── Hero ───────────────── */}
+      <section className="relative overflow-hidden pt-[calc(var(--ui-nav-h)+5.5rem)] pb-20">
+        <div className="ui-container relative z-10">
+          <div className="relative grid items-center gap-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-16">
+            <motion.div initial="hidden" animate="visible" variants={containerVariants}>
+              <motion.h1
+                variants={itemVariants}
+                className="font-brand text-[42px] font-black leading-[1.08] tracking-tight text-brand-ink sm:text-[56px] lg:text-[64px]"
+              >
+                {t('landing.headline1')}
+                {t('landing.headline2')}
+              </motion.h1>
 
-        {/* Center content overlay */}
-        <div className="relative z-10 max-w-5xl mx-auto text-center px-6 pb-16 pt-48">
+              <motion.p
+                variants={itemVariants}
+                className="mt-6 max-w-xl text-[16px] leading-relaxed text-brand-muted sm:text-[17px]"
+              >
+                {t('landing.subNextGen')}
+              </motion.p>
+
+              <motion.div variants={itemVariants} className="mt-9 flex flex-wrap items-center gap-4">
+                <BrandButton to={ctaLink} variant="ink" size="lg">
+                  {t('landing.ctaPrimary')}
+                </BrandButton>
+                <BrandButton as="a" href="#how-it-works" variant="outline" size="lg">
+                  {t('landing.ctaSecondary')}
+                </BrandButton>
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="mt-9 flex flex-wrap gap-2">
+                {positions.map((pos) => (
+                  <span
+                    key={pos}
+                    className="rounded-full border border-brand-line bg-brand-card/70 px-3 py-1.5 text-[11px] font-medium text-brand-muted"
+                  >
+                    {pos}
+                  </span>
+                ))}
+              </motion.div>
+            </motion.div>
+
+            {/* 主视觉：原生搭建的面试界面浮窗 */}
+            <motion.div
+              initial={{ opacity: 0, y: 26 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="relative"
+            >
+              <InterviewPreview />
+            </motion.div>
+          </div>
+
+          {/* 底部能力条：图标 + 标题 + 描述，用竖线分隔 */}
           <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-            className="space-y-8"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-20 border-t border-brand-line pt-10"
           >
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-[11px] font-semibold tracking-wider bg-white/60 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 backdrop-blur-xl border border-white/40 shadow-sm">
-              {t('landing.badgePremium')}
-            </motion.div>
+            <div className="mb-12 flex flex-col items-center gap-4 text-center">
+              <h2 className="font-brand text-[26px] font-black leading-tight tracking-tight text-brand-ink sm:text-[32px]">
+                {t('landing.featuresTitle')}
+              </h2>
+              <p className="max-w-2xl text-[15px] leading-relaxed text-brand-ink">
+                {t('landing.featuresSub')}
+              </p>
+            </div>
 
-            <motion.h1
-              variants={itemVariants}
-              className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.1] tracking-tight font-serif"
-            >
-              {t('landing.headline1')}
-              {t('landing.headline2')}
-            </motion.h1>
-
-            <motion.p
-              variants={itemVariants}
-              className="text-base sm:text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto font-medium"
-            >
-              {t('landing.subNextGen')}
-            </motion.p>
-
-            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-              <Link
-                to={ctaLink}
-                className="inline-flex items-center justify-center gap-3 text-base px-10 py-4 w-full sm:w-auto rounded-full font-bold text-white bg-slate-800 hover:bg-slate-900 transition-all shadow-xl hover:-translate-y-0.5 active:scale-[0.97]"
-              >
-                {t('landing.ctaPrimary')}
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <a
-                href="#how-it-works"
-                className="inline-flex items-center gap-2 text-base px-10 py-4 w-full sm:w-auto rounded-full font-bold text-slate-600 bg-white/50 backdrop-blur-xl border border-slate-200/80 hover:bg-white/80 transition-all shadow-sm"
-              >
-                {t('landing.ctaSecondary')}
-              </a>
-            </motion.div>
-
-            <motion.div variants={itemVariants} className="flex flex-nowrap justify-center gap-2 pt-4 overflow-x-auto">
-              {positions.map((pos) => (
-                <span
-                  key={pos}
-                  className="px-3 py-1 bg-white/40 text-slate-500 text-[9px] font-medium tracking-wider rounded-full border border-slate-200/40 backdrop-blur-md whitespace-nowrap shrink-0"
-                >
-                  {pos}
-                </span>
+            <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4 lg:divide-x lg:divide-brand-line">
+              {features.map((feature, i) => (
+                <div key={i} className={i > 0 ? 'lg:pl-10' : ''}>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-ink text-brand-on-ink">
+                    {feature.icon}
+                  </div>
+                  <h3 className="mt-4 text-[15px] font-bold text-brand-ink">{feature.title}</h3>
+                  <p className="mt-2 text-[13px] leading-relaxed text-brand-muted">{feature.description}</p>
+                </div>
               ))}
-            </motion.div>
+            </div>
           </motion.div>
         </div>
       </section>
 
       <OfferLogosMarquee />
-
-      <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-[#e3ebe5] dark:bg-slate-900 border-y border-[#cdd8cf] dark:border-slate-800">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="space-y-8"
-            >
-              <div className="section-badge w-fit">
-                <Zap className="w-3.5 h-3.5" />
-                {t('landing.featuresBadge')}
-              </div>
-              <h2 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white leading-tight font-serif">
-                {t('landing.featuresTitle')}
-              </h2>
-              <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
-                {t('landing.featuresSub')}
-              </p>
-
-              <div className="grid sm:grid-cols-2 gap-6">
-                {features.map((feature, i) => (
-                  <div key={i} className="p-6 bg-[#f2f7f3] dark:bg-slate-800 rounded-2xl border border-[#cdd8cf] dark:border-slate-700 shadow-sm space-y-3">
-                    <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900">
-                      {feature.icon}
-                    </div>
-                    <h3 className="font-bold text-slate-900 dark:text-white">{feature.title}</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{feature.description}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-            >
-              <img
-                src={darkResumeMockup}
-                alt="Premium Resume Analytics"
-                className="w-full max-w-[640px] mx-auto rounded-2xl shadow-lg"
-              />
-            </motion.div>
-          </div>
-        </div>
-      </section>
 
       <HowItWorksShowcase ctaLink={ctaLink} />
 
@@ -213,23 +176,26 @@ export default function LandingPage() {
 
       <TestimonialsMarquee />
 
-      <section className="py-32 px-4 bg-[#f3eef9] dark:bg-slate-950 relative overflow-hidden">
-        <div className="max-w-4xl mx-auto text-center relative z-10 space-y-12">
-          <h2 className="text-3xl sm:text-5xl font-black text-slate-800 dark:text-white leading-[1.2] font-serif">
-            {t('landing.ctaEndTitle')}
-          </h2>
-          <p className="text-xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
-            {t('landing.ctaEndSub')}
-          </p>
-          <Link
-            to={ctaLink}
-            className="btn-primary text-xl px-12 py-5 rounded-2xl inline-flex items-center gap-3"
-          >
-            {t('landing.ctaEndBtn')}
-            <ArrowRight className="w-6 h-6" />
-          </Link>
-          <div className="text-slate-400 text-sm italic opacity-60">
-            {t('landing.ctaEndFoot')}
+      {/* ───────────────── 收尾 CTA ───────────────── */}
+      <section className="bg-brand-paper pb-24 pt-8">
+        <div className="ui-container">
+          <div className="px-6 py-20 text-center sm:px-16">
+            <div className="mx-auto max-w-3xl space-y-8">
+              <h2 className="font-brand text-[32px] font-black leading-[1.14] tracking-tight text-brand-ink sm:text-[46px]">
+                {t('landing.ctaEndTitle')}
+              </h2>
+              <p className="mx-auto max-w-2xl text-[16px] leading-relaxed text-brand-ink sm:text-[17px]">
+                {t('landing.ctaEndSub')}
+              </p>
+              <div className="flex justify-center pt-2">
+                <BrandButton to={ctaLink} variant="lime" size="lg">
+                  {t('landing.ctaEndBtn')}
+                </BrandButton>
+              </div>
+              <p className="text-[13px] italic text-brand-muted">
+                {t('landing.ctaEndFoot')}
+              </p>
+            </div>
           </div>
         </div>
       </section>

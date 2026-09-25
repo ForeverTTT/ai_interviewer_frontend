@@ -198,13 +198,13 @@ const PracticeInterviewPanel = forwardRef(function PracticeInterviewPanel({
   }
 
   if (!workspace) return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center text-sm text-slate-500">
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-brand-paper px-6 text-center text-[13px] text-brand-muted">
       <span>{error || t('interview.practice.loading')}</span>
       {error && (
         <button
           type="button"
           onClick={() => { setError(null); setRestoreAttempt(value => value + 1) }}
-          className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white dark:bg-white dark:text-slate-900"
+          className="rounded-xl bg-brand-ink px-4 py-2 text-[12.5px] font-semibold text-brand-on-ink"
         >
           {t('chat.retry')}
         </button>

@@ -35,7 +35,7 @@ const MARQUEE_SEQUENCE = [
 function LogoItem({ children, title }) {
   return (
     <div
-      className="flex h-16 sm:h-24 w-44 sm:w-56 shrink-0 items-center justify-center rounded-[2rem] border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm transition-all hover:scale-105"
+      className="brand-float flex h-16 w-44 shrink-0 items-center justify-center transition-transform duration-300 hover:-translate-y-0.5 sm:h-20 sm:w-52"
       title={title}
     >
       {children}
@@ -54,7 +54,7 @@ function LogoRow({ broken, setBroken, rowIndex }) {
           return (
             <LogoItem key={uniqueKey} title={b.name}>
               {broken[uniqueKey] ? (
-                <span className="text-sm font-bold text-slate-400">{b.name}</span>
+                <span className="text-sm font-semibold text-brand-muted">{b.name}</span>
               ) : (
                 <img
                   src={src}
@@ -71,7 +71,7 @@ function LogoRow({ broken, setBroken, rowIndex }) {
         return (
           <LogoItem key={uniqueKey} title={u.sub}>
             {broken[uniqueKey] ? (
-              <span className="text-xs font-bold text-slate-400 text-center px-2">{u.name}</span>
+              <span className="px-2 text-center text-xs font-semibold text-brand-muted">{u.name}</span>
             ) : (
               <img
                 src={src}
@@ -92,22 +92,22 @@ export default function OfferLogosMarquee() {
   const [broken, setBroken] = useState({})
 
   return (
-    <section className="relative pt-12 pb-12 bg-white dark:bg-slate-950 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 text-center mb-16">
-        <motion.p 
+    <section className="relative overflow-hidden bg-brand-paper py-16">
+      <div className="ui-container mb-12 text-center">
+        <motion.p
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-600 mb-6"
+          className="mb-5 text-[11px] font-bold uppercase tracking-[0.22em] text-brand-muted"
         >
           {t('offerMarquee.sub')}
         </motion.p>
-        <motion.h3 
+        <motion.h3
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white font-serif leading-tight"
+          className="font-brand text-[26px] font-black leading-tight tracking-tight text-brand-ink sm:text-[36px]"
         >
           {t('offerMarquee.line1')}
         </motion.h3>

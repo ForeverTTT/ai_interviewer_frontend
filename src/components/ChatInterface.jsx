@@ -23,12 +23,12 @@ function newRequestId() {
 /* ── Agent display config ─────────────────────────────────────── */
 
 const AGENT_STYLE = {
-  opening: { emoji: '👔', color: 'bg-slate-900 dark:bg-white text-white dark:text-slate-900', Icon: BrainCircuit },
-  explore: { emoji: '📎', color: 'bg-indigo-600 text-white', Icon: FolderOpen },
-  technical: { emoji: '💡', color: 'bg-blue-600 text-white', Icon: FlaskConical },
-  behavioral: { emoji: '🤝', color: 'bg-emerald-600 text-white', Icon: Users },
-  feedback: { emoji: '📋', color: 'bg-primary-600 text-white', Icon: ClipboardList },
-  analyzer: { emoji: '🔍', color: 'bg-slate-500 text-white', Icon: Search },
+  opening: { emoji: '👔', color: 'bg-brand-ink text-brand-on-ink', Icon: BrainCircuit },
+  explore: { emoji: '📎', color: 'bg-brand-violet text-white', Icon: FolderOpen },
+  technical: { emoji: '💡', color: 'bg-brand-ink text-brand-on-ink', Icon: FlaskConical },
+  behavioral: { emoji: '🤝', color: 'bg-brand-inset text-brand-ink', Icon: Users },
+  feedback: { emoji: '📋', color: 'bg-brand-violet text-white', Icon: ClipboardList },
+  analyzer: { emoji: '🔍', color: 'bg-brand-muted text-white', Icon: Search },
 }
 
 /* ── Tiny helpers ─────────────────────────────────────────────── */
@@ -39,7 +39,7 @@ function TypingDots() {
       {[0, 150, 300].map(d => (
         <div
           key={d}
-          className="w-1.5 h-1.5 bg-slate-900 dark:bg-white rounded-full animate-bounce"
+          className="h-1.5 w-1.5 rounded-full bg-brand-ink animate-bounce"
           style={{ animationDelay: `${d}ms`, animationDuration: '0.6s' }}
         />
       ))}
@@ -62,7 +62,7 @@ function AgentBadge({ name, streaming, agentMap }) {
   const c = agentMap[name] || agentMap.opening
   const { Icon } = c
   return (
-    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${c.color} shadow-sm mb-3`}>
+    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest ${c.color} shadow-sm mb-3`}>
       <Icon className="w-3 h-3" />
       <span>{c.label}</span>
       {streaming && <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse ml-1" />}
@@ -74,7 +74,7 @@ function WaveIcon({ active }) {
   return (
     <div className={`flex items-end gap-[3px] h-4 transition-opacity ${active ? 'opacity-100' : 'opacity-25'}`}>
       {[3, 6, 4, 7, 5, 3, 6].map((h, i) => (
-        <div key={i} className={`w-[2.5px] rounded-full ${active ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-500'}`}
+        <div key={i} className={`w-[2.5px] rounded-full ${active ? 'bg-brand-ink' : 'bg-brand-line'}`}
           style={{
             height: `${h * 2}px`,
             animation: active ? `wavebar 0.5s ${i * 0.07}s infinite alternate ease-in-out` : 'none'
@@ -1241,14 +1241,16 @@ const ChatInterface = forwardRef(function ChatInterface({
 
   const HR_PORTRAIT_SRC = `${String(import.meta.env.BASE_URL || '/').replace(/\/?$/, '/')}images/interviewer-hr.png`
 
+  const liveConnectionOk = nativeLiveEnabled ? live.connected : !initError
+
   const messageItems = (
     <>
       {displayMessages.length === 0 && (
         <div className="flex flex-col items-center justify-center h-full min-h-[8rem] gap-3 opacity-50">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-600 to-violet-600 flex items-center justify-center">
-            <BrainCircuit className="w-8 h-8 text-white" />
+          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-violet">
+            <BrainCircuit className="h-6 w-6 text-white" />
           </div>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">{t('chat.preparing')}</p>
+          <p className="text-[13px] text-brand-muted">{t('chat.preparing')}</p>
           <TypingDots />
         </div>
       )}
@@ -1268,13 +1270,13 @@ const ChatInterface = forwardRef(function ChatInterface({
             )}
 
             <div className={`flex flex-col gap-2 ${digitalHuman ? 'max-w-full' : 'max-w-[85%]'} ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-              <div className={`px-4 py-3 text-[0.8rem] leading-snug tracking-tight shadow-sm ${msg.role === 'user'
-                  ? 'bg-slate-900 text-white rounded-2xl rounded-tr-none dark:bg-white dark:text-slate-900 font-bold'
-                  : 'bg-white/60 dark:bg-white/10 backdrop-blur-md text-slate-800 dark:text-slate-100 border border-slate-200/50 dark:border-white/10 rounded-2xl rounded-tl-none font-serif'
+              <div className={`px-4 py-3 text-[13px] leading-relaxed ${msg.role === 'user'
+                  ? 'rounded-2xl rounded-tr-none bg-brand-ink font-medium text-brand-on-ink'
+                  : 'rounded-2xl rounded-tl-none border border-brand-line bg-brand-card text-brand-ink'
                 }`}>
                 {msg.streaming && !msg.content
                   ? <TypingDots />
-                  : <div className={`whitespace-pre-wrap ${msg.streaming ? 'typing-cursor' : ''}`}>{sanitizeSquareBrackets(msg.content)}</div>}
+                  : <div className="whitespace-pre-wrap">{sanitizeSquareBrackets(msg.content)}</div>}
               </div>
             </div>
           </div>
@@ -1294,14 +1296,14 @@ const ChatInterface = forwardRef(function ChatInterface({
           {stt.active && (
             <div className="flex items-center gap-2 px-3 py-1 bg-red-50 dark:bg-red-950/20 rounded-full border border-red-100 dark:border-red-900/30">
               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">{t('chat.recording')}</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">{t('chat.recording')}</span>
             </div>
           )}
 
           {interactionBusy && (
             <div className="flex items-center gap-2">
               <Loader2 className="w-3 h-3 animate-spin text-slate-400" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                 {currentAgent ? (agentMap[currentAgent.name]?.label ?? currentAgent.label) : t('chat.analyzing')}
               </span>
             </div>
@@ -1310,7 +1312,7 @@ const ChatInterface = forwardRef(function ChatInterface({
           {tts.speaking && !stt.active && (
             <div className="flex items-center gap-3">
               <WaveIcon active />
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('chat.ttsPlaying')}</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{t('chat.ttsPlaying')}</span>
             </div>
           )}
         </div>
@@ -1321,7 +1323,7 @@ const ChatInterface = forwardRef(function ChatInterface({
             }`}
         >
           {ttsEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-          <span className="text-[10px] font-black uppercase tracking-widest">{ttsEnabled ? t('chat.voiceOn') : t('chat.voiceOff')}</span>
+          <span className="text-[10px] font-semibold uppercase tracking-widest">{ttsEnabled ? t('chat.voiceOn') : t('chat.voiceOff')}</span>
         </button>
       </div>
 
@@ -1389,7 +1391,7 @@ const ChatInterface = forwardRef(function ChatInterface({
         </button>
       </div>
 
-      <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+      <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-slate-400">
         {stt.supported ? t('chat.hintFull') : t('chat.hintType')}
       </p>
     </div>
@@ -1397,7 +1399,7 @@ const ChatInterface = forwardRef(function ChatInterface({
 
   return (
     <div
-      className={`flex min-h-0 flex-1 flex-col bg-transparent text-slate-900 dark:text-white ${interviewUiVisible
+      className={`flex min-h-0 flex-1 flex-col bg-brand-paper text-brand-ink ${interviewUiVisible
           ? ''
           : 'absolute inset-0 z-0 opacity-0 pointer-events-none overflow-hidden min-h-0'
         }`}
@@ -1405,7 +1407,7 @@ const ChatInterface = forwardRef(function ChatInterface({
     >
       {/* Error banner */}
       {initError && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-red-100 border-b border-red-200 text-red-800 dark:bg-red-900/40 dark:border-red-700/40 dark:text-red-300 text-xs flex-shrink-0">
+        <div className="flex flex-shrink-0 items-center gap-2 border-b border-brand-danger/30 bg-brand-danger/[0.08] px-4 py-2 text-[12px] text-brand-ink">
           ⚠️ {initError}
           <button
             onClick={() => {
@@ -1428,7 +1430,7 @@ const ChatInterface = forwardRef(function ChatInterface({
               // Restart opening generation. Previously this button only cleared UI state.
               void runGraph([{ role: 'user', content: trigger }], /* isSystem */ true, controller.signal)
             }}
-            className="ml-auto flex items-center gap-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 transition-colors"
+            className="ml-auto flex items-center gap-1 font-bold text-brand-danger transition-opacity hover:opacity-70"
           >
             <RefreshCw className="w-3 h-3" /> {t('chat.retry')}
           </button>
@@ -1437,10 +1439,10 @@ const ChatInterface = forwardRef(function ChatInterface({
 
       {digitalHuman ? (
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent">
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row relative">
+          <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
             {/* Stage 1: AI Interviewer (40% Width) */}
             <main
-              className="relative lg:flex-[4] flex-shrink-0 flex flex-col items-center justify-center bg-black overflow-hidden m-4 rounded-[2.5rem] border border-white/5 shadow-2xl"
+              className="relative m-3 h-[30vh] shrink-0 overflow-hidden rounded-[20px] bg-brand-ink lg:m-4 lg:h-auto lg:flex-[4]"
               aria-label={t('interview.digitalHuman')}
             >
               <img
@@ -1452,37 +1454,37 @@ const ChatInterface = forwardRef(function ChatInterface({
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
 
               {/* AI Status Header */}
-              <div className="absolute top-8 left-8 flex items-center gap-3 pointer-events-none z-20">
-                <div className="px-4 py-2 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/10 flex items-center gap-3">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.6)]" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white">{t('interview.digitalZoomLive')}</span>
+              <div className="pointer-events-none absolute left-5 top-5 z-20 flex items-center gap-2">
+                <div className="flex items-center gap-2.5 rounded-full bg-black/55 px-3.5 py-1.5 backdrop-blur">
+                  <div className="h-2 w-2 animate-pulse rounded-full bg-brand-danger" />
+                  <span className="text-[11px] font-bold text-white">{t('interview.digitalZoomLive')}</span>
                 </div>
-                <div className="px-4 py-2 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest text-white/50">
+                <div className="rounded-full bg-white/10 px-3.5 py-1.5 text-[11px] font-bold text-white/70 backdrop-blur">
                    {activeAgentLabel}
                 </div>
               </div>
 
               {/* AI Name & Visualizer */}
-              <div className="absolute bottom-10 left-10 flex flex-col gap-3 pointer-events-none z-20">
+              <div className="pointer-events-none absolute bottom-5 left-5 z-20 flex flex-col gap-2">
                 <div className="flex items-center gap-4">
-                  <h3 className="text-3xl font-black text-white uppercase tracking-tighter drop-shadow-2xl font-serif leading-none">{t('interview.digitalHuman')}</h3>
+                  <h3 className="font-brand text-[22px] font-semibold leading-none tracking-tight text-white">{t('interview.digitalHuman')}</h3>
                   {tts.speaking && (
-                    <div className="flex items-end gap-1.5 h-6 bg-primary-600/20 px-3 py-1 rounded-full backdrop-blur-md border border-primary-500/30">
+                    <div className="flex h-6 items-end gap-1.5 rounded-full bg-white/10 px-3 py-1 backdrop-blur">
                       {[4, 7, 5, 9, 6].map((h, i) => (
-                        <div key={i} className="w-1 rounded-full bg-primary-400 animate-dh-wave" style={{ height: `${h * 2}px`, animationDelay: `${i * 100}ms` }} />
+                        <div key={i} className="w-1 rounded-full bg-brand-violet animate-dh-wave" style={{ height: `${h * 2}px`, animationDelay: `${i * 100}ms` }} />
                       ))}
                     </div>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                   <div className="w-1.5 h-1.5 rounded-full bg-primary-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-                   <span className="text-[10px] font-black uppercase tracking-widest text-primary-400 drop-shadow-md">{digitalStateLabel}</span>
+                   <div className="h-1.5 w-1.5 rounded-full bg-brand-violet" />
+                   <span className="text-[11px] font-bold text-white/75">{digitalStateLabel}</span>
                 </div>
               </div>
             </main>
 
             {/* Stage 2: Candidate (User) (40% Width) */}
-            <div className="relative lg:flex-[4] flex-shrink-0 flex flex-col items-center justify-center bg-slate-900 overflow-hidden m-4 rounded-[2.5rem] border border-white/5 shadow-2xl group transition-all duration-500">
+            <div className="group relative m-3 h-[22vh] shrink-0 overflow-hidden rounded-[20px] bg-brand-ink lg:m-4 lg:h-auto lg:flex-[4]">
                {userCameraStream?.getVideoTracks?.()?.length ? (
                   <video
                     ref={userPipVideoRef}
@@ -1492,68 +1494,66 @@ const ChatInterface = forwardRef(function ChatInterface({
                     autoPlay
                   />
                 ) : (
-                  <div className="flex h-full flex-col items-center justify-center gap-4 bg-slate-900 p-12 text-center">
-                    <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center border border-white/10 shadow-inner">
-                       <VideoOff className="w-8 h-8 text-white/20" />
+                  <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
+                    <div className="grid h-14 w-14 place-items-center rounded-full bg-white/10">
+                       <VideoOff className="h-6 w-6 text-white/40" />
                     </div>
-                    <span className="text-xs font-black text-white/40 uppercase tracking-widest leading-relaxed">Camera Off</span>
+                    <span className="text-[12px] text-white/45">{t('interview.cameraOff')}</span>
                   </div>
                 )}
                 
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
 
                 {/* Candidate Label */}
-                <div className="absolute top-8 left-8 flex items-center gap-3 pointer-events-none z-20">
-                  <div className="px-4 py-2 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/10 flex items-center gap-3">
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white">{t('interview.candidateLabel', { defaultValue: 'Candidate' })}</span>
+                <div className="pointer-events-none absolute left-5 top-5 z-20 flex items-center gap-2">
+                  <div className="flex items-center gap-2.5 rounded-full bg-black/55 px-3.5 py-1.5 backdrop-blur">
+                    <div className="h-2 w-2 rounded-full bg-brand-violet" />
+                    <span className="text-[11px] font-bold text-white">{t('interview.candidateLabel', { defaultValue: 'Candidate' })}</span>
                   </div>
                 </div>
 
-                <div className="absolute bottom-10 left-10 flex flex-col gap-2 pointer-events-none z-20">
-                   <h3 className="text-3xl font-black text-white uppercase tracking-tighter drop-shadow-2xl font-serif leading-none">{t('chat.you')}</h3>
+                <div className="pointer-events-none absolute bottom-5 left-5 z-20 flex flex-col gap-2">
+                   <h3 className="font-brand text-[22px] font-semibold leading-none tracking-tight text-white">{t('chat.you')}</h3>
                    <div className="flex items-center gap-2">
-                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                     <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 drop-shadow-md">On-Screen</span>
+                     <div className="h-1.5 w-1.5 rounded-full bg-brand-violet" />
+                     <span className="text-[11px] font-bold text-white/75">{t('interview.onScreen')}</span>
                    </div>
                 </div>
             </div>
 
             {/* Chat Sidebar: Meeting Transcript (20% Width) */}
-            <aside className={`w-full ${isPractice ? 'lg:flex-[3]' : 'lg:flex-[2]'} flex flex-col bg-transparent lg:my-4 lg:mr-4 rounded-[2.5rem] border border-slate-200/50 dark:border-white/5 overflow-hidden transition-all duration-300 relative`}>
-              {/* Glass background for sidebar */}
-              <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/40 backdrop-blur-3xl -z-10" />
+            <aside className={`brand-float relative m-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] lg:m-0 lg:my-4 lg:mr-4 ${isPractice ? 'lg:flex-[3]' : 'lg:flex-[2]'}`}>
               
-              <div className="flex-shrink-0 px-6 py-5 border-b border-slate-200/50 dark:border-white/10 flex flex-col gap-4 relative z-20">
+              <div className="relative z-20 flex flex-shrink-0 flex-col gap-4 border-b border-brand-line px-5 py-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Transcript</h3>
+                  <h3 className="text-[12.5px] font-bold text-brand-ink">{t('interview.transcriptTitle')}</h3>
                   {/* Timer: Compact style */}
-                  <div className="flex items-center gap-2 px-3 py-1 bg-white/50 dark:bg-black/40 rounded-xl border border-slate-200/50 dark:border-white/10 shadow-sm transition-all animate-in slide-in-from-top duration-500">
-                    <Clock className={`w-3.5 h-3.5 ${timerStatus === 'critical' ? 'text-red-500 animate-pulse' : timerStatus === 'warning' ? 'text-amber-500' : 'text-primary-500'}`} />
-                    <span className={`text-sm font-mono font-bold tabular-nums tracking-tight ${timerStatus === 'critical' ? 'text-red-600 dark:text-red-400' : timerStatus === 'warning' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}`}>
+                  <div className="flex items-center gap-2 rounded-lg border border-brand-line bg-brand-inset px-2.5 py-1">
+                    <Clock className={`h-3.5 w-3.5 ${timerStatus === 'critical' ? 'animate-pulse text-brand-danger' : 'text-brand-muted'}`} />
+                    <span className={`text-[13px] font-bold tabular-nums ${timerStatus === 'critical' ? 'text-brand-danger' : 'text-brand-ink'}`}>
                       {timerDisplay}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 scroll-smooth scrollbar-hide">
+              <div className="custom-scrollbar flex-1 space-y-5 overflow-y-auto scroll-smooth px-5 py-5">
                 {messageItems}
               </div>
 
               {isPractice && (
-                <div className="relative z-20 max-h-[58%] space-y-3 overflow-y-auto border-t border-slate-200/60 bg-white/75 p-4 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/70">
+                <div className="custom-scrollbar relative z-20 max-h-[58%] space-y-3 overflow-y-auto border-t border-brand-line bg-brand-inset p-4">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600">{t('interview.practice.title')}</span>
+                    <span className="text-[12.5px] font-semibold text-brand-ink">{t('interview.practice.title')}</span>
                     <button type="button" disabled={practiceController.busy} onClick={() => {
                       if (!practiceController.paused) live.stopMic()
                       void practiceController.togglePause()
-                    }} className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-[10px] font-bold dark:border-slate-700">
+                    }} className="rounded-lg border border-brand-line bg-brand-card px-2.5 py-1.5 text-[11.5px] font-bold text-brand-ink transition-colors hover:border-brand-ink">
                       {practiceController.paused ? t('interview.practice.resume') : t('interview.practice.pause')}
                     </button>
                   </div>
 
-                  <div className="text-[10px] font-bold text-slate-500">
+                  <div className="text-[11.5px] text-brand-muted">
                     {t('interview.practice.progress', {
                       current: practiceController.workspace.interview.question_index || 0,
                       total: practiceController.workspace.practiceLimits?.questionLimit || '–',
@@ -1562,9 +1562,9 @@ const ChatInterface = forwardRef(function ChatInterface({
                     })}
                   </div>
 
-                  {practiceController.error && <div className="rounded-xl bg-red-50 p-2.5 text-xs text-red-700 dark:bg-red-950/30 dark:text-red-200">{practiceController.error}</div>}
+                  {practiceController.error && <div className="rounded-xl border border-brand-danger/30 bg-brand-danger/[0.07] p-2.5 text-[12px] text-brand-ink">{practiceController.error}</div>}
                   {practiceController.paused ? (
-                    <div className="rounded-xl bg-amber-50 p-3 text-xs font-medium text-amber-900 dark:bg-amber-950/30 dark:text-amber-100">{t('interview.practice.pausedMessage')}</div>
+                    <div className="rounded-xl border border-brand-line bg-brand-card p-3 text-[12px] text-brand-ink">{t('interview.practice.pausedMessage')}</div>
                   ) : (
                     <>
                       <textarea
@@ -1573,26 +1573,26 @@ const ChatInterface = forwardRef(function ChatInterface({
                         rows={4}
                         disabled={practiceController.busy || !practiceController.canDraftAnswer}
                         placeholder={practiceController.attempts.length ? t('interview.practice.refinePlaceholder') : t('interview.practice.answerPlaceholder')}
-                        className="w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-xs leading-relaxed text-slate-900 outline-none focus:border-slate-500 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:disabled:bg-slate-950"
+                        className="w-full resize-none rounded-xl border border-brand-line bg-brand-card p-3 text-[12.5px] leading-relaxed text-brand-ink outline-none focus:border-brand-ink disabled:opacity-60"
                       />
                       <div className="grid grid-cols-2 gap-2">
-                        <button type="button" disabled={practiceController.busy || !practiceController.answer.trim() || !practiceController.canDraftAnswer} onClick={() => void practiceController.submitAnswer()} className="rounded-xl bg-slate-900 px-3 py-2.5 text-[10px] font-black text-white disabled:opacity-40 dark:bg-white dark:text-slate-900">
+                        <button type="button" disabled={practiceController.busy || !practiceController.answer.trim() || !practiceController.canDraftAnswer} onClick={() => void practiceController.submitAnswer()} className="rounded-xl bg-brand-ink px-3 py-2.5 text-[11.5px] font-semibold text-brand-on-ink disabled:opacity-40">
                           {practiceController.attempts.length ? t('interview.practice.submitRetry') : t('interview.practice.submit')}
                         </button>
-                        <button type="button" disabled={practiceController.busy || practiceController.hintsExhausted} onClick={() => void practiceController.nextHint()} className="rounded-xl border border-violet-300 px-3 py-2.5 text-[10px] font-black text-violet-700 disabled:opacity-40 dark:text-violet-300">
+                        <button type="button" disabled={practiceController.busy || practiceController.hintsExhausted} onClick={() => void practiceController.nextHint()} className="rounded-xl border border-brand-violet/50 px-3 py-2.5 text-[11.5px] font-semibold text-brand-violet disabled:opacity-40">
                           {practiceController.hintsExhausted ? t('interview.practice.hintsExhausted') : t('interview.practice.nextHint')}
                         </button>
-                        {practiceController.attempts.length > 0 && !practiceController.retrying && <button type="button" disabled={practiceController.busy} onClick={() => void practiceController.beginRetry()} className="rounded-xl border px-3 py-2.5 text-[10px] font-black">{t('interview.practice.retry')}</button>}
-                        <button type="button" disabled={practiceController.busy || practiceController.attempts.length === 0} onClick={() => void practiceController.masterNext()} className="rounded-xl border border-emerald-300 px-3 py-2.5 text-[10px] font-black text-emerald-700 disabled:opacity-40">{t('interview.practice.masterNext')}</button>
-                        <button type="button" disabled={practiceController.busy} onClick={() => void practiceController.skipNext()} className="rounded-xl border border-amber-300 px-3 py-2.5 text-[10px] font-black text-amber-700">{t('interview.practice.skipNext')}</button>
+                        {practiceController.attempts.length > 0 && !practiceController.retrying && <button type="button" disabled={practiceController.busy} onClick={() => void practiceController.beginRetry()} className="rounded-xl border border-brand-line px-3 py-2.5 text-[11.5px] font-semibold text-brand-ink">{t('interview.practice.retry')}</button>}
+                        <button type="button" disabled={practiceController.busy || practiceController.attempts.length === 0} onClick={() => void practiceController.masterNext()} className="rounded-xl border border-brand-line px-3 py-2.5 text-[11.5px] font-semibold text-brand-ink disabled:opacity-40">{t('interview.practice.masterNext')}</button>
+                        <button type="button" disabled={practiceController.busy} onClick={() => void practiceController.skipNext()} className="rounded-xl border border-brand-line px-3 py-2.5 text-[11.5px] font-semibold text-brand-muted">{t('interview.practice.skipNext')}</button>
                       </div>
 
-                      {practiceController.hints.map(hint => <div key={hint.id} className="rounded-xl border border-violet-200 bg-violet-50 p-3 text-xs text-violet-950 dark:bg-violet-950/30 dark:text-violet-100"><div className="mb-1 text-[9px] font-black uppercase">{t(`interview.practice.hintLevels.${hint.level}`)}</div>{hint.content}</div>)}
-                      {practiceController.latestFeedback && <div className="rounded-xl bg-emerald-50 p-3 text-xs text-emerald-950 dark:bg-emerald-950/30 dark:text-emerald-100"><div className="font-black">{t('interview.practice.score', { score: practiceController.latestFeedback.score })}</div>{(practiceController.latestFeedback.strengths || []).slice(0, 2).map(item => <p key={item} className="mt-1">✓ {item}</p>)}{(practiceController.latestFeedback.gaps || []).slice(0, 2).map(item => <p key={item} className="mt-1">→ {item}</p>)}</div>}
-                      <details className="rounded-xl border border-slate-200 p-3 text-xs dark:border-slate-700">
-                        <summary className="cursor-pointer font-black text-slate-500">{t('interview.practice.privateNotes')}</summary>
-                        <textarea value={practiceController.note} onChange={event => practiceController.setNote(event.target.value)} rows={2} className="mt-3 w-full resize-none rounded-lg border border-slate-200 bg-white p-2 outline-none dark:border-slate-700 dark:bg-slate-900" />
-                        <button type="button" disabled={practiceController.busy} onClick={() => void practiceController.saveNote()} className="mt-2 rounded-lg border px-3 py-1.5 text-[10px] font-bold">{t('interview.practice.saveNote')}</button>
+                      {practiceController.hints.map(hint => <div key={hint.id} className="rounded-xl border border-brand-violet/30 bg-brand-violet/[0.06] p-3 text-[12px] text-brand-ink"><div className="mb-1 text-[11px] font-semibold text-brand-violet">{t(`interview.practice.hintLevels.${hint.level}`)}</div>{hint.content}</div>)}
+                      {practiceController.latestFeedback && <div className="rounded-xl border border-brand-line bg-brand-card p-3 text-[12px] text-brand-ink"><div className="font-semibold">{t('interview.practice.score', { score: practiceController.latestFeedback.score })}</div>{(practiceController.latestFeedback.strengths || []).slice(0, 2).map(item => <p key={item} className="mt-1">✓ {item}</p>)}{(practiceController.latestFeedback.gaps || []).slice(0, 2).map(item => <p key={item} className="mt-1">→ {item}</p>)}</div>}
+                      <details className="rounded-xl border border-brand-line bg-brand-card p-3 text-[12px]">
+                        <summary className="cursor-pointer font-semibold text-brand-muted">{t('interview.practice.privateNotes')}</summary>
+                        <textarea value={practiceController.note} onChange={event => practiceController.setNote(event.target.value)} rows={2} className="mt-3 w-full resize-none rounded-lg border border-brand-line bg-brand-inset p-2 text-brand-ink outline-none focus:border-brand-ink" />
+                        <button type="button" disabled={practiceController.busy} onClick={() => void practiceController.saveNote()} className="mt-2 rounded-lg border border-brand-line px-3 py-1.5 text-[11.5px] font-bold text-brand-ink">{t('interview.practice.saveNote')}</button>
                       </details>
                     </>
                   )}
@@ -1602,12 +1602,15 @@ const ChatInterface = forwardRef(function ChatInterface({
             </aside>
           </div>
 
-          <div className="h-24 px-10 flex-shrink-0 relative z-50 mt-auto">
-            <div className="h-full flex items-center justify-between px-10 bg-white/80 dark:bg-slate-900/40 backdrop-blur-3xl rounded-t-[3.5rem] border-t border-x border-slate-200/50 dark:border-white/10 shadow-[0_-15px_60px_rgba(0,0,0,0.15)] dark:shadow-[0_-20px_50px_rgba(0,0,0,0.4)]">
-              <div className="flex items-center gap-12">
-                <div className="flex flex-col gap-2">
-                  <span className="text-[10px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest leading-none">Audio Controls</span>
-                  <div className="flex items-center gap-4">
+          {/* 控制条：原来外层 px-10 套内层 px-10 再加 gap-12，最少需要约 830px 才排得下，
+              且没有任何断点。改成自适应换行 + 紧凑间距。 */}
+          <div className="relative z-50 mt-auto flex-shrink-0 px-3 pb-3 lg:px-4 lg:pb-4">
+            <div className="brand-float flex flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-[18px] px-4 py-3 lg:px-6">
+
+              <div className="flex items-center gap-5">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[11px] leading-none text-brand-muted">{t('interview.audioControls')}</span>
+                  <div className="flex items-center gap-2.5">
                     <button
                       onClick={() => {
                         if (stt.active) stt.stop()
@@ -1618,11 +1621,11 @@ const ChatInterface = forwardRef(function ChatInterface({
                       }}
                       disabled={interactionBusy || Boolean(practiceController?.paused) || Boolean(practiceController && !practiceController.canDraftAnswer)}
                       aria-pressed={stt.active}
-                      aria-label={stt.active ? 'Microphone on — click to mute' : 'Microphone off — click to unmute'}
-                      title={stt.active ? 'Microphone on — click to mute' : 'Microphone off — click to unmute'}
-                      className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center transition-all ${stt.active ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.5)] scale-110' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/60 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10 hover:border-slate-300 dark:hover:border-white/10 border border-transparent'}`}
+                      aria-label={stt.active ? t('chat.micStop') : t('chat.micTitleNo')}
+                      title={stt.active ? t('chat.micStop') : t('chat.micTitleNo')}
+                      className={`grid h-11 w-11 place-items-center rounded-xl transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${stt.active ? 'bg-brand-danger text-white' : 'border border-brand-line bg-brand-card text-brand-ink hover:border-brand-ink'}`}
                     >
-                      {stt.active ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
+                      {stt.active ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
                     </button>
                     <button
                       onClick={() => {
@@ -1632,54 +1635,55 @@ const ChatInterface = forwardRef(function ChatInterface({
                         else window.speechSynthesis?.resume()
                       }}
                       aria-pressed={ttsEnabled}
-                      aria-label={ttsEnabled ? 'Speaker on — click to mute' : 'Speaker off — click to unmute'}
-                      title={ttsEnabled ? 'Speaker on — click to mute' : 'Speaker off — click to unmute'}
-                      className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center transition-all ${ttsEnabled ? 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/80' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}
+                      aria-label={ttsEnabled ? t('chat.voiceOn') : t('chat.voiceOff')}
+                      title={ttsEnabled ? t('chat.voiceOn') : t('chat.voiceOff')}
+                      className={`grid h-11 w-11 place-items-center rounded-xl transition-colors ${ttsEnabled ? 'border border-brand-line bg-brand-card text-brand-ink hover:border-brand-ink' : 'border border-brand-danger/30 bg-brand-danger/[0.08] text-brand-danger'}`}
                     >
-                      {ttsEnabled ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
+                      {ttsEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
                     </button>
                   </div>
                 </div>
 
-                <div className="w-px h-10 bg-slate-200 dark:bg-white/10" />
+                <div className="hidden h-10 w-px bg-brand-line sm:block" />
 
-                <div className="flex flex-col gap-2">
-                  <span className="text-[10px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest leading-none">Video Camera</span>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[11px] leading-none text-brand-muted">{t('interview.videoCamera')}</span>
                   <button
                     onClick={() => onToggleCamera?.()}
                     aria-pressed={isCameraOn}
-                    aria-label={isCameraOn ? 'Camera on — click to turn off' : 'Camera off — click to turn on'}
-                    title={isCameraOn ? 'Camera on — click to turn off' : 'Camera off — click to turn on'}
-                    className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center transition-all ${isCameraOn ? 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-white/80' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}
+                    aria-label={isCameraOn ? t('interview.videoCamera') : t('interview.cameraOff')}
+                    title={isCameraOn ? t('interview.videoCamera') : t('interview.cameraOff')}
+                    className={`grid h-11 w-11 place-items-center rounded-xl transition-colors ${isCameraOn ? 'border border-brand-line bg-brand-card text-brand-ink hover:border-brand-ink' : 'border border-brand-danger/30 bg-brand-danger/[0.08] text-brand-danger'}`}
                   >
-                    {isCameraOn ? <Video className="w-6 h-6" /> : <VideoOff className="w-6 h-6" />}
+                    {isCameraOn ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
                   </button>
                 </div>
               </div>
 
-              <div className="hidden xl:flex items-center gap-10">
-                <div className="flex flex-col items-center gap-2">
-                   <span className="text-[10px] font-black text-slate-400 dark:text-white/30 uppercase tracking-widest leading-none">Interview Status</span>
-                   <div className="px-5 py-2 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full border border-emerald-500/10 flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Connection: Stable</span>
-                   </div>
+              {/* 连接状态读真实的 live.connected；原来是写死的绿点，断线了也显示"稳定" */}
+              <div className="hidden flex-col items-center gap-1.5 xl:flex">
+                <span className="text-[11px] leading-none text-brand-muted">{t('interview.connectionLabel')}</span>
+                <div className="flex items-center gap-2 rounded-full border border-brand-line bg-brand-inset px-3.5 py-1.5">
+                  <span className={`h-2 w-2 rounded-full ${liveConnectionOk ? 'bg-brand-success' : 'animate-pulse bg-brand-muted'}`} />
+                  <span className="text-[11.5px] font-bold text-brand-ink">
+                    {liveConnectionOk ? t('interview.connectionOk') : t('interview.connectionWait')}
+                  </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2.5">
                 <button
                   onClick={() => {
                     stopInterviewRef.current()
                     window.location.href = '/setup'
                   }}
-                  className="px-8 py-3.5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-white/40 hover:text-slate-900 dark:hover:text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-slate-200 dark:border-white/10"
+                  className="rounded-xl border border-brand-line bg-brand-card px-5 py-2.5 text-[12.5px] font-bold text-brand-muted transition-colors hover:border-brand-ink hover:text-brand-ink"
                 >
                   {t('interview.exitDirectly', { defaultValue: 'Exit Without Saving' })}
                 </button>
                 <button
                   onClick={() => window.dispatchEvent(new CustomEvent('interview-end-request'))}
-                  className="px-10 py-3.5 bg-red-600 hover:bg-red-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all shadow-2xl shadow-red-600/30 font-bold"
+                  className="rounded-xl bg-brand-danger px-6 py-2.5 text-[12.5px] font-semibold text-white transition-opacity hover:opacity-90"
                 >
                   {t('interview.leaveRoom', { defaultValue: 'End Session' })}
                 </button>

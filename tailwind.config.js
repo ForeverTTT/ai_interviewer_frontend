@@ -9,6 +9,28 @@ export default {
   theme: {
     extend: {
       colors: {
+        /**
+         * 主题感知色板。取值来自 index.css 的 CSS 变量，light/dark 各定义一次，
+         * 因此使用这些颜色的组件不需要写任何 `dark:` 变体。
+         */
+        /** 品牌视觉色板（首页在用），取值见 index.css 的 --brand-* */
+        brand: {
+          paper: 'rgb(var(--brand-paper) / <alpha-value>)',
+          card: 'rgb(var(--brand-card) / <alpha-value>)',
+          inset: 'rgb(var(--brand-inset) / <alpha-value>)',
+          deep: 'rgb(var(--brand-deep) / <alpha-value>)',
+          ink: 'rgb(var(--brand-ink) / <alpha-value>)',
+          'on-ink': 'rgb(var(--brand-on-ink) / <alpha-value>)',
+          muted: 'rgb(var(--brand-muted) / <alpha-value>)',
+          line: 'rgb(var(--brand-line) / <alpha-value>)',
+          violet: 'rgb(var(--brand-violet) / <alpha-value>)',
+          glow: 'rgb(var(--brand-glow) / <alpha-value>)',
+          lime: 'rgb(var(--brand-lime) / <alpha-value>)',
+          sky: 'rgb(var(--brand-sky) / <alpha-value>)',
+          coral: 'rgb(var(--brand-coral) / <alpha-value>)',
+          success: 'rgb(var(--brand-success) / <alpha-value>)',
+          danger: 'rgb(var(--brand-danger) / <alpha-value>)',
+        },
         primary: {
           50: '#fff7ed',
           100: '#ffedd5',
@@ -27,6 +49,8 @@ export default {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         serif: ['"Source Serif 4"', 'Georgia', 'serif'],
         display: ['"Outfit"', 'Inter', 'sans-serif'],
+        /* 品牌标题：拉丁走 Outfit，中文回退到 Noto Sans SC 的 900 字重 */
+        brand: ['"Outfit"', '"Noto Sans SC"', 'Inter', 'system-ui', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.8s ease-out forwards',
