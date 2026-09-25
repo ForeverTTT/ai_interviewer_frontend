@@ -130,7 +130,7 @@ export default function GallupTestPage() {
           } else if (data.status === 'in_progress') {
             setAnswers(data.answers || {})
             const qList = Array.isArray(questions) ? questions : []
-            const firstUnanswered = qList.findIndex(q => !data.answers[q.id])
+            const firstUnanswered = qList.findIndex(q => data.answers?.[q.id] == null)
             setCurrentIndex(firstUnanswered !== -1 ? firstUnanswered : 0)
           }
         }
@@ -172,14 +172,19 @@ export default function GallupTestPage() {
   }
 
   const handleAnswer = (questionId, score) => {
-    // Guard: avoid double-click advancing / auto state thrash.
     const existing = answers[questionId]
     const existingNum = typeof existing === 'string' ? Number(existing) : existing
-    if (typeof existingNum === 'number' && !Number.isNaN(existingNum)) return
+    const wasAnswered = typeof existingNum === 'number' && !Number.isNaN(existingNum)
+
+    // Returning to a previous question must allow changing its saved answer.
+    // Re-clicking the already-selected option is a no-op, while a changed
+    // answer stays on the current question so the user can verify it.
+    if (wasAnswered && existingNum === score) return
+
     const newAnswers = { ...answers, [questionId]: score }
     setAnswers(newAnswers)
-    saveToBackend(newAnswers)
-    if (currentIndex < questions.length - 1) {
+    void saveToBackend(newAnswers)
+    if (!wasAnswered && currentIndex < questions.length - 1) {
       setTimeout(() => setCurrentIndex(currentIndex + 1), 250)
     }
   }
@@ -409,7 +414,7 @@ export default function GallupTestPage() {
                         key={opt.score}
                         onClick={() => handleAnswer(questions[currentIndex].id, opt.score)}
                         /* 选中态：黑框 + 黑底白字；ring 而不是加粗 border，切换时零布局位移 */
-                        className={`flex-1 flex flex-col items-center justify-center gap-2.5 py-5 px-3 rounded-2xl border transition-colors duration-200 relative group overflow-hidden ${answers[questions[currentIndex]?.id] === opt.score ? 'border-brand-ink bg-brand-ink text-brand-on-ink ring-1 ring-brand-ink' : 'border-brand-line bg-brand-card text-brand-muted hover:border-brand-ink hover:text-brand-ink'}`}
+                        className={`flex-1 flex flex-col items-center justify-center gap-2.5 py-5 px-3 rounded-2xl border transition-colors duration-200 relative group overflow-hidden ${Number(answers[questions[currentIndex]?.id]) === opt.score ? 'border-brand-ink bg-brand-ink text-brand-on-ink ring-1 ring-brand-ink' : 'border-brand-line bg-brand-card text-brand-muted hover:border-brand-ink hover:text-brand-ink'}`}
                       >
                         <opt.icon className="w-8 h-8 transition-transform group-hover:scale-110" />
                         <span className="text-[11px] font-bold leading-none">{t(opt.label)}</span>
