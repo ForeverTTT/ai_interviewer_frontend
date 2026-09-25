@@ -508,16 +508,16 @@ function profileHasVisibleData(cvProfile, resumeText, resumeNotes) {
 }
 
 const displayCellClass =
-  'rounded-[18px] border border-brand-line bg-brand-card p-4 transition-colors hover:border-brand-ink'
+  'min-h-[78px] bg-brand-card p-4 transition-colors hover:bg-brand-inset/45 sm:p-5'
 const displayLabelClass = 'mb-1 text-[11px] text-brand-muted'
 const displayValueClass = 'break-words text-[13.5px] font-bold text-brand-ink'
 
-function DisplayCell({ label, value, t, asLink, mailto }) {
+function DisplayCell({ label, value, t, asLink, mailto, className = '' }) {
   const v = String(value || '').trim()
   const empty = !v
   const webHref = !empty && asLink ? safeExternalHref(v) : null
   return (
-    <div className={displayCellClass}>
+    <div className={`${displayCellClass} ${className}`}>
       <div className={displayLabelClass}>{label}</div>
       <div className={displayValueClass}>
         {empty ? (
@@ -590,8 +590,33 @@ function SectionHeader({ icon: Icon, title, t }) {
 }
 
 function ProfileSectionsView({ cvProfile, t }) {
+  const hasStructuredDetails = Boolean(
+    cvProfile.education.length
+    || cvProfile.workExperience.length
+    || cvProfile.projects.length
+    || cvProfile.publications.length
+    || cvProfile.skills.length
+    || cvProfile.languages.length
+    || cvProfile.awards.length,
+  )
+
+  if (!hasStructuredDetails) {
+    return (
+      <div className="flex flex-col gap-5 rounded-[22px] border border-dashed border-brand-line bg-brand-card/45 px-6 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+        <div className="min-w-0">
+          <p className="font-brand text-[17px] font-semibold text-brand-ink">{t('profile.viewEmptyTitle')}</p>
+          <p className="mt-1.5 max-w-2xl text-[13px] leading-relaxed text-brand-muted">{t('profile.cv.emptySection')}</p>
+        </div>
+        <Link to="/profile/edit" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-brand-line bg-brand-card px-4 py-2.5 text-[12.5px] font-semibold text-brand-ink transition-colors hover:border-brand-ink">
+          <Pencil className="h-3.5 w-3.5" />
+          {t('profile.editProfile')}
+        </Link>
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 sm:space-y-10">
       {/* Education */}
       <section>
         <SectionHeader icon={GraduationCap} title={t('profile.cv.education')} t={t} />
@@ -792,7 +817,7 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
   const scrollToCoach = () => coachRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   return (
-    <div className="space-y-10">
+    <div className="mx-auto max-w-[1120px] space-y-8 sm:space-y-10">
       {/* 悬浮快捷入口：小屏隐藏（头部已有同样的两个入口，且会遮住正文），
           大屏时底部留出安全区，避免压在 iOS 手势条上 */}
       {showFloatingEditButton ? (
@@ -872,8 +897,8 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
         </div>
       </motion.div>
 
-      <header>
-        <div className="flex flex-col justify-between gap-7 border-b border-brand-line pb-8 md:flex-row md:items-end">
+      <header className="rounded-[24px] border border-brand-line bg-brand-card px-5 py-6 sm:px-7 sm:py-7">
+        <div className="flex flex-col justify-between gap-7 md:flex-row md:items-end">
           <div className="min-w-0 max-w-2xl space-y-5">
             <div className="flex items-center gap-4">
               <div className="h-[72px] w-[72px] shrink-0 overflow-hidden rounded-2xl border border-brand-line bg-brand-inset">
@@ -940,7 +965,7 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
           <div className="space-y-12">
             <section>
               <SectionHeader icon={User} title={t('profile.cv.basic')} t={t} />
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-px overflow-hidden rounded-[20px] border border-brand-line bg-brand-line md:grid-cols-2">
                 <DisplayCell label={t('profile.cv.fullName')} value={cvProfile.fullName} t={t} />
                 <div className={displayCellClass}>
                   <div className={displayLabelClass}>{t('profile.cv.gender')}</div>
@@ -950,7 +975,7 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
                 <DisplayCell label={t('profile.cv.phone')} value={cvProfile.phone} t={t} />
                 <DisplayCell label={t('profile.cv.location')} value={cvProfile.location} t={t} />
                 <DisplayCell label={t('profile.cv.linkedIn')} value={cvProfile.linkedIn} t={t} asLink />
-                <DisplayCell label={t('profile.cv.website')} value={cvProfile.website} t={t} asLink />
+                <DisplayCell label={t('profile.cv.website')} value={cvProfile.website} t={t} asLink className="md:col-span-2" />
               </div>
             </section>
 

@@ -26,6 +26,16 @@ function parseReport(raw) {
   try { return JSON.parse(raw) } catch { return null }
 }
 
+function InlineRichText({ text }) {
+  const parts = String(text || '').split(/(\*\*[^*\n]+\*\*)/g)
+  return parts.map((part, index) => {
+    const match = part.match(/^\*\*([^*\n]+)\*\*$/)
+    return match
+      ? <strong key={index} className="rounded-[3px] bg-brand-glow/25 px-0.5 font-semibold text-brand-ink">{match[1]}</strong>
+      : part || null
+  })
+}
+
 function hasReport(interview) {
   const report = parseReport(interview?.report_json)
   const hasStructuredContent = Boolean(
@@ -340,139 +350,119 @@ export default function DashboardPage() {
           </Link>
         </header>
 
-        {/* ───────── 概览：职场胜算 + 两项节奏指标 ───────── */}
-        <section aria-label={t('dashboard.growth.overview')} className="grid gap-5 lg:grid-cols-12">
-
-          <motion.article
-            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-            className={`${CARD} px-6 py-6 lg:col-span-7`}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <p className={`flex items-center gap-2 ${EYEBROW}`}>
-                  <Target className="h-3.5 w-3.5" />{t('dashboard.growth.readiness.title')}
-                </p>
-                <p className="mt-2 max-w-md text-[12.5px] leading-relaxed text-brand-muted">
-                  {t('dashboard.growth.readiness.description')}
-                </p>
-              </div>
-              <BriefcaseBusiness className="h-5 w-5 shrink-0 text-brand-muted" />
-            </div>
-
-            {readinessScore !== null ? (
-              <>
-                {/* 分数用环形，与报告页的准备度环保持同一种表达 */}
-                <div className="mt-5 flex flex-wrap items-center gap-5">
-                  <div className="relative grid h-[108px] w-[108px] shrink-0 place-items-center">
-                    <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
-                      <circle cx="60" cy="60" r="50" fill="none" stroke="rgb(var(--brand-line))" strokeWidth="9" />
-                      <circle
-                        cx="60" cy="60" r="50" fill="none" stroke="rgb(var(--brand-violet))"
-                        strokeWidth="9" strokeLinecap="round"
-                        strokeDasharray={`${(2 * Math.PI * 50 * readinessScore) / 100} ${2 * Math.PI * 50}`}
-                      />
-                    </svg>
-                    <div className="absolute flex items-baseline gap-0.5">
-                      <span className="text-[30px] font-semibold leading-none tracking-tight tabular-nums text-brand-ink">{readinessScore}</span>
-                      <span className="text-[11px] font-medium text-brand-muted">/100</span>
-                    </div>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[12.5px] text-brand-muted">
-                      {t(`dashboard.growth.readiness.${readiness?.assessment || 'initial'}`)}
-                    </p>
-                    <Link
-                      to={`/interview/${readiness?.latestInterviewId || latestReport.id}/report`}
-                      className="mt-2.5 inline-flex items-center gap-1.5 rounded-xl border border-brand-line bg-brand-card px-3.5 py-2 text-[12.5px] font-semibold text-brand-ink transition-colors hover:border-brand-ink"
-                    >
-                      {t('dashboard.growth.viewEvidence')} <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-                </div>
-
-                {/* 五个维度：一行一条，点开看证据摘录。横排比原来的 5 列窄格好读得多 */}
-                {readiness?.dimensions?.length > 0 && (
-                  <div className="mt-5 divide-y divide-brand-line border-t border-brand-line">
-                    {readiness.dimensions.map(dimension => (
-                      <details key={dimension.key} className="group py-2.5">
-                        <summary className="flex cursor-pointer list-none items-center gap-3">
-                          <span className="w-[76px] shrink-0 text-[12.5px] text-brand-ink">
-                            {t(`dashboard.growth.readiness.dimensions.${dimension.key}`)}
-                          </span>
-                          <span className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-brand-inset">
-                            <span className="block h-full rounded-full bg-brand-violet" style={{ width: `${dimension.score ?? 0}%` }} />
-                          </span>
-                          <span className="w-8 shrink-0 text-right text-[12.5px] font-semibold tabular-nums text-brand-ink">
-                            {dimension.score ?? '—'}
-                          </span>
-                          {dimension.trend !== null && dimension.trend !== undefined && (
-                            <span className={`w-8 shrink-0 text-right text-[11.5px] font-medium tabular-nums ${dimension.trend > 0 ? 'text-brand-success' : dimension.trend < 0 ? 'text-brand-danger' : 'text-brand-muted'}`}>
-                              {dimension.trend > 0 ? '+' : ''}{dimension.trend}
-                            </span>
-                          )}
-                        </summary>
-                        <p className="mt-2 pl-[88px] text-[12px] leading-relaxed text-brand-muted">
-                          {dimension.evidence?.excerpt || t('dashboard.growth.readiness.insufficient')}
-                        </p>
-                      </details>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="mt-5 flex flex-wrap items-end justify-between gap-4 border-t border-brand-line pt-5">
+        {/* ───────── 主概览：准备度、最近结果、训练节奏合成一个视觉主体 ───────── */}
+        <motion.section
+          initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+          aria-label={t('dashboard.growth.overview')}
+          className="overflow-hidden rounded-[26px] border border-brand-line bg-brand-card"
+        >
+          <div className="grid lg:grid-cols-12">
+            <article className="px-6 py-6 sm:px-8 sm:py-7 lg:col-span-7">
+              <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
+                  <p className={`flex items-center gap-2 ${EYEBROW}`}><Target className="h-3.5 w-3.5" />{t('dashboard.growth.readiness.title')}</p>
+                  <p className="mt-2 max-w-lg text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.readiness.description')}</p>
+                </div>
+                <BriefcaseBusiness className="h-5 w-5 shrink-0 text-brand-muted" />
+              </div>
+
+              {readinessScore !== null ? (
+                <div className="mt-6 grid gap-6 sm:grid-cols-[112px_minmax(0,1fr)] sm:items-start">
+                  <div>
+                    <div className="relative grid h-[104px] w-[104px] place-items-center">
+                      <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
+                        <circle cx="60" cy="60" r="50" fill="none" stroke="rgb(var(--brand-line))" strokeWidth="9" />
+                        <circle cx="60" cy="60" r="50" fill="none" stroke="rgb(var(--brand-violet))" strokeWidth="9" strokeLinecap="round" strokeDasharray={`${(2 * Math.PI * 50 * readinessScore) / 100} ${2 * Math.PI * 50}`} />
+                      </svg>
+                      <div className="absolute flex items-baseline gap-0.5">
+                        <span className="text-[29px] font-semibold leading-none tabular-nums text-brand-ink">{readinessScore}</span>
+                        <span className="text-[10px] text-brand-muted">/100</span>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-center text-[11.5px] text-brand-muted">{t(`dashboard.growth.readiness.${readiness?.assessment || 'initial'}`)}</p>
+                  </div>
+
+                  {readiness?.dimensions?.length > 0 && (
+                    <div className="space-y-3 pt-1">
+                      {readiness.dimensions.map(dimension => (
+                        <details key={dimension.key} className="group">
+                          <summary className="flex cursor-pointer list-none items-center gap-3">
+                            <span className="w-[76px] shrink-0 text-[12px] text-brand-ink">{t(`dashboard.growth.readiness.dimensions.${dimension.key}`)}</span>
+                            <span className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-brand-inset">
+                              <span className="block h-full rounded-full bg-brand-violet" style={{ width: `${dimension.score ?? 0}%` }} />
+                            </span>
+                            <span className="w-7 shrink-0 text-right text-[12px] font-semibold tabular-nums text-brand-ink">{dimension.score ?? '—'}</span>
+                            {dimension.trend !== null && dimension.trend !== undefined && (
+                              <span className={`w-7 shrink-0 text-right text-[11px] font-medium tabular-nums ${dimension.trend > 0 ? 'text-brand-success' : dimension.trend < 0 ? 'text-brand-danger' : 'text-brand-muted'}`}>{dimension.trend > 0 ? '+' : ''}{dimension.trend}</span>
+                            )}
+                          </summary>
+                          <p className="mt-2 pl-[88px] text-[11.5px] leading-relaxed text-brand-muted">{dimension.evidence?.excerpt || t('dashboard.growth.readiness.insufficient')}</p>
+                        </details>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="mt-6 border-t border-brand-line pt-5">
                   <p className="text-[15px] font-semibold text-brand-ink">{t('dashboard.growth.readiness.pendingTitle')}</p>
-                  <p className="mt-1.5 max-w-md text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.readiness.pendingBody')}</p>
+                  <p className="mt-1.5 max-w-lg text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.readiness.pendingBody')}</p>
                 </div>
-                <Link
-                  to={latestReport ? `/interview/${latestReport.id}/report` : '/setup'}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-brand-ink px-4 py-2.5 text-[12.5px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90"
-                >
-                  {latestReport ? t('dashboard.growth.viewLatestReport') : t('dashboard.growth.startBaseline')}
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            )}
-          </motion.article>
+              )}
+            </article>
 
-          {/* 两项节奏指标并排，高度跟左卡对齐 */}
-          <div className="grid gap-5 sm:grid-cols-2 lg:col-span-5">
-            <motion.article initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className={`${CARD} flex flex-col justify-between px-5 py-5`}>
-              <div className="flex items-center justify-between gap-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-brand-line bg-brand-inset text-brand-muted">
-                  <BarChart3 className="h-4 w-4" />
-                </span>
-                <span className={EYEBROW}>{t('dashboard.growth.practice.title')}</span>
-              </div>
-              <div className="mt-6">
-                <div className="text-[28px] font-semibold leading-none tracking-tight tabular-nums text-brand-ink">{metrics.effectiveCount}</div>
-                <div className="mt-1.5 text-[12.5px] text-brand-muted">{t('dashboard.growth.practice.count')}</div>
-              </div>
-              <div className="mt-4 flex items-center gap-2 border-t border-brand-line pt-3.5 text-[12.5px] text-brand-ink">
-                <Clock3 className="h-3.5 w-3.5 shrink-0 text-brand-muted" />{formatEffectiveDuration(metrics.totalSeconds, t)}
-              </div>
-            </motion.article>
-
-            <motion.article initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={`${CARD} flex flex-col justify-between px-5 py-5`}>
-              <div className="flex items-center justify-between gap-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-brand-line bg-brand-inset text-brand-muted">
-                  <CalendarDays className="h-4 w-4" />
-                </span>
-                <span className={EYEBROW}>{t('dashboard.growth.rhythm.title')}</span>
-              </div>
-              <div className="mt-6">
-                <div className="text-[28px] font-semibold leading-none tracking-tight tabular-nums text-brand-ink">
-                  {metrics.weeklyDays}<span className="ml-1 text-[16px] text-brand-muted">/ 5</span>
+            {/* 最近结果是全页唯一的顶部报告入口，避免与“查看报告依据”重复。 */}
+            <article className="border-t border-brand-line bg-brand-inset/55 px-6 py-6 sm:px-8 sm:py-7 lg:col-span-5 lg:border-l lg:border-t-0">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className={EYEBROW}>{t('dashboard.growth.latest.eyebrow')}</p>
+                  <h2 className="mt-2 font-brand text-[19px] font-semibold text-brand-ink">{t('dashboard.growth.latest.title')}</h2>
                 </div>
-                <div className="mt-1.5 text-[12.5px] text-brand-muted">{t('dashboard.growth.rhythm.weeklyDays')}</div>
+                {latestReviewCandidate && !isGenerating(latestReviewCandidate) && (
+                  <span className="text-[11px] tabular-nums text-brand-muted">{new Date(sessionDate(latestReviewCandidate)).toLocaleDateString(localeTag, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                )}
               </div>
-              <div className="mt-4 flex items-center gap-2 border-t border-brand-line pt-3.5 text-[12.5px] text-brand-ink">
-                <Flame className="h-3.5 w-3.5 shrink-0 text-brand-muted" />{t('dashboard.growth.rhythm.streak', { count: metrics.streak })}
-              </div>
-            </motion.article>
+
+              {loading ? (
+                <div className="flex min-h-52 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-brand-muted" /></div>
+              ) : loadError ? (
+                <p className="mt-6 text-[13px] font-medium text-brand-danger">{t('dashboard.growth.loadFailed')}</p>
+              ) : !latestReviewCandidate ? (
+                <div className="mt-6 flex min-h-44 flex-col justify-between gap-5">
+                  <div>
+                    <h3 className="text-[15px] font-semibold text-brand-ink">{t('dashboard.growth.latest.emptyTitle')}</h3>
+                    <p className="mt-2 text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.latest.emptyBody')}</p>
+                  </div>
+                  <Link to="/setup" className="inline-flex w-fit items-center gap-2 rounded-xl bg-brand-ink px-5 py-2.5 text-[12.5px] font-semibold text-brand-on-ink hover:opacity-90">{t('dashboard.growth.startBaseline')}<ArrowRight className="h-3.5 w-3.5" /></Link>
+                </div>
+              ) : isGenerating(latestReviewCandidate) ? (
+                <div className="mt-6 flex gap-3" role="status">
+                  <Loader2 className="mt-0.5 h-5 w-5 shrink-0 animate-spin text-brand-violet" />
+                  <div><h3 className="text-[14px] font-semibold text-brand-ink">{t('dashboard.growth.latest.generatingTitle')}</h3><p className="mt-1 text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.latest.generatingBody')}</p></div>
+                </div>
+              ) : hasReport(latestReviewCandidate) ? (
+                <div className="mt-6 flex min-h-44 flex-col justify-between gap-5">
+                  <div>
+                    <div className="flex flex-wrap gap-x-2.5 gap-y-1 text-[11.5px] text-brand-muted"><span>{latestReviewCandidate.position}</span><span>·</span><span>{latestReviewCandidate.language}</span><span>·</span><span>{latestReviewCandidate.duration} {t('dashboard.durMin')}</span></div>
+                    <p className="mt-4 text-[15px] font-medium leading-relaxed text-brand-ink"><InlineRichText text={reportSummary(latestReviewCandidate) || t('dashboard.growth.latest.reportReadyBody')} /></p>
+                    {reportStrength(latestReviewCandidate) && <p className="mt-3 flex items-start gap-2 text-[12.5px] leading-relaxed text-brand-muted"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-success" /><span><InlineRichText text={reportStrength(latestReviewCandidate)} /></span></p>}
+                  </div>
+                  <Link to={`/interview/${latestReviewCandidate.id}/report`} className="inline-flex w-fit items-center gap-2 rounded-xl bg-brand-ink px-5 py-2.5 text-[12.5px] font-semibold text-brand-on-ink hover:opacity-90">{t('dashboard.growth.viewReport')}<ArrowRight className="h-3.5 w-3.5" /></Link>
+                </div>
+              ) : isResumable(latestReviewCandidate) ? (
+                <div className="mt-6 flex min-h-44 flex-col justify-between gap-5"><div><h3 className="text-[14px] font-semibold text-brand-ink">{t('dashboard.growth.latest.unfinishedTitle')}</h3><p className="mt-2 text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.latest.unfinishedBody', { position: latestReviewCandidate.position })}</p></div><Link to={`/interview/${latestReviewCandidate.id}`} className="inline-flex w-fit items-center gap-2 rounded-xl bg-brand-ink px-5 py-2.5 text-[12.5px] font-semibold text-brand-on-ink hover:opacity-90">{t('dashboard.growth.continuePractice')}<ArrowRight className="h-3.5 w-3.5" /></Link></div>
+              ) : (
+                <div className="mt-6 flex min-h-44 flex-col justify-between gap-5"><div><h3 className="text-[14px] font-semibold text-brand-ink">{t('dashboard.growth.latest.noReportTitle')}</h3><p className="mt-2 text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.latest.noReportBody')}</p></div><Link to={`/interview/${latestReviewCandidate.id}/report`} className="inline-flex w-fit items-center gap-2 rounded-xl border border-brand-line bg-brand-card px-5 py-2.5 text-[12.5px] font-semibold text-brand-ink hover:border-brand-ink">{t('dashboard.growth.checkReportStatus')}<ArrowRight className="h-3.5 w-3.5" /></Link></div>
+              )}
+            </article>
           </div>
-        </section>
+
+          <div className="grid divide-y divide-brand-line border-t border-brand-line bg-brand-card sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+            <div className="px-6 py-4"><div className="flex items-center gap-2 text-[11px] text-brand-muted"><BarChart3 className="h-3.5 w-3.5" />{t('dashboard.growth.practice.title')}</div><p className="mt-1 text-[19px] font-semibold tabular-nums text-brand-ink">{metrics.effectiveCount}<span className="ml-1 text-[11.5px] font-normal text-brand-muted">{t('dashboard.growth.practice.count')}</span></p></div>
+            <div className="px-6 py-4"><div className="flex items-center gap-2 text-[11px] text-brand-muted"><Clock3 className="h-3.5 w-3.5" />{t('dashboard.growth.practice.title')}</div><p className="mt-1 text-[15px] font-semibold text-brand-ink">{formatEffectiveDuration(metrics.totalSeconds, t)}</p></div>
+            <div className="px-6 py-4"><div className="flex items-center gap-2 text-[11px] text-brand-muted"><CalendarDays className="h-3.5 w-3.5" />{t('dashboard.growth.rhythm.title')}</div><p className="mt-1 text-[19px] font-semibold tabular-nums text-brand-ink">{metrics.weeklyDays}<span className="ml-1 text-[11.5px] font-normal text-brand-muted">/ 5 {t('dashboard.growth.rhythm.weeklyDays')}</span></p></div>
+            <div className="px-6 py-4"><div className="flex items-center gap-2 text-[11px] text-brand-muted"><Flame className="h-3.5 w-3.5" />{t('dashboard.growth.rhythm.title')}</div><p className="mt-1 text-[15px] font-semibold text-brand-ink">{t('dashboard.growth.rhythm.streak', { count: metrics.streak })}</p></div>
+          </div>
+        </motion.section>
 
         <OfferSprintPanel
           offerSprint={growthOverview?.offerSprint}
@@ -529,126 +519,32 @@ export default function DashboardPage() {
           </section>
         )}
 
-        {/* ───────── 题目收藏 + 最新复盘：并排，减少全宽长条的堆叠感 ───────── */}
-        <section className="grid gap-5 lg:grid-cols-2">
-
-          <article className={`${CARD} px-6 py-6`}>
-            <div className="mb-4 flex items-end justify-between gap-4">
-              <div className="min-w-0">
-                <p className={EYEBROW}>{t('dashboard.growth.collections.eyebrow')}</p>
-                <h2 className={`mt-2 ${H2}`}>{t('dashboard.growth.collections.title')}</h2>
-              </div>
-              <Link to="/notes" className="inline-flex shrink-0 items-center gap-1.5 text-[12.5px] font-semibold text-brand-ink transition-opacity hover:opacity-70">
-                {t('dashboard.growth.collections.viewAll')}<ArrowRight className="h-3.5 w-3.5" />
-              </Link>
+        {/* 收藏是辅助入口，使用开放式列表，不再占一整张白色卡片。 */}
+        <section className="border-y border-brand-line py-7">
+          <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-10">
+            <div>
+              <p className={EYEBROW}>{t('dashboard.growth.collections.eyebrow')}</p>
+              <h2 className={`mt-2 ${H2}`}>{t('dashboard.growth.collections.title')}</h2>
+              <Link to="/notes" className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-brand-ink hover:opacity-70">{t('dashboard.growth.collections.viewAll')}<ArrowRight className="h-3.5 w-3.5" /></Link>
             </div>
+
             {growthOverview?.recentCollections?.length > 0 ? (
-              <div className="divide-y divide-brand-line border-t border-brand-line">
+              <div className="grid gap-x-8 gap-y-0 sm:grid-cols-2">
                 {growthOverview.recentCollections.map(collection => (
-                  <Link key={collection.id} to="/notes" className="group flex items-start gap-3 py-3.5 transition-opacity hover:opacity-70">
-                    <span className="mt-0.5 shrink-0 rounded-full border border-brand-line bg-brand-inset px-2 py-0.5 text-[10.5px] font-medium text-brand-muted">
-                      {t('dashboard.growth.collections.toReview')}
-                    </span>
+                  <Link key={collection.id} to="/notes" className="group flex items-start gap-3 border-t border-brand-line py-3.5 first:border-t-0 sm:[&:nth-child(2)]:border-t-0">
+                    <span className="mt-1 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-inset text-brand-violet"><BookmarkCheck className="h-3.5 w-3.5" /></span>
                     <span className="min-w-0 flex-1">
-                      <span className="line-clamp-2 block text-[13px] leading-relaxed text-brand-ink">{collection.question_text}</span>
+                      <span className="line-clamp-2 block text-[13px] leading-relaxed text-brand-ink transition-opacity group-hover:opacity-70">{collection.question_text}</span>
                       {collection.position && <span className="mt-1 block truncate text-[11.5px] text-brand-muted">{collection.position}</span>}
                     </span>
-                    {collection.is_pinned && <BookmarkCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-violet" />}
+                    <ArrowRight className="mt-1 h-3.5 w-3.5 shrink-0 text-brand-muted transition-transform group-hover:translate-x-1" />
                   </Link>
                 ))}
               </div>
             ) : (
-              <div className="rounded-xl border border-dashed border-brand-line bg-brand-inset px-4 py-6 text-center text-[12.5px] text-brand-muted">
-                {t('dashboard.growth.collections.empty')}
-              </div>
+              <p className="self-center text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.collections.empty')}</p>
             )}
-          </article>
-
-          <article className={`${CARD} px-6 py-6`}>
-            <div className="mb-4 flex items-end justify-between gap-4">
-              <div className="min-w-0">
-                <p className={EYEBROW}>{t('dashboard.growth.latest.eyebrow')}</p>
-                <h2 className={`mt-2 ${H2}`}>{t('dashboard.growth.latest.title')}</h2>
-              </div>
-              {latestReviewCandidate && !isGenerating(latestReviewCandidate) && (
-                <span className="shrink-0 text-[11.5px] tabular-nums text-brand-muted">
-                  {new Date(sessionDate(latestReviewCandidate)).toLocaleDateString(localeTag, { year: 'numeric', month: 'short', day: 'numeric' })}
-                </span>
-              )}
-            </div>
-
-            {loading ? (
-              <div className="flex min-h-36 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-brand-muted" /></div>
-            ) : loadError ? (
-              <div className="rounded-xl border border-brand-danger/30 bg-brand-danger/[0.06] px-4 py-4 text-[13px] font-medium text-brand-danger">
-                {t('dashboard.growth.loadFailed')}
-              </div>
-            ) : !latestReviewCandidate ? (
-              <div className="flex flex-col gap-4 rounded-xl border border-dashed border-brand-line bg-brand-inset px-5 py-6">
-                <div className="flex gap-3">
-                  <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-brand-muted" />
-                  <div className="min-w-0">
-                    <h3 className="text-[14px] font-semibold text-brand-ink">{t('dashboard.growth.latest.emptyTitle')}</h3>
-                    <p className="mt-1 text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.latest.emptyBody')}</p>
-                  </div>
-                </div>
-                <Link to="/setup" className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-ink px-5 py-2.5 text-[12.5px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90">
-                  {t('dashboard.growth.startBaseline')} <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            ) : isGenerating(latestReviewCandidate) ? (
-              <div className="flex items-center gap-4 rounded-xl border border-brand-line bg-brand-inset px-5 py-5" role="status">
-                <Loader2 className="h-5 w-5 shrink-0 animate-spin text-brand-violet" />
-                <div className="min-w-0">
-                  <h3 className="text-[14px] font-semibold text-brand-ink">{t('dashboard.growth.latest.generatingTitle')}</h3>
-                  <p className="mt-1 text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.latest.generatingBody')}</p>
-                </div>
-              </div>
-            ) : hasReport(latestReviewCandidate) ? (
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11.5px] text-brand-muted">
-                  <span>{latestReviewCandidate.position}</span><span>·</span>
-                  <span>{latestReviewCandidate.language}</span><span>·</span>
-                  <span>{latestReviewCandidate.duration} {t('dashboard.durMin')}</span>
-                </div>
-                <p className="text-[14px] leading-relaxed text-brand-ink">
-                  {reportSummary(latestReviewCandidate) || t('dashboard.growth.latest.reportReadyBody')}
-                </p>
-                {reportStrength(latestReviewCandidate) && (
-                  <p className="flex items-start gap-2 text-[12.5px] leading-relaxed text-brand-ink">
-                    <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-success" />
-                    {reportStrength(latestReviewCandidate)}
-                  </p>
-                )}
-                <Link to={`/interview/${latestReviewCandidate.id}/report`} className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-ink px-5 py-2.5 text-[12.5px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90">
-                  {t('dashboard.growth.viewReport')} <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            ) : isResumable(latestReviewCandidate) ? (
-              <div className="flex flex-col gap-4 rounded-xl border border-brand-line bg-brand-inset px-5 py-5">
-                <div className="flex gap-3">
-                  <PauseCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand-muted" />
-                  <div className="min-w-0">
-                    <h3 className="text-[14px] font-semibold text-brand-ink">{t('dashboard.growth.latest.unfinishedTitle')}</h3>
-                    <p className="mt-1 text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.latest.unfinishedBody', { position: latestReviewCandidate.position })}</p>
-                  </div>
-                </div>
-                <Link to={`/interview/${latestReviewCandidate.id}`} className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-ink px-5 py-2.5 text-[12.5px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90">
-                  {t('dashboard.growth.continuePractice')} <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4 rounded-xl border border-brand-line px-5 py-5">
-                <div className="min-w-0">
-                  <h3 className="text-[14px] font-semibold text-brand-ink">{t('dashboard.growth.latest.noReportTitle')}</h3>
-                  <p className="mt-1 text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.latest.noReportBody')}</p>
-                </div>
-                <Link to={`/interview/${latestReviewCandidate.id}/report`} className="inline-flex items-center justify-center gap-2 rounded-xl border border-brand-line bg-brand-card px-5 py-2.5 text-[12.5px] font-semibold text-brand-ink transition-colors hover:border-brand-ink">
-                  {t('dashboard.growth.checkReportStatus')} <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            )}
-          </article>
+          </div>
         </section>
 
         {/* ───────── 复盘历史 ───────── */}
@@ -691,7 +587,7 @@ export default function DashboardPage() {
               )}
             </div>
           ) : (
-            <div className="grid gap-5 lg:grid-cols-2">
+            <div className="divide-y divide-brand-line border-y border-brand-line">
               {filteredInterviews.map((interview, index) => {
                 const action = getAction(interview, t)
                 const ActionIcon = action.icon
@@ -711,18 +607,38 @@ export default function DashboardPage() {
                     tabIndex={action.route ? 0 : undefined}
                     onClick={() => openInterview(interview)}
                     onKeyDown={event => { if (action.route && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); openInterview(interview) } }}
-                    className={`${CARD} group relative flex flex-col gap-4 px-6 py-5 transition-colors ${action.route ? 'cursor-pointer hover:border-brand-ink' : ''}`}
+                    className={`group relative grid gap-4 py-5 transition-colors sm:grid-cols-[150px_minmax(0,1fr)_auto] sm:items-center ${action.route ? 'cursor-pointer hover:bg-brand-inset/50' : ''}`}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0 space-y-2">
-                        <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10.5px] font-medium ${badgeTone}`}>
-                          {isGenerating(interview) && <Loader2 className="h-3 w-3 animate-spin" />}
-                          {statusLabel(interview, t)}
-                        </span>
-                        <h3 className="truncate text-[16px] font-semibold text-brand-ink">
-                          {interview.position || t('dashboard.growth.history.untitled')}
-                        </h3>
+                    <div className="space-y-2">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10.5px] font-medium ${badgeTone}`}>
+                        {isGenerating(interview) && <Loader2 className="h-3 w-3 animate-spin" />}
+                        {statusLabel(interview, t)}
+                      </span>
+                      <p className="text-[11.5px] tabular-nums text-brand-muted">{date.toLocaleDateString(localeTag, { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                    </div>
+
+                    <div className="min-w-0">
+                      <h3 className="truncate text-[15px] font-semibold text-brand-ink">{interview.position || t('dashboard.growth.history.untitled')}</h3>
+                      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-brand-muted">
+                        <span>{interview.language}</span>
+                        <span>{interview.mode === 'practice' ? t('dashboard.growth.history.practiceMode') : t('dashboard.growth.history.formalMode')}</span>
+                        <span>{interview.duration} {t('dashboard.durMin')}</span>
                       </div>
+                      <p className="mt-2 line-clamp-2 text-[12.5px] leading-relaxed text-brand-muted">
+                        <InlineRichText text={summary || (isResumable(interview)
+                          ? t('dashboard.growth.history.resumeHint')
+                          : isGenerating(interview)
+                            ? t('dashboard.growth.latest.generatingBody')
+                            : t('dashboard.growth.history.noSummary'))} />
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3 sm:justify-end">
+                      <span className={`inline-flex items-center gap-2 text-[12.5px] font-semibold ${action.route ? 'text-brand-ink' : 'text-brand-muted'}`}>
+                        <ActionIcon className={`h-3.5 w-3.5 ${isGenerating(interview) ? 'animate-spin' : ''}`} />
+                        {action.label}
+                        {action.route && <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />}
+                      </span>
                       <button
                         type="button"
                         onClick={event => { event.stopPropagation(); setPendingDelete({ id: interview.id, position: interview.position || '' }) }}
@@ -731,29 +647,6 @@ export default function DashboardPage() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
-                    </div>
-
-                    <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-brand-muted">
-                      <span>{date.toLocaleDateString(localeTag, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                      <span>{interview.language}</span>
-                      <span>{interview.mode === 'practice' ? t('dashboard.growth.history.practiceMode') : t('dashboard.growth.history.formalMode')}</span>
-                      <span>{interview.duration} {t('dashboard.durMin')}</span>
-                    </div>
-
-                    <p className="min-h-9 text-[13px] leading-relaxed text-brand-ink">
-                      {summary || (isResumable(interview)
-                        ? t('dashboard.growth.history.resumeHint')
-                        : isGenerating(interview)
-                          ? t('dashboard.growth.latest.generatingBody')
-                          : t('dashboard.growth.history.noSummary'))}
-                    </p>
-
-                    <div className="mt-auto border-t border-brand-line pt-4">
-                      <span className={`inline-flex items-center gap-2 text-[12.5px] font-semibold ${action.route ? 'text-brand-ink' : 'text-brand-muted'}`}>
-                        <ActionIcon className={`h-3.5 w-3.5 ${isGenerating(interview) ? 'animate-spin' : ''}`} />
-                        {action.label}
-                        {action.route && <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />}
-                      </span>
                     </div>
                   </motion.article>
                 )

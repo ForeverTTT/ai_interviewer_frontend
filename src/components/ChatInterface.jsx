@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import { useGeminiLiveInterview } from '../hooks/useGeminiLiveInterview'
+import { normalizeCjkSpacing } from '../lib/textNormalization'
 import {
   Send, Volume2, VolumeX, Loader2, Video, VideoOff,
   Mic, MicOff, RefreshCw, BrainCircuit, Clock,
@@ -434,7 +435,12 @@ function useSpeechRecognition(language, onFinal, onInterim) {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     const r = new SR()
     r.continuous = true; r.interimResults = true
-    r.lang = langRef.current === 'Deutsch' ? 'de-DE' : 'en-US'
+    const recognitionLanguage = String(langRef.current || '').toLowerCase()
+    r.lang = recognitionLanguage === 'deutsch' || recognitionLanguage.startsWith('de')
+      ? 'de-DE'
+      : recognitionLanguage === 'chinese' || recognitionLanguage.startsWith('zh') || recognitionLanguage.includes('中文')
+        ? 'zh-CN'
+        : 'en-US'
     listeningRef.current = true
 
     r.onresult = e => {
@@ -692,8 +698,8 @@ const ChatInterface = forwardRef(function ChatInterface({
   const legacyTts = useStreamingTTS(language, interviewerStyle, ttsEnabled)
   const legacyStt = useSpeechRecognition(
     language,
-    useCallback(t => setInput(t), []),
-    useCallback(t => setInterimText(t), []),
+    useCallback(t => setInput(normalizeCjkSpacing(t)), []),
+    useCallback(t => setInterimText(normalizeCjkSpacing(t)), []),
   )
 
   const handleLiveReady = useCallback(() => {
@@ -712,11 +718,11 @@ const ChatInterface = forwardRef(function ChatInterface({
   }, [releaseOpeningGate])
 
   const handleLiveInputTranscript = useCallback((text) => {
-    const content = String(text || '').trim()
+    const content = normalizeCjkSpacing(String(text || '').trim())
     if (!content) return
     if (isPractice) {
       setInterimText(content)
-      practiceController.setAnswer([speechBaseForPracticeRef.current, content].filter(Boolean).join(' ').trim())
+      practiceController.setAnswer(normalizeCjkSpacing([speechBaseForPracticeRef.current, content].filter(Boolean).join(' ').trim()))
       return
     }
     setInterimText(content)
@@ -751,12 +757,12 @@ const ChatInterface = forwardRef(function ChatInterface({
   const handleLiveTurnComplete = useCallback(({ inputText, outputText }) => {
     const inputId = liveInputMessageIdRef.current
     const outputId = liveOutputMessageIdRef.current
-    const finalInput = String(inputText || '').trim()
+    const finalInput = normalizeCjkSpacing(String(inputText || '').trim())
     const finalOutput = sanitizeSquareBrackets(String(outputText || '').trim())
 
     if (isPractice) {
       if (finalInput) {
-        const accumulatedAnswer = [speechBaseForPracticeRef.current, finalInput].filter(Boolean).join(' ').trim()
+        const accumulatedAnswer = normalizeCjkSpacing([speechBaseForPracticeRef.current, finalInput].filter(Boolean).join(' ').trim())
         speechBaseForPracticeRef.current = accumulatedAnswer
         practiceController.setAnswer(accumulatedAnswer)
       }
@@ -1166,7 +1172,7 @@ const ChatInterface = forwardRef(function ChatInterface({
 
   // ── Send message ──────────────────────────────────────────────
   const sendMessage = useCallback(async (text) => {
-    const trimmed = text?.trim()
+    const trimmed = normalizeCjkSpacing(text?.trim())
     if (!trimmed || isStreaming) return
     if (isPractice) {
       if (stt.active) stt.stop()
