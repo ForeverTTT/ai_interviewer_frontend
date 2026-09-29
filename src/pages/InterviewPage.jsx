@@ -630,15 +630,15 @@ export default function InterviewPage() {
 
       {/* ── Top Bar ── */}
       {chatPhase === 'idle' && (
-        <nav className="z-10 flex flex-shrink-0 items-center justify-between border-b border-brand-line bg-brand-paper/85 px-6 py-4 backdrop-blur-xl">
+        <nav className="lk-liquid z-10 mx-3 mt-3 flex flex-shrink-0 items-center justify-between rounded-[22px] px-4 py-3 sm:px-5">
         <div className="flex items-center gap-6">
-          <Link to="/setup" className="flex h-10 w-10 items-center justify-center rounded-xl border border-brand-line text-brand-muted transition-colors hover:border-brand-ink hover:text-brand-ink">
+          <Link to="/setup" className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-line bg-brand-card/70 text-brand-muted transition-colors hover:border-brand-ink/40 hover:text-brand-ink">
             <ArrowLeft className="w-4 h-4" />
           </Link>
           
           <div className="hidden md:flex flex-col">
             <span className="mb-1 text-[11px] leading-none text-brand-muted">{t('interview.role')}</span>
-            <h1 className="max-w-[240px] truncate font-brand text-xl font-semibold leading-none tracking-tight text-brand-ink">
+            <h1 className="lk-display max-w-[320px] truncate text-xl leading-none">
               {position}
             </h1>
           </div>
@@ -646,15 +646,15 @@ export default function InterviewPage() {
 
         <div className="flex items-center gap-4">
           {chatPhase === 'live' && (
-            <div className="flex items-center gap-4 px-4 py-2 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+            <div className="lk-liquid flex items-center gap-4 rounded-full px-4 py-2">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">{t('interview.live')}</span>
+                <div className="h-2 w-2 animate-pulse rounded-full bg-brand-success" />
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-brand-success">{t('interview.live')}</span>
               </div>
-              <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
-              <div className="flex items-center gap-2 font-mono text-sm font-bold tabular-nums text-slate-900 dark:text-white">
-                <Clock className="w-3.5 h-3.5 text-slate-400" />
-                <span className={timer.isCritical ? 'text-red-500' : timer.isWarning ? 'text-amber-500' : ''}>
+              <div className="h-4 w-px bg-brand-line" />
+              <div className="flex items-center gap-2 font-mono text-sm font-bold tabular-nums text-brand-ink">
+                <Clock className="h-3.5 w-3.5 text-brand-muted" />
+                <span className={timer.isCritical ? 'text-brand-danger' : timer.isWarning ? 'text-brand-ochre' : ''}>
                   {timer.display}
                 </span>
               </div>
@@ -668,7 +668,7 @@ export default function InterviewPage() {
             {chatPhase === 'live' && (
               <button
                 onClick={() => setShowEndModal(true)}
-                className="ml-2 px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-semibold uppercase tracking-widest rounded-xl hover:bg-slate-800 dark:hover:bg-slate-100 transition-all border border-slate-900 dark:border-white shadow-lg shadow-slate-900/10"
+                className="lk-btn lk-btn-primary ml-2 !px-5 !py-2 !text-[12px]"
               >
                 {t('interview.end')}
               </button>
@@ -698,7 +698,7 @@ export default function InterviewPage() {
               <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col justify-center">
 
                 <header className="mb-8 text-center">
-                  <h2 className="font-brand text-[34px] font-semibold leading-tight tracking-tight text-brand-ink sm:text-[42px]">
+                  <h2 className="lk-display text-[34px] leading-tight sm:text-[44px]">
                     {t('interview.lobbyTitle')}
                   </h2>
                   <p className="mx-auto mt-3 max-w-2xl text-[14.5px] leading-relaxed text-brand-muted">
@@ -710,7 +710,7 @@ export default function InterviewPage() {
                 <div className="grid items-stretch gap-5 lg:grid-cols-[1.1fr_0.9fr]">
 
                   {/* ── 摄像头预览（仿 Google Meet：控制键浮在画面底部）── */}
-                  <div className="relative min-h-[360px] overflow-hidden rounded-[20px] border border-brand-line bg-brand-inset">
+                  <div className="relative min-h-[360px] overflow-hidden rounded-[28px] border border-brand-line bg-gradient-to-br from-brand-mist to-brand-inset">
                     <video
                       ref={lobbyPreviewRef}
                       className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${lobbyCameraOn && cameraStream ? 'opacity-100' : 'opacity-0'}`}
@@ -734,7 +734,7 @@ export default function InterviewPage() {
                     )}
 
                     {/* 控制条常驻在画面底部；药丸自带底色，开/关摄像头两种情况下都清晰 */}
-                    <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center justify-center gap-2.5 p-4">
+                    <div className="lk-liquid absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-wrap items-center justify-center gap-2 rounded-full p-1.5">
                       <button
                         onClick={() => { setCameraError(null); setLobbyCameraOn(v => !v) }}
                         className={`flex items-center gap-2 rounded-full border px-4 py-2 text-[12.5px] font-bold backdrop-blur transition-colors ${lobbyCameraOn
@@ -773,8 +773,8 @@ export default function InterviewPage() {
                   </div>
 
                   {/* ── 信息卡：原左栏元信息 + 提示 + 进入按钮合并为一张 ── */}
-                  <div className="brand-float flex flex-col rounded-[20px] p-6">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-violet">{t('meta.title')}</p>
+                  <div className="brand-float flex flex-col rounded-[28px] p-7">
+                    <p className="lk-eyebrow">{t('meta.title')}</p>
                     <h3 className="mt-2 font-brand text-[21px] font-semibold leading-tight tracking-tight text-brand-ink">
                       {t('interview.instructionTitle', { position })}
                     </h3>
@@ -815,7 +815,7 @@ export default function InterviewPage() {
                     {/* 提示（原左侧栏的独立卡片，合并进来后移动端也能看到） */}
                     <div className="mt-5 border-t border-brand-line pt-5">
                       <div className="mb-3 flex items-center gap-2">
-                        <div className="h-4 w-1 rounded-full bg-brand-violet" />
+                        <div className="h-4 w-1 rounded-full bg-brand-ochre" />
                         <span className="text-[12.5px] font-semibold text-brand-ink">{t('interview.tipsTitle')}</span>
                         <AlertCircle className="ml-auto h-4 w-4 text-brand-muted" />
                       </div>
@@ -835,7 +835,7 @@ export default function InterviewPage() {
                     <div className="mt-auto pt-6">
                       <button
                         onClick={handleStart}
-                        className="group flex w-full items-center justify-between rounded-[16px] bg-brand-ink p-5 text-brand-on-ink transition-opacity duration-200 hover:opacity-90"
+                        className="group flex w-full items-center justify-between rounded-[22px] bg-brand-ink p-5 text-brand-on-ink shadow-lift transition-all duration-300 hover:-translate-y-0.5"
                       >
                         <span className="space-y-1 text-left">
                           <span className="flex items-center gap-2 text-[11px] font-medium opacity-70">
@@ -846,7 +846,7 @@ export default function InterviewPage() {
                             {t('interview.joinInterviewBtn')}
                           </span>
                         </span>
-                        <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-on-ink/15 text-brand-on-ink transition-transform duration-200 group-hover:scale-105">
+                        <span className="grid h-12 w-12 place-items-center rounded-full bg-brand-ochre text-[#22303D] transition-transform duration-300 group-hover:scale-110">
                           <Play className="h-5 w-5 translate-x-0.5 fill-current" />
                         </span>
                       </button>
@@ -1012,19 +1012,19 @@ export default function InterviewPage() {
       )}
 
       {endNotice && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/45 p-6 backdrop-blur-sm" role="dialog" aria-modal="true" aria-live="polite">
-          <div className="w-full max-w-md rounded-[2.5rem] border border-slate-200 bg-white p-9 shadow-2xl dark:border-slate-800 dark:bg-slate-950">
-            <div className="mb-7 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-300">
-              {endNotice.status === 'generating' ? <Loader2 className="h-8 w-8 animate-spin" /> : endNotice.status === 'ready' ? <FileText className="h-8 w-8" /> : <AlertCircle className="h-8 w-8 text-red-500" />}
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-brand-ink/40 p-6 backdrop-blur-sm" role="dialog" aria-modal="true" aria-live="polite">
+          <div className="brand-float w-full max-w-md rounded-[28px] p-9 shadow-float">
+            <div className="mb-7 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-harbor/[0.12] text-brand-harbor">
+              {endNotice.status === 'generating' ? <Loader2 className="h-8 w-8 animate-spin" /> : endNotice.status === 'ready' ? <FileText className="h-8 w-8" /> : <AlertCircle className="h-8 w-8 text-brand-danger" />}
             </div>
-            <h3 className="font-serif text-3xl font-black text-slate-950 dark:text-white">{t(`interview.endNotice.${endNotice.status}Title`)}</h3>
-            <p className="mt-4 text-base leading-relaxed text-slate-500 dark:text-slate-300">{t(`interview.endNotice.${endNotice.status}Body`)}</p>
-            {endNotice.status === 'failed' && finalizeError && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700 dark:bg-red-950/30 dark:text-red-300">{finalizeError}</p>}
+            <h3 className="lk-display text-3xl">{t(`interview.endNotice.${endNotice.status}Title`)}</h3>
+            <p className="mt-4 text-base leading-relaxed text-brand-muted">{t(`interview.endNotice.${endNotice.status}Body`)}</p>
+            {endNotice.status === 'failed' && finalizeError && <p className="mt-4 rounded-xl bg-brand-danger/[0.08] p-3 text-sm font-bold text-brand-danger">{finalizeError}</p>}
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              <button type="button" onClick={() => navigate('/dashboard')} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white dark:bg-white dark:text-slate-950">{t('interview.endNotice.openGrowth')}</button>
+              <button type="button" onClick={() => navigate('/dashboard')} className="lk-btn lk-btn-primary">{t('interview.endNotice.openGrowth')}</button>
               {endNotice.status === 'failed'
-                ? <button type="button" onClick={() => void finalizeAndGoReport('manual')} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-black text-slate-800 dark:border-slate-700 dark:text-white">{t('interview.endNotice.retry')}</button>
-                : <button type="button" onClick={() => setEndNotice(null)} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-black text-slate-800 dark:border-slate-700 dark:text-white">{t('interview.endNotice.stay')}</button>}
+                ? <button type="button" onClick={() => void finalizeAndGoReport('manual')} className="lk-btn lk-btn-ghost">{t('interview.endNotice.retry')}</button>
+                : <button type="button" onClick={() => setEndNotice(null)} className="lk-btn lk-btn-ghost">{t('interview.endNotice.stay')}</button>}
             </div>
           </div>
         </div>

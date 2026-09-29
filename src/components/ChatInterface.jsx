@@ -25,10 +25,10 @@ function newRequestId() {
 
 const AGENT_STYLE = {
   opening: { emoji: '👔', color: 'bg-brand-ink text-brand-on-ink', Icon: BrainCircuit },
-  explore: { emoji: '📎', color: 'bg-brand-violet text-white', Icon: FolderOpen },
+  explore: { emoji: '📎', color: 'bg-brand-harbor text-white', Icon: FolderOpen },
   technical: { emoji: '💡', color: 'bg-brand-ink text-brand-on-ink', Icon: FlaskConical },
   behavioral: { emoji: '🤝', color: 'bg-brand-inset text-brand-ink', Icon: Users },
-  feedback: { emoji: '📋', color: 'bg-brand-violet text-white', Icon: ClipboardList },
+  feedback: { emoji: '📋', color: 'bg-brand-ochre text-[#22303D]', Icon: ClipboardList },
   analyzer: { emoji: '🔍', color: 'bg-brand-muted text-white', Icon: Search },
 }
 
@@ -1294,22 +1294,22 @@ const ChatInterface = forwardRef(function ChatInterface({
   )
 
   const inputBarSection = (
-    <div className="relative z-10 flex-shrink-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl px-6 py-4 space-y-4 border-t border-slate-200 dark:border-slate-900">
+    <div className="relative z-10 flex-shrink-0 space-y-4 border-t border-brand-line bg-brand-card/80 px-6 py-4 backdrop-blur-xl">
 
       {/* Status Indicators */}
       <div className="flex items-center justify-between gap-4 h-6">
         <div className="flex items-center gap-4">
           {stt.active && (
-            <div className="flex items-center gap-2 px-3 py-1 bg-red-50 dark:bg-red-950/20 rounded-full border border-red-100 dark:border-red-900/30">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">{t('chat.recording')}</span>
+            <div className="flex items-center gap-2 rounded-full border border-brand-danger/25 bg-brand-danger/[0.07] px-3 py-1">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-brand-danger" />
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-brand-danger">{t('chat.recording')}</span>
             </div>
           )}
 
           {interactionBusy && (
             <div className="flex items-center gap-2">
-              <Loader2 className="w-3 h-3 animate-spin text-slate-400" />
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+              <Loader2 className="h-3 w-3 animate-spin text-brand-muted" />
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-brand-muted">
                 {currentAgent ? (agentMap[currentAgent.name]?.label ?? currentAgent.label) : t('chat.analyzing')}
               </span>
             </div>
@@ -1318,14 +1318,14 @@ const ChatInterface = forwardRef(function ChatInterface({
           {tts.speaking && !stt.active && (
             <div className="flex items-center gap-3">
               <WaveIcon active />
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{t('chat.ttsPlaying')}</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-brand-muted">{t('chat.ttsPlaying')}</span>
             </div>
           )}
         </div>
 
         <button
           onClick={() => { setTtsEnabled(v => !v); tts.stop() }}
-          className={`group flex items-center gap-2 px-3 py-1 rounded-lg transition-all ${ttsEnabled ? 'text-slate-900 dark:text-white' : 'text-slate-400'
+          className={`group flex items-center gap-2 px-3 py-1 rounded-lg transition-all ${ttsEnabled ? 'text-brand-ink' : 'text-brand-muted'
             }`}
         >
           {ttsEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
@@ -1347,8 +1347,8 @@ const ChatInterface = forwardRef(function ChatInterface({
           aria-label={stt.active ? 'Microphone on — click to mute' : 'Microphone off — click to unmute'}
           title={stt.active ? 'Microphone on — click to mute' : 'Microphone off — click to unmute'}
           className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${stt.active
-              ? 'bg-red-600 text-white shadow-xl shadow-red-600/20'
-              : 'bg-slate-100 dark:bg-slate-900 text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'
+              ? 'bg-brand-danger text-white shadow-lift'
+              : 'border border-brand-line bg-brand-inset text-brand-muted hover:text-brand-ink'
             } disabled:opacity-50`}
         >
           {stt.active ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
@@ -1375,10 +1375,10 @@ const ChatInterface = forwardRef(function ChatInterface({
             placeholder={stt.active ? t('chat.listening') : t('chat.placeholder', { lang: language || 'English' })}
             rows={1}
             disabled={interactionBusy || Boolean(practiceController && !practiceController.canDraftAnswer)}
-            className="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 text-sm font-medium rounded-2xl px-6 py-4.5 min-h-[56px] max-h-32 resize-none focus:outline-none border border-slate-100 dark:border-slate-800 focus:border-slate-900 dark:focus:border-white transition-all disabled:opacity-50"
+            className="min-h-[56px] max-h-32 w-full resize-none rounded-2xl border border-brand-line bg-brand-inset px-6 py-4 text-sm font-medium text-brand-ink transition-all placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none focus:ring-4 focus:ring-brand-ink/10 disabled:opacity-50"
           />
           {interimText && stt.active && (
-            <div className="absolute left-6 bottom-4 text-[10px] font-medium text-slate-400 italic pointer-events-none">
+            <div className="pointer-events-none absolute bottom-4 left-6 text-[10px] font-medium italic text-brand-muted">
               {interimText}
             </div>
           )}
@@ -1391,13 +1391,13 @@ const ChatInterface = forwardRef(function ChatInterface({
             sendMessage(text)
           }}
           disabled={!inputDraft.trim() || interactionBusy || Boolean(practiceController && !practiceController.canDraftAnswer)}
-          className="flex-shrink-0 w-14 h-14 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl flex items-center justify-center hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-xl shadow-slate-900/10 disabled:opacity-50"
+          className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-ink text-brand-on-ink shadow-lift transition-all hover:-translate-y-px disabled:opacity-50"
         >
           {interactionBusy ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
         </button>
       </div>
 
-      <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+      <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-brand-muted">
         {stt.supported ? t('chat.hintFull') : t('chat.hintType')}
       </p>
     </div>

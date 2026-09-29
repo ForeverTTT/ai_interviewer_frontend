@@ -84,7 +84,7 @@
 frontend/
 ├── public/
 │   ├── avatars/               # 用户头像图片
-│   ├── crab_logo.png          # OfferClaw Logo
+│   ├── crab_logo.png          # 旧版 Logo（已由 LandIt 标志替代）
 │   └── index.html             # 入口 HTML（含首屏防闪烁脚本）
 ├── src/
 │   ├── main.jsx               # React 入口，加载 i18n → 渲染 App

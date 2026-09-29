@@ -4,26 +4,24 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/landit-icon-light.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="AI模拟面试平台，专为赴德实习求职者设计" />
+    <meta name="theme-color" content="#F5F6F2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0E141A" media="(prefers-color-scheme: dark)" />
+    <meta name="description" content="LandIt — AI 模拟面试与求职训练平台，专为赴德实习与求职者设计" />
     <title>LandIt - AI德国面试训练营</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Source+Serif+4:opsz,wght@8..60,600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,400..800&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;600;700&display=swap" rel="stylesheet">
     <script>
       (function () {
         try {
-          var path = (location.pathname || '/').replace(/\/+$/, '') || '/'
-          var onInterview = path === '/interview'
-          var app = localStorage.getItem('interviewde_app_theme')
-          var inv = localStorage.getItem('interviewde_interview_theme')
-          var dark = onInterview ? inv !== 'light' : app === 'dark'
+          // 与 ThemeContext 的存储键保持一致，避免深色用户首帧闪白
+          var dark = localStorage.getItem('interviewde_theme') === 'dark'
           document.documentElement.classList.toggle('dark', dark)
           document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
         } catch (e) { /* ignore */ }
       })()
     </script>
-  <style>[style*="opacity"]{opacity:1 !important}</style>
-</head>
+  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
-import { BrainCircuit } from 'lucide-react'
 
 export default function ProtectedRoute({ children }) {
   const { t } = useTranslation()
@@ -35,10 +34,11 @@ export default function ProtectedRoute({ children }) {
       <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-paper">
         {/* bg-mesh-subtle / shadow-glow-primary 在项目里都没有定义，是失效类，一并移除 */}
         <div className="relative z-[1] flex flex-col items-center gap-5">
-          <div className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-ink text-brand-on-ink">
-            <BrainCircuit className="h-7 w-7" />
+          <img src="/landit-icon-light.svg" alt="" className="h-12 w-12 animate-pulse-soft rounded-2xl dark:hidden" />
+          <img src="/landit-icon-dark.svg" alt="" className="hidden h-12 w-12 animate-pulse-soft rounded-2xl dark:block" />
+          <div className="h-1 w-24 overflow-hidden rounded-full bg-brand-line">
+            <div className="h-full w-1/2 animate-[lk-marquee_1.1s_linear_infinite] rounded-full bg-brand-ochre" />
           </div>
-          <div className="h-9 w-9 animate-spin rounded-full border-[3px] border-brand-line border-t-brand-ink" />
           <p className="text-[13px] text-brand-muted">{t('protected.loading')}</p>
         </div>
       </div>

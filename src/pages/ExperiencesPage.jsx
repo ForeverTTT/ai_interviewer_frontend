@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef, forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import PageHeader from '../components/brand/PageHeader'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
@@ -818,45 +819,34 @@ export default function ExperiencesPage() {
   }
 
   return (
-    <div className="theme-quiet min-h-screen bg-brand-paper pb-16 pt-[calc(var(--ui-nav-h)+2rem)]">
+    <div className="theme-quiet min-h-screen pb-16 pt-[calc(var(--ui-nav-h)+2.75rem)]">
       <div className="ui-container">
-        <header className="mb-10 flex flex-col items-start justify-between gap-8 sm:flex-row sm:items-end">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl space-y-3"
-          >
-            <h1 className="font-brand text-[30px] font-semibold leading-tight tracking-[-0.02em] text-brand-ink sm:text-[34px]">
-              {t('exp.title')}
-            </h1>
-            <p className="text-[15px] leading-relaxed text-brand-muted">
-              {t('exp.subtitle')}
-            </p>
-          </motion.div>
-
-          {user && (
-             <div className="flex flex-col items-center gap-2">
-               <motion.button
-                 initial={{ opacity: 0, scale: 0.9 }}
-                 animate={{ opacity: 1, scale: 1 }}
-                 onClick={() => setPostModalOpen(true)}
-                 className="flex items-center gap-2.5 rounded-full bg-brand-ink px-7 py-3.5 text-[14px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90"
-               >
-                 <Plus className="w-5 h-5" />
-                 {t('exp.postBtn')}
-               </motion.button>
-               <motion.div
-                 initial={{ opacity: 0, y: -5 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 transition={{ delay: 0.2 }}
-                 className="flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-inset px-3 py-1 text-[11px] font-medium text-brand-muted"
-               >
-                 <Zap className="w-3 h-3" />
-                 {t('exp.rewardBadge')}
-               </motion.div>
-             </div>
+        <PageHeader
+          title={t('exp.title')}
+          subtitle={t('exp.subtitle')}
+          actions={user && (
+            <div className="flex flex-col items-end gap-2">
+              <motion.button
+                initial={{ opacity: 0, scale: 0.94 }}
+                animate={{ opacity: 1, scale: 1 }}
+                onClick={() => setPostModalOpen(true)}
+                className="lk-btn lk-btn-accent lk-btn-lg"
+              >
+                <Plus className="h-5 w-5" />
+                {t('exp.postBtn')}
+              </motion.button>
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-card/80 px-3 py-1 text-[11px] font-medium text-brand-muted backdrop-blur"
+              >
+                <Zap className="h-3 w-3 fill-brand-ochre text-brand-ochre" />
+                {t('exp.rewardBadge')}
+              </motion.div>
+            </div>
           )}
-        </header>
+        />
 
         {loading ? (
           <div className="flex items-center justify-center py-32">
@@ -869,39 +859,26 @@ export default function ExperiencesPage() {
           </div>
         ) : (
           <>
-              <motion.div
+            {/* 左：检索与统计（桌面端吸顶）；右：面经列表 */}
+            <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-8">
+              <motion.aside
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10"
+                className="space-y-4 lg:sticky lg:top-[calc(var(--ui-nav-h)+1.5rem)]"
               >
-                {[
-                  { n: stats.total, label: t('exp.filterAll'), icon: Filter, tone: 'total' },
-                  { n: stats.work, label: t('exp.filterWork'), icon: Briefcase, tone: 'work' },
-                  { n: stats.school, label: t('exp.filterSchool'), icon: GraduationCap, tone: 'school' },
-                  { n: stats.offers, label: 'Passed / Offers', icon: Award, tone: 'offers' },
-                ].map(({ n, label, icon: Icon, tone }) => (
-                  <div
-                    key={label}
-                    className="brand-float space-y-2 rounded-[20px] border border-brand-line p-5"
-                  >
-                    <div className="flex items-center justify-between">
-                      {/* 完整类名走映射表：拼接出来的 text-xxx-500 会被生产构建 purge 掉 */}
-                      <Icon className={STAT_ICON_CLASS[tone]} />
-                      <span className="font-brand text-[22px] font-semibold tabular-nums text-brand-ink">{n}</span>
-                    </div>
-                    <p className="text-[12px] text-brand-muted">{label}</p>
-                  </div>
-                ))}
-              </motion.div>
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder={t('exp.searchPlaceholder')}
+                    className="w-full rounded-full border border-brand-line bg-brand-card py-3 pl-11 pr-4 text-[13.5px] font-medium text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none focus:ring-4 focus:ring-brand-ink/10"
+                  />
+                </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-10"
-            >
-                <div className="flex flex-wrap gap-2 rounded-2xl border border-brand-line bg-brand-inset p-1.5">
+                <div className="brand-float p-2" role="group">
                   {filterTabs.map((tab) => (
                     <button
                       key={tab.key}
@@ -913,18 +890,17 @@ export default function ExperiencesPage() {
                         }
                       }}
                       aria-pressed={filter === tab.key}
-                      /* 选中态用黑框 + ring，不加粗 border，避免 0.5px 布局位移 */
-                      className={`rounded-xl border px-4 py-2.5 text-[12.5px] font-bold transition-colors ${
+                      className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-[13px] font-semibold transition-colors ${
                         filter === tab.key
-                          ? 'border-brand-ink bg-brand-card text-brand-ink ring-1 ring-brand-ink'
-                          : 'border-transparent text-brand-muted hover:text-brand-ink'
+                          ? 'bg-brand-ink text-brand-on-ink'
+                          : 'text-brand-muted hover:bg-brand-inset hover:text-brand-ink'
                       }`}
                     >
                       {tab.label}
-                      <span className={`ml-1.5 rounded-md px-1.5 py-0.5 text-[11px] font-bold tabular-nums ${
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums ${
                         filter === tab.key
-                          ? 'bg-brand-inset text-brand-ink'
-                          : 'bg-brand-card text-brand-muted'
+                          ? 'bg-brand-on-ink/15 text-brand-on-ink'
+                          : 'bg-brand-inset text-brand-muted'
                       }`}>
                         {tab.count}
                       </span>
@@ -932,50 +908,63 @@ export default function ExperiencesPage() {
                   ))}
                 </div>
 
-              <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder={t('exp.searchPlaceholder')}
-                  className="w-full rounded-2xl border border-brand-line bg-brand-card py-3 pl-11 pr-4 text-[13.5px] font-medium text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none"
-                />
-              </div>
-            </motion.div>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { n: stats.total, label: t('exp.filterAll'), icon: Filter, tone: 'total' },
+                    { n: stats.work, label: t('exp.filterWork'), icon: Briefcase, tone: 'work' },
+                    { n: stats.school, label: t('exp.filterSchool'), icon: GraduationCap, tone: 'school' },
+                    { n: stats.offers, label: 'Passed / Offers', icon: Award, tone: 'offers' },
+                  ].map(({ n, label, icon: Icon, tone }) => (
+                    <div
+                      key={label}
+                      className="brand-float space-y-2 rounded-[18px] p-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        {/* 完整类名走映射表：拼接出来的 text-xxx-500 会被生产构建 purge 掉 */}
+                        <Icon className={STAT_ICON_CLASS[tone]} />
+                        <span className="font-display text-[24px] font-semibold tabular-nums text-brand-ink">{n}</span>
+                      </div>
+                      <p className="truncate text-[11.5px] text-brand-muted">{label}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.aside>
 
-            {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 px-10 text-center space-y-4">
-                <p className="text-[13.5px] font-bold text-brand-muted">{filter === 'mine' ? t('exp.noMyResults') : t('exp.noResults')}</p>
-                {search && (
-                   <button
-                     onClick={() => setSearch('')}
-                     className="text-[12.5px] font-bold text-brand-ink underline decoration-brand-line underline-offset-4 transition-colors hover:decoration-brand-ink"
-                   >
-                     Clear Search
-                   </button>
+              <div className="min-w-0">
+                {filtered.length === 0 ? (
+                  <div className="brand-float flex flex-col items-center justify-center space-y-4 px-10 py-20 text-center">
+                    <p className="text-[13.5px] font-bold text-brand-muted">{filter === 'mine' ? t('exp.noMyResults') : t('exp.noResults')}</p>
+                    {search && (
+                       <button
+                         onClick={() => setSearch('')}
+                         className="text-[12.5px] font-bold text-brand-ink underline decoration-brand-line underline-offset-4 transition-colors hover:decoration-brand-ink"
+                       >
+                         Clear Search
+                       </button>
+                    )}
+                  </div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="space-y-4"
+                  >
+                    <AnimatePresence mode="popLayout">
+                      {filtered.map((exp) => (
+                        <ExperienceCard
+                          key={exp.id}
+                          exp={exp}
+                          t={t}
+                          user={user}
+                          onDelete={handleDelete}
+                        />
+                      ))}
+                    </AnimatePresence>
+                  </motion.div>
                 )}
               </div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="space-y-5"
-              >
-                <AnimatePresence mode="popLayout">
-                  {filtered.map((exp) => (
-                    <ExperienceCard
-                      key={exp.id}
-                      exp={exp}
-                      t={t}
-                      user={user}
-                      onDelete={handleDelete}
-                    />
-                  ))}
-                </AnimatePresence>
-              </motion.div>
-            )}
+            </div>
             <AnimatePresence>
               {postModalOpen && (
                 <PostModal

@@ -22,7 +22,15 @@
     "myExperiences": "我的面经",
     "chooseAvatar": "选择个人头像",
     "tokens": "能量值",
-    "notes": "题目收藏"
+    "notes": "题目收藏",
+    "groupPractice": "面试训练",
+    "groupMaterials": "求职材料",
+    "groupCommunity": "社区",
+    "collapse": "收起侧栏",
+    "expand": "展开侧栏",
+    "menu": "菜单",
+    "backHome": "返回首页",
+    "energyCta": "获取更多能量"
   },
   "resumeTailor": {
     "badge": "面向目标岗位的申请材料工作台",
@@ -269,7 +277,7 @@
   },
   "login": {
     "back": "返回首页",
-    "welcome": "Welcome to Interview",
+    "welcome": "欢迎来到 LandIt",
     "subtitle": "登录开启 AI 赋能的德国面试训练",
     "google": "使用 Google 账号登录",
     "linkedin": "使用 LinkedIn 账号登录",
@@ -460,6 +468,11 @@
     "privacyMore": "了解更多"
   },
   "profile": {
+    "coachCta": "生成 AI 简历诊断",
+    "coachPreviewTitle": "让 AI 帮你诊断这份简历",
+    "scoreDetails": "查看诊断详情",
+    "scoreInsight": "简历的内容深度和逻辑性不错。进一步细化量化指标，可以显著提升面向头部雇主的竞争力。",
+    "coachScoreProfessionalism": "专业度",
     "title": "个人资料与简历",
     "status": "求职状态",
     "statusSeeking": "积极求职中",
@@ -1174,6 +1187,7 @@
     }
   },
   "interview": {
+    "candidateLabel": "候选人",
     "live": "面试中",
     "end": "结束",
     "timeLeft": "剩余时间",
@@ -1478,6 +1492,8 @@
     "loading": "加载中..."
   },
   "common": {
+    "error": "出错了，请稍后重试",
+    "networkError": "网络异常，请稍后重试",
     "upload": "上传",
     "uiLanguage": "界面语言",
     "themeToggle": "切换浅色或深色主题",
@@ -1700,6 +1716,9 @@
     "listView": "列表视图"
   },
   "growthSprint": {
+    "summary": {
+      "practice": "已完成 {{count}} 次有效练习，累计 {{duration}}"
+    },
     "eyebrow": "Offer 冲刺计划",
     "empty": {
       "title": "把下一次面试变成一条可执行路线",

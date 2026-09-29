@@ -15,10 +15,10 @@ import GallupRadar from './GallupRadar'
  * 与 GallupTestPage 里的那份保持一致。
  */
 const DOMAIN_TONES = {
-  executing: { chip: 'bg-brand-violet/[0.10] border-brand-violet/25', icon: 'text-brand-violet' },
-  influencing: { chip: 'bg-brand-ink border-brand-ink', icon: 'text-brand-on-ink' },
-  relationship: { chip: 'bg-brand-success/[0.10] border-brand-success/25', icon: 'text-brand-success' },
-  strategic: { chip: 'bg-brand-sky/40 border-brand-sky', icon: 'text-brand-ink' },
+  executing: { chip: 'bg-brand-harbor/[0.12] border-brand-harbor/25', icon: 'text-brand-harbor' },
+  influencing: { chip: 'bg-brand-ochre/[0.2] border-brand-ochre/35', icon: 'text-[#8A5F10] dark:text-brand-ochre' },
+  relationship: { chip: 'bg-brand-sage/[0.22] border-brand-sage/35', icon: 'text-brand-success' },
+  strategic: { chip: 'bg-brand-brick/[0.12] border-brand-brick/25', icon: 'text-brand-brick' },
 }
 
 const FALLBACK_TONE = DOMAIN_TONES.executing
@@ -88,11 +88,11 @@ export default function GallupReport({ results, onRetake }) {
   }
 
   return (
-    <div className="ui-container max-w-5xl pb-14 pt-[calc(var(--ui-nav-h)+2rem)] space-y-10 font-chinese-modern">
+    <div className="ui-container max-w-5xl pb-14 pt-[calc(var(--ui-nav-h)+2.75rem)] space-y-10 font-chinese-modern">
       {/* New Clean Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-brand-line pb-8">
         <div className="space-y-2">
-          <h1 className="font-brand text-[30px] sm:text-[36px] font-semibold tracking-tight leading-tight text-brand-ink">
+          <h1 className="lk-display text-[32px] leading-tight sm:text-[42px]">
             {isZh ? '你的优势报告' : t('gallup.report.title')}
           </h1>
           <p className="text-[14px] text-brand-muted">
@@ -102,7 +102,7 @@ export default function GallupReport({ results, onRetake }) {
         
         <button 
           onClick={onRetake}
-          className="inline-flex h-11 shrink-0 items-center gap-2 self-start rounded-xl border border-brand-line bg-brand-card px-5 text-[13px] font-bold text-brand-ink transition-colors hover:border-brand-ink"
+          className="lk-btn lk-btn-ghost self-start"
         >
           <RefreshCw className="w-4 h-4" />
           {isZh ? '重测一次' : t('gallup.report.retake')}

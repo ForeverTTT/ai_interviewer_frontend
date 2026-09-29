@@ -567,7 +567,7 @@ function GallupAdCard({ t }) {
           </p>
         </div>
         <Link
-          to="/gallup-test"
+          to="/gallup"
           className="inline-flex items-center gap-2 border-b-2 border-brand-ink pb-1 text-[13px] font-bold text-brand-ink transition-all hover:gap-4"
         >
           {t('profile.gallupAdBtn')}
@@ -814,7 +814,18 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
   const hasData = profileHasVisibleData(cvProfile, resumeText, resumeNotes)
   const tr = String(targetRole || '').trim()
   const coachRef = useRef(null)
-  const scrollToCoach = () => coachRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const tabsRef = useRef(null)
+  /* 资料页拆成三个标签：个人资料 / AI 简历诊断 / 简历原文。内容一样都不少，只是不再挤在一条长页面里 */
+  const [tab, setTab] = useState('profile')
+  const scrollToCoach = () => {
+    setTab('coach')
+    window.requestAnimationFrame(() => tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
+  const profileTabs = [
+    { id: 'profile', label: t('nav.profile'), icon: User },
+    { id: 'coach', label: t('profile.coachTitle'), icon: Sparkles, dot: Boolean(coach) },
+    { id: 'raw', label: String(t('profile.cv.rawResumeTitle')).replace(/\s*[（(][^）)]*[）)]\s*$/, ''), icon: FileText },
+  ]
 
   return (
     <div className="mx-auto max-w-[1120px] space-y-8 sm:space-y-10">
@@ -897,7 +908,8 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
         </div>
       </motion.div>
 
-      <header className="rounded-[24px] border border-brand-line bg-brand-card px-5 py-6 sm:px-7 sm:py-7">
+      <header className="brand-float relative overflow-hidden rounded-[28px] px-5 py-6 sm:px-8 sm:py-8">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgb(var(--brand-lime)/0.18),transparent_70%)]" />
         <div className="flex flex-col justify-between gap-7 md:flex-row md:items-end">
           <div className="min-w-0 max-w-2xl space-y-5">
             <div className="flex items-center gap-4">
@@ -915,7 +927,7 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
                   <span className="h-1.5 w-1.5 rounded-full bg-brand-violet" aria-hidden="true" />
                   {jobStatusDisplay(jobSearchStatus, t)}
                 </div>
-                <h1 className="font-brand text-[34px] font-semibold leading-tight tracking-tight text-brand-ink sm:text-[40px]">
+                <h1 className="lk-display text-[34px] leading-tight sm:text-[40px]">
                   {cvProfile.fullName || t('profile.displayTitle')}
                 </h1>
               </div>
@@ -946,113 +958,163 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
         </div>
       </header>
 
-      <div className="space-y-12">
-        {!hasData ? (
-          <div className="space-y-5 rounded-[22px] border-2 border-dashed border-brand-line p-10 text-center">
-            <div className="space-y-2">
-              <h3 className="font-brand text-[22px] font-semibold tracking-tight text-brand-ink">{t('profile.viewEmptyTitle')}</h3>
-              <p className="mx-auto max-w-sm text-[13px] text-brand-muted">{t('profile.viewEmptySub')}</p>
-            </div>
-            <Link
-              to="/profile/edit"
-              className="inline-flex items-center gap-2 rounded-xl bg-brand-ink px-5 py-3 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90"
-            >
-              <Pencil className="h-4 w-4" />
-              <span>{t('profile.editProfile')}</span>
-            </Link>
+      {!hasData ? (
+        <div className="space-y-5 rounded-[22px] border-2 border-dashed border-brand-line p-10 text-center">
+          <div className="space-y-2">
+            <h3 className="font-brand text-[22px] font-semibold tracking-tight text-brand-ink">{t('profile.viewEmptyTitle')}</h3>
+            <p className="mx-auto max-w-sm text-[13px] text-brand-muted">{t('profile.viewEmptySub')}</p>
           </div>
-        ) : (
-          <div className="space-y-12">
-            <section>
-              <SectionHeader icon={User} title={t('profile.cv.basic')} t={t} />
-              <div className="grid grid-cols-1 gap-px overflow-hidden rounded-[20px] border border-brand-line bg-brand-line md:grid-cols-2">
-                <DisplayCell label={t('profile.cv.fullName')} value={cvProfile.fullName} t={t} />
-                <div className={displayCellClass}>
-                  <div className={displayLabelClass}>{t('profile.cv.gender')}</div>
-                  <div className={displayValueClass}>{genderDisplay(cvProfile.gender, t)}</div>
-                </div>
-                <DisplayCell label={t('profile.cv.email')} value={cvProfile.email} t={t} mailto />
-                <DisplayCell label={t('profile.cv.phone')} value={cvProfile.phone} t={t} />
-                <DisplayCell label={t('profile.cv.location')} value={cvProfile.location} t={t} />
-                <DisplayCell label={t('profile.cv.linkedIn')} value={cvProfile.linkedIn} t={t} asLink />
-                <DisplayCell label={t('profile.cv.website')} value={cvProfile.website} t={t} asLink className="md:col-span-2" />
-              </div>
-            </section>
-
-            <ProfileSectionsView cvProfile={cvProfile} t={t} />
-
-            {/* Moved to top: AI Diagnostic & Resume Score */}
-            {coach ? (
-              <div ref={coachRef} className="space-y-10">
-                <CoachReport coach={coach} t={t} />
-                {timeStr && (
-                  <div className="flex items-center gap-2 border-t border-brand-line pt-5 text-[11px] text-brand-muted">
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-brand-success" />
-                    {t('profile.coachPersistNote', { time: timeStr })}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="brand-float relative overflow-hidden rounded-[22px] px-6 py-10 text-center sm:px-10"
-              >
-                <div className="relative z-10 mx-auto max-w-lg space-y-5">
-                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-brand-line bg-brand-inset text-brand-violet">
-                    <Sparkles className="h-7 w-7" />
-                  </div>
-                  <h3 className="font-brand text-[26px] font-semibold tracking-tight text-brand-ink">{t('profile.coachPreviewTitle', '您的 AI 简历报告已就绪')}</h3>
-                  <p className="text-[13.5px] leading-relaxed text-brand-muted">
-                    {t('landing.coachBannerSub', '点击生成深度简历诊断。我们将基于德国人才市场标准和 ATS 算法为您提供全方位复盘。')}
-                  </p>
+          <Link
+            to="/profile/edit"
+            className="lk-btn lk-btn-primary"
+          >
+            <Pencil className="h-4 w-4" />
+            <span>{t('profile.editProfile')}</span>
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {/* 标签条：玻璃质感的分段控件，选中项滑动 */}
+          <div ref={tabsRef} className="scroll-mt-28">
+            <div className="lk-liquid inline-flex max-w-full gap-1 overflow-x-auto rounded-full p-1.5 scrollbar-hide" role="tablist">
+              {profileTabs.map(item => {
+                const active = tab === item.id
+                return (
                   <button
-                    onClick={runCoach}
-                    disabled={coachGenerating || !hasData}
-                    className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-brand-ink px-5 py-3.5 text-[15px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                    key={item.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setTab(item.id)}
+                    className={`relative flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-semibold transition-colors ${active ? 'text-brand-on-ink' : 'text-brand-muted hover:text-brand-ink'}`}
                   >
-                    {coachGenerating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
-                    {coachGenerating ? t('profile.cv.extracting') : t('profile.coachCta')}
+                    {active && (
+                      <motion.span layoutId="profile-tab-pill" className="absolute inset-0 rounded-full bg-brand-ink" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />
+                    )}
+                    <item.icon className="relative h-4 w-4" />
+                    <span className="relative">{item.label}</span>
+                    {item.dot && <span className="relative h-1.5 w-1.5 rounded-full bg-brand-ochre" aria-hidden="true" />}
                   </button>
-                </div>
-              </motion.div>
-            )}
-
-            {tr && (
-              <div className="brand-float rounded-[22px] px-6 py-5">
-                <span className="mb-2 block text-[11px] text-brand-muted">{t('profile.coachTargetRole')}</span>
-                <p className="font-brand text-[22px] font-semibold tracking-tight text-brand-ink">{tr}</p>
-              </div>
-            )}
-
-            <div className="grid gap-5">
-              {resumeText.trim() && (
-                <details className="group space-y-3">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-[18px] border border-brand-line bg-brand-card p-5 text-[12.5px] font-bold text-brand-ink transition-colors hover:border-brand-ink">
-                    <span className="flex min-w-0 items-center gap-3">
-                      <FileText className="h-4 w-4 shrink-0 text-brand-violet" />
-                      {t('profile.cv.rawResumeTitle')}
-                    </span>
-                    <ChevronDown className="h-4 w-4 shrink-0 text-brand-muted transition-transform group-open:rotate-180" />
-                  </summary>
-                  <div className="rounded-[18px] border border-brand-line bg-brand-inset p-5">
-                    <pre className="whitespace-pre-wrap font-sans text-[12.5px] leading-relaxed text-brand-muted">
-                      {resumeText}
-                    </pre>
-                  </div>
-                </details>
-              )}
-
-              {resumeNotes.trim() && (
-                <div className="space-y-3 rounded-[18px] border border-brand-line bg-brand-card p-5">
-                  <span className="text-[11px] text-brand-muted">{t('profile.sectionNotes')}</span>
-                  <p className="whitespace-pre-wrap text-[13px] font-medium leading-relaxed text-brand-muted">{resumeNotes}</p>
-                </div>
-              )}
+                )
+              })}
             </div>
           </div>
-        )}
-      </div>
+
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={tab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {tab === 'profile' && (
+                <div className="space-y-12">
+                  <section>
+                    <SectionHeader icon={User} title={t('profile.cv.basic')} t={t} />
+                    <div className="grid grid-cols-1 gap-px overflow-hidden rounded-[20px] border border-brand-line bg-brand-line md:grid-cols-2">
+                      <DisplayCell label={t('profile.cv.fullName')} value={cvProfile.fullName} t={t} />
+                      <div className={displayCellClass}>
+                        <div className={displayLabelClass}>{t('profile.cv.gender')}</div>
+                        <div className={displayValueClass}>{genderDisplay(cvProfile.gender, t)}</div>
+                      </div>
+                      <DisplayCell label={t('profile.cv.email')} value={cvProfile.email} t={t} mailto />
+                      <DisplayCell label={t('profile.cv.phone')} value={cvProfile.phone} t={t} />
+                      <DisplayCell label={t('profile.cv.location')} value={cvProfile.location} t={t} />
+                      <DisplayCell label={t('profile.cv.linkedIn')} value={cvProfile.linkedIn} t={t} asLink />
+                      <DisplayCell label={t('profile.cv.website')} value={cvProfile.website} t={t} asLink className="md:col-span-2" />
+                    </div>
+                  </section>
+
+                  <ProfileSectionsView cvProfile={cvProfile} t={t} />
+                </div>
+              )}
+
+              {tab === 'coach' && (
+                <div className="space-y-8">
+                  {tr && (
+                    <div className="brand-float flex flex-wrap items-center justify-between gap-3 rounded-[22px] px-6 py-5">
+                      <div>
+                        <span className="mb-1 block text-[11px] text-brand-muted">{t('profile.coachTargetRole')}</span>
+                        <p className="lk-display text-[22px]">{tr}</p>
+                      </div>
+                      <Link to="/profile/edit" className="lk-btn lk-btn-ghost !py-2 !text-[12.5px]"><Pencil className="h-3.5 w-3.5" />{t('profile.editProfile')}</Link>
+                    </div>
+                  )}
+
+                  {coach ? (
+                    <div ref={coachRef} className="space-y-10">
+                      <CoachReport coach={coach} t={t} />
+                      {timeStr && (
+                        <div className="flex items-center gap-2 border-t border-brand-line pt-5 text-[11px] text-brand-muted">
+                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-brand-success" />
+                          {t('profile.coachPersistNote', { time: timeStr })}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="brand-float relative overflow-hidden rounded-[22px] px-6 py-10 text-center sm:px-10"
+                    >
+                      <div className="relative z-10 mx-auto max-w-lg space-y-5">
+                        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-brand-ochre/20 text-[#8A5F10] dark:text-brand-ochre">
+                          <Sparkles className="h-7 w-7" />
+                        </div>
+                        <h3 className="lk-display text-[26px]">{t('profile.coachPreviewTitle', '您的 AI 简历报告已就绪')}</h3>
+                        <p className="text-[13.5px] leading-relaxed text-brand-muted">
+                          {t('landing.coachBannerSub', '点击生成深度简历诊断。我们将基于德国人才市场标准和 ATS 算法为您提供全方位复盘。')}
+                        </p>
+                        <button
+                          onClick={runCoach}
+                          disabled={coachGenerating || !hasData}
+                          className="lk-btn lk-btn-primary lk-btn-lg w-full"
+                        >
+                          {coachGenerating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
+                          {coachGenerating ? t('profile.cv.extracting') : t('profile.coachCta')}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              )}
+
+              {tab === 'raw' && (
+                <div className="grid gap-5">
+                  {resumeText.trim() ? (
+                    <details className="group space-y-3" open>
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-[18px] border border-brand-line bg-brand-card p-5 text-[12.5px] font-bold text-brand-ink transition-colors hover:border-brand-ink">
+                        <span className="flex min-w-0 items-center gap-3">
+                          <FileText className="h-4 w-4 shrink-0 text-brand-violet" />
+                          {t('profile.cv.rawResumeTitle')}
+                        </span>
+                        <ChevronDown className="h-4 w-4 shrink-0 text-brand-muted transition-transform group-open:rotate-180" />
+                      </summary>
+                      <div className="rounded-[18px] border border-brand-line bg-brand-inset p-5">
+                        <pre className="whitespace-pre-wrap font-sans text-[12.5px] leading-relaxed text-brand-muted">
+                          {resumeText}
+                        </pre>
+                      </div>
+                    </details>
+                  ) : (
+                    <div className="rounded-[18px] border border-dashed border-brand-line p-8 text-center text-[13px] text-brand-muted">
+                      {t('profile.cv.emptySection')}
+                    </div>
+                  )}
+
+                  {resumeNotes.trim() && (
+                    <div className="space-y-3 rounded-[18px] border border-brand-line bg-brand-card p-5">
+                      <span className="text-[11px] text-brand-muted">{t('profile.sectionNotes')}</span>
+                      <p className="whitespace-pre-wrap text-[13px] font-medium leading-relaxed text-brand-muted">{resumeNotes}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   )
 }
@@ -1597,7 +1659,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="theme-quiet flex min-h-screen flex-col items-center justify-center gap-7 bg-brand-paper">
+      <div className="theme-quiet flex min-h-screen flex-col items-center justify-center gap-7">
         <div className="relative">
           <Loader2 className="h-9 w-9 animate-spin text-brand-ink" />
         </div>
@@ -1636,7 +1698,7 @@ export default function ProfilePage() {
         variants={pageExitVariants}
         initial="initial"
         animate="animate"
-        className="theme-quiet min-h-screen bg-brand-paper pb-14 pt-[calc(var(--ui-nav-h)+2rem)]"
+        className="theme-quiet min-h-screen pb-14 pt-[calc(var(--ui-nav-h)+2.75rem)]"
       >
         <div className="ui-container relative z-10">
           <ProfileDisplayView
@@ -1677,7 +1739,7 @@ export default function ProfilePage() {
       variants={pageExitVariants}
       initial="initial"
       animate="animate"
-      className="theme-quiet min-h-screen bg-brand-paper pb-14 pt-[calc(var(--ui-nav-h)+2rem)]"
+      className="theme-quiet min-h-screen pb-14 pt-[calc(var(--ui-nav-h)+2.75rem)]"
     >
       <div className="ui-container relative z-10">
           <ProfileEditView

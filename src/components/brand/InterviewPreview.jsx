@@ -7,7 +7,7 @@ import interviewerPortrait from '../../assets/interviewers/avatar_01/neutral.png
  * 首页主视觉：面试进行中的产品界面。
  *
  * 这里刻意用真实 DOM 搭建而不是贴一张图——图片会随品牌迭代过期（上一版就留着
- * 旧 OfferClaw 配色的截图），而 DOM 版本自动跟随 brand-* token，深浅色也一起走。
+ * 旧配色的截图），而 DOM 版本自动跟随 brand-* token，深浅色也一起走。
  * 所有文案走 i18n，不硬编码中文。
  */
 
