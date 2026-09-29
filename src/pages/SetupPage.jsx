@@ -355,14 +355,46 @@ function SectionCard({ title, subtitle, action, children, className = '', step }
  * 紧凑设置行：标签左置、控件右排。
  * 这是这一版的核心布局——标签独占一列后，整页高度比"标签压在控件上方"省掉约三分之一。
  */
-function SettingRow({ label, htmlFor, children, className = '' }) {
+/** 「类别选择（可选）」→ 主标签 + 下方一行小字，窄栏里不再断成两截 */
+function splitOptional(label) {
+  const text = String(label || '')
+  const m = text.match(/^(.*?)\s*[（(]([^）)]*)[）)]\s*$/)
+  return m ? { main: m[1], note: m[2] } : { main: text, note: '' }
+}
+
+function SettingRow({ label, htmlFor, info, children, className = '' }) {
   return (
-    <div className={`grid gap-x-6 gap-y-2 py-3.5 sm:grid-cols-[104px_minmax(0,1fr)] ${className}`}>
-      <label htmlFor={htmlFor} className="pt-2 text-[13px] font-semibold leading-snug text-brand-ink">
-        {label}
-      </label>
+    <div className={`grid gap-x-6 gap-y-2.5 py-4 sm:grid-cols-[112px_minmax(0,1fr)] ${className}`}>
+      <div className="flex items-start gap-1.5 pt-2">
+        <label htmlFor={htmlFor} className="text-[13px] font-semibold leading-snug text-brand-ink">
+          {splitOptional(label).main}
+          {splitOptional(label).note && (
+            <span className="mt-0.5 block text-[11px] font-normal text-brand-muted">{splitOptional(label).note}</span>
+          )}
+        </label>
+        {/* 次要说明收进悬停提示，界面上只留一个小图标 */}
+        {info && (
+          <span className="group/info relative mt-px shrink-0" tabIndex={0} aria-label={info}>
+            <Info className="h-3.5 w-3.5 text-brand-muted/70 transition-colors group-hover/info:text-brand-ink" />
+            <span className="pointer-events-none absolute left-1/2 top-6 z-30 w-60 -translate-x-1/2 rounded-xl bg-brand-ink px-3 py-2 text-[11.5px] font-normal leading-relaxed text-brand-on-ink opacity-0 shadow-lift transition-opacity group-hover/info:opacity-100 group-focus/info:opacity-100">
+              {info}
+            </span>
+          </span>
+        )}
+      </div>
       <div className="min-w-0">{children}</div>
     </div>
+  )
+}
+
+/** 当前选中项的说明：一组选项只显示一条，信息不丢、界面不挤 */
+function SelectedNote({ children }) {
+  if (!children) return null
+  return (
+    <p className="mt-2.5 flex items-start gap-2 rounded-xl bg-brand-inset px-3.5 py-2.5 text-[12px] leading-relaxed text-brand-muted">
+      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-ochre" aria-hidden="true" />
+      <span className="min-w-0">{children}</span>
+    </p>
   )
 }
 
@@ -375,9 +407,9 @@ function OptionPill({ selected, disabled, onClick, children }) {
       disabled={disabled}
       aria-pressed={selected}
       /* ring 而不是加粗 border：切换时零布局位移 */
-      className={`rounded-lg border px-4 py-2 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${selected
-        ? 'border-brand-ink bg-brand-card font-semibold text-brand-ink ring-1 ring-brand-ink'
-        : 'border-brand-line bg-brand-card text-brand-muted hover:border-brand-muted/50 hover:text-brand-ink'
+      className={`rounded-full border px-4 py-2 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${selected
+        ? 'border-brand-ink bg-brand-ink font-semibold text-brand-on-ink'
+        : 'border-brand-line bg-brand-card text-brand-muted hover:border-brand-ink/30 hover:text-brand-ink'
         }`}
     >
       {children}
@@ -385,33 +417,28 @@ function OptionPill({ selected, disabled, onClick, children }) {
   )
 }
 
-/** 多行选项卡：图标 + 标题 + 一行说明。选中用黑框 + 黑色实心勾。 */
-function OptionCard({ selected, onClick, icon: Icon, title, desc, hint }) {
+/**
+ * 紧凑选项：图标 + 名称。说明文字不再挤在每张卡里，
+ * 而是只显示选中项的那一条（见 SelectedNote），悬停时 title 也能看到。
+ */
+function OptionCard({ selected, onClick, icon: Icon, title, desc }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`relative flex w-full items-start gap-3 rounded-xl border px-3.5 py-3 pr-9 text-left transition-colors ${selected
-        ? 'border-brand-ink bg-brand-card ring-1 ring-brand-ink'
-        : 'border-brand-line bg-brand-card hover:border-brand-muted/50'
+      title={desc}
+      className={`flex items-center gap-2.5 rounded-2xl border px-3.5 py-2.5 text-left transition-all ${selected
+        ? 'border-brand-ink bg-brand-ink text-brand-on-ink shadow-lift'
+        : 'border-brand-line bg-brand-card text-brand-ink hover:-translate-y-px hover:border-brand-ink/30'
         }`}
     >
       {Icon && (
-        <span className={`mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg transition-colors ${selected ? 'bg-brand-inset text-brand-ink' : 'bg-brand-inset text-brand-muted'}`}>
+        <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg transition-colors ${selected ? 'bg-white/15 text-brand-on-ink dark:bg-black/10' : 'bg-brand-inset text-brand-muted'}`}>
           <Icon className="h-3.5 w-3.5" />
         </span>
       )}
-      <span className="min-w-0">
-        <span className="block text-[13.5px] font-semibold leading-tight text-brand-ink">{title}</span>
-        {desc && <span className="mt-1 block text-[12px] leading-relaxed text-brand-muted">{desc}</span>}
-        {hint && <span className="mt-1 block text-[11.5px] text-brand-muted">{hint}</span>}
-      </span>
-      {selected && (
-        <span className="absolute right-3 top-1/2 grid h-[18px] w-[18px] -translate-y-1/2 place-items-center rounded-full bg-brand-ink text-brand-on-ink">
-          <Check className="h-2.5 w-2.5" strokeWidth={3} />
-        </span>
-      )}
+      <span className="whitespace-nowrap text-[13px] font-semibold">{title}</span>
     </button>
   )
 }
@@ -890,6 +917,7 @@ export default function SetupPage() {
   const interviewerTypeLabel = interviewerTypeOptions.find(o => o.value === form.interviewerType)?.label || ''
   const modeLabel = modeOptions.find(o => o.value === form.mode)?.label || ''
   const selectedDifficulty = difficultyOptions.find(o => o.value === form.difficulty)
+  const selectedInterviewerType = interviewerTypeOptions.find(o => o.value === form.interviewerType)
   const difficultyLabel = selectedDifficulty?.label || ''
   const durationLabel = isPractice
     ? t('setup.practiceUnlimited')
@@ -950,7 +978,7 @@ export default function SetupPage() {
           </motion.div>
         )}
 
-        <form onSubmit={handleSubmit} className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_372px]">
+        <form onSubmit={handleSubmit} className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
 
           {/* ───────────── 左栏 ───────────── */}
           <div className="min-w-0 space-y-5">
@@ -1095,8 +1123,8 @@ export default function SetupPage() {
                 <p className="mt-1.5 text-[12px] text-brand-danger">{errors.jobDescription}</p>
               )}
               {jdAnalysis.status === 'idle' && (
-                <p className="mt-1.5 text-[12px] text-brand-muted">
-                  {t('setup.jdAnalysisReady')} · {t('setup.hintDetail')}
+                <p className="mt-2 text-[12px] text-brand-muted" title={t('setup.hintDetail')}>
+                  {t('setup.jdAnalysisReady')}
                 </p>
               )}
               {jdAnalysis.status !== 'idle' && (
@@ -1126,7 +1154,7 @@ export default function SetupPage() {
                   </div>
                 </SettingRow>
 
-                <SettingRow label={t('setup.categoryLabel')}>
+                <SettingRow label={t('setup.categoryLabel')} info={t('setup.subRoleHintEmpty')}>
                   <div className="grid gap-3 lg:grid-cols-2">
                     <CategorySelector
                       value={selectedCategory}
@@ -1157,11 +1185,9 @@ export default function SetupPage() {
                     </div>
                   </div>
 
-                  <p className="mt-2 text-[11.5px] text-brand-muted">
-                    {selectedRoles.length > 0 ? t('setup.subRoleHint') : t('setup.subRoleHintEmpty')}
-                  </p>
                   {selectedRoles.length > 0 && (
-                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                      <span className="mr-1 text-[11.5px] text-brand-muted">{t('setup.subRoleHint')}</span>
                       {selectedRoles.map(role => (
                         <button
                           key={role}
@@ -1179,7 +1205,7 @@ export default function SetupPage() {
                   )}
                 </SettingRow>
 
-                <SettingRow label={t('setup.resumeUploadLabel')}>
+                <SettingRow label={t('setup.resumeUploadLabel')} info={t('setup.resumeAutoMatch')}>
                   <input
                     ref={resumeFileRef}
                     type="file"
@@ -1187,44 +1213,41 @@ export default function SetupPage() {
                     onChange={handleResumePdf}
                     className="hidden"
                   />
-                  <button
-                    type="button"
-                    onClick={() => resumeFileRef.current?.click()}
-                    disabled={resumeParsing}
-                    className="flex w-full items-center gap-3 rounded-xl border border-dashed border-brand-line bg-brand-inset px-4 py-2.5 text-left transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-brand-line bg-brand-card text-brand-muted">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
+                    <button
+                      type="button"
+                      onClick={() => resumeFileRef.current?.click()}
+                      disabled={resumeParsing}
+                      title={t('setup.resumeHintLimit', { mb: RESUME_MAX_MB })}
+                      className="inline-flex items-center gap-2 rounded-full border border-dashed border-brand-ink/25 bg-brand-card px-4 py-2 text-[13px] font-semibold text-brand-ink transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-60"
+                    >
                       {resumeParsing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block truncate text-[13px] font-semibold text-brand-ink">{t('setup.resumeChoosePdf')}</span>
-                      <span className="block truncate text-[11.5px] text-brand-muted">{t('setup.resumeHintLimit', { mb: RESUME_MAX_MB })}</span>
-                    </span>
-                  </button>
-
-                  <div className="mt-2 space-y-1">
-                    {resumeNote && (
-                      <p className={`text-[12px] ${resumeNote.type === 'err' ? 'text-brand-danger' : resumeNote.type === 'warn' ? 'text-brand-ink' : 'text-brand-success'}`}>
-                        {resumeNote.text}
-                      </p>
-                    )}
-                    <p className="text-[11.5px] leading-relaxed text-brand-muted">{t('setup.resumeAutoMatch')}</p>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-brand-muted">
+                      {t('setup.resumeChoosePdf')}
+                    </button>
+                    <span className="flex min-w-0 items-center gap-1.5 text-[12px] text-brand-muted">
+                      {effectiveResume
+                        ? <Check className="h-3.5 w-3.5 shrink-0 text-brand-success" strokeWidth={2.5} />
+                        : <FileText className="h-3.5 w-3.5 shrink-0" />}
                       <span className="min-w-0">{resumeStatusText}</span>
-                      {sessionResumeText.trim() && (
-                        <button type="button" onClick={() => setSessionResumeText('')} className="font-semibold text-brand-ink hover:underline">
-                          {t('setup.resumeClearSession')}
-                        </button>
-                      )}
-                      <Link to="/profile" className="font-semibold text-brand-muted transition-colors hover:text-brand-ink">
-                        {t('setup.resumeProfileLink')}
-                      </Link>
-                    </div>
+                    </span>
+                    {sessionResumeText.trim() && (
+                      <button type="button" onClick={() => setSessionResumeText('')} className="text-[12px] font-semibold text-brand-ink hover:underline">
+                        {t('setup.resumeClearSession')}
+                      </button>
+                    )}
+                    <Link to="/profile" className="text-[12px] font-semibold text-brand-harbor transition-colors hover:text-brand-ink">
+                      {t('setup.resumeProfileLink')}
+                    </Link>
                   </div>
+                  {resumeNote && (
+                    <p className={`mt-2 text-[12px] ${resumeNote.type === 'err' ? 'text-brand-danger' : resumeNote.type === 'warn' ? 'text-brand-ink' : 'text-brand-success'}`}>
+                      {resumeNote.text}
+                    </p>
+                  )}
                 </SettingRow>
 
-                <SettingRow label={t('setup.interviewerType')}>
-                  <div className="grid gap-2.5 md:grid-cols-3">
+                <SettingRow label={t('setup.interviewerType')} info={t('setup.interviewerTypeDesc')}>
+                  <div className="flex flex-wrap gap-2">
                     {interviewerTypeOptions.map(option => (
                       <OptionCard
                         key={option.value}
@@ -1233,15 +1256,17 @@ export default function SetupPage() {
                         icon={option.icon}
                         title={option.label}
                         desc={option.desc}
-                        hint={option.hint}
                       />
                     ))}
                   </div>
-                  <p className="mt-2 text-[11.5px] text-brand-muted">{t('setup.interviewerTypeDesc')}</p>
+                  <SelectedNote>
+                    {selectedInterviewerType?.desc}
+                    {selectedInterviewerType?.hint && <span className="text-brand-muted/80"> · {selectedInterviewerType.hint}</span>}
+                  </SelectedNote>
                 </SettingRow>
 
-                <SettingRow label={t('setup.interviewMode')}>
-                  <div className="grid gap-2.5 sm:grid-cols-2">
+                <SettingRow label={t('setup.interviewMode')} info={t('setup.interviewModeDesc')}>
+                  <div className="flex flex-wrap gap-2">
                     {modeOptions.map(option => (
                       <OptionCard
                         key={option.value}
@@ -1253,7 +1278,7 @@ export default function SetupPage() {
                       />
                     ))}
                   </div>
-                  <p className="mt-2 text-[11.5px] text-brand-muted">{t('setup.interviewModeDesc')}</p>
+                  <SelectedNote>{modeOptions.find(o => o.value === form.mode)?.desc}</SelectedNote>
                 </SettingRow>
 
                 <SettingRow label={t('setup.difficulty')}>
@@ -1269,7 +1294,7 @@ export default function SetupPage() {
                     ))}
                   </div>
                   {/* 只显示当前选中难度的说明，信息不丢又不撑高页面 */}
-                  <p className="mt-2 text-[11.5px] leading-relaxed text-brand-muted">{selectedDifficulty?.desc}</p>
+                  <SelectedNote>{selectedDifficulty?.desc}</SelectedNote>
                 </SettingRow>
 
                 <SettingRow label={t('setup.interviewLang')}>
@@ -1288,8 +1313,8 @@ export default function SetupPage() {
 
                 <SettingRow label={t('setup.duration')} htmlFor="setup-duration">
                   {isPractice ? (
-                    <p className="rounded-lg border border-brand-line bg-brand-inset px-3.5 py-2.5 text-[12px] leading-relaxed text-brand-muted">
-                      <span className="mr-2 inline-block rounded-md border border-brand-line bg-brand-card px-2 py-0.5 text-[11px] font-semibold text-brand-ink">
+                    <p className="rounded-xl bg-brand-inset px-3.5 py-2.5 text-[12px] leading-relaxed text-brand-muted">
+                      <span className="mr-2 inline-block rounded-full bg-brand-card px-2.5 py-0.5 text-[11px] font-semibold text-brand-ink">
                         {t('setup.practiceUnlimitedCount', { n: practiceTotalQuestions })}
                       </span>
                       {t('setup.practiceFlowDesc', {
@@ -1313,15 +1338,15 @@ export default function SetupPage() {
                         style={{ '--brand-range-fill': `${durationFillPct}%` }}
                       />
                       <span className="shrink-0 text-[11.5px] text-brand-muted">{t('setup.durationMinutes', { n: DURATION_MAX })}</span>
-                      <span className="shrink-0 rounded-lg border border-brand-ink px-2.5 py-1 text-[12.5px] font-semibold tabular-nums text-brand-ink">
+                      <span className="shrink-0 rounded-full bg-brand-ink px-3 py-1 text-[12.5px] font-semibold tabular-nums text-brand-on-ink">
                         {t('setup.durationMinutes', { n: form.duration })}
                       </span>
                     </div>
                   )}
                 </SettingRow>
 
-                <SettingRow label={t('setup.interviewerStyle')}>
-                  <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+                <SettingRow label={t('setup.interviewerStyle')} info={t('setup.interviewerStyleDesc')}>
+                  <div className="flex flex-wrap gap-2">
                     {interviewerStyles.map(item => (
                       <OptionCard
                         key={item.value}
@@ -1333,7 +1358,7 @@ export default function SetupPage() {
                       />
                     ))}
                   </div>
-                  <p className="mt-2 text-[11.5px] text-brand-muted">{t('setup.interviewerStyleDesc')}</p>
+                  <SelectedNote>{interviewerStyles.find(i => i.value === form.interviewerStyle)?.desc}</SelectedNote>
                 </SettingRow>
               </div>
             </SectionCard>

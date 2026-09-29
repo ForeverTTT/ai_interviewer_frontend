@@ -500,7 +500,7 @@ export default function OfferSprintPanel({ offerSprint, practiceStats, onOvervie
       </div>
 
       {/* 周报 / 里程碑 / 会员预告：次要信息，默认折叠成三张小卡 */}
-      <div className="grid gap-3.5 lg:grid-cols-3">
+      <div className="grid items-start gap-3.5 lg:grid-cols-3">
         <details className={`${CARD} group px-5 py-4`}>
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
             <div className="min-w-0">
