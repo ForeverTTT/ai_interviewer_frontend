@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import harborScene from '../assets/background.jpg'
 import { supabase } from '../lib/supabase'
 import { BrainCircuit, AlertCircle, CheckCircle2 } from 'lucide-react'
 
@@ -121,15 +122,16 @@ export default function AuthCallbackPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-paper px-4">
-      <div className="relative z-[1] flex flex-col items-center gap-5 max-w-sm w-full text-center">
-        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-xl ${
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-cover opacity-[0.35] blur-[60px] saturate-[1.3]" style={{ backgroundImage: `url(${harborScene})` }} />
+      <div className="lk-liquid relative z-[1] flex w-full max-w-sm flex-col items-center gap-5 rounded-[28px] px-8 py-10 text-center">
+        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-lift ${
           status === 'error'   ? 'bg-brand-danger' :
           status === 'success' ? 'bg-brand-success' :
           'bg-brand-ink'
         }`}>
           {status === 'error' && <AlertCircle className="w-9 h-9 text-white" />}
           {status === 'success' && <CheckCircle2 className="w-9 h-9 text-white" />}
-          {status === 'loading' && <BrainCircuit className="w-9 h-9 text-white" />}
+          {status === 'loading' && <BrainCircuit className="w-9 h-9 text-brand-on-ink" />}
         </div>
 
         {status === 'loading' && (
@@ -150,7 +152,7 @@ export default function AuthCallbackPage() {
             <p className="text-[13px] text-brand-muted">{t('auth.backSoon')}</p>
             <button
               onClick={() => navigate('/login', { replace: true })}
-              className="mt-2 rounded-xl bg-brand-ink px-6 py-2.5 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90"
+              className="lk-btn lk-btn-primary mt-2"
             >
               {t('auth.backNow')}
             </button>

@@ -39,10 +39,10 @@ const API_URL = getBackendBaseUrl()
  * 都压成淡底 + 同色图标，只有 influencing 是深色实底，四个仍然能区分但不会跳出来。
  */
 const DOMAIN_TONES = {
-  executing: { chip: 'bg-brand-violet/[0.10] border-brand-violet/25', icon: 'text-brand-violet' },
-  influencing: { chip: 'bg-brand-ink border-brand-ink', icon: 'text-brand-on-ink' },
-  relationship: { chip: 'bg-brand-success/[0.10] border-brand-success/25', icon: 'text-brand-success' },
-  strategic: { chip: 'bg-brand-sky/40 border-brand-sky', icon: 'text-brand-ink' },
+  executing: { chip: 'bg-brand-harbor/[0.12] border-brand-harbor/25', icon: 'text-brand-harbor', card: 'from-brand-harbor/[0.14]' },
+  influencing: { chip: 'bg-brand-ochre/[0.2] border-brand-ochre/35', icon: 'text-[#8A5F10] dark:text-brand-ochre', card: 'from-brand-ochre/[0.2]' },
+  relationship: { chip: 'bg-brand-sage/[0.22] border-brand-sage/35', icon: 'text-brand-success', card: 'from-brand-sage/[0.22]' },
+  strategic: { chip: 'bg-brand-brick/[0.12] border-brand-brick/25', icon: 'text-brand-brick', card: 'from-brand-brick/[0.13]' },
 }
 
 export default function GallupTestPage() {
@@ -298,13 +298,7 @@ export default function GallupTestPage() {
   }
 
   return (
-    <div className="theme-quiet min-h-screen bg-brand-paper pb-14 pt-[calc(var(--ui-nav-h)+2rem)]">
-      {/* 与首页同一套克制的柔光圆，只做氛围 */}
-      <div
-        className="hidden"
-        aria-hidden="true"
-      />
-
+    <div className="theme-quiet min-h-screen pb-14 pt-[calc(var(--ui-nav-h)+2.75rem)]">
       <div className="ui-container relative z-10 max-w-4xl font-chinese-modern">
         <AnimatePresence mode="wait">
           {step === 'intro' && (
@@ -312,16 +306,16 @@ export default function GallupTestPage() {
                <motion.div
                  initial={{ opacity: 0, scale: 0.8 }}
                  animate={{ opacity: 1, scale: 1 }}
-                 className="inline-flex items-center gap-2 rounded-full border border-brand-line bg-brand-card px-4 py-1.5 text-[12.5px] font-bold text-brand-ink mb-8"
+                 className="lk-liquid mb-8 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[12.5px] font-semibold text-brand-ink"
                >
-                <Gem className="w-3.5 h-3.5 text-brand-violet" /> Strategic Discovery
+                <Gem className="h-3.5 w-3.5 text-brand-ochre" /> Strategic Discovery
               </motion.div>
 
-              <h1 className="font-brand text-[34px] sm:text-[40px] font-semibold text-brand-ink mb-5 tracking-tight leading-tight">
+              <h1 className="lk-display mb-5 text-[36px] leading-tight sm:text-[46px]">
                 {t('gallup.title')}
               </h1>
 
-              <p className="mx-auto mb-12 max-w-3xl border-l-2 border-brand-violet pl-5 text-left text-[14px] leading-relaxed text-brand-muted">
+              <p className="mx-auto mb-12 max-w-2xl text-[15px] leading-relaxed text-brand-muted">
                 {t('gallup.subtitle')}
               </p>
 
@@ -330,7 +324,7 @@ export default function GallupTestPage() {
                   <motion.div
                     key={key}
                     initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-                    className="brand-float rounded-[20px] border border-brand-line p-6 group transition-transform hover:-translate-y-1"
+                    className={`brand-float group rounded-[22px] bg-gradient-to-b ${DOMAIN_TONES[key].card} to-brand-card p-6 transition-transform hover:-translate-y-1`}
                   >
                     <div className={`w-12 h-12 mx-auto rounded-xl border flex items-center justify-center mb-3 transition-transform group-hover:rotate-6 ${DOMAIN_TONES[key].chip}`}>
                       {key === 'executing' ? <Target className={`w-5 h-5 ${DOMAIN_TONES.executing.icon}`} /> :
@@ -338,7 +332,7 @@ export default function GallupTestPage() {
                        key === 'relationship' ? <Users className={`w-5 h-5 ${DOMAIN_TONES.relationship.icon}`} /> :
                        <Lightbulb className={`w-5 h-5 ${DOMAIN_TONES.strategic.icon}`} />}
                     </div>
-                    <div className="text-[12.5px] font-bold text-brand-ink leading-tight">{t(`gallup.domains_info.${key}.name`).split(' (')[0]}</div>
+                    <div className="text-[13px] font-semibold leading-tight text-brand-ink">{t(`gallup.domains_info.${key}.name`).split(' (')[0]}</div>
                   </motion.div>
                 ))}
               </div>
@@ -348,7 +342,7 @@ export default function GallupTestPage() {
                 <button
                   onClick={() => setStep('quiz')}
                   disabled={tokens < 100}
-                  className="group inline-flex h-14 items-center justify-center gap-2.5 rounded-xl bg-brand-ink px-10 text-[15px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="lk-btn lk-btn-accent lk-btn-lg group"
                 >
                   <span>{progress > 0 ? t('gallup.resumeBtn') : t('gallup.startBtn')}</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -357,7 +351,7 @@ export default function GallupTestPage() {
                    {t('profile.tokenUsage')} 100 Energy（{t('profile.tokens')}: {tokens}）
                 </p>
                 {tokens < 100 && (
-                  <Link to="/profile" className="text-[12px] font-bold text-brand-violet underline">
+                  <Link to="/profile" className="text-[12px] font-bold text-brand-harbor underline">
                     {t('profile.recharge')}
                   </Link>
                 )}
@@ -367,7 +361,7 @@ export default function GallupTestPage() {
 
           {step === 'quiz' && (
             <motion.div key="quiz" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.6, ease: "anticipate" }} className="py-6">
-                <div className="brand-float rounded-[22px] border border-brand-line overflow-hidden relative">
+                <div className="brand-float relative overflow-hidden rounded-[28px]">
                 {/* Visual Progress Header */}
                 <div className="px-6 pt-6 pb-5 sm:px-8 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3.5">
@@ -396,7 +390,7 @@ export default function GallupTestPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.5 }}
-                      className="font-brand text-[22px] sm:text-[26px] font-semibold text-brand-ink leading-[1.35] tracking-tight"
+                      className="lk-display text-[24px] leading-[1.35] sm:text-[30px]"
                     >
                       {questions[currentIndex]?.text}
                     </motion.h2>
@@ -414,7 +408,7 @@ export default function GallupTestPage() {
                         key={opt.score}
                         onClick={() => handleAnswer(questions[currentIndex].id, opt.score)}
                         /* 选中态：黑框 + 黑底白字；ring 而不是加粗 border，切换时零布局位移 */
-                        className={`flex-1 flex flex-col items-center justify-center gap-2.5 py-5 px-3 rounded-2xl border transition-colors duration-200 relative group overflow-hidden ${Number(answers[questions[currentIndex]?.id]) === opt.score ? 'border-brand-ink bg-brand-ink text-brand-on-ink ring-1 ring-brand-ink' : 'border-brand-line bg-brand-card text-brand-muted hover:border-brand-ink hover:text-brand-ink'}`}
+                        className={`flex-1 flex flex-col items-center justify-center gap-2.5 py-5 px-3 rounded-[20px] border transition-all duration-200 hover:-translate-y-0.5 relative group overflow-hidden ${Number(answers[questions[currentIndex]?.id]) === opt.score ? 'border-brand-ink bg-brand-ink text-brand-on-ink ring-1 ring-brand-ink' : 'border-brand-line bg-brand-card text-brand-muted hover:border-brand-ink hover:text-brand-ink'}`}
                       >
                         <opt.icon className="w-8 h-8 transition-transform group-hover:scale-110" />
                         <span className="text-[11px] font-bold leading-none">{t(opt.label)}</span>
@@ -427,19 +421,19 @@ export default function GallupTestPage() {
                   <button
                     disabled={currentIndex === 0}
                     onClick={() => setCurrentIndex(currentIndex - 1)}
-                    className="inline-flex h-11 shrink-0 items-center rounded-xl border border-brand-line bg-brand-card px-4 text-[13px] font-bold text-brand-ink transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-45"
+                    className="inline-flex h-11 shrink-0 items-center rounded-full border border-brand-line bg-brand-card px-4 text-[13px] font-bold text-brand-ink transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-45"
                   >
                     <ChevronLeft className="w-4 h-4 mr-1.5" /> {t('gallup.prevBtn')}
                   </button>
                   <div className="h-1.5 flex-grow mx-4 sm:mx-8 bg-brand-line rounded-full overflow-hidden relative">
-                    <motion.div className="h-full bg-brand-ink" animate={{ width: `${progress}%` }} transition={{ duration: 1 }} />
+                    <motion.div className="h-full rounded-full bg-brand-ochre" animate={{ width: `${progress}%` }} transition={{ duration: 1 }} />
                   </div>
                   {answeredCount === questions.length ? (
-                    <button onClick={handleSubmit} className="inline-flex h-11 shrink-0 items-center rounded-xl bg-brand-ink px-5 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90">
+                    <button onClick={handleSubmit} className="inline-flex h-11 shrink-0 items-center rounded-full bg-brand-ink px-5 text-[13px] font-semibold text-brand-on-ink transition-all duration-200 hover:-translate-y-px">
                       {t('gallup.viewResults')} <CheckCircle className="w-4 h-4 ml-1.5" />
                     </button>
                   ) : (
-                    <button onClick={() => setCurrentIndex(currentIndex + 1)} className="inline-flex h-11 shrink-0 items-center rounded-xl bg-brand-ink px-5 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90">
+                    <button onClick={() => setCurrentIndex(currentIndex + 1)} className="inline-flex h-11 shrink-0 items-center rounded-full bg-brand-ink px-5 text-[13px] font-semibold text-brand-on-ink transition-all duration-200 hover:-translate-y-px">
                       {t('gallup.nextBtn')} <ChevronRight className="w-4 h-4 ml-1.5" />
                     </button>
                   )}

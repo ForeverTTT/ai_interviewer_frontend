@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { motion } from 'framer-motion'
 import {
   AlertCircle, Check, Copy, Download, FileText, Loader2,
   Save, Sparkles, Upload, WandSparkles,
@@ -10,15 +9,16 @@ import { getBackendBaseUrl } from '../lib/backendBase'
 import { authenticatedFetch } from '../lib/authenticatedFetch'
 import { exportPdf, exportWord } from '../lib/documentExport'
 import { parseJobDescription } from '../lib/jobDescriptionParser'
+import PageHeader from '../components/brand/PageHeader'
 
 /** 输入控件共用的一套品牌样式；写成常量避免每处手抄一遍长串类名 */
 const FIELD_BASE = 'w-full rounded-xl border border-brand-line bg-brand-inset text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none focus:ring-4 focus:ring-brand-ink/10'
 const INPUT_CLASS = `${FIELD_BASE} px-4 py-3 text-[13.5px] font-medium`
 const TEXTAREA_CLASS = `${FIELD_BASE} resize-none px-4 py-3.5 text-[13.5px] leading-relaxed`
 /** 次级按钮：白底 + 描边，hover 转黑框 */
-const SECONDARY_BUTTON = 'inline-flex items-center justify-center gap-2 rounded-xl border border-brand-line bg-brand-card px-3 py-2 text-[12.5px] font-medium text-brand-ink transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-60'
+const SECONDARY_BUTTON = 'inline-flex items-center justify-center gap-2 rounded-full border border-brand-line bg-brand-card px-3.5 py-2 text-[12.5px] font-medium text-brand-ink transition-colors hover:border-brand-ink/40 disabled:cursor-not-allowed disabled:opacity-60'
 /** 主 CTA：墨色实心。徽标压在按钮里，用半透明的 on-ink 而不是实心块，避免黑上叠黑 */
-const PRIMARY_CTA = 'inline-flex items-center justify-center gap-2 rounded-xl bg-brand-ink px-5 py-3 text-[13.5px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40'
+const PRIMARY_CTA = 'lk-btn lk-btn-primary !text-[13.5px]'
 const CTA_BADGE = 'rounded-full bg-brand-on-ink/15 px-2 py-0.5 text-[11px] font-medium'
 
 function fileToBase64Data(file) {
@@ -34,12 +34,15 @@ function fileToBase64Data(file) {
 }
 
 /** 区块小标题：序号 + 标题，替代原来的全大写微标签 */
+/** 步骤标题：序号圆章与开始面试页一致，整站的「流程」读起来是同一种语言 */
 function StepHeading({ step, title, hint }) {
   return (
-    <div className="min-w-0">
-      <p className="text-[11px] font-bold tabular-nums text-brand-muted">{step}</p>
-      <h2 className="mt-1.5 font-brand text-[17px] font-semibold tracking-[-0.01em] text-brand-ink">{title}</h2>
-      {hint && <p className="mt-1.5 text-[12.5px] leading-relaxed text-brand-muted">{hint}</p>}
+    <div className="flex min-w-0 items-start gap-3.5">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-ink font-display text-[14px] font-semibold tabular-nums text-brand-on-ink">{step}</span>
+      <div className="min-w-0">
+        <h2 className="pt-1 font-brand text-[17px] font-semibold tracking-[-0.01em] text-brand-ink">{title}</h2>
+        {hint && <p className="mt-1.5 text-[12.5px] leading-relaxed text-brand-muted">{hint}</p>}
+      </div>
     </div>
   )
 }
@@ -254,13 +257,13 @@ export default function ResumeTailorPage() {
   const chip = 'rounded-full border px-3 py-1.5 text-[12px] font-medium'
 
   return (
-    <div className="theme-quiet min-h-screen bg-brand-paper pb-24 pt-[calc(var(--ui-nav-h)+2rem)]">
+    <div className="theme-quiet min-h-screen pb-24 pt-[calc(var(--ui-nav-h)+2.75rem)]">
       <div className="ui-container">
-        <motion.header initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-6 max-w-3xl space-y-3">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-inset px-3 py-1 text-[11px] font-medium text-brand-muted">{t('resumeTailor.badge')}</div>
-          <h1 className="font-brand text-[30px] font-semibold leading-tight tracking-[-0.02em] text-brand-ink sm:text-[34px]">{t('resumeTailor.title')}</h1>
-          <p className="text-[14px] leading-relaxed text-brand-muted">{t('resumeTailor.subtitle')}</p>
-        </motion.header>
+        <PageHeader
+          eyebrow={t('resumeTailor.badge')}
+          title={t('resumeTailor.title')}
+          subtitle={t('resumeTailor.subtitle')}
+        />
 
         {notice && (
           <div className={`mb-6 flex items-center gap-3 rounded-xl border px-4 py-3 text-[13px] font-medium ${notice.type === 'success' ? 'border-brand-success/30 bg-brand-success/[0.06] text-brand-success' : 'border-brand-danger/30 bg-brand-danger/[0.06] text-brand-danger'}`}>
@@ -273,7 +276,7 @@ export default function ResumeTailorPage() {
           {/* ───────── 左栏：输入（01 基础简历 + 02 岗位描述）。
               这栏只是信息录入，右栏的产出才是页面主体，所以宽度压到 4/12 ───────── */}
           <section className="lg:col-span-4">
-            <div className="brand-float space-y-5 rounded-[22px] px-6 py-5">
+            <div className="brand-float space-y-5 rounded-[24px] px-6 py-6">
 
               {/* 01 基础简历。
                   原来这里是个约 200px 高的虚线上传框，但它实际只承载「一行状态 + 一个按钮」，
@@ -284,7 +287,7 @@ export default function ResumeTailorPage() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-medium tabular-nums text-brand-muted">01</span>
+                    <span className="grid h-5 w-5 place-items-center rounded-full bg-brand-ink font-display text-[10px] font-semibold tabular-nums text-brand-on-ink">01</span>
                     <h2 className="truncate font-brand text-[14px] font-semibold text-brand-ink">{t('resumeTailor.baseResume')}</h2>
                   </div>
                   <p className="mt-0.5 flex items-center gap-1.5 truncate text-[12px] text-brand-muted">
@@ -328,7 +331,7 @@ export default function ResumeTailorPage() {
 
           {/* ───────── 右栏：产出（03 定制简历 + 04 动机信）───────── */}
           <section className="space-y-5 lg:col-span-8">
-            <div className="brand-float space-y-5 rounded-[22px] px-6 py-5">
+            <div className="brand-float space-y-5 rounded-[24px] px-6 py-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <StepHeading step="03" title={t('resumeTailor.tailoredResume')} hint={t('resumeTailor.tailoredHint')} />
                 <button type="button" disabled={tailoring || !resumeText || jobDescription.trim().length < 50} onClick={tailorResume} className={PRIMARY_CTA}>
@@ -340,7 +343,7 @@ export default function ResumeTailorPage() {
                   <textarea value={tailoredResume} onChange={event => setTailoredResume(event.target.value)} rows={24} className={`${TEXTAREA_CLASS} font-mono text-[12px]`} />
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <ResultActions title={`${position} - Tailored Resume`} text={tailoredResume} fileName={`${position || 'tailored'}-resume`} t={t} />
-                    <button type="button" disabled={saving} onClick={persistTailoredResume} className="inline-flex items-center gap-2 rounded-xl bg-brand-ink px-4 py-2.5 text-[12.5px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">
+                    <button type="button" disabled={saving} onClick={persistTailoredResume} className="lk-btn lk-btn-accent !px-4 !text-[12.5px]">
                       {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{t('resumeTailor.saveAsProfile')}
                     </button>
                   </div>
@@ -354,7 +357,7 @@ export default function ResumeTailorPage() {
               ) : <div className="flex min-h-72 flex-col items-center justify-center rounded-xl border border-dashed border-brand-line bg-brand-inset text-center"><Sparkles className="h-7 w-7 text-brand-muted" /><p className="mt-3 max-w-sm text-[13px] text-brand-muted">{t('resumeTailor.emptyTailored')}</p></div>}
             </div>
 
-            <div className="brand-float space-y-5 rounded-[22px] px-6 py-5">
+            <div className="brand-float space-y-5 rounded-[24px] px-6 py-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <StepHeading step="04" title={t('resumeTailor.letterTitle')} hint={t('resumeTailor.letterHint')} />
                 <button type="button" disabled={letterLoading || !resumeText || !position || jobDescription.trim().length < 50} onClick={generateLetter} className={PRIMARY_CTA}>

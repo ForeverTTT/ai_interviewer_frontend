@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowLeft, Bookmark, BookmarkCheck, CalendarDays, CheckCircle2,
   ChevronLeft, ChevronRight, ExternalLink, Eye, EyeOff, Layers, LayoutList,
@@ -10,6 +11,7 @@ import {
 import { getBackendBaseUrl } from '../lib/backendBase'
 import { authenticatedFetch } from '../lib/authenticatedFetch'
 import { createInterviewRequestId } from '../lib/interviewEvents'
+import PageHeader from '../components/brand/PageHeader'
 
 const SOURCE_OPTIONS = ['', 'practice', 'report']
 const INTERVIEWER_OPTIONS = ['', 'mixed', 'technical', 'hr']
@@ -136,9 +138,9 @@ export default function NotesPage() {
   const localeTag = i18n.language === 'de' ? 'de-DE' : i18n.language === 'en' ? 'en-US' : 'zh-CN'
 
   const CARD = 'brand-float rounded-[22px]'
-  const EYEBROW = 'text-[11px] font-medium uppercase tracking-[0.16em] text-brand-muted'
-  const BTN_INK = 'inline-flex items-center justify-center gap-2 rounded-xl bg-brand-ink px-4 py-2.5 text-[12.5px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90 disabled:opacity-40'
-  const BTN_LINE = 'inline-flex items-center justify-center gap-2 rounded-xl border border-brand-line bg-brand-card px-4 py-2.5 text-[12.5px] font-semibold text-brand-ink transition-colors hover:border-brand-ink disabled:opacity-40'
+  const EYEBROW = 'text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-muted'
+  const BTN_INK = 'inline-flex items-center justify-center gap-2 rounded-full bg-brand-ink px-4 py-2.5 text-[12.5px] font-semibold text-brand-on-ink transition-all hover:-translate-y-px hover:opacity-95 disabled:opacity-40'
+  const BTN_LINE = 'inline-flex items-center justify-center gap-2 rounded-full border border-brand-line bg-brand-card px-4 py-2.5 text-[12.5px] font-semibold text-brand-ink transition-colors hover:border-brand-ink/40 disabled:opacity-40'
   const FIELD = 'w-full rounded-xl border border-brand-line bg-brand-inset px-4 py-2.5 text-[13px] text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none focus:ring-4 focus:ring-brand-ink/10'
 
   const total = filtered.length
@@ -265,36 +267,40 @@ export default function NotesPage() {
   }
 
   return (
-    <div className="theme-quiet min-h-screen bg-brand-paper pb-20 pt-[calc(var(--ui-nav-h)+2rem)]">
+    <div className="theme-quiet min-h-screen pb-20 pt-[calc(var(--ui-nav-h)+2.75rem)]">
       <main className="ui-container max-w-[1400px] space-y-5">
 
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="min-w-0">
-            <Link to="/dashboard" className="mb-4 inline-flex items-center gap-1.5 text-[12.5px] font-medium text-brand-muted transition-colors hover:text-brand-ink">
+        <PageHeader
+          before={(
+            <Link to="/dashboard" className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-card/70 px-3 py-1.5 text-[12px] font-medium text-brand-muted backdrop-blur transition-colors hover:border-brand-ink/30 hover:text-brand-ink">
               <ArrowLeft className="h-3.5 w-3.5" />{t('notes.back')}
             </Link>
-            <p className={`flex items-center gap-2 ${EYEBROW}`}><Bookmark className="h-3.5 w-3.5" />{t('notes.eyebrow')}</p>
-            <h1 className="mt-2 font-brand text-[30px] font-semibold leading-tight tracking-[-0.02em] text-brand-ink sm:text-[34px]">{t('notes.title')}</h1>
-            <p className="mt-2.5 max-w-2xl text-[14px] leading-relaxed text-brand-ink">{t('notes.subtitle')}</p>
-          </div>
-          <div className="flex shrink-0 items-center gap-3">
-            <div className="rounded-xl border border-brand-line bg-brand-card px-4 py-2.5">
-              <span className="text-[20px] font-semibold tabular-nums text-brand-ink">{filtered.length}</span>
-              <span className="ml-1.5 text-[11.5px] text-brand-muted">{t('notes.cards')}</span>
-            </div>
-            <div className="flex gap-1 rounded-xl border border-brand-line bg-brand-inset p-1">
-              {[{ k: 'card', label: t('notes.cardView'), Icon: Layers }, { k: 'list', label: t('notes.listView'), Icon: LayoutList }].map(m => (
-                <button
-                  key={m.k} type="button" onClick={() => setMode(m.k)} aria-pressed={mode === m.k}
-                  aria-label={m.label}
-                  className={`grid h-8 w-9 place-items-center rounded-lg transition-colors ${mode === m.k ? 'bg-brand-card text-brand-ink shadow-sm' : 'text-brand-muted hover:text-brand-ink'}`}
-                >
-                  <m.Icon className="h-4 w-4" />
-                </button>
-              ))}
-            </div>
-          </div>
-        </header>
+          )}
+          eyebrow={t('notes.eyebrow')}
+          title={t('notes.title')}
+          subtitle={t('notes.subtitle')}
+          className="!mb-3"
+          actions={(
+            <>
+              <div className="flex items-baseline gap-1.5 rounded-full border border-brand-line bg-brand-card px-4 py-2">
+                <Bookmark className="h-3.5 w-3.5 self-center text-brand-ochre" />
+                <span className="text-[18px] font-semibold tabular-nums text-brand-ink">{filtered.length}</span>
+                <span className="text-[11.5px] text-brand-muted">{t('notes.cards')}</span>
+              </div>
+              <div className="flex gap-1 rounded-full border border-brand-line bg-brand-inset p-1">
+                {[{ k: 'card', label: t('notes.cardView'), Icon: Layers }, { k: 'list', label: t('notes.listView'), Icon: LayoutList }].map(m => (
+                  <button
+                    key={m.k} type="button" onClick={() => setMode(m.k)} aria-pressed={mode === m.k}
+                    aria-label={m.label} title={m.label}
+                    className={`grid h-8 w-10 place-items-center rounded-full transition-colors ${mode === m.k ? 'bg-brand-card text-brand-ink shadow-sm' : 'text-brand-muted hover:text-brand-ink'}`}
+                  >
+                    <m.Icon className="h-4 w-4" />
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        />
 
         <section className={`${CARD} space-y-3 px-5 py-4`} aria-label={t('notes.filters')}>
           <label className="relative block">
@@ -364,14 +370,39 @@ export default function NotesPage() {
             </div>
 
             <div className="space-y-5 px-6 py-6">
-              <h2 className="text-[18px] font-semibold leading-relaxed text-brand-ink">{current.question_text}</h2>
+              {/* 闪卡：正面是题目，揭晓答案时整张卡在 3D 空间里翻到背面 */}
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={current.id}
+                  initial={{ opacity: 0, x: 24 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -24 }}
+                  transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                  className="lk-perspective"
+                >
+                  <motion.div
+                    animate={{ rotateY: revealed ? 180 : 0 }}
+                    transition={{ type: 'spring', stiffness: 120, damping: 18 }}
+                    style={{ transformStyle: 'preserve-3d' }}
+                    className="relative grid"
+                  >
+                    <div className="flex min-h-[200px] flex-col justify-center rounded-[20px] border border-brand-line bg-gradient-to-br from-brand-inset to-brand-card px-7 py-8 [backface-visibility:hidden] [grid-area:1/1]">
+                      <span className="lk-eyebrow">Q · {cardIndex + 1}</span>
+                      <h2 className="lk-display mt-4 text-[22px] leading-snug sm:text-[26px]">{current.question_text}</h2>
+                    </div>
+                    <div className="rounded-[20px] border border-brand-ink/15 bg-brand-card px-7 py-7 [backface-visibility:hidden] [grid-area:1/1] [transform:rotateY(180deg)]">
+                      <p className="mb-4 line-clamp-2 text-[12.5px] font-medium text-brand-muted">{current.question_text}</p>
+                      {revealed && <CardAnswer collection={current} />}
+                    </div>
+                  </motion.div>
+                </motion.div>
+              </AnimatePresence>
 
               <button type="button" onClick={() => setRevealed(v => !v)} className={`${BTN_INK} w-full py-3`}>
                 {revealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 {t(revealed ? 'notes.hide' : 'notes.reveal')}
               </button>
 
-              {revealed && <CardAnswer collection={current} />}
               <CardNote collection={current} />
               <CardActions collection={current} />
             </div>

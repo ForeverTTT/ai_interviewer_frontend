@@ -14,6 +14,7 @@ import {
   MonitorPlay, BadgeCheck, Code2, Scale, Leaf, Search, ChevronRight, Lightbulb,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import PageHeader from '../components/brand/PageHeader'
 
 function fileToBase64Data(file) {
   return new Promise((resolve, reject) => {
@@ -327,14 +328,21 @@ function FieldLabel({ children, required = false, htmlFor }) {
   )
 }
 
-/** 带标题栏的卡片外壳。标题比选项标题高一档，用显示字体加重。 */
-function SectionCard({ title, subtitle, action, children, className = '' }) {
+/** 带标题栏的卡片外壳。step 给出流程序号，让「先贴 JD → 再配置面试」一眼可读。 */
+function SectionCard({ title, subtitle, action, children, className = '', step }) {
   return (
-    <section className={`brand-float rounded-[22px] px-6 py-5 ${className}`}>
-      <header className="mb-4 flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
-        <div className="min-w-0">
-          <h2 className="font-brand text-[16.5px] font-semibold tracking-[-0.01em] text-brand-ink">{title}</h2>
-          {subtitle && <p className="mt-1 text-[12.5px] text-brand-muted">{subtitle}</p>}
+    <section className={`brand-float rounded-[24px] px-6 py-6 sm:px-7 ${className}`}>
+      <header className="mb-5 flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
+        <div className="flex min-w-0 items-start gap-3.5">
+          {step && (
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-ink font-display text-[14px] font-semibold tabular-nums text-brand-on-ink">
+              {String(step).padStart(2, '0')}
+            </span>
+          )}
+          <div className="min-w-0">
+            <h2 className="font-brand text-[17px] font-semibold tracking-[-0.01em] text-brand-ink">{title}</h2>
+            {subtitle && <p className="mt-1 text-[12.5px] text-brand-muted">{subtitle}</p>}
+          </div>
         </div>
         {action}
       </header>
@@ -898,15 +906,20 @@ export default function SetupPage() {
   const updateForm = (patch) => setForm(prev => ({ ...prev, ...patch }))
 
   return (
-    <div className="theme-quiet relative min-h-screen bg-brand-paper pb-14 pt-[calc(var(--ui-nav-h)+2rem)]">
+    <div className="theme-quiet relative min-h-screen pb-14 pt-[calc(var(--ui-nav-h)+2.75rem)]">
       <div className="ui-container relative z-10">
 
-        <header className="mb-7">
-          <h1 className="font-brand text-[30px] font-semibold leading-tight tracking-[-0.02em] text-brand-ink sm:text-[34px]">
-            {t('setup.pageTitle')}
-          </h1>
-          <p className="mt-2.5 text-[14px] leading-relaxed text-brand-muted">{t('setup.pageSub')}</p>
-        </header>
+        <PageHeader
+          title={t('setup.pageTitle')}
+          subtitle={t('setup.pageSub')}
+          actions={(
+            <span className="inline-flex items-center gap-2 rounded-full border border-brand-line bg-brand-card/80 px-4 py-2 text-[12.5px] text-brand-muted backdrop-blur">
+              <Zap className="h-3.5 w-3.5 fill-brand-ochre text-brand-ochre" />
+              {t('nav.tokens')}
+              <span className="font-semibold tabular-nums text-brand-ink">{tokens}</span>
+            </span>
+          )}
+        />
 
         {formNotice && (
           <motion.div
@@ -943,6 +956,7 @@ export default function SetupPage() {
           <div className="min-w-0 space-y-5">
 
             <SectionCard
+              step={1}
               title={t('setup.jobDesc')}
               subtitle={t('setup.jobDescSub')}
               action={(
@@ -1095,7 +1109,7 @@ export default function SetupPage() {
               )}
             </SectionCard>
 
-            <SectionCard title={t('setup.sectionInterviewSetup')}>
+            <SectionCard step={2} title={t('setup.sectionInterviewSetup')}>
               <div className="divide-y divide-brand-line">
 
                 <SettingRow label={t('setup.trackLabel')}>
@@ -1327,8 +1341,11 @@ export default function SetupPage() {
 
           {/* ───────────── 右栏：预览 + 概览 ───────────── */}
           <aside className="xl:sticky xl:top-[calc(var(--ui-nav-h)+1.5rem)] xl:max-h-[calc(100dvh-var(--ui-nav-h)-3rem)] xl:overflow-y-auto">
-            <div className="brand-float rounded-[22px] px-5 py-5">
-              <h2 className="mb-1 font-brand text-[16.5px] font-semibold tracking-[-0.01em] text-brand-ink">{t('setup.summaryOverview')}</h2>
+            <div className="brand-float rounded-[24px] px-5 py-5">
+              <h2 className="mb-1 flex items-center gap-2.5 font-brand text-[17px] font-semibold tracking-[-0.01em] text-brand-ink">
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-brand-ochre font-display text-[12px] font-semibold text-[#22303D]">03</span>
+                {t('setup.summaryOverview')}
+              </h2>
               <div className="divide-y divide-brand-line">
                 <div className="pb-1.5">
                   <SummaryRow

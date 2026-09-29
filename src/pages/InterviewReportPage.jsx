@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import PageHeader from '../components/brand/PageHeader'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import {
@@ -85,7 +86,7 @@ function RichText({ text, className, strongClassName }) {
   if (parts.length === 1) return <span className={className}>{text}</span>
   /* 重点用薰衣草马克笔底 + 近黑字，而不是变色加粗；跨行时靠 box-decoration-clone 保持圆角 */
   const strongCls = strongClassName
-    || 'rounded-[3px] bg-brand-glow/40 px-1 py-[2px] font-semibold text-brand-ink [box-decoration-break:clone] [-webkit-box-decoration-break:clone]'
+    || 'rounded-[3px] bg-brand-ochre/25 px-1 py-[2px] font-semibold text-brand-ink [box-decoration-break:clone] [-webkit-box-decoration-break:clone]'
   return (
     <span className={className}>
       {parts.map((part, i) => {
@@ -1176,7 +1177,7 @@ export default function InterviewReportPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-slate-100 to-slate-50 dark:from-slate-950 dark:to-slate-900">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
         <Loader2 className="w-10 h-10 animate-spin text-brand-ink" />
         <span className="text-sm font-medium text-brand-muted">{t('report.loading')}</span>
         <span className="sr-only">{t('report.loading')}</span>
@@ -1196,65 +1197,33 @@ export default function InterviewReportPage() {
   }
 
   return (
-    <div className="theme-quiet min-h-screen bg-brand-paper pb-20 pt-[calc(var(--ui-nav-h)+2rem)]">
+    <div className="theme-quiet min-h-screen pb-20 pt-[calc(var(--ui-nav-h)+2.75rem)]">
       <div className="ui-container max-w-[1400px] space-y-6">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
-          <Link
-            to="/dashboard"
-            className="group inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-brand-muted hover:text-brand-ink dark:hover:text-white transition-all"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            {t('report.backDashboard')}
-          </Link>
-        </motion.div>
-
-        {err && <div className="rounded-2xl border border-brand-danger/30 bg-brand-danger/[0.06] p-4 text-sm font-bold text-brand-danger/30 bg-brand-inset" role="alert">{err}</div>}
+        {err && <div className="rounded-2xl border border-brand-danger/30 bg-brand-danger/[0.06] p-4 text-sm font-bold text-brand-danger" role="alert">{err}</div>}
 
         <article className="space-y-8">
-          <motion.header
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            <div className="flex flex-col justify-between gap-5 border-b border-brand-line pb-6 md:flex-row md:items-end">
-              <div className="max-w-2xl">
-                <div className="flex items-center gap-3.5">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-ink text-brand-on-ink">
-                    <Zap className="h-5 w-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-muted">
-                      {t('report.docLabel')}
-                    </div>
-                    <h1 className="font-brand text-[29px] font-semibold tracking-[-0.025em] text-brand-ink sm:text-[34px]">
-                      {t('report.title')}
-                    </h1>
-                  </div>
-                </div>
-                <p className="mt-3 text-[13.5px] leading-relaxed text-brand-muted">
-                  {t('report.subtitle')}
-                </p>
+          <PageHeader
+            className="!mb-0 border-b border-brand-line pb-7"
+            before={(
+              <Link
+                to="/dashboard"
+                className="group mb-5 inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-card/70 px-3 py-1.5 text-[12px] font-medium text-brand-muted backdrop-blur transition-colors hover:border-brand-ink/30 hover:text-brand-ink"
+              >
+                <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+                {t('report.backDashboard')}
+              </Link>
+            )}
+            eyebrow={t('report.docLabel')}
+            title={t('report.title')}
+            subtitle={t('report.subtitle')}
+            actions={(
+              <div className="flex flex-wrap items-center gap-2 text-[12px] text-brand-muted">
+                <span className="lk-chip max-w-[240px] !text-[12px]"><Briefcase className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{interview?.position}</span></span>
+                <span className="lk-chip !text-[12px]"><Globe2 className="h-3.5 w-3.5" />{interview?.language}</span>
+                <span className="lk-chip !text-[12px]"><Clock className="h-3.5 w-3.5" />{interview?.duration} {t('dashboard.durMin')}</span>
               </div>
-
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11.5px] text-brand-muted">
-                <div className="flex items-center gap-1.5">
-                  <Briefcase className="h-3.5 w-3.5" />
-                  <span className="max-w-[180px] truncate">{interview?.position}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Globe2 className="h-3.5 w-3.5" />
-                  <span>{interview?.language}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5" />
-                  <span>{interview?.duration} {t('dashboard.durMin')}</span>
-                </div>
-              </div>
-            </div>
-          </motion.header>
+            )}
+          />
 
           <div className="min-h-[400px]">
             {reportTranslating ? (
@@ -1270,7 +1239,7 @@ export default function InterviewReportPage() {
                   <FileText className="w-10 h-10 text-brand-muted" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-semibold font-brand text-brand-ink dark:text-white">{t('report.noReport')}</h3>
+                  <h3 className="text-2xl font-semibold font-brand text-brand-ink">{t('report.noReport')}</h3>
                   <p className="text-sm text-brand-muted max-w-sm mx-auto">{t('report.retryHint')}</p>
                 </div>
                 {transcript.length > 0 && (
@@ -1296,8 +1265,8 @@ export default function InterviewReportPage() {
                   <section key={`${sec.title}-${i}`} className="space-y-8">
                     {sec.title ? (
                       <div className="flex items-center gap-4">
-                        <div className="h-8 w-1.5 rounded-full bg-brand-card dark:bg-white" />
-                        <h2 className="text-2xl font-semibold font-brand tracking-tight text-brand-ink dark:text-white">
+                        <div className="h-8 w-1.5 rounded-full bg-brand-ochre" />
+                        <h2 className="text-2xl font-semibold font-brand tracking-tight text-brand-ink">
                           {stripMdNoise(sec.title)}
                         </h2>
                       </div>
@@ -1313,10 +1282,10 @@ export default function InterviewReportPage() {
               <section className="mt-24 pt-24 border-t border-brand-line space-y-12">
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-2xl bg-brand-inset bg-brand-card text-brand-muted">
+                    <div className="p-3 rounded-2xl bg-brand-card text-brand-muted">
                       <MessageSquareQuote className="w-6 h-6" />
                     </div>
-                    <h2 className="text-3xl font-semibold font-brand tracking-tight text-brand-ink dark:text-white">
+                    <h2 className="text-3xl font-semibold font-brand tracking-tight text-brand-ink">
                       {t('report.transcriptTitle')}
                     </h2>
                   </div>
@@ -1333,7 +1302,7 @@ export default function InterviewReportPage() {
                         key={i}
                         className={`group relative p-8 rounded-[2rem] border transition-all ${
                           m.role === 'assistant'
-                            ? 'bg-white border-brand-line shadow-sm'
+                            ? 'bg-brand-card border-brand-line shadow-sm'
                             : 'bg-brand-inset/50 border-brand-line md:ml-20'
                         }`}
                       >
@@ -1342,7 +1311,7 @@ export default function InterviewReportPage() {
                             {String(i + 1).padStart(2, '0')}
                           </span>
                           <span className={`text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded ${
-                            m.role === 'assistant' ? 'bg-brand-inset bg-brand-card text-brand-muted' : 'bg-brand-inset/40 text-brand-ink'
+                            m.role === 'assistant' ? 'bg-brand-card text-brand-muted' : 'bg-brand-inset/40 text-brand-ink'
                           }`}>
                             {m.role === 'assistant' ? t('dashboard.roleAssistant') : t('dashboard.roleUser')}
                           </span>
@@ -1352,7 +1321,7 @@ export default function InterviewReportPage() {
                         </p>
 
                         {coach && (
-                          <div className="mt-8 p-6 rounded-2xl bg-brand-inset/50 bg-brand-inset border border-brand-line/50/20 space-y-6">
+                          <div className="mt-8 p-6 rounded-2xl bg-brand-inset/50 bg-brand-inset border border-brand-line/60 space-y-6">
                             <div className="flex items-center gap-3">
                               <Sparkles className="w-4 h-4 text-brand-success" />
                               <span className="text-[10px] font-semibold uppercase tracking-widest text-brand-success">AI Feedback</span>
@@ -1372,7 +1341,7 @@ export default function InterviewReportPage() {
                                   <label className="text-[9px] font-semibold uppercase tracking-widest text-brand-muted">Points to Note</label>
                                   <ul className="space-y-1.5">
                                     {coach.improvements.map((g, j) => (
-                                      <li key={j} className="flex gap-2 text-xs text-brand-success/70/70 font-bold">
+                                      <li key={j} className="flex gap-2 text-xs text-brand-success font-bold">
                                         <ArrowRight className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                                         <RichText text={g} />
                                       </li>
@@ -1383,7 +1352,7 @@ export default function InterviewReportPage() {
                             </div>
                             
                             {coach.modelAnswer && (
-                              <div className="pt-4 border-t border-brand-line/50/20 space-y-2">
+                              <div className="pt-4 border-t border-brand-line/60 space-y-2">
                                 <label className="text-[9px] font-semibold uppercase tracking-widest text-brand-success">Better Expression</label>
                                 <p className="text-xs text-brand-muted text-brand-muted leading-relaxed font-bold">
                                   <RichText text={coach.modelAnswer} />

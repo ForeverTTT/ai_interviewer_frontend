@@ -1,32 +1,36 @@
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { ArrowRight, ArrowUpRight } from 'lucide-react'
 
 /**
- * 首页视觉语言的公共零件。
+ * LandIt · Harbor 视觉语言的公共零件。
  *
- * 风格：编辑式极简 + 几何矢量点缀 + 柔和科技感。
- * 黑白灰承担绝大部分面积，紫色（brand-violet）和荧光黄绿（brand-lime）
- * 只出现在按钮、圆点和装饰图形上。卡片用细描边而不是投影。
- *
- * 颜色一律走 brand-* token，因此深浅色由 index.css 的变量切换，
- * 这里无需写任何深色变体。
+ * 大面积是薄雾纸色和白卡片；深港蓝承担交互；赭黄只给最重要的那个按钮和少量高光；
+ * 标题用 Fraunces / 思源宋体做编辑感。颜色一律走 brand-* token，深浅色由 index.css 切换。
  */
 
-/** 小标签，如 `#AI 面试练习 ◆` */
-export function Tag({ children, className = '' }) {
+/** 小标签，如 `AI 面试官 · 实时追问` */
+export function Tag({ children, className = '', tone = 'glass' }) {
+  const toneCls = tone === 'glass'
+    ? 'lk-glass text-brand-ink'
+    : 'border border-brand-line bg-brand-card text-brand-ink'
   return (
-    <span
-      className={`inline-flex items-center gap-2 rounded-full border border-brand-line bg-brand-card px-4 py-1.5 text-[12px] font-semibold tracking-wide text-brand-ink ${className}`}
-    >
+    <span className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-semibold tracking-wide ${toneCls} ${className}`}>
+      <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-ochre opacity-60" />
+        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-ochre" />
+      </span>
       {children}
-      <span className="h-1.5 w-1.5 rotate-45 bg-brand-violet" aria-hidden="true" />
     </span>
   )
 }
 
 /**
- * 主按钮。三种形态都带一个圆形箭头徽标——这是参考稿里最显著的特征，
- * 按钮被当成「graphic object」而不是普通矩形。
+ * 主按钮。
+ *   ink     深港蓝实心（默认主操作）
+ *   lime    赭黄强调（每屏最多一个；历史命名保留）
+ *   outline 半透明描边
  */
 export function BrandButton({
   as = 'link',
@@ -37,34 +41,29 @@ export function BrandButton({
   size = 'md',
   children,
   className = '',
+  icon = 'arrow',
 }) {
   const shell = {
-    ink: 'bg-brand-ink text-brand-on-ink border-brand-ink',
-    /* 原来是荧光绿底 + 黑字，现在换成品牌紫底 + 白字（quiet-violet 自带前景色） */
-    lime: 'quiet-violet border-transparent',
-    outline: 'bg-brand-card text-brand-ink border-brand-ink/25 hover:border-brand-ink',
-  }[variant]
+    ink: 'lk-btn-primary',
+    lime: 'lk-btn-accent',
+    accent: 'lk-btn-accent',
+    outline: 'lk-btn-ghost',
+  }[variant] || 'lk-btn-primary'
 
-  const badge = {
-    ink: 'quiet-violet',
-    lime: 'bg-brand-ink text-brand-on-ink',
-    outline: 'bg-brand-ink text-brand-on-ink',
-  }[variant]
+  const sizing = size === 'lg' ? 'lk-btn-lg' : ''
+  const Icon = icon === 'external' ? ArrowUpRight : ArrowRight
+  const iconBg = variant === 'ink' ? 'bg-white/15 dark:bg-black/10' : 'bg-black/[0.07] dark:bg-white/10'
 
-  const sizing = size === 'lg'
-    ? 'gap-4 py-2 pl-7 pr-2 text-[15px]'
-    : 'gap-3 py-1.5 pl-5 pr-1.5 text-[14px]'
-
-  const badgeSize = size === 'lg' ? 'h-11 w-11' : 'h-9 w-9'
-
-  const cls = `group inline-flex items-center rounded-full border font-semibold transition-transform duration-300 hover:-translate-y-0.5 active:translate-y-0 ${shell} ${sizing} ${className}`
+  const cls = `lk-btn group ${shell} ${sizing} ${className}`
 
   const inner = (
     <>
-      <span className="whitespace-nowrap">{children}</span>
-      <span className={`grid shrink-0 place-items-center rounded-full transition-transform duration-300 group-hover:translate-x-0.5 ${badge} ${badgeSize}`}>
-        <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
-      </span>
+      <span>{children}</span>
+      {icon && (
+        <span className={`relative -mr-1 grid h-6 w-6 place-items-center overflow-hidden rounded-full ${iconBg}`}>
+          <Icon className="h-4 w-4 transition-transform duration-300 ease-out-soft group-hover:translate-x-[3px]" strokeWidth={2.25} />
+        </span>
+      )}
     </>
   )
 
@@ -73,22 +72,22 @@ export function BrandButton({
   return <Link to={to} onClick={onClick} className={cls}>{inner}</Link>
 }
 
-/** 区块标题：可选徽标 + 大字标题 + 副标题，左对齐或居中 */
-export function SectionHead({ badge, title, sub, align = 'center', className = '' }) {
+/** 区块标题：眉标 + 衬线大标题 + 副标题，左对齐或居中 */
+export function SectionHead({ badge, title, sub, align = 'center', className = '', tone = 'default' }) {
   const alignCls = align === 'left' ? 'items-start text-left' : 'items-center text-center'
+  const onDark = tone === 'dark'
   return (
     <header className={`flex flex-col gap-5 ${alignCls} ${className}`}>
       {badge && (
-        <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-brand-muted">
-          <span className="h-1.5 w-1.5 rounded-full bg-brand-violet" aria-hidden="true" />
+        <span className={`lk-eyebrow ${onDark ? '!text-white/60' : ''}`}>
           {badge}
         </span>
       )}
-      <h2 className="font-brand text-[34px] font-black leading-[1.12] tracking-tight text-brand-ink sm:text-[46px] lg:text-[54px]">
+      <h2 className={`lk-display text-[34px] leading-[1.12] sm:text-[44px] lg:text-[52px] ${onDark ? '!text-white' : ''}`}>
         {title}
       </h2>
       {sub && (
-        <p className={`text-[15px] leading-relaxed text-brand-muted sm:text-[17px] ${align === 'center' ? 'max-w-2xl' : 'max-w-xl'}`}>
+        <p className={`text-[15px] leading-relaxed sm:text-[16.5px] ${onDark ? 'text-white/65' : 'text-brand-muted'} ${align === 'center' ? 'max-w-2xl' : 'max-w-xl'}`}>
           {sub}
         </p>
       )}
@@ -96,113 +95,96 @@ export function SectionHead({ badge, title, sub, align = 'center', className = '
   )
 }
 
-/** 品牌字标，供标题内联使用 */
-export function WordMark() {
+/** 品牌字标，供标题内联使用：标题里用斜体衬线的 It 呼应标志 */
+export function WordMark({ className = '' }) {
   return (
-    <span className="whitespace-nowrap font-brand tracking-tight">
-      Land<span className="italic text-brand-violet">It</span>
+    <span className={`whitespace-nowrap ${className}`}>
+      Land<span className="italic text-brand-harbor">It</span>
     </span>
   )
 }
 
-/** 细描边卡片。不用投影，靠描边和底色分层。 */
+/** 细描边卡片 */
 export function BrandCard({ children, className = '', as: Tag_ = 'div' }) {
   return (
-    <Tag_ className={`rounded-[22px] border border-brand-line bg-brand-card ${className}`}>
+    <Tag_ className={`brand-float ${className}`}>
       {children}
     </Tag_>
   )
 }
 
-/**
- * 像素散点装饰。参考稿里反复出现的方块碎片，
- * 密度从一角向外递减，用确定性算法生成，避免每次渲染抖动。
- */
-export function PixelScatter({ className = '', seed = 7 }) {
-  const cells = []
-  let n = seed
-  const rand = () => {
-    n = (n * 1103515245 + 12345) % 2147483648
-    return n / 2147483648
-  }
-  for (let row = 0; row < 8; row += 1) {
-    for (let col = 0; col < 8; col += 1) {
-      // 越靠右下越密集
-      if (rand() > (row + col) / 16) continue
-      const r = rand()
-      const fill = r > 0.72 ? 'rgb(var(--brand-lime))' : r > 0.38 ? 'rgb(var(--brand-violet))' : 'rgb(var(--brand-ink))'
-      cells.push(
-        <rect key={`${row}-${col}`} x={col * 13} y={row * 13} width="10" height="10" fill={fill} />,
-      )
-    }
-  }
+/** 编号标签，用于流程 / 清单类内容 */
+export function IndexBadge({ n, className = '' }) {
   return (
-    <svg viewBox="0 0 104 104" className={className} aria-hidden="true" focusable="false">
-      {cells}
-    </svg>
-  )
-}
-
-/** 点阵轨道装饰：虚线圆 + 一个实心点，参考稿里用来做「轨迹」意象 */
-export function DottedOrbit({ className = '' }) {
-  return (
-    <svg viewBox="0 0 160 160" className={className} aria-hidden="true" focusable="false">
-      <circle
-        cx="80" cy="80" r="66"
-        fill="none"
-        stroke="rgb(var(--brand-ink))"
-        strokeWidth="2"
-        strokeDasharray="1 9"
-        strokeLinecap="round"
-        opacity="0.55"
-      />
-      <circle
-        cx="80" cy="80" r="44"
-        fill="none"
-        stroke="rgb(var(--brand-violet))"
-        strokeWidth="1.5"
-        strokeDasharray="1 7"
-        strokeLinecap="round"
-        opacity="0.5"
-      />
-      <circle cx="80" cy="14" r="5" fill="rgb(var(--brand-ink))" />
-      <circle cx="124" cy="80" r="4" fill="rgb(var(--brand-violet))" />
-      <circle cx="46" cy="112" r="3.5" fill="rgb(var(--brand-lime))" />
-    </svg>
-  )
-}
-
-/**
- * 霓虹光晕。参考稿在左上、右上、右下各有一团发光色斑，
- * 是这套视觉里唯一大面积用到品牌色的地方——但始终是模糊的、低饱和度呈现。
- *
- * @param {'violet'|'lime'|'mix'} tone
- */
-export function NeonGlow({ className = '', tone = 'violet', intensity = 0.5 }) {
-  const gradient = {
-    violet: `radial-gradient(circle at 50% 50%, rgb(var(--brand-violet) / ${intensity}), transparent 68%)`,
-    lime: `radial-gradient(circle at 50% 50%, rgb(var(--brand-lime) / ${intensity}), transparent 68%)`,
-    mix: `radial-gradient(circle at 34% 32%, rgb(var(--brand-violet) / ${intensity}), transparent 62%), radial-gradient(circle at 72% 70%, rgb(var(--brand-lime) / ${intensity * 0.7}), transparent 60%)`,
-  }[tone]
-
-  /**
-   * 注意 z-index：不能用 -z-10。父级带 bg-brand-paper 的元素会把负层级的光晕
-   * 整个盖住（上一版就是这样，光晕完全看不见）。这里留在 z-0，由内容层加 relative z-10。
-   */
-  return (
-    <div
-      className={`pointer-events-none absolute z-0 rounded-full blur-[100px] ${className}`}
-      style={{ backgroundImage: gradient }}
-      aria-hidden="true"
-    />
-  )
-}
-
-/** 编号标签，用于流程/清单类内容 */
-export function IndexBadge({ n }) {
-  return (
-    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-brand-ink text-[12px] font-bold tabular-nums text-brand-ink">
+    <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full border border-brand-line bg-brand-card font-display text-[14px] font-semibold tabular-nums text-brand-ink ${className}`}>
       {String(n).padStart(2, '0')}
     </span>
+  )
+}
+
+/**
+ * 3D 倾斜卡片：鼠标悬停时按指针位置做极小角度的透视旋转，并带一块跟随的柔光。
+ * 角度上限 5°，只让卡片「有厚度」，不做夸张的翻转。触屏设备不触发。
+ */
+export function TiltCard({ children, className = '', max = 5, glare = true, as = 'div', ...rest }) {
+  const ref = useRef(null)
+  const px = useMotionValue(0.5)
+  const py = useMotionValue(0.5)
+  const rx = useSpring(useTransform(py, [0, 1], [max, -max]), { stiffness: 180, damping: 18 })
+  const ry = useSpring(useTransform(px, [0, 1], [-max, max]), { stiffness: 180, damping: 18 })
+  const glareBg = useTransform(
+    [px, py],
+    ([x, y]) => `radial-gradient(420px circle at ${x * 100}% ${y * 100}%, rgb(255 255 255 / 0.22), transparent 45%)`,
+  )
+  const MotionTag = motion[as] || motion.div
+
+  const onMove = (e) => {
+    if (e.pointerType === 'touch') return
+    const rect = ref.current?.getBoundingClientRect()
+    if (!rect) return
+    px.set((e.clientX - rect.left) / rect.width)
+    py.set((e.clientY - rect.top) / rect.height)
+  }
+  const onLeave = () => {
+    px.set(0.5)
+    py.set(0.5)
+  }
+
+  return (
+    <div className="lk-perspective h-full">
+      <MotionTag
+        ref={ref}
+        onPointerMove={onMove}
+        onPointerLeave={onLeave}
+        style={{ rotateX: rx, rotateY: ry, transformStyle: 'preserve-3d' }}
+        className={`group/tilt relative h-full ${className}`}
+        {...rest}
+      >
+        {children}
+        {glare && (
+          <motion.span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-300 group-hover/tilt:opacity-100"
+            style={{ background: glareBg }}
+          />
+        )}
+      </MotionTag>
+    </div>
+  )
+}
+
+/** 进入视口时上浮淡入；once 保证只播一次 */
+export function Reveal({ children, delay = 0, y = 18, className = '', as = 'div' }) {
+  const MotionTag = motion[as] || motion.div
+  return (
+    <MotionTag
+      initial={{ opacity: 0, y }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.75, delay, ease: [0.16, 1, 0.3, 1] }}
+      className={className}
+    >
+      {children}
+    </MotionTag>
   )
 }

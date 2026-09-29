@@ -39,10 +39,10 @@ export default function CookieBanner() {
         >
           <div className="relative overflow-hidden group">
             {/* Premium Background with Blur & Gradient */}
-            <div className="brand-float absolute inset-0 rounded-[22px] border border-brand-line" />
+            <div className="lk-liquid absolute inset-0 rounded-[26px]" />
             
             {/* Subtle Gradient Accent */}
-            <div className="pointer-events-none absolute -left-24 -top-24 h-48 w-48 rounded-full bg-brand-glow/[0.10] blur-[80px]" />
+            <div className="pointer-events-none absolute -left-24 -top-24 h-48 w-48 rounded-full bg-brand-ochre/[0.16] blur-[70px]" />
 
             <div className="relative px-6 py-5 md:px-10 md:py-8 flex flex-col md:flex-row items-center gap-6 md:gap-10">
               {/* Icon Section */}
@@ -55,7 +55,7 @@ export default function CookieBanner() {
               {/* Content Section */}
               <div className="flex-1 space-y-2 text-center md:text-left">
                 <div className="flex items-center justify-center md:justify-start gap-3 flex-wrap md:flex-nowrap">
-                  <h3 className="whitespace-nowrap font-brand text-[17px] font-black tracking-tight text-brand-ink">
+                  <h3 className="lk-display whitespace-nowrap text-[18px]">
                     {t('common.cookie.title')}
                   </h3>
                   <div className="flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-inset px-2 py-0.5">
@@ -72,13 +72,13 @@ export default function CookieBanner() {
               <div className="flex flex-row items-center gap-3 w-full md:w-auto shrink-0">
                 <button
                   onClick={handleDecline}
-                  className="flex-1 rounded-xl border border-brand-line px-5 py-2.5 text-[13px] font-bold text-brand-muted transition-colors hover:border-brand-ink hover:text-brand-ink md:flex-none"
+                  className="lk-btn lk-btn-ghost flex-1 md:flex-none"
                 >
                   {t('common.cookie.decline')}
                 </button>
                 <button
                   onClick={handleAccept}
-                  className="flex-1 rounded-xl bg-brand-ink px-6 py-2.5 text-[13px] font-bold text-brand-on-ink transition-opacity duration-200 hover:opacity-90 md:flex-none"
+                  className="lk-btn lk-btn-primary flex-1 md:flex-none"
                 >
                   {t('common.cookie.accept')}
                 </button>

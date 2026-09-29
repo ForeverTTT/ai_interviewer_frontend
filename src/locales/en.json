@@ -22,7 +22,15 @@
     "myExperiences": "My Experiences",
     "chooseAvatar": "Choose Avatar",
     "tokens": "Energy",
-    "notes": "Question Library"
+    "notes": "Question Library",
+    "groupPractice": "Practice",
+    "groupMaterials": "Application kit",
+    "groupCommunity": "Community",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "menu": "Menu",
+    "backHome": "Back to home",
+    "energyCta": "Get more energy"
   },
   "resumeTailor": {
     "badge": "Targeted application workspace",
@@ -460,6 +468,12 @@
     "privacyMore": "Learn more"
   },
   "profile": {
+    "coachCta": "Generate AI resume diagnosis",
+    "coachPreviewTitle": "Let AI diagnose your resume",
+    "scoreDetails": "View diagnosis details",
+    "scoreInsight": "Your resume shows solid depth and structure. Sharper, quantified results will make it far more competitive with top employers.",
+    "coachScoreProfessionalism": "Professionalism",
+    "displayTitle": "Your profile",
     "title": "Profile & Resume",
     "status": "Career Status",
     "statusSeeking": "Open to Work",
@@ -1169,6 +1183,7 @@
     }
   },
   "interview": {
+    "candidateLabel": "Candidate",
     "live": "Live Interview",
     "end": "End",
     "timeLeft": "Time Left",
@@ -1473,6 +1488,8 @@
     "loading": "Loading..."
   },
   "common": {
+    "error": "Something went wrong. Please try again.",
+    "networkError": "Network error. Please try again.",
     "upload": "Upload",
     "uiLanguage": "UI Language",
     "themeToggle": "Toggle Light/Dark Theme",
@@ -1695,6 +1712,9 @@
     "listView": "List view"
   },
   "growthSprint": {
+    "summary": {
+      "practice": "{{count}} effective sessions so far · {{duration}} in total"
+    },
     "eyebrow": "Offer sprint",
     "empty": {
       "title": "Turn your next interview into an executable route",

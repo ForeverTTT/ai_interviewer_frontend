@@ -6,6 +6,7 @@ import {
   AlertTriangle, ArrowRight, BarChart3, BriefcaseBusiness, CalendarDays,
   CheckCircle2, Clock3, FileClock, FileText, Flame, Loader2, PauseCircle,
   PlayCircle, PlusCircle, Sparkles, Target, Trash2, BookmarkCheck,
+  Flag, Layers, History, RotateCcw, Eye,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
@@ -13,6 +14,7 @@ import { getBackendBaseUrl } from '../lib/backendBase'
 import { authenticatedFetch } from '../lib/authenticatedFetch'
 import { createInterviewRequestId } from '../lib/interviewEvents'
 import OfferSprintPanel from '../components/OfferSprintPanel'
+import PageHeader from '../components/brand/PageHeader'
 
 const RESUMABLE_STATUSES = new Set(['draft', 'active', 'paused'])
 
@@ -136,6 +138,73 @@ function statusLabel(interview, t) {
   return t('dashboard.growth.status.closed')
 }
 
+/**
+ * 复习闪卡：最近收藏的题目，正面是题目，点一下在 3D 空间里翻到背面看答案要点。
+ * 完整的筛选、笔记和再次练习都在题目收藏库里，这里只做「随手翻一翻」。
+ */
+function ReviewFlashcards({ collections, t }) {
+  const [flipped, setFlipped] = useState({})
+  if (!collections.length) {
+    return (
+      <div className="brand-float flex min-h-52 flex-col items-center justify-center gap-4 px-6 py-10 text-center">
+        <Layers className="h-8 w-8 text-brand-muted" />
+        <p className="max-w-md text-[13px] leading-relaxed text-brand-muted">{t('dashboard.growth.collections.empty')}</p>
+        <Link to="/notes" className="lk-btn lk-btn-ghost">{t('dashboard.growth.collections.viewAll')}<ArrowRight className="h-3.5 w-3.5" /></Link>
+      </div>
+    )
+  }
+  const tones = ['from-brand-harbor/[0.16]', 'from-brand-ochre/[0.22]', 'from-brand-sage/[0.24]', 'from-brand-brick/[0.14]']
+  return (
+    <section className="space-y-4">
+      <div className="flex flex-wrap items-end justify-between gap-3 px-1">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-muted">{t('dashboard.growth.collections.eyebrow')}</p>
+          <h2 className="mt-1.5 font-brand text-[17px] font-semibold text-brand-ink">{t('dashboard.growth.collections.title')}</h2>
+        </div>
+        <Link to="/notes" className="lk-btn lk-btn-ghost !py-2 !text-[12.5px]">{t('dashboard.growth.collections.viewAll')}<ArrowRight className="h-3.5 w-3.5" /></Link>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {collections.map((collection, index) => {
+          const isFlipped = Boolean(flipped[collection.id])
+          const answer = String(collection.answer_text || collection.answer || '').trim()
+          return (
+            <div key={collection.id} className="lk-perspective h-[220px]">
+              <motion.button
+                type="button"
+                onClick={() => setFlipped(cur => ({ ...cur, [collection.id]: !cur[collection.id] }))}
+                animate={{ rotateY: isFlipped ? 180 : 0 }}
+                transition={{ type: 'spring', stiffness: 120, damping: 18 }}
+                style={{ transformStyle: 'preserve-3d' }}
+                className="relative h-full w-full text-left"
+                aria-pressed={isFlipped}
+              >
+                <span className={`absolute inset-0 flex flex-col rounded-[22px] border border-brand-line bg-gradient-to-br ${tones[index % tones.length]} to-brand-card p-5 shadow-sm [backface-visibility:hidden]`}>
+                  <span className="flex items-center justify-between">
+                    <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-card font-display text-[13px] font-semibold tabular-nums text-brand-ink shadow-sm">Q{index + 1}</span>
+                    <BookmarkCheck className="h-4 w-4 text-brand-muted" />
+                  </span>
+                  <span className="lk-display mt-4 line-clamp-4 text-[17px] leading-snug">{collection.question_text}</span>
+                  <span className="mt-auto flex items-center justify-between gap-2 pt-3 text-[11.5px] text-brand-muted">
+                    <span className="truncate">{collection.position}</span>
+                    <span className="flex shrink-0 items-center gap-1 font-medium text-brand-ink"><RotateCcw className="h-3 w-3" />{t('notes.reveal')}</span>
+                  </span>
+                </span>
+                <span className="absolute inset-0 flex flex-col rounded-[22px] border border-brand-ink/15 bg-brand-card p-5 shadow-sm [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-muted">{t('notes.answer')}</span>
+                  <span className="mt-2 line-clamp-5 text-[13px] leading-relaxed text-brand-ink">{answer || '—'}</span>
+                  <span className="mt-auto flex items-center justify-between gap-2 pt-3 text-[11.5px] text-brand-muted">
+                    <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{t('notes.hide')}</span>
+                  </span>
+                </span>
+              </motion.button>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 export default function DashboardPage() {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
@@ -150,6 +219,7 @@ export default function DashboardPage() {
   const [deleteModalError, setDeleteModalError] = useState(null)
   const [taskBusy, setTaskBusy] = useState(false)
   const [taskError, setTaskError] = useState(false)
+  const [section, setSection] = useState('sprint')
   const formalFinalizeRequestedRef = useRef(new Set())
   const localeTag = i18n.language === 'de' ? 'de-DE' : i18n.language === 'en' ? 'en-US' : 'zh-CN'
 
@@ -333,22 +403,21 @@ export default function DashboardPage() {
   const H2 = 'font-brand text-[17px] font-semibold tracking-[-0.01em] text-brand-ink'
 
   return (
-    <div className="theme-quiet min-h-screen bg-brand-paper pb-20 pt-[calc(var(--ui-nav-h)+2rem)]">
+    <div className="theme-quiet min-h-screen pb-20 pt-[calc(var(--ui-nav-h)+2.75rem)]">
       <main className="ui-container max-w-[1400px] space-y-5">
 
         {/* ───────── 页头 ───────── */}
-        <header className="mb-1 flex flex-col justify-between gap-5 md:flex-row md:items-end">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="min-w-0 max-w-2xl">
-            <p className={EYEBROW}>{t('dashboard.growth.eyebrow')}</p>
-            <h1 className="mt-2 font-brand text-[30px] font-semibold leading-tight tracking-[-0.02em] text-brand-ink sm:text-[34px]">
-              {t('dashboard.growth.title')}
-            </h1>
-            <p className="mt-2.5 text-[14px] leading-relaxed text-brand-ink">{t('dashboard.growth.subtitle')}</p>
-          </motion.div>
-          <Link to="/setup" className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-ink px-5 py-3 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90">
-            <PlusCircle className="h-4 w-4" />{t('dashboard.newInterview')}
-          </Link>
-        </header>
+        <PageHeader
+          eyebrow={t('dashboard.growth.eyebrow')}
+          title={t('dashboard.growth.title')}
+          subtitle={t('dashboard.growth.subtitle')}
+          actions={(
+            <Link to="/setup" className="lk-btn lk-btn-primary">
+              <PlusCircle className="h-4 w-4" />{t('dashboard.newInterview')}
+            </Link>
+          )}
+          className="!mb-3"
+        />
 
         {/* ───────── 主概览：准备度、最近结果、训练节奏合成一个视觉主体 ───────── */}
         <motion.section
@@ -464,196 +533,221 @@ export default function DashboardPage() {
           </div>
         </motion.section>
 
-        <OfferSprintPanel
-          offerSprint={growthOverview?.offerSprint}
-          practiceStats={{
-            count: metrics.effectiveCount,
-            duration: formatEffectiveDuration(metrics.totalSeconds, t),
-          }}
-          onOverview={setGrowthOverview}
-          onStartTask={startRecommendedTask}
-        />
+        {/* ───────── 下半区：冲刺计划 / 复习闪卡 / 面试记录，用一组玻璃分段控件切换，页面不再一路堆叠 ───────── */}
+        <div className="flex justify-center pt-2">
+          <div className="lk-liquid inline-flex max-w-full gap-1 overflow-x-auto rounded-full p-1.5 scrollbar-hide" role="tablist" aria-label={t('dashboard.growth.title')}>
+            {[
+              { key: 'sprint', label: t('growthSprint.eyebrow'), icon: Flag },
+              { key: 'review', label: t('dashboard.growth.collections.title'), icon: Layers, count: growthOverview?.recentCollections?.length || 0 },
+              { key: 'history', label: t('dashboard.growth.history.title'), icon: History, count: interviews.length },
+            ].map(tab => {
+              const active = section === tab.key
+              const Icon = tab.icon
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setSection(tab.key)}
+                  className={`relative flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-semibold transition-colors ${active ? 'text-brand-on-ink' : 'text-brand-muted hover:text-brand-ink'}`}
+                >
+                  {active && <motion.span layoutId="dashboard-section-pill" className="absolute inset-0 rounded-full bg-brand-ink" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
+                  <Icon className="relative h-4 w-4" />
+                  <span className="relative">{tab.label}</span>
+                  {tab.count > 0 && <span className={`relative rounded-full px-1.5 text-[11px] tabular-nums ${active ? 'bg-white/15 dark:bg-black/15' : 'bg-brand-inset'}`}>{tab.count}</span>}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={section}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-5"
+          >
+            {section === 'sprint' && (
+              <>
+                <OfferSprintPanel
+                  offerSprint={growthOverview?.offerSprint}
+                  practiceStats={{
+                    count: metrics.effectiveCount,
+                    duration: formatEffectiveDuration(metrics.totalSeconds, t),
+                  }}
+                  onOverview={setGrowthOverview}
+                  onStartTask={startRecommendedTask}
+                />
 
         {/* ───────── 推荐任务（没有冲刺计划时才出现）───────── */}
-        {!growthOverview?.offerSprint?.plan && readiness?.nextPracticeTask && (
-          <section className="grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-            <article className={`${CARD} px-6 py-6`}>
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0 max-w-3xl">
-                  <p className={EYEBROW}>{t('dashboard.growth.task.eyebrow')}</p>
-                  <h2 className={`mt-2 ${H2}`}>{readiness.nextPracticeTask.title || readiness.nextPracticeTask.questionText}</h2>
-                  <p className="mt-2 text-[13px] leading-relaxed text-brand-ink">{readiness.nextPracticeTask.reason}</p>
-                  <p className="mt-2 text-[12px] text-brand-muted">{t('dashboard.growth.task.minutes', { count: readiness.nextPracticeTask.estimatedMinutes || 8 })}</p>
-                  {taskError && (
-                    <p className="mt-3 rounded-lg border border-brand-danger/30 bg-brand-danger/[0.06] px-3 py-2 text-[12px] font-medium text-brand-danger">
-                      {t('dashboard.growth.task.failed')}
-                    </p>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  disabled={taskBusy || readiness.nextPracticeTask.questionIndex === null || readiness.nextPracticeTask.questionIndex === undefined || !Number.isInteger(Number(readiness.nextPracticeTask.questionIndex))}
-                  onClick={() => void startRecommendedTask()}
-                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-ink px-5 py-3 text-[13px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90 disabled:opacity-40"
-                >
-                  {taskBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
-                  {t('dashboard.growth.task.start')}
-                </button>
-              </div>
-            </article>
-
-            <article className={`${CARD} flex flex-col justify-center px-6 py-6`}>
-              <p className={EYEBROW}>{t('dashboard.growth.task.weekly')}</p>
-              <p className="mt-2 text-[24px] font-semibold tabular-nums text-brand-ink">
-                {t('dashboard.growth.task.weeklyCount', { count: readiness.weeklyTasks?.length || 1 })}
-              </p>
-              <div className="mt-3 space-y-1.5">
-                {(readiness.weeklyTasks || [readiness.nextPracticeTask]).slice(0, 5).map((task, index) => (
-                  <p key={task.id || index} className="line-clamp-1 text-[12.5px] text-brand-ink">
-                    <span className="mr-2 tabular-nums text-brand-muted">{index + 1}.</span>{task.title || task.questionText}
-                  </p>
-                ))}
-              </div>
-              <p className="mt-3 text-[12px] leading-relaxed text-brand-muted">{t('dashboard.growth.task.weeklyBody')}</p>
-            </article>
-          </section>
-        )}
-
-        {/* 收藏是辅助入口，使用开放式列表，不再占一整张白色卡片。 */}
-        <section className="border-y border-brand-line py-7">
-          <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-10">
-            <div>
-              <p className={EYEBROW}>{t('dashboard.growth.collections.eyebrow')}</p>
-              <h2 className={`mt-2 ${H2}`}>{t('dashboard.growth.collections.title')}</h2>
-              <Link to="/notes" className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-brand-ink hover:opacity-70">{t('dashboard.growth.collections.viewAll')}<ArrowRight className="h-3.5 w-3.5" /></Link>
-            </div>
-
-            {growthOverview?.recentCollections?.length > 0 ? (
-              <div className="grid gap-x-8 gap-y-0 sm:grid-cols-2">
-                {growthOverview.recentCollections.map(collection => (
-                  <Link key={collection.id} to="/notes" className="group flex items-start gap-3 border-t border-brand-line py-3.5 first:border-t-0 sm:[&:nth-child(2)]:border-t-0">
-                    <span className="mt-1 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-inset text-brand-violet"><BookmarkCheck className="h-3.5 w-3.5" /></span>
-                    <span className="min-w-0 flex-1">
-                      <span className="line-clamp-2 block text-[13px] leading-relaxed text-brand-ink transition-opacity group-hover:opacity-70">{collection.question_text}</span>
-                      {collection.position && <span className="mt-1 block truncate text-[11.5px] text-brand-muted">{collection.position}</span>}
-                    </span>
-                    <ArrowRight className="mt-1 h-3.5 w-3.5 shrink-0 text-brand-muted transition-transform group-hover:translate-x-1" />
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <p className="self-center text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.collections.empty')}</p>
-            )}
-          </div>
-        </section>
-
-        {/* ───────── 复盘历史 ───────── */}
-        <section className="space-y-4" aria-labelledby="review-history-title">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="min-w-0">
-              <p className={EYEBROW}>{t('dashboard.growth.history.eyebrow')}</p>
-              <h2 id="review-history-title" className={`mt-2 ${H2}`}>{t('dashboard.growth.history.title')}</h2>
-              <p className="mt-1.5 text-[12.5px] text-brand-muted">{t('dashboard.growth.history.subtitle')}</p>
-            </div>
-            <div className="flex shrink-0 gap-1 rounded-xl border border-brand-line bg-brand-inset p-1" role="group" aria-label={t('dashboard.growth.history.filterLabel')}>
-              {['all', 'reports', 'continue'].map(option => (
-                <button
-                  key={option} type="button" onClick={() => setFilter(option)} aria-pressed={filter === option}
-                  className={`rounded-lg px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${filter === option ? 'bg-brand-card text-brand-ink shadow-sm' : 'text-brand-muted hover:text-brand-ink'}`}
-                >
-                  {t(`dashboard.growth.history.filters.${option}`)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="flex min-h-44 items-center justify-center"><Loader2 className="h-7 w-7 animate-spin text-brand-muted" /></div>
-          ) : filteredInterviews.length === 0 ? (
-            <div className={`${CARD} flex min-h-52 flex-col items-center justify-center gap-4 px-6 py-8 text-center`}>
-              <FileText className="h-8 w-8 text-brand-muted" />
-              <div>
-                <h3 className="text-[14px] font-semibold text-brand-ink">
-                  {filter === 'all' ? t('dashboard.growth.history.emptyTitle') : t('dashboard.growth.history.noMatchTitle')}
-                </h3>
-                <p className="mt-1 text-[12.5px] text-brand-muted">
-                  {filter === 'all' ? t('dashboard.growth.history.emptyBody') : t('dashboard.growth.history.noMatchBody')}
-                </p>
-              </div>
-              {filter === 'all' && (
-                <Link to="/setup" className="inline-flex items-center gap-2 rounded-xl bg-brand-ink px-5 py-2.5 text-[12.5px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90">
-                  {t('dashboard.growth.startBaseline')} <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              )}
-            </div>
-          ) : (
-            <div className="divide-y divide-brand-line border-y border-brand-line">
-              {filteredInterviews.map((interview, index) => {
-                const action = getAction(interview, t)
-                const ActionIcon = action.icon
-                const date = new Date(sessionDate(interview))
-                const summary = reportSummary(interview)
-                const badgeTone = hasReport(interview)
-                  ? 'border-brand-success/30 bg-brand-success/[0.08] text-brand-success'
-                  : isGenerating(interview)
-                    ? 'border-brand-violet/30 bg-brand-violet/[0.08] text-brand-violet'
-                    : 'border-brand-line bg-brand-inset text-brand-muted'
-                return (
-                  <motion.article
-                    key={interview.id}
-                    initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: Math.min(index * 0.04, 0.25) }}
-                    role={action.route ? 'link' : undefined}
-                    tabIndex={action.route ? 0 : undefined}
-                    onClick={() => openInterview(interview)}
-                    onKeyDown={event => { if (action.route && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); openInterview(interview) } }}
-                    className={`group relative grid gap-4 py-5 transition-colors sm:grid-cols-[150px_minmax(0,1fr)_auto] sm:items-center ${action.route ? 'cursor-pointer hover:bg-brand-inset/50' : ''}`}
-                  >
-                    <div className="space-y-2">
-                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10.5px] font-medium ${badgeTone}`}>
-                        {isGenerating(interview) && <Loader2 className="h-3 w-3 animate-spin" />}
-                        {statusLabel(interview, t)}
-                      </span>
-                      <p className="text-[11.5px] tabular-nums text-brand-muted">{date.toLocaleDateString(localeTag, { year: 'numeric', month: 'short', day: 'numeric' })}</p>
-                    </div>
-
-                    <div className="min-w-0">
-                      <h3 className="truncate text-[15px] font-semibold text-brand-ink">{interview.position || t('dashboard.growth.history.untitled')}</h3>
-                      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-brand-muted">
-                        <span>{interview.language}</span>
-                        <span>{interview.mode === 'practice' ? t('dashboard.growth.history.practiceMode') : t('dashboard.growth.history.formalMode')}</span>
-                        <span>{interview.duration} {t('dashboard.durMin')}</span>
+                {!growthOverview?.offerSprint?.plan && readiness?.nextPracticeTask && (
+                  <section className="grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+                    <article className={`${CARD} px-6 py-6`}>
+                      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0 max-w-3xl">
+                          <p className={EYEBROW}>{t('dashboard.growth.task.eyebrow')}</p>
+                          <h2 className={`mt-2 ${H2}`}>{readiness.nextPracticeTask.title || readiness.nextPracticeTask.questionText}</h2>
+                          <p className="mt-2 text-[13px] leading-relaxed text-brand-ink">{readiness.nextPracticeTask.reason}</p>
+                          <p className="mt-2 text-[12px] text-brand-muted">{t('dashboard.growth.task.minutes', { count: readiness.nextPracticeTask.estimatedMinutes || 8 })}</p>
+                          {taskError && (
+                            <p className="mt-3 rounded-lg border border-brand-danger/30 bg-brand-danger/[0.06] px-3 py-2 text-[12px] font-medium text-brand-danger">
+                              {t('dashboard.growth.task.failed')}
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          disabled={taskBusy || readiness.nextPracticeTask.questionIndex === null || readiness.nextPracticeTask.questionIndex === undefined || !Number.isInteger(Number(readiness.nextPracticeTask.questionIndex))}
+                          onClick={() => void startRecommendedTask()}
+                          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-ink px-5 py-3 text-[13px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90 disabled:opacity-40"
+                        >
+                          {taskBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
+                          {t('dashboard.growth.task.start')}
+                        </button>
                       </div>
-                      <p className="mt-2 line-clamp-2 text-[12.5px] leading-relaxed text-brand-muted">
-                        <InlineRichText text={summary || (isResumable(interview)
-                          ? t('dashboard.growth.history.resumeHint')
-                          : isGenerating(interview)
-                            ? t('dashboard.growth.latest.generatingBody')
-                            : t('dashboard.growth.history.noSummary'))} />
-                      </p>
-                    </div>
+                    </article>
 
-                    <div className="flex items-center justify-between gap-3 sm:justify-end">
-                      <span className={`inline-flex items-center gap-2 text-[12.5px] font-semibold ${action.route ? 'text-brand-ink' : 'text-brand-muted'}`}>
-                        <ActionIcon className={`h-3.5 w-3.5 ${isGenerating(interview) ? 'animate-spin' : ''}`} />
-                        {action.label}
-                        {action.route && <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={event => { event.stopPropagation(); setPendingDelete({ id: interview.id, position: interview.position || '' }) }}
-                        className="relative z-10 shrink-0 rounded-lg p-1.5 text-brand-muted transition-colors hover:bg-brand-danger/10 hover:text-brand-danger"
-                        aria-label={t('dashboard.delete')}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                    <article className={`${CARD} flex flex-col justify-center px-6 py-6`}>
+                      <p className={EYEBROW}>{t('dashboard.growth.task.weekly')}</p>
+                      <p className="mt-2 text-[24px] font-semibold tabular-nums text-brand-ink">
+                        {t('dashboard.growth.task.weeklyCount', { count: readiness.weeklyTasks?.length || 1 })}
+                      </p>
+                      <div className="mt-3 space-y-1.5">
+                        {(readiness.weeklyTasks || [readiness.nextPracticeTask]).slice(0, 5).map((task, index) => (
+                          <p key={task.id || index} className="line-clamp-1 text-[12.5px] text-brand-ink">
+                            <span className="mr-2 tabular-nums text-brand-muted">{index + 1}.</span>{task.title || task.questionText}
+                          </p>
+                        ))}
+                      </div>
+                      <p className="mt-3 text-[12px] leading-relaxed text-brand-muted">{t('dashboard.growth.task.weeklyBody')}</p>
+                    </article>
+                  </section>
+                )}
+
+              </>
+            )}
+
+            {section === 'review' && (
+              <ReviewFlashcards collections={growthOverview?.recentCollections || []} t={t} />
+            )}
+
+            {section === 'history' && (
+              <>
+        {/* ───────── 复盘历史 ───────── */}
+                <section className="space-y-4" aria-labelledby="review-history-title">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="min-w-0">
+                      <p className={EYEBROW}>{t('dashboard.growth.history.eyebrow')}</p>
+                      <h2 id="review-history-title" className={`mt-2 ${H2}`}>{t('dashboard.growth.history.title')}</h2>
+                      <p className="mt-1.5 text-[12.5px] text-brand-muted">{t('dashboard.growth.history.subtitle')}</p>
                     </div>
-                  </motion.article>
-                )
-              })}
-            </div>
-          )}
-        </section>
+                    <div className="flex shrink-0 gap-1 rounded-xl border border-brand-line bg-brand-inset p-1" role="group" aria-label={t('dashboard.growth.history.filterLabel')}>
+                      {['all', 'reports', 'continue'].map(option => (
+                        <button
+                          key={option} type="button" onClick={() => setFilter(option)} aria-pressed={filter === option}
+                          className={`rounded-lg px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${filter === option ? 'bg-brand-card text-brand-ink shadow-sm' : 'text-brand-muted hover:text-brand-ink'}`}
+                        >
+                          {t(`dashboard.growth.history.filters.${option}`)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {loading ? (
+                    <div className="flex min-h-44 items-center justify-center"><Loader2 className="h-7 w-7 animate-spin text-brand-muted" /></div>
+                  ) : filteredInterviews.length === 0 ? (
+                    <div className={`${CARD} flex min-h-52 flex-col items-center justify-center gap-4 px-6 py-8 text-center`}>
+                      <FileText className="h-8 w-8 text-brand-muted" />
+                      <div>
+                        <h3 className="text-[14px] font-semibold text-brand-ink">
+                          {filter === 'all' ? t('dashboard.growth.history.emptyTitle') : t('dashboard.growth.history.noMatchTitle')}
+                        </h3>
+                        <p className="mt-1 text-[12.5px] text-brand-muted">
+                          {filter === 'all' ? t('dashboard.growth.history.emptyBody') : t('dashboard.growth.history.noMatchBody')}
+                        </p>
+                      </div>
+                      {filter === 'all' && (
+                        <Link to="/setup" className="inline-flex items-center gap-2 rounded-xl bg-brand-ink px-5 py-2.5 text-[12.5px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90">
+                          {t('dashboard.growth.startBaseline')} <ArrowRight className="h-3.5 w-3.5" />
+                        </Link>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-brand-line border-y border-brand-line">
+                      {filteredInterviews.map((interview, index) => {
+                        const action = getAction(interview, t)
+                        const ActionIcon = action.icon
+                        const date = new Date(sessionDate(interview))
+                        const summary = reportSummary(interview)
+                        const badgeTone = hasReport(interview)
+                          ? 'border-brand-success/30 bg-brand-success/[0.08] text-brand-success'
+                          : isGenerating(interview)
+                            ? 'border-brand-violet/30 bg-brand-violet/[0.08] text-brand-violet'
+                            : 'border-brand-line bg-brand-inset text-brand-muted'
+                        return (
+                          <motion.article
+                            key={interview.id}
+                            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: Math.min(index * 0.04, 0.25) }}
+                            role={action.route ? 'link' : undefined}
+                            tabIndex={action.route ? 0 : undefined}
+                            onClick={() => openInterview(interview)}
+                            onKeyDown={event => { if (action.route && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); openInterview(interview) } }}
+                            className={`group relative grid gap-4 py-5 transition-colors sm:grid-cols-[150px_minmax(0,1fr)_auto] sm:items-center ${action.route ? 'cursor-pointer hover:bg-brand-inset/50' : ''}`}
+                          >
+                            <div className="space-y-2">
+                              <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10.5px] font-medium ${badgeTone}`}>
+                                {isGenerating(interview) && <Loader2 className="h-3 w-3 animate-spin" />}
+                                {statusLabel(interview, t)}
+                              </span>
+                              <p className="text-[11.5px] tabular-nums text-brand-muted">{date.toLocaleDateString(localeTag, { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                            </div>
+
+                            <div className="min-w-0">
+                              <h3 className="truncate text-[15px] font-semibold text-brand-ink">{interview.position || t('dashboard.growth.history.untitled')}</h3>
+                              <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-brand-muted">
+                                <span>{interview.language}</span>
+                                <span>{interview.mode === 'practice' ? t('dashboard.growth.history.practiceMode') : t('dashboard.growth.history.formalMode')}</span>
+                                <span>{interview.duration} {t('dashboard.durMin')}</span>
+                              </div>
+                              <p className="mt-2 line-clamp-2 text-[12.5px] leading-relaxed text-brand-muted">
+                                <InlineRichText text={summary || (isResumable(interview)
+                                  ? t('dashboard.growth.history.resumeHint')
+                                  : isGenerating(interview)
+                                    ? t('dashboard.growth.latest.generatingBody')
+                                    : t('dashboard.growth.history.noSummary'))} />
+                              </p>
+                            </div>
+
+                            <div className="flex items-center justify-between gap-3 sm:justify-end">
+                              <span className={`inline-flex items-center gap-2 text-[12.5px] font-semibold ${action.route ? 'text-brand-ink' : 'text-brand-muted'}`}>
+                                <ActionIcon className={`h-3.5 w-3.5 ${isGenerating(interview) ? 'animate-spin' : ''}`} />
+                                {action.label}
+                                {action.route && <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={event => { event.stopPropagation(); setPendingDelete({ id: interview.id, position: interview.position || '' }) }}
+                                className="relative z-10 shrink-0 rounded-lg p-1.5 text-brand-muted transition-colors hover:bg-brand-danger/10 hover:text-brand-danger"
+                                aria-label={t('dashboard.delete')}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </motion.article>
+                        )
+                      })}
+                    </div>
+                  )}
+                </section>
+              </>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <AnimatePresence>

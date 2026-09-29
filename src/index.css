@@ -1,169 +1,409 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;0,8..60,900;1,8..60,400&family=Outfit:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@500;700;900&display=swap');
+/* 字体在 index.html 里用 <link> 预连接加载；这里不再 @import，避免阻塞渲染和重复下载 */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /**
- * 布局尺寸变量。颜色一律走下面的 --brand-* 品牌 token，
- * 全站只有一套色板（旧的 --ui-* 颜色已随开始面试页迁移一并删除）。
+ * LandIt · Harbor 设计系统
+ *
+ * 视觉母题取自首页插画：汉堡港、易北爱乐厅、一条通向远方的路和两个正在交谈的人。
+ * 色彩直接从插画和 LandIt 标志里取样——港湾蓝、鼠尾草绿、赭黄、红砖，再加一层薄雾般的纸色底。
+ *
+ * 规则：
+ *   1. 墨色（深港蓝）承担主要交互：主按钮、选中态、焦点。
+ *   2. 赭黄只给「最想让人点的那一个按钮」和极少量高光；港湾蓝用于链接、图表和强调。
+ *   3. 层次靠留白 + 1px 发丝线 + 带蓝调的柔和投影，不用高饱和色块。
+ *
+ * 每个值只定义两次（light / .dark），消费方不写 `dark:` 变体。
+ * 数值是空格分隔的 RGB 通道，以便 Tailwind 的 `<alpha-value>` 生效。
+ * violet / glow / lime / coral 是历史变量名，现在分别指向 harbor / sage / ochre / brick。
  */
 @layer base {
   :root {
-    /* Navbar 实际高度，页面用它计算顶部避让，避免各页面各写一个魔数 */
+    /* Navbar 占位高度（浮动胶囊 + 上下留白），页面顶部避让都读这个变量 */
     --ui-nav-h: 5rem;
-    /**
-     * 内容区宽度上限。低于它时页面完全跟随视口铺满；超过后居中留白，
-     * 否则在 2K/5K 屏上卡片会被拉到几百像素宽、文字密度过低。
-     * 顶栏不受此限制（logo 贴左、账号贴右在宽屏上是正常形态）。
-     */
-    --ui-max-w: 1760px;
+    /* 内容区宽度上限：低于它时铺满，超过后居中留白 */
+    --ui-max-w: 1440px;
 
-    /* 品牌橘直接沿用 tailwind.config.js 的 primary 色阶，不引入新色值 */
-  }
-
-  /**
-   * 品牌视觉 token —— "编辑式极简 + 几何点缀 + 柔和科技感"。
-   * 黑白灰是主角，紫色和荧光黄绿只做小面积点缀。
-   * 每个值只定义两次（light / .dark），消费方无需写任何 `dark:` 变体。
-   * 数值是空格分隔的 RGB 通道，以便 Tailwind 的 `<alpha-value>` 生效。
-   */
-  :root {
-    /* 全站统一一张画布：区块之间靠留白分层，不再交替换底色 */
-    --brand-paper: 246 246 249; /* #F6F6F9 冷灰，比旧的 #F5F5F5 多一丝蓝紫，绝不发暖 */
-    --brand-card: 255 255 255; /* 浮窗与卡片一律纯白 */
-    --brand-inset: 242 242 246; /* #F2F2F6 卡片内部的浅色凹槽 */
-    --brand-ink: 26 26 31; /* #1A1A1F 近黑但偏冷；纯黑在这套色板里太硬 */
-    --brand-muted: 90 90 102; /* #5A5A66 —— 次要文字。原来的 #6F6F7A 压在 #F6F6F9 上只有 4.56:1，
-                                  读长文很虚；这一档是 6.3:1 */
-    --brand-line: 228 228 234; /* #E4E4EA 中性描边 */
-    --brand-deep: 43 38 68; /* #2B2644 深靛，用于成对出现的暗色卡片 */
-    --brand-violet: 124 92 255; /* #7C5CFF 实色紫，用在按钮/圆点/线条 */
-    --brand-glow: 170 126 255; /* #AA7EFF 只用于半透明氛围圆，never 实色 */
-    --brand-lime: 201 243 29; /* #C9F31D 荧光黄绿 */
-    --brand-sky: 191 217 255; /* #BFD9FF AI 氛围 */
-    --brand-coral: 241 138 108; /* #F18A6C AI 氛围 */
-    --brand-success: 43 182 115;
-    --brand-danger: 226 76 75;
-    /* 落在 ink 实心块上的文字色，深浅色下需要反过来 */
-    --brand-on-ink: 250 250 252;
+    --brand-paper: 245 246 242;   /* #F5F6F2 薄雾纸色，带一丝鼠尾草绿 */
+    --brand-card: 255 255 255;
+    --brand-inset: 238 241 236;   /* #EEF1EC 卡片内凹槽 */
+    --brand-mist: 224 232 228;    /* #E0E8E4 插画天空 */
+    --brand-ink: 34 48 61;        /* #22303D 深港蓝，比纯黑柔和，在纸色上 12:1 */
+    --brand-muted: 86 99 110;     /* #56636E 次要文字，在纸色上 ≈5.7:1 */
+    --brand-line: 221 227 221;    /* #DDE3DD 发丝线 */
+    --brand-deep: 30 45 58;       /* #1E2D3A 深色卡片 */
+    --brand-violet: 70 106 138;   /* #466A8A harbor 港湾蓝，白字 5.6:1 */
+    --brand-glow: 127 166 136;    /* #7FA688 sage 鼠尾草绿（标志路径色） */
+    --brand-lime: 232 168 50;     /* #E8A832 ochre 赭黄（标志箭头色），配墨色字 */
+    --brand-sky: 199 214 226;     /* #C7D6E2 */
+    --brand-coral: 181 101 76;    /* #B5654C brick 红砖 */
+    --brand-success: 70 134 100;  /* #468664 */
+    --brand-danger: 190 80 62;    /* #BE503E */
+    --brand-on-ink: 248 249 245;
+    --brand-shadow: 30 45 58;     /* 投影带一点港蓝，比纯黑更干净 */
   }
 
   .dark {
-    --brand-paper: 17 17 20;
-    --brand-card: 25 25 29;
-    --brand-inset: 33 33 38;
-    --brand-ink: 238 238 243;
-    --brand-muted: 163 163 175; /* #A3A3AF 深色下同理往亮里提一档 */
-    --brand-line: 45 45 52;
-    --brand-deep: 43 38 68;
-    --brand-violet: 154 128 255;
-    --brand-glow: 170 126 255;
-    --brand-lime: 201 243 29;
-    --brand-sky: 120 158 224;
-    --brand-coral: 226 129 100;
-    --brand-success: 52 199 123;
-    --brand-danger: 248 113 113;
-    --brand-on-ink: 19 19 23;
-
+    --brand-paper: 14 20 26;      /* 夜色港口 */
+    --brand-card: 21 29 37;
+    --brand-inset: 28 38 48;
+    --brand-mist: 30 42 52;
+    --brand-ink: 233 237 233;
+    --brand-muted: 152 166 176;
+    --brand-line: 40 52 63;
+    --brand-deep: 30 45 58;
+    --brand-violet: 140 176 206;
+    --brand-glow: 124 166 136;
+    --brand-lime: 236 181 76;
+    --brand-sky: 64 92 116;
+    --brand-coral: 212 128 100;
+    --brand-success: 110 178 140;
+    --brand-danger: 232 122 102;
+    --brand-on-ink: 14 20 26;
+    --brand-shadow: 0 0 0;
   }
 
-  /**
-   * 「Quiet Lavender」色板 —— 已迁移区域的强调色层。
-   * 规则：**交互色是墨色**（按钮、选中态、焦点），薰衣草只做小面积点缀和数据可视化；
-   * 不出现高饱和纯色块，
-   * 层次靠留白 + 1px 描边而不是阴影和几何装饰。
-   * 中性底色（paper / card / inset / ink / muted / line）已经是上面的全局值，全站共用一张画布；
-   * 这里只覆盖强调色和语义色，所以未迁移的页面仍然保留它们原来的荧光绿点缀。
-   * 用法：把 .theme-quiet 加在区域根节点上。已接入：Navbar、Footer、SetupPage。
+  /*
+   * .theme-quiet 以前用来给「已迁移页面」换一套强调色。
+   * 现在全站只有一套 Harbor 色板，保留类名只是为了不动页面结构，它不再覆盖任何变量。
    */
-  .theme-quiet {
-    /* 中性底色已经是全局值，这里只覆盖「强调色 + 语义色」这层差集 */
-    --brand-violet: 122 110 168; /* #7A6EA8 强调色：图标 / 描边 / 次要文字 */
-    --brand-glow: 186 176 219; /* #BAB0DB Pantone Mystic Violet 一档，只做浅色填充 */
-    --brand-lime: 186 176 219; /* 荧光黄绿在这套色板里退役，兜底成薰衣草，避免漏色 */
-    --brand-sky: 202 208 226;
-    --brand-coral: 206 182 182;
-    --brand-success: 92 140 116; /* 去饱和的墨绿，替掉原来的亮绿 */
-    --brand-danger: 188 96 96;
 
+  * {
+    @apply border-brand-line;
   }
 
-  .dark .theme-quiet {
-    --brand-violet: 178 167 220;
-    --brand-glow: 140 128 190;
-    --brand-lime: 178 167 220;
-    --brand-sky: 130 140 165;
-    --brand-coral: 178 148 148;
-    --brand-success: 108 168 138;
-    --brand-danger: 214 122 122;
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
 
+  body {
+    @apply bg-brand-paper font-sans text-brand-ink antialiased;
+    font-feature-settings: 'ss01' on, 'cv11' on;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: rgb(232 168 50 / 0.32);
+    color: rgb(34 48 61);
+  }
+
+  .dark ::selection {
+    background-color: rgb(236 181 76 / 0.35);
+    color: rgb(233 237 233);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--brand-violet) / 0.55);
+    outline-offset: 2px;
+  }
+
+  /*
+   * 标题字重统一：font-brand 的 black / extrabold 在 DM Sans 上过重，
+   * 这里收到 700，页面里原有的 font-black 不用逐个改。
+   */
+  .font-brand.font-black,
+  .font-brand.font-extrabold {
+    font-weight: 700;
+  }
+
+  /* 衬线展示字：Fraunces 打开 SOFT 轴，字形更圆润亲和；字重压到 500–600 更显克制 */
+  .font-display,
+  .font-serif {
+    font-variation-settings: 'SOFT' 60, 'WONK' 0;
+    letter-spacing: -0.018em;
+  }
+
+  .font-display.font-black,
+  .font-display.font-extrabold,
+  .font-display.font-bold,
+  .font-serif.font-black,
+  .font-serif.font-bold {
+    font-weight: 600;
   }
 }
 
 @layer components {
-  /** 浮窗卡片：纯白 + 柔和大阴影，参考稿里所有交互界面都是这种「浮起来」的质感 */
-  .brand-float {
-    @apply rounded-[20px] bg-brand-card;
-    /* 这套风格不靠厚重阴影撑层次，克制到刚好能"浮"起来即可 */
-    box-shadow: 0 10px 40px rgb(20 20 20 / 0.06);
-  }
-
-  .dark .brand-float {
-    box-shadow: 0 10px 40px rgb(0 0 0 / 0.45);
-  }
-
-  /** Quiet Lavender 下卡片不靠阴影分层，换成一条 1px 冷灰描边，只留一丝落影 */
-  .theme-quiet .brand-float {
-    border: 1px solid rgb(var(--brand-line));
-    box-shadow: 0 1px 2px rgb(24 24 31 / 0.03);
-  }
-
-  .dark .theme-quiet .brand-float {
-    box-shadow: none;
-  }
-
-  /**
-   * 主按钮：墨色实心。
-   * 试过薰衣草渐变，用户反馈「整体太偏紫」，所以交互色（按钮、选中态）一律回到墨色，
-   * 薰衣草只留给数据可视化和极小面积的点缀。
-   */
-  .theme-quiet .quiet-cta {
-    @apply bg-brand-ink text-brand-on-ink;
-  }
-
-  .theme-quiet .quiet-cta:hover:not(:disabled) {
-    @apply opacity-90;
-  }
-
-  /**
-   * 首页的紫色按钮。比强调紫 #7A6EA8 深一档：#7A6EA8 配白字只有 4.4:1，不到 4.5，
-   * 压到 #6F6399 才有 5.35:1。观感还是同一支薰衣草，别再往浅了调。
-   */
-  .theme-quiet .quiet-violet {
-    background-color: #6F6399;
-    color: #FFFFFF;
-  }
-
-  .theme-quiet .quiet-violet:hover:not(:disabled) {
-    background-color: #7B6EA8;
-  }
-
-  .dark .theme-quiet .quiet-violet {
-    background-color: #7A6EA8;
-  }
-
-  .dark .theme-quiet .quiet-violet:hover:not(:disabled) {
-    background-color: #877AB8;
-  }
-
-  /** 内容区容器：窄屏铺满，宽屏在 --ui-max-w 处收口。改一处即可全站生效。 */
+  /** 内容区容器：窄屏铺满，宽屏在 --ui-max-w 处收口 */
   .ui-container {
     @apply mx-auto w-full px-4 sm:px-6 lg:px-8;
     max-width: var(--ui-max-w);
   }
 
-  /* 时长滑块：轨道左侧品牌紫、右侧中性色，分割点由 --brand-range-fill 驱动 */
+  /**
+   * 浮起的卡片：纯白 + 1px 发丝线 + 带港蓝色调的双层柔影。
+   * 全站所有卡片、下拉、弹窗共用这一个类，改这里即可统一。
+   */
+  .brand-float {
+    @apply rounded-[20px] border border-brand-line/90 bg-brand-card;
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.7) inset,
+      0 1px 2px rgb(var(--brand-shadow) / 0.04),
+      0 10px 30px -18px rgb(var(--brand-shadow) / 0.22);
+  }
+
+  .dark .brand-float {
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.03) inset,
+      0 16px 40px -20px rgb(0 0 0 / 0.6);
+  }
+
+  /** 毛玻璃表面：导航、浮层、叠在插画上的信息卡 */
+  .lk-glass {
+    @apply border border-white/60 bg-brand-card/70;
+    backdrop-filter: blur(18px) saturate(1.25);
+    -webkit-backdrop-filter: blur(18px) saturate(1.25);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.65) inset,
+      0 18px 48px -24px rgb(var(--brand-shadow) / 0.35);
+  }
+
+  .dark .lk-glass {
+    @apply border-white/[0.08] bg-brand-card/70;
+    box-shadow: 0 18px 48px -24px rgb(0 0 0 / 0.7);
+  }
+
+  /**
+   * 液态玻璃（仿 Apple Liquid Glass）：高透、强模糊、提饱和，
+   * 顶部一道镜面高光 + 底部一圈内阴影，边缘像被光折射过。
+   * 只用在「浮在内容之上」的控件上：侧栏、顶栏、分段控件、悬浮工具条。
+   * 普通内容卡片不要用它——满屏玻璃会让信息层级变糊。
+   */
+  .lk-liquid {
+    position: relative;
+    isolation: isolate;
+    background:
+      linear-gradient(160deg, rgb(255 255 255 / 0.62) 0%, rgb(255 255 255 / 0.32) 55%, rgb(255 255 255 / 0.42) 100%);
+    backdrop-filter: blur(24px) saturate(1.9) brightness(1.03);
+    -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.03);
+    border: 1px solid rgb(255 255 255 / 0.6);
+    box-shadow:
+      inset 0 1px 0.5px rgb(255 255 255 / 0.95),
+      inset 0 -1px 0.5px rgb(255 255 255 / 0.35),
+      inset 0 -18px 32px -24px rgb(var(--brand-shadow) / 0.22),
+      0 1px 2px rgb(var(--brand-shadow) / 0.05),
+      0 16px 40px -18px rgb(var(--brand-shadow) / 0.28);
+  }
+
+  /* 镜面高光：左上角一团柔光 + 上半部渐亮，在内容之下、背景之上 */
+  .lk-liquid::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 70% at 12% -10%, rgb(255 255 255 / 0.7), transparent 55%),
+      linear-gradient(180deg, rgb(255 255 255 / 0.28), transparent 40%);
+  }
+
+  .dark .lk-liquid {
+    background: linear-gradient(160deg, rgb(255 255 255 / 0.10) 0%, rgb(255 255 255 / 0.04) 60%, rgb(255 255 255 / 0.07) 100%);
+    border-color: rgb(255 255 255 / 0.12);
+    box-shadow:
+      inset 0 1px 0.5px rgb(255 255 255 / 0.22),
+      inset 0 -18px 32px -24px rgb(0 0 0 / 0.5),
+      0 18px 44px -20px rgb(0 0 0 / 0.75);
+  }
+
+  .dark .lk-liquid::before {
+    background: radial-gradient(120% 70% at 12% -10%, rgb(255 255 255 / 0.12), transparent 55%);
+  }
+
+  /** 玻璃上的选中项：一块更亮、更「厚」的玻璃片 */
+  .lk-liquid-pill {
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.72));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 1),
+      inset 0 -1px 0 rgb(var(--brand-shadow) / 0.06),
+      0 1px 2px rgb(var(--brand-shadow) / 0.08),
+      0 8px 20px -10px rgb(var(--brand-shadow) / 0.4);
+  }
+
+  .dark .lk-liquid-pill {
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.08));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 8px 20px -10px rgb(0 0 0 / 0.7);
+  }
+
+  /** 页面眉标：小号字 + 一段短横线，用在大标题上方 */
+  .lk-eyebrow {
+    @apply inline-flex items-center gap-2.5 text-[11.5px] font-semibold uppercase tracking-[0.18em] text-brand-muted;
+  }
+
+  .lk-eyebrow::before {
+    content: '';
+    @apply inline-block h-px w-6 bg-brand-ochre;
+  }
+
+  /** 展示标题：衬线、紧字距 */
+  .lk-display {
+    @apply font-display font-semibold text-brand-ink;
+    letter-spacing: -0.022em;
+    text-wrap: balance;
+    font-variation-settings: 'SOFT' 60, 'WONK' 0, 'opsz' 96;
+  }
+
+  /** 强调词：赭黄荧光笔划线，替代以前的渐变字 */
+  .lk-mark {
+    background-image: linear-gradient(transparent 62%, rgb(var(--brand-lime) / 0.38) 62%, rgb(var(--brand-lime) / 0.38) 92%, transparent 92%);
+    @apply rounded-sm px-0.5;
+  }
+
+  /* ─────────── 按钮 ─────────── */
+
+  .lk-btn {
+    @apply relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 py-2.5 text-[13.5px] font-semibold transition-all duration-300 ease-out-soft disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .lk-btn-lg {
+    @apply px-7 py-3.5 text-[15px];
+  }
+
+  /** 墨色主按钮 */
+  .lk-btn-primary {
+    @apply bg-brand-ink text-brand-on-ink;
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.12) inset, 0 10px 24px -12px rgb(var(--brand-shadow) / 0.55);
+  }
+
+  .lk-btn-primary:hover:not(:disabled) {
+    @apply -translate-y-0.5;
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.12) inset, 0 16px 32px -14px rgb(var(--brand-shadow) / 0.6);
+  }
+
+  /** 赭黄强调按钮：每屏最多一个 */
+  .lk-btn-accent {
+    @apply bg-brand-ochre text-[#22303D];
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.35) inset, 0 12px 28px -14px rgb(var(--brand-lime) / 0.9);
+  }
+
+  .lk-btn-accent:hover:not(:disabled) {
+    @apply -translate-y-0.5;
+    filter: brightness(1.04);
+  }
+
+  /** 描边次按钮 */
+  .lk-btn-ghost {
+    @apply border border-brand-ink/15 bg-brand-card/70 text-brand-ink backdrop-blur;
+  }
+
+  .lk-btn-ghost:hover:not(:disabled) {
+    @apply border-brand-ink/40 bg-brand-card;
+  }
+
+  .lk-btn:active:not(:disabled) {
+    @apply translate-y-0 scale-[0.98];
+  }
+
+  /** 小胶囊标签 */
+  .lk-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-card/80 px-3 py-1 text-[11.5px] font-medium text-brand-muted;
+  }
+
+  /** 下划线从左侧展开的文字链接 */
+  .lk-link {
+    @apply relative inline-flex items-center gap-1 text-brand-ink;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s;
+  }
+
+  .lk-link:hover {
+    background-size: 100% 1px;
+  }
+
+  /* ─────────── 历史类名：统一换成 Harbor 视觉，页面无需改动 ─────────── */
+
+  /** Setup 页的主提交按钮 */
+  .quiet-cta {
+    @apply bg-brand-ink text-brand-on-ink;
+    box-shadow: 0 10px 24px -12px rgb(var(--brand-shadow) / 0.55);
+  }
+
+  .quiet-cta:hover:not(:disabled) {
+    @apply -translate-y-px;
+  }
+
+  /** 强调色按钮（原薰衣草紫） → 赭黄 */
+  .quiet-violet {
+    @apply bg-brand-ochre text-[#22303D];
+  }
+
+  .quiet-violet:hover:not(:disabled) {
+    filter: brightness(1.04);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-3 rounded-full bg-brand-ink px-8 py-3.5 font-semibold text-brand-on-ink transition-all duration-300;
+    box-shadow: 0 12px 28px -14px rgb(var(--brand-shadow) / 0.6);
+  }
+
+  .btn-primary:hover {
+    @apply -translate-y-0.5;
+  }
+
+  .btn-primary:active {
+    @apply translate-y-0 scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-3 rounded-full border border-brand-line bg-brand-card px-8 py-3.5 font-semibold text-brand-ink transition-all duration-300;
+  }
+
+  .btn-secondary:hover {
+    @apply -translate-y-0.5 border-brand-ink/40;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium text-brand-muted transition-colors duration-200 hover:bg-brand-inset hover:text-brand-ink;
+  }
+
+  .card {
+    @apply rounded-xl border border-brand-line bg-brand-card transition-all duration-300;
+  }
+
+  .input-field, .textarea-field, .select-field {
+    @apply w-full rounded-xl border border-brand-line bg-brand-card px-4 py-2.5 text-brand-ink placeholder-brand-muted/70 transition-all duration-200 focus:border-brand-ink focus:outline-none focus:ring-4 focus:ring-brand-ink/10;
+  }
+
+  .input-field-premium {
+    @apply w-full rounded-2xl border border-brand-line bg-brand-inset px-6 py-4 font-medium text-brand-ink placeholder-brand-muted/70 transition-all duration-300 focus:border-brand-ink focus:outline-none focus:ring-4 focus:ring-brand-ink/10;
+  }
+
+  .textarea-field-premium {
+    @apply w-full rounded-[1.5rem] border border-brand-line bg-brand-inset px-6 py-4 font-medium leading-relaxed text-brand-ink placeholder-brand-muted/70 transition-all duration-300 focus:border-brand-ink focus:outline-none focus:ring-4 focus:ring-brand-ink/10;
+  }
+
+  .card-premium {
+    @apply relative overflow-hidden rounded-[1.5rem] border border-brand-line bg-brand-card transition-all duration-500 hover:-translate-y-1 hover:shadow-lift;
+  }
+
+  .gradient-text {
+    @apply lk-mark font-bold text-brand-ink;
+  }
+
+  .section-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-inset px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-muted;
+  }
+
+  .btn-setup-action,
+  .btn-setup-action-pill {
+    @apply inline-flex items-center justify-center gap-3 rounded-xl border border-brand-line bg-brand-card px-10 py-5 font-semibold text-brand-ink transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-ink/40 active:scale-[0.98];
+  }
+
+  .btn-setup-action-pill {
+    @apply rounded-full;
+  }
+
+  /* 时长滑块：左侧港湾蓝、右侧中性色，分割点由 --brand-range-fill 驱动 */
   .brand-range {
     @apply h-1.5 w-full cursor-pointer appearance-none rounded-full bg-transparent;
     background-image: linear-gradient(
@@ -178,27 +418,25 @@
   }
 
   .brand-range::-webkit-slider-thumb {
-    @apply h-4 w-4 appearance-none rounded-full border-2 border-brand-card bg-[rgb(var(--brand-violet))];
-    box-shadow: 0 1px 4px rgb(var(--brand-violet) / 0.45);
+    @apply h-[18px] w-[18px] appearance-none rounded-full border-[3px] border-brand-card bg-brand-ochre;
+    box-shadow: 0 1px 6px rgb(var(--brand-shadow) / 0.35);
   }
 
   .brand-range::-moz-range-thumb {
-    @apply h-4 w-4 appearance-none rounded-full border-2 border-brand-card bg-[rgb(var(--brand-violet))];
-    box-shadow: 0 1px 4px rgb(var(--brand-violet) / 0.45);
+    @apply h-[18px] w-[18px] appearance-none rounded-full border-[3px] border-brand-card bg-brand-ochre;
+    box-shadow: 0 1px 6px rgb(var(--brand-shadow) / 0.35);
   }
 
   .brand-range:focus-visible::-webkit-slider-thumb {
-    box-shadow: 0 0 0 4px rgb(var(--brand-violet) / 0.25);
+    box-shadow: 0 0 0 5px rgb(var(--brand-lime) / 0.3);
   }
 
   .brand-range:focus-visible::-moz-range-thumb {
-    box-shadow: 0 0 0 4px rgb(var(--brand-violet) / 0.25);
+    box-shadow: 0 0 0 5px rgb(var(--brand-lime) / 0.3);
   }
 }
 
 @layer utilities {
-  /* 这个类在项目里被用了两处，但从来没有定义过——一直是空操作，
-     导致横向滚动容器露出原生滚动条。这里补上真实实现。 */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -207,47 +445,47 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-}
 
-@layer utilities {
   .font-chinese-modern {
-    font-family: 'Noto Sans SC', 'Inter', system-ui, sans-serif;
+    font-family: 'DM Sans', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif;
   }
-}
 
-/* Custom shadows — Premium Minimalist */
-@layer utilities {
   .shadow-soft {
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 2px rgb(var(--brand-shadow) / 0.05), 0 1px 3px rgb(var(--brand-shadow) / 0.08);
   }
   .shadow-card {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 4px 12px -4px rgb(var(--brand-shadow) / 0.08);
   }
   .shadow-card-hover {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 20px 40px -18px rgb(var(--brand-shadow) / 0.18);
   }
   .shadow-nav {
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+    box-shadow: 0 1px 0 rgb(var(--brand-shadow) / 0.04);
   }
   .shadow-glow-brand {
-    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    box-shadow: 0 0 0 4px rgb(var(--brand-lime) / 0.18);
   }
 
-  /* Subtitle Accent */
   .title-accent-bar {
-    @apply mx-auto h-0.5 w-12 bg-slate-900 dark:bg-slate-100 opacity-20;
+    @apply mx-auto h-0.5 w-12 bg-brand-ochre;
   }
 
-  /* Fine dot grid — very subtle */
+  /* 细点阵，极淡 */
   .bg-dot-grid {
-    background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-    background-size: 24px 24px;
+    background-image: radial-gradient(rgb(var(--brand-ink) / 0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
   }
 
-  .dark .bg-dot-grid {
-    background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  /* 3D 透视容器：子元素用 transform 做轻微倾斜 */
+  .lk-perspective {
+    perspective: 1400px;
   }
-  /* Digital Human Animations — Refined Minimalist */
+
+  .lk-preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  /* 数字人动效 */
   @keyframes dh-mouth {
     0%, 100% { transform: scaleY(0.5); opacity: 0.8; }
     50% { transform: scaleY(1); opacity: 1; }
@@ -277,6 +515,7 @@
   .animate-dh-thinking {
     animation: dh-thinking 1.5s ease-in-out infinite;
   }
+
   @keyframes marquee {
     0% { transform: translateX(0); }
     100% { transform: translateX(-33.33%); }
@@ -291,165 +530,45 @@
   .animate-marquee-reverse {
     animation: marquee-reverse 50s linear infinite;
   }
+  @keyframes lk-marquee {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-50%, 0, 0); }
+  }
+  .lk-marquee {
+    animation: lk-marquee 60s linear infinite;
+  }
+
   .offer-marquee-mask {
-    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+  }
+
+  /* 纸张颗粒：极淡的噪点，让大面积纸色不显得像塑料 */
+  .lk-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.13 0 0 0 0 0.19 0 0 0 0 0.24 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-marquee,
+    .animate-marquee-reverse,
+    .lk-marquee,
+    .animate-drift,
+    .animate-drift-slow {
+      animation: none;
+    }
   }
 }
 
-@layer base {
-  * {
-    @apply border-brand-line;
-  }
-  
-  html {
-    scroll-behavior: smooth;
-  }
-  
-  /* body 也走 brand-paper —— 之前是纯白 / slate-950，回弹和加载瞬间会露出和页面对不上的底 */
-  body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    @apply bg-brand-paper text-brand-ink antialiased;
-  }
-
-  ::selection {
-    background-color: rgb(186 176 219 / 0.45); /* 淡薰衣草 */
-    color: #1a1a1f;
-  }
-
-  .dark ::selection {
-    background-color: rgb(140 128 190 / 0.45);
-    color: #eeeef3;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight font-bold;
-  }
-
-  .font-serif {
-    font-family: 'Source Serif 4', serif;
-  }
-
-  .font-display {
-    font-family: 'Outfit', sans-serif;
-  }
-}
-
-@layer components {
-  .btn-primary {
-    @apply inline-flex items-center justify-center gap-3 px-12 py-5 text-white font-black rounded-[2rem] transition-all duration-500 relative overflow-hidden font-display uppercase tracking-widest;
-    background: linear-gradient(135deg, #a78bda 0%, #8b6fc0 50%, #7c5cb8 100%);
-    box-shadow: 0 20px 40px -12px rgba(139, 111, 192, 0.35);
-  }
-
-  .btn-primary::before {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full transition-transform duration-700 pointer-events-none;
-  }
-
-  .btn-primary:hover {
-    @apply -translate-y-1.5;
-    box-shadow: 0 30px 60px -12px rgba(139, 111, 192, 0.5);
-    background: linear-gradient(135deg, #b89de3 0%, #a78bda 50%, #8b6fc0 100%);
-  }
-
-  .btn-primary:hover::before {
-    @apply translate-x-full;
-  }
-
-  .btn-primary:active {
-    @apply scale-[0.96] translate-y-0.5;
-    box-shadow: 0 10px 20px -5px rgba(139, 111, 192, 0.4);
-  }
-
-  .btn-secondary {
-    @apply inline-flex items-center justify-center gap-3 px-10 py-5 bg-white/40 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200 font-black rounded-[2rem] border border-slate-200 dark:border-slate-800 backdrop-blur-xl transition-all duration-500 font-display uppercase tracking-widest;
-    box-shadow: 0 10px 20px -8px rgba(0, 0, 0, 0.05);
-  }
-  
-  .btn-secondary:hover {
-    @apply -translate-y-1.5 border-slate-400 dark:border-slate-600 bg-white/60 dark:bg-slate-800/60;
-    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1);
-  }
-
-  .btn-secondary:active {
-    @apply scale-[0.96] translate-y-0.5;
-  }
-  
-  .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-slate-600 font-medium rounded-lg transition-all duration-200 hover:bg-slate-100/80 hover:text-slate-900;
-  }
-
-  .dark .btn-ghost {
-    @apply text-slate-400 hover:bg-slate-800 hover:text-white;
-  }
-  
-  .card {
-    @apply bg-white rounded-xl border border-slate-200 shadow-sm transition-all duration-300;
-  }
-
-  .dark .card {
-    @apply bg-slate-900 border-slate-800;
-  }
-  
-  .input-field, .textarea-field, .select-field {
-    @apply w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500;
-  }
-
-  .dark .input-field, .dark .textarea-field, .dark .select-field {
-    @apply bg-slate-900 border-slate-700 text-slate-100 placeholder-slate-600 focus:ring-blue-500/20;
-  }
-  
-  .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 font-black;
-  }
-
-  .dark .gradient-text {
-    @apply from-orange-300 via-orange-400 to-orange-500;
-  }
-
-  .section-badge {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-full border border-slate-200 uppercase tracking-widest;
-  }
-
-  .dark .section-badge {
-    @apply bg-slate-800 text-slate-300 border-slate-700;
-  }
-  .input-field-premium {
-    @apply w-full px-6 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-white placeholder-slate-300 dark:placeholder-slate-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-slate-900/5 dark:focus:ring-white/5 focus:border-slate-900 dark:focus:border-white font-medium;
-  }
-
-  .textarea-field-premium {
-    @apply w-full px-6 py-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2rem] text-slate-900 dark:text-white placeholder-slate-300 dark:placeholder-slate-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-slate-900/5 dark:focus:ring-white/5 focus:border-slate-900 dark:focus:border-white font-medium leading-relaxed;
-  }
-
-  .card-premium {
-    @apply relative overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1 hover:border-indigo-100 dark:hover:border-indigo-900;
-  }
-
-  /* Gray & Black Border Button for Setup/Profile */
-  .btn-setup-action {
-    @apply inline-flex items-center justify-center gap-3 px-10 py-5 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold rounded-xl border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:-translate-y-0.5 active:scale-[0.98] uppercase tracking-wider font-chinese-modern shadow-sm;
-  }
-
-  /* Pill-shaped Gray & Gray Border Button */
-  .btn-setup-action-pill {
-    @apply inline-flex items-center justify-center gap-3 px-10 py-5 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold rounded-full border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:-translate-y-0.5 active:scale-[0.98] uppercase tracking-wider font-chinese-modern shadow-sm;
-  }
-}
-
-
-/* Glassmorphism Refinement */
+/* 旧版毛玻璃顶栏类名 */
 .glass {
-  @apply bg-white/80 backdrop-blur-md border-b border-slate-200 transition-colors duration-200;
+  @apply border-b border-brand-line bg-brand-card/80 backdrop-blur-md transition-colors duration-200;
 }
 
-.dark .glass {
-  @apply bg-slate-950/80 border-slate-800;
-}
-
-/* Custom scrollbar — Minimal */
+/* 滚动条：极简 */
 ::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {

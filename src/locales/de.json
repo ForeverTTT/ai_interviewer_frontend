@@ -22,7 +22,15 @@
     "myExperiences": "Meine Erfahrungen",
     "chooseAvatar": "Profilbild wählen",
     "tokens": "Energie",
-    "notes": "Fragensammlung"
+    "notes": "Fragensammlung",
+    "groupPractice": "Training",
+    "groupMaterials": "Bewerbungsunterlagen",
+    "groupCommunity": "Community",
+    "collapse": "Seitenleiste einklappen",
+    "expand": "Seitenleiste ausklappen",
+    "menu": "Menü",
+    "backHome": "Zur Startseite",
+    "energyCta": "Mehr Energie erhalten"
   },
   "resumeTailor": {
     "badge": "Arbeitsbereich für gezielte Bewerbungen",
@@ -460,6 +468,11 @@
     "privacyMore": "Mehr erfahren"
   },
   "profile": {
+    "coachCta": "KI-Lebenslaufanalyse erstellen",
+    "coachPreviewTitle": "Lass die KI deinen Lebenslauf analysieren",
+    "scoreDetails": "Analyse ansehen",
+    "scoreInsight": "Dein Lebenslauf ist inhaltlich stark und logisch aufgebaut. Mit präziser quantifizierten Ergebnissen wirst du für Top-Arbeitgeber deutlich attraktiver.",
+    "coachScoreProfessionalism": "Professionalität",
     "title": "Profil & Lebenslauf",
     "status": "Karrierestatus",
     "statusSeeking": "Suchend",
@@ -1160,6 +1173,7 @@
     }
   },
   "interview": {
+    "candidateLabel": "Kandidat:in",
     "live": "Live Interview",
     "end": "Ende",
     "timeLeft": "Zeit",
@@ -1464,6 +1478,8 @@
     "loading": "Lädt..."
   },
   "common": {
+    "error": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "networkError": "Netzwerkfehler. Bitte versuche es erneut.",
     "upload": "Hochladen",
     "uiLanguage": "Sprache",
     "themeToggle": "Theme",
@@ -1686,6 +1702,9 @@
     "listView": "Listenansicht"
   },
   "growthSprint": {
+    "summary": {
+      "practice": "Bisher {{count}} effektive Einheiten · insgesamt {{duration}}"
+    },
     "eyebrow": "Offer-Sprint",
     "empty": {
       "title": "Machen Sie aus dem nächsten Interview einen konkreten Weg",
