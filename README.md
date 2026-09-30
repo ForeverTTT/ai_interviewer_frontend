@@ -1,3 +1,5 @@
+> 此仓库保留历史记录。前后端源码及正式部署已统一迁至 [ai_interviewer_backend](https://github.com/ForeverTTT/ai_interviewer_backend)；请从该仓库的 `frontend/` 开发和发布。此仓库的推送只验证构建，不再部署 Firebase Hosting。
+
 <div align="center">
 
 <img src="src/assets/background.jpg" width="100%" alt="LandIt — 汉堡港口插画" />
