@@ -171,6 +171,12 @@
     --brand-success: 16 180 142;
   }
 
+  .flowlab-shell-community {
+    --brand-violet: 182 137 54;
+    --brand-glow: 244 215 153;
+    --brand-success: 99 143 86;
+  }
+
   .dark .flowlab-app-shell {
     --brand-paper: 32 31 36;
     --brand-card: 42 41 47;
@@ -195,25 +201,137 @@
     transform: rotate(2deg) translateY(-2px);
   }
 
-  .flowlab-shell-mesh {
-    @apply absolute rounded-full blur-[75px];
-    opacity: 0.5;
+  .flowlab-sidebar-brand-icon {
+    @apply block h-10 w-10 shrink-0 object-contain transition-transform duration-500 ease-out-soft;
   }
 
-  .flowlab-shell-mesh-a {
-    left: -10rem;
-    top: -9rem;
-    width: 32rem;
-    height: 32rem;
-    background: rgb(var(--brand-glow) / 0.62);
+  .flowlab-sidebar-brand-wordmark {
+    @apply block h-auto w-[146px] shrink-0 object-contain transition-transform duration-500 ease-out-soft;
   }
 
-  .flowlab-shell-mesh-b {
-    bottom: -12rem;
-    right: -9rem;
-    width: 36rem;
-    height: 36rem;
-    background: rgb(254 183 201 / 0.42);
+  .group:hover .flowlab-sidebar-brand-icon,
+  .group:hover .flowlab-sidebar-brand-wordmark {
+    transform: translateY(-1px) scale(1.015);
+  }
+
+  .dark .flowlab-sidebar-brand-wordmark {
+    border-radius: 12px;
+    background: #fffaf1;
+    padding: 3px 6px;
+  }
+
+  .flowlab-shell-atmosphere {
+    background:
+      radial-gradient(ellipse 48rem 40rem at 4% 4%, rgb(var(--brand-glow) / 0.28), transparent 72%),
+      radial-gradient(ellipse 44rem 38rem at 96% 92%, rgb(254 183 201 / 0.17), transparent 72%),
+      rgb(var(--brand-paper));
+  }
+
+  /* 同一位壳仔负责的页面共享色相，但光源位置各不相同。 */
+  .flowlab-surface-dashboard .flowlab-shell-atmosphere {
+    background:
+      radial-gradient(ellipse 54rem 42rem at 94% 5%, rgb(184 222 164 / 0.24), transparent 72%),
+      radial-gradient(ellipse 40rem 36rem at 3% 38%, rgb(254 183 201 / 0.12), transparent 72%),
+      rgb(var(--brand-paper));
+  }
+
+  .flowlab-surface-notes .flowlab-shell-atmosphere {
+    background:
+      radial-gradient(ellipse 52rem 40rem at 5% 9%, rgb(184 222 164 / 0.23), transparent 72%),
+      radial-gradient(ellipse 43rem 34rem at 96% 58%, rgb(254 183 201 / 0.1), transparent 72%),
+      rgb(var(--brand-paper));
+  }
+
+  .flowlab-surface-report .flowlab-shell-atmosphere {
+    background:
+      radial-gradient(ellipse 56rem 44rem at 91% 8%, rgb(184 222 164 / 0.25), transparent 72%),
+      radial-gradient(ellipse 44rem 36rem at 2% 86%, rgb(254 183 201 / 0.1), transparent 72%),
+      rgb(var(--brand-paper));
+  }
+
+  .flowlab-surface-gallup .flowlab-shell-atmosphere {
+    background:
+      radial-gradient(ellipse 50rem 40rem at 5% 11%, rgb(210 233 228 / 0.34), transparent 72%),
+      radial-gradient(ellipse 48rem 38rem at 92% 7%, rgb(255 220 163 / 0.3), transparent 72%),
+      rgb(var(--brand-paper));
+  }
+
+  .flowlab-surface-experiences .flowlab-shell-atmosphere {
+    background:
+      radial-gradient(ellipse 54rem 42rem at 96% 8%, rgb(255 220 163 / 0.3), transparent 72%),
+      radial-gradient(ellipse 44rem 38rem at 3% 43%, rgb(210 233 228 / 0.32), transparent 72%),
+      rgb(var(--brand-paper));
+  }
+
+  .flowlab-surface-my-experiences .flowlab-shell-atmosphere {
+    background:
+      radial-gradient(ellipse 52rem 40rem at 4% 8%, rgb(255 220 163 / 0.28), transparent 72%),
+      radial-gradient(ellipse 48rem 38rem at 94% 68%, rgb(230 218 242 / 0.25), transparent 72%),
+      rgb(var(--brand-paper));
+  }
+
+  .flowlab-sidebar {
+    border: 1px solid rgb(68 67 75 / 0.065);
+    background: rgb(255 252 246 / 0.7);
+    backdrop-filter: blur(24px) saturate(1.18);
+    -webkit-backdrop-filter: blur(24px) saturate(1.18);
+    box-shadow:
+      0 18px 50px -34px rgb(68 67 75 / 0.32),
+      inset 0 1px 0 rgb(255 255 255 / 0.8);
+  }
+
+  .flowlab-sidebar-active {
+    border: 1px solid rgb(68 67 75 / 0.055);
+    background: #efeeeb;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.72);
+  }
+
+  .flowlab-energy-card {
+    border: 1px solid rgb(68 67 75 / 0.06);
+    background: #f1f0ed;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.65);
+  }
+
+  .flowlab-energy-card > div[aria-hidden="true"] {
+    opacity: 0.15;
+  }
+
+  .flowlab-energy-card a {
+    background: rgb(255 255 255 / 0.58);
+  }
+
+  .dark .flowlab-sidebar,
+  .dark .flowlab-energy-card {
+    border-color: rgb(var(--brand-line));
+    background: rgb(var(--brand-card) / 0.96);
+  }
+
+  .dark .flowlab-sidebar-active,
+  .dark .flowlab-energy-card a {
+    background: rgb(var(--brand-inset));
+  }
+
+  @media (min-width: 1024px) {
+    .flowlab-sidebar {
+      border-color: rgb(255 255 255 / 0.5);
+      background:
+        linear-gradient(180deg, rgb(255 255 255 / 0.58) 0%, rgb(255 252 246 / 0.66) 100%);
+      box-shadow:
+        0 18px 46px -36px rgb(68 67 75 / 0.34),
+        14px 0 34px -30px rgb(68 67 75 / 0.28),
+        inset -1px 0 0 rgb(255 255 255 / 0.42),
+        inset 0 1px 0 rgb(255 255 255 / 0.82);
+    }
+
+    .dark .flowlab-sidebar {
+      border-color: rgb(137 164 126 / 0.16);
+      background:
+        linear-gradient(180deg, rgb(44 48 42 / 0.98) 0%, rgb(39 39 42 / 0.98) 100%);
+      box-shadow:
+        12px 0 32px -28px rgb(0 0 0 / 0.58),
+        inset -1px 0 0 rgb(137 164 126 / 0.10);
+    }
+
   }
 
   /** 内容区容器：窄屏铺满，宽屏在 --ui-max-w 处收口 */

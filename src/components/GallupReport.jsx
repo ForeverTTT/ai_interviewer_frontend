@@ -22,6 +22,7 @@ const DOMAIN_TONES = {
 }
 
 const FALLBACK_TONE = DOMAIN_TONES.executing
+const COMMUNITY_EGG = '/brand/flowlab-community-egg-avatar.png'
 
 export default function GallupReport({ results, onRetake }) {
   const { t, i18n } = useTranslation()
@@ -88,25 +89,24 @@ export default function GallupReport({ results, onRetake }) {
   }
 
   return (
-    <div className="ui-container max-w-5xl pb-14 pt-[calc(var(--ui-nav-h)+2.75rem)] space-y-10 font-chinese-modern">
-      {/* New Clean Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-brand-line pb-8">
-        <div className="space-y-2">
-          <h1 className="lk-display text-[32px] leading-tight sm:text-[42px]">
+    <div className="community-shell max-w-5xl space-y-8 pb-14 pt-[calc(var(--ui-nav-h)+1.5rem)]">
+      <div className="gallup-report-hero">
+        <div className="space-y-3">
+          <h1 className="community-title !text-[clamp(36px,5vw,58px)]">
             {isZh ? '你的优势报告' : t('gallup.report.title')}
           </h1>
           <p className="text-[14px] text-brand-muted">
             {isZh ? '基于盖洛普 34 项核心才干模型的职业竞争力诊断' : t('gallup.report.subtitle')}
           </p>
+          <button
+            onClick={onRetake}
+            className="lk-btn lk-btn-ghost mt-3"
+          >
+            <RefreshCw className="w-4 h-4" />
+            {isZh ? '重测一次' : t('gallup.report.retake')}
+          </button>
         </div>
-        
-        <button 
-          onClick={onRetake}
-          className="lk-btn lk-btn-ghost self-start"
-        >
-          <RefreshCw className="w-4 h-4" />
-          {isZh ? '重测一次' : t('gallup.report.retake')}
-        </button>
+        <img className="community-egg" src={COMMUNITY_EGG} alt="荷包蛋用户形象" />
       </div>
 
       {/* Overview Dashboard: Radar + Domain Cards */}

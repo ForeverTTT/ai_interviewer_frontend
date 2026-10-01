@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
@@ -24,6 +24,9 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import xiaohongshuQr from '../assets/xiaohongshu_qr.png'
+import './ProfilePage.css'
+
+const RESUME_TAILOR_WORKING = '/brand/flowlab-resume-tailor-working.png'
 
 function fileToBase64Data(file) {
   return new Promise((resolve, reject) => {
@@ -200,9 +203,9 @@ function CoachReport({ coach, t }) {
                 </div>
                 <div className="min-w-0">
                   <h3 className="font-brand text-[22px] font-semibold leading-tight tracking-tight text-brand-ink">
-                    <span className="whitespace-nowrap">Land<span className="italic text-brand-violet">It</span></span> Resume Score
+                    <span className="whitespace-nowrap">FlowLab</span> Resume Score
                   </h3>
-                  <p className="mt-1 text-[11px] text-brand-muted">AI Diagnostic Engine</p>
+                  <p className="mt-1 text-[11px] text-brand-muted">Resume Analysis</p>
                 </div>
               </div>
               <button
@@ -505,6 +508,43 @@ function profileHasVisibleData(cvProfile, resumeText, resumeNotes) {
   if (p.workExperience?.length || p.education?.length || p.projects?.length || p.publications?.length) return true
   if (p.skills?.length || p.languages?.length || p.awards?.length) return true
   return false
+}
+
+function buildBaseResumeText(profile, t) {
+  const lines = []
+  const pushSection = (title, content) => {
+    const values = content.filter(Boolean)
+    if (!values.length) return
+    if (lines.length) lines.push('')
+    lines.push(title.toUpperCase(), ...values)
+  }
+  const period = (start, end) => [start, end].filter(Boolean).join(' – ')
+  const contact = [profile.email, profile.phone, profile.location, profile.linkedIn, profile.website].filter(Boolean).join(' · ')
+
+  if (profile.fullName) lines.push(profile.fullName)
+  if (contact) lines.push(contact)
+  if (profile.summary) lines.push('', profile.summary)
+
+  pushSection(t('profile.cv.work'), (profile.workExperience || []).flatMap(item => {
+    const heading = [item.title, item.company].filter(Boolean).join(' · ')
+    const meta = [item.location, period(item.startDate, item.endDate)].filter(Boolean).join(' · ')
+    return [heading, meta, ...parseBullets(item.highlights).map(line => `- ${line}`)]
+  }))
+  pushSection(t('profile.cv.education'), (profile.education || []).flatMap(item => {
+    const heading = [item.degree, item.field, item.institution].filter(Boolean).join(' · ')
+    const meta = [period(item.startDate, item.endDate), item.gpa].filter(Boolean).join(' · ')
+    return [heading, meta, ...parseBullets(item.details).map(line => `- ${line}`)]
+  }))
+  pushSection(t('profile.cv.projects'), (profile.projects || []).flatMap(item => {
+    const heading = [item.name, item.role].filter(Boolean).join(' · ')
+    const meta = [period(item.startDate, item.endDate), item.technologies].filter(Boolean).join(' · ')
+    return [heading, meta, ...parseBullets(item.description).map(line => `- ${line}`)]
+  }))
+  pushSection(t('profile.cv.skills'), [(profile.skills || []).filter(Boolean).join(' · ')])
+  pushSection(t('profile.cv.languages'), (profile.languages || []).map(item => [item.name, item.proficiency].filter(Boolean).join(' · ')))
+  pushSection(t('profile.cv.awards'), (profile.awards || []).map(item => [item.title, item.issuer, item.year].filter(Boolean).join(' · ')))
+
+  return lines.join('\n').trim()
 }
 
 const displayCellClass =
@@ -914,13 +954,11 @@ function ProfileDisplayView({ cvProfile, resumeText, resumeNotes, targetRole, co
           <div className="min-w-0 max-w-2xl space-y-5">
             <div className="flex items-center gap-4">
               <div className="h-[72px] w-[72px] shrink-0 overflow-hidden rounded-2xl border border-brand-line bg-brand-inset">
-                {avatarId ? (
-                  <img src={avatarId} alt="Avatar" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-brand-muted">
-                    <User className="h-9 w-9" />
-                  </div>
-                )}
+                <img
+                  src={avatarId || '/brand/flowlab-community-egg-avatar.png'}
+                  alt="Avatar"
+                  className={`h-full w-full ${avatarId ? 'object-cover' : 'object-contain p-1.5'}`}
+                />
               </div>
               <div className="min-w-0 space-y-1.5">
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-inset px-2.5 py-0.5 text-[11px] text-brand-muted">
@@ -1237,18 +1275,222 @@ function RechargeModal({ isOpen, onClose, t }) {
   )
 }
 
-const avatars = [
-  'https://api.dicebear.com/7.x/identicon/svg?seed=Aneka',
-  'https://api.dicebear.com/7.x/identicon/svg?seed=Milo',
-  'https://api.dicebear.com/7.x/identicon/svg?seed=Toby',
-  'https://api.dicebear.com/7.x/identicon/svg?seed=Luna',
-  'https://api.dicebear.com/7.x/identicon/svg?seed=Jack'
-]
+function ResumeMasterView({
+  cvProfile,
+  resumeText,
+  resumeNotes,
+  targetRole,
+  setTargetRole,
+  coach,
+  coachGenerating,
+  coachTranslating,
+  coachErr,
+  runCoach,
+  t,
+  timeStr,
+}) {
+  const hasData = profileHasVisibleData(cvProfile, resumeText, resumeNotes)
+  const hasBaseResume = Boolean(resumeText.trim())
+  const coachSectionRef = useRef(null)
+  const [activeView, setActiveView] = useState('profile')
+  const openView = (view) => {
+    setActiveView(view)
+    window.requestAnimationFrame(() => coachSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
+  const hasStructuredDetails = Boolean(
+    cvProfile.education.length
+    || cvProfile.workExperience.length
+    || cvProfile.projects.length
+    || cvProfile.publications.length
+    || cvProfile.skills.length
+    || cvProfile.languages.length
+    || cvProfile.awards.length,
+  )
+  return (
+    <div className="profile-master-page mx-auto max-w-[1120px] space-y-7">
+      <header className="profile-tailor-hero">
+        <div className="profile-tailor-copy">
+          <h1>{t('profile.masterTitle')}</h1>
+          {!hasBaseResume && (
+            <div className="profile-resume-status">
+              <span className="h-2 w-2 rounded-full" aria-hidden="true" />
+              <span>{t('profile.masterMissing')}</span>
+            </div>
+          )}
+          {timeStr && hasBaseResume && <p>{t('profile.masterUpdated', { time: timeStr })}</p>}
+          <div className="mt-5 flex flex-wrap gap-2.5">
+            <Link to="/profile/edit" className="profile-tailor-primary inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-semibold">
+              <Pencil className="h-4 w-4" />{hasData ? t('profile.masterEdit') : t('profile.masterCreate')}
+            </Link>
+            {hasBaseResume && (
+              <Link to="/resume-tailor" className="profile-tailor-secondary inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-semibold">
+                {t('profile.masterContinue')}<ArrowRight className="h-4 w-4" />
+              </Link>
+            )}
+          </div>
+        </div>
+        <div className="profile-tailor-visual" aria-hidden="true">
+          <div />
+          <img src={RESUME_TAILOR_WORKING} alt="" />
+        </div>
+      </header>
+
+      {!hasData ? (
+        <section className="profile-empty-master rounded-[24px] px-6 py-10 text-center">
+          <FileText className="mx-auto h-6 w-6 text-brand-violet" />
+          <h2 className="mt-3 text-[18px] font-semibold text-brand-ink">{t('profile.masterEmptyTitle')}</h2>
+          <p className="mx-auto mt-2 max-w-md text-[13px] text-brand-muted">{t('profile.masterEmptyBody')}</p>
+          <Link to="/profile/edit" className="profile-tailor-primary mt-5 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-semibold">
+            {t('profile.masterCreate')}
+          </Link>
+        </section>
+      ) : (
+        <>
+          <nav ref={coachSectionRef} className="profile-master-view-tabs scroll-mt-24" aria-label={t('profile.masterViewNav')}>
+            <button
+              type="button"
+              onClick={() => setActiveView('profile')}
+              className={activeView === 'profile' ? 'is-active' : ''}
+              aria-current={activeView === 'profile' ? 'page' : undefined}
+            >
+              <User className="h-4 w-4" />{t('nav.profile')}
+            </button>
+            {hasBaseResume && (
+              <button
+                type="button"
+                onClick={() => setActiveView('analysis')}
+                className={activeView === 'analysis' ? 'is-active' : ''}
+                aria-current={activeView === 'analysis' ? 'page' : undefined}
+              >
+                <Sparkles className="h-4 w-4" />{t('profile.coachTitle')}
+              </button>
+            )}
+          </nav>
+
+          {activeView === 'profile' ? (
+            <>
+              <section className="profile-master-workspace">
+                <aside className="profile-master-overview">
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 className="text-[18px] font-semibold text-brand-ink">{t('profile.masterFacts')}</h2>
+                    <Link to="/profile/edit" className="profile-tailor-secondary inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] font-semibold">
+                      <Pencil className="h-3.5 w-3.5" />{t('profile.masterEdit')}
+                    </Link>
+                  </div>
+
+                  <dl className="profile-master-contact">
+                    <div><dt>{t('profile.cv.fullName')}</dt><dd>{cvProfile.fullName || t('profile.viewSectionEmpty')}</dd></div>
+                    <div><dt>{t('profile.cv.email')}</dt><dd>{cvProfile.email || t('profile.viewSectionEmpty')}</dd></div>
+                    <div><dt>{t('profile.cv.phone')}</dt><dd>{cvProfile.phone || t('profile.viewSectionEmpty')}</dd></div>
+                    <div><dt>{t('profile.cv.location')}</dt><dd>{cvProfile.location || t('profile.viewSectionEmpty')}</dd></div>
+                  </dl>
+                </aside>
+
+                <div className="profile-master-resume-preview">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <h2 className="flex items-center gap-2 text-[18px] font-semibold text-brand-ink">
+                      <FileText className="h-4 w-4 text-brand-violet" />{t('profile.masterResumeText')}
+                    </h2>
+                    {hasBaseResume && (
+                      <Link to="/resume-tailor" className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-brand-violet hover:underline">
+                        {t('profile.masterContinue')}<ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    )}
+                  </div>
+
+                  {hasBaseResume ? (
+                    <>
+                      <p className="profile-master-resume-excerpt">{resumeText}</p>
+                      <details className="profile-master-resume-full group">
+                        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[12.5px] font-semibold text-brand-ink">
+                          <span>{t('profile.masterViewFull')}</span>
+                          <ChevronDown className="h-4 w-4 text-brand-muted transition-transform group-open:rotate-180" />
+                        </summary>
+                        <pre className="mt-4 max-h-[420px] overflow-auto whitespace-pre-wrap border-t border-brand-line pt-4 font-sans text-[12px] leading-relaxed text-brand-muted">{resumeText}</pre>
+                      </details>
+                    </>
+                  ) : (
+                    <p className="mt-5 text-[13px] text-brand-muted">{t('profile.masterEmptyBody')}</p>
+                  )}
+                </div>
+              </section>
+
+              {hasStructuredDetails && (
+                <section className="profile-master-sections">
+                  <ProfileSectionsView cvProfile={cvProfile} t={t} />
+                </section>
+              )}
+            </>
+          ) : hasBaseResume ? (
+            <section className="profile-master-analysis">
+              <div className="profile-master-analysis-head">
+                <div className="flex min-w-0 items-start gap-3.5">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand-violet/10 text-brand-violet">
+                    <Sparkles className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <h2 className="text-[19px] font-semibold text-brand-ink">{t('profile.coachTitle')}</h2>
+                    <p className="mt-1 text-[12.5px] text-brand-muted">{t('profile.coachBrief')}</p>
+                  </div>
+                </div>
+
+                <div className="profile-master-analysis-actions">
+                  <label className="min-w-0 flex-1">
+                    <span className="sr-only">{t('profile.coachTargetRole')}</span>
+                    <input
+                      value={targetRole}
+                      onChange={(event) => setTargetRole(event.target.value)}
+                      className="profile-master-analysis-input"
+                      placeholder={t('profile.coachTargetPh')}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={runCoach}
+                    disabled={coachGenerating || resumeText.trim().length < 80}
+                    className="profile-tailor-primary inline-flex shrink-0 items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-45"
+                  >
+                    {coachGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                    {coachGenerating ? t('profile.coachRunning') : coach ? t('profile.coachRegenerate') : t('profile.coachRun')}
+                  </button>
+                </div>
+              </div>
+
+              {coachErr && (
+                <p className="mt-4 rounded-xl bg-brand-danger/8 px-4 py-3 text-[12.5px] text-brand-danger">{coachErr}</p>
+              )}
+
+              {coachTranslating && (
+                <p className="mt-4 flex items-center gap-2 text-[12px] text-brand-muted">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />{t('common.loading')}
+                </p>
+              )}
+
+              {coach && (
+                <div className="profile-master-analysis-report">
+                  <CoachReport coach={coach} t={t} />
+                  {timeStr && (
+                    <p className="mt-5 flex items-center gap-2 border-t border-brand-line pt-4 text-[11px] text-brand-muted">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-brand-success" />
+                      {t('profile.coachPersistNote', { time: timeStr })}
+                    </p>
+                  )}
+                </div>
+              )}
+            </section>
+          ) : null}
+        </>
+      )}
+    </div>
+  )
+}
 
 export default function ProfilePage() {
   const { t, i18n } = useTranslation()
   const location = useLocation()
+  const navigate = useNavigate()
   const isEdit = location.pathname === '/profile/edit'
+  const returnToResumeTailor = location.state?.returnTo === '/resume-tailor'
   const coachSectionRef = useRef(null)
   const tRef = useRef(t)
   const coachLangRef = useRef('')
@@ -1394,7 +1636,8 @@ export default function ProfilePage() {
     };
 
     const sanitizedCvProfile = sanitize(cvProfile);
-    const sanitizedResumeText = sanitize(resumeText);
+    const generatedResumeText = buildBaseResumeText(sanitizedCvProfile, t)
+    const sanitizedResumeText = sanitize(resumeText.trim() || generatedResumeText);
     const sanitizedResumeNotes = sanitize(resumeNotes);
     const sanitizedTargetRole = sanitize(targetRole);
 
@@ -1432,8 +1675,13 @@ export default function ProfilePage() {
       }
 
       const data = await res.json()
+      setResumeText(sanitizedResumeText)
       setUpdatedAt(data.resumeUpdatedAt || null)
       setNote({ type: 'ok', text: t('profile.saveSuccess') })
+      if (returnToResumeTailor) {
+        navigate('/resume-tailor', { replace: true })
+        return
+      }
       setTimeout(() => setNote(null), 3000)
     } catch (err) {
       console.error('[Profile save]', err);
@@ -1517,8 +1765,8 @@ export default function ProfilePage() {
     }
   }
 
-  const runExtractCv = async () => {
-    const src = (pendingRaw || resumeText || '').trim()
+  const runExtractCv = async (sourceText = '') => {
+    const src = (sourceText || pendingRaw || resumeText || '').trim()
     if (src.length < 50) {
       setNote({ type: 'err', text: t('profile.cv.extractNeedText') })
       setTimeout(() => setNote(null), 5000)
@@ -1589,10 +1837,9 @@ export default function ProfilePage() {
       if (j.text) {
         const clean = j.text.replace(/[●•⚫🌑⦿★■◾▪]/g, '').trim()
         setResumeText(clean)
+        setPendingPreviewOpen(false)
+        await runExtractCv(clean)
       }
-      setPendingPreviewOpen(false)
-      setNote({ type: 'ok', text: t('profile.cv.pdfExtractOk', { n: j.charCount ?? 0 }) })
-      setTimeout(() => setNote(null), 2000)
     } catch (err) {
       console.error('[onPdf] error:', err)
       setNote({ type: 'err', text: err?.message || t('profile.parseErr') })
@@ -1698,26 +1945,22 @@ export default function ProfilePage() {
         variants={pageExitVariants}
         initial="initial"
         animate="animate"
-        className="theme-quiet min-h-screen pb-14 pt-[calc(var(--ui-nav-h)+2.75rem)]"
+        className="profile-resume-page theme-quiet min-h-screen pb-14 pt-[calc(var(--ui-nav-h)+2.75rem)]"
       >
         <div className="ui-container relative z-10">
-          <ProfileDisplayView
+          <ResumeMasterView
             cvProfile={cvProfile}
             resumeText={resumeText}
             resumeNotes={resumeNotes}
             targetRole={targetRole}
+            setTargetRole={setTargetRole}
             coach={coach}
-            t={t}
-            i18n={i18n}
-            timeStr={timeStr}
-            jobSearchStatus={jobSearchStatus}
-            avatarId={avatarId}
-            showFloatingEditButton={showFloatingQuickSwitch}
-            coachTranslating={coachTranslating}
             coachGenerating={coachGenerating}
+            coachTranslating={coachTranslating}
+            coachErr={coachErr}
             runCoach={runCoach}
-            tokens={tokens}
-            recharge={() => setShowRechargeModal(true)}
+            t={t}
+            timeStr={timeStr}
           />
         </div>
         <AnimatePresence>
@@ -1739,7 +1982,7 @@ export default function ProfilePage() {
       variants={pageExitVariants}
       initial="initial"
       animate="animate"
-      className="theme-quiet min-h-screen pb-14 pt-[calc(var(--ui-nav-h)+2.75rem)]"
+      className="profile-resume-page theme-quiet min-h-screen pb-14 pt-[calc(var(--ui-nav-h)+2.75rem)]"
     >
       <div className="ui-container relative z-10">
           <ProfileEditView
@@ -1749,7 +1992,8 @@ export default function ProfilePage() {
             save={save} saving={saving} note={note} setNote={setNote} parseBusy={parseBusy} extractBusy={extractBusy} onPdf={onPdf} fileRef={fileRef} runExtractCv={runExtractCv}
             pendingRaw={pendingRaw} setPendingRaw={setPendingRaw} pendingPreviewOpen={pendingPreviewOpen} setPendingPreviewOpen={setPendingPreviewOpen}
             applyPendingToResume={applyPendingToResume} pendingApplied={pendingApplied} jobSearchStatus={jobSearchStatus} setJobSearchStatus={setJobSearchStatus}
-            avatarId={avatarId} setAvatarId={setAvatarId} uploadingAvatar={uploadingAvatar} setUploadingAvatar={setUploadingAvatar} t={t}
+            avatarId={avatarId} setAvatarId={setAvatarId} uploadingAvatar={uploadingAvatar} setUploadingAvatar={setUploadingAvatar}
+            returnToResumeTailor={returnToResumeTailor} t={t}
           />
       </div>
       <AnimatePresence>
@@ -1770,7 +2014,7 @@ function ProfileEditView({
   targetRole, setTargetRole, coach, coachGenerating, coachJustGenerated, coachErr, runCoach,
   save, saving, note, setNote, parseBusy, extractBusy, onPdf, fileRef, runExtractCv,
   pendingRaw, setPendingRaw, pendingPreviewOpen, setPendingPreviewOpen, applyPendingToResume, pendingApplied,
-  jobSearchStatus, setJobSearchStatus, avatarId, setAvatarId, uploadingAvatar, setUploadingAvatar, t
+  jobSearchStatus, setJobSearchStatus, avatarId, setAvatarId, uploadingAvatar, setUploadingAvatar, returnToResumeTailor, t
 }) {
   const [activeTab, setActiveTab] = useState('basic')
 
@@ -1791,60 +2035,25 @@ function ProfileEditView({
   ]
 
   return (
-    <div className="space-y-10">
-      <header className="flex flex-col justify-between gap-7 border-b border-brand-line pb-8 md:flex-row md:items-end">
-        <div className="min-w-0 space-y-2">
-          {/* 中文标题不加 uppercase */}
-          <h1 className="font-brand text-[34px] font-semibold leading-tight tracking-tight text-brand-ink sm:text-[40px]">
-            {t('profile.editProfile')}
+    <div className="profile-edit-page space-y-8">
+      <header className="profile-edit-workbench">
+        <div className="profile-edit-copy min-w-0">
+          <h1 className="text-[32px] font-semibold leading-tight tracking-[-0.035em] text-brand-ink sm:text-[38px]">
+            {t('profile.masterCreate')}
           </h1>
-          <p className="text-[14px] leading-relaxed text-brand-muted">
-            {t('profile.editHint')}
-          </p>
-        </div>
-
-        <div className="flex shrink-0 flex-col items-stretch gap-3 md:items-end">
-          {coachGenerating && (
-            <div className="flex animate-pulse items-center gap-2 self-start rounded-xl border border-brand-line bg-brand-inset px-3 py-1.5 text-[11px] font-bold text-brand-ink md:self-end">
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-ink" aria-hidden="true" />
-              {t('profile.coachGeneratingHint')}
-            </div>
-          )}
-          {/* 移动端换行显示，不再横向滚动——否则「保存」会被推出可视区 */}
-          <div className="flex flex-wrap items-center gap-2.5 md:justify-end">
-            {coachErr && (
-              <div className="rounded-lg border border-brand-danger/30 bg-brand-danger/[0.06] px-3 py-1.5 text-[11px] font-bold text-brand-danger">
-                {coachErr}
-              </div>
-            )}
-            <button
-              onClick={runCoach}
-              disabled={coachGenerating || (resumeText.trim().length < 80)}
-              className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-brand-line bg-brand-card px-4 py-2.5 text-[13px] font-bold text-brand-ink transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-brand-line"
-            >
-              {coachGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-brand-violet" />}
-              <span>{coachGenerating ? t('profile.coachRunning') : t('profile.coachRun')}</span>
-            </button>
-            {!coachGenerating && coachJustGenerated && coach && (
-              <Link
-                to="/profile"
-                className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-brand-line bg-brand-card px-4 py-2.5 text-[13px] font-bold text-brand-ink transition-colors hover:border-brand-ink"
-              >
-                <BarChart3 className="h-4 w-4 text-brand-violet" />
-                <span>{t('profile.coachViewReport')}</span>
-              </Link>
-            )}
+          <p className="mt-2 text-[13.5px] text-brand-muted">{t('profile.masterEditHint')}</p>
+          <div className="mt-5 flex flex-wrap items-center gap-2.5">
             <button
               onClick={save}
               disabled={saving}
-              className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-brand-ink px-4 py-2.5 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              className="profile-tailor-primary flex items-center gap-2 whitespace-nowrap rounded-full px-5 py-2.5 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-              <span>{saving ? t('common.saving') : t('common.save')}</span>
+              <span>{saving ? t('common.saving') : returnToResumeTailor ? t('profile.masterSaveReturn') : t('profile.masterSave')}</span>
             </button>
             <Link
-              to="/profile"
-              className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-brand-line bg-brand-card px-4 py-2.5 text-[13px] font-bold text-brand-ink transition-colors hover:border-brand-ink"
+              to={returnToResumeTailor ? '/resume-tailor' : '/profile'}
+              className="profile-tailor-secondary flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2.5 text-[13px] font-semibold"
             >
               <ArrowRight className="h-4 w-4 rotate-180" />
               <span>{t('common.back')}</span>
@@ -1856,7 +2065,7 @@ function ProfileEditView({
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                className={`self-start rounded-xl border px-3.5 py-2 text-[12px] font-bold leading-snug md:self-end ${note.type === 'ok'
+                className={`mt-3 inline-flex rounded-xl border px-3.5 py-2 text-[12px] font-bold leading-snug ${note.type === 'ok'
                     ? 'border-brand-success/30 bg-brand-success/[0.08] text-brand-success'
                     : 'border-brand-danger/30 bg-brand-danger/[0.06] text-brand-danger'
                   }`}
@@ -1866,20 +2075,22 @@ function ProfileEditView({
             )}
           </AnimatePresence>
         </div>
+        <div className="profile-edit-visual" aria-hidden="true">
+          <div />
+          <img src={RESUME_TAILOR_WORKING} alt="" />
+        </div>
       </header>
 
-      <div className="grid gap-8 lg:grid-cols-4 lg:gap-10">
-        <aside className="min-w-0 lg:col-span-1">
-          {/* <lg：横向可滚动的 tab 条（scrollbar-hide 已在 index.css 有真实实现）
-              lg+：左侧 sticky 纵向侧栏 */}
-          <nav className="scrollbar-hide flex snap-x gap-2 overflow-x-auto pb-1 lg:sticky lg:top-[calc(var(--ui-nav-h)+1.5rem)] lg:flex-col lg:gap-1 lg:overflow-x-visible lg:pb-0">
+      <div className="profile-edit-layout">
+        <aside className="profile-edit-tab-shell min-w-0">
+          <nav className="profile-edit-tabs scrollbar-hide flex snap-x gap-2 overflow-x-auto pb-1">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex shrink-0 snap-start items-center gap-2.5 whitespace-nowrap rounded-xl border px-4 py-2.5 text-[13px] font-bold transition-colors lg:w-full lg:px-5 lg:py-3.5 ${activeTab === tab.id
-                  ? 'border-brand-ink bg-brand-card text-brand-ink ring-1 ring-brand-ink'
-                  : 'border-brand-line bg-brand-card text-brand-muted hover:border-brand-ink hover:text-brand-ink'
+                className={`flex shrink-0 snap-start items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2.5 text-[12.5px] font-semibold transition-colors ${activeTab === tab.id
+                  ? 'border-brand-violet bg-brand-violet/[0.08] text-brand-violet ring-1 ring-brand-violet/20'
+                  : 'border-brand-line bg-white/55 text-brand-muted hover:border-brand-violet/40 hover:text-brand-ink'
                   }`}
               >
                 <tab.icon className="h-4 w-4 shrink-0" />
@@ -1889,7 +2100,7 @@ function ProfileEditView({
           </nav>
         </aside>
 
-        <main className="min-w-0 space-y-10 lg:col-span-3">
+        <main className="profile-edit-content min-w-0 space-y-10">
           {activeTab === 'basic' && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -1919,7 +2130,7 @@ function ProfileEditView({
                       <button
                         onClick={() => void runExtractCv()}
                         disabled={extractBusy || parseBusy || !(pendingRaw || resumeText || '').trim()}
-                        className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-brand-ink px-4 py-2.5 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-brand-violet px-4 py-2.5 text-[13px] font-semibold text-white shadow-[0_10px_24px_rgba(217,87,136,0.18)] transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         {extractBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
                         {extractBusy ? t('profile.cv.extracting') : t('profile.cv.extractBtn')}
@@ -1942,7 +2153,7 @@ function ProfileEditView({
                           <div className="group/tip relative">
                             <button
                               onClick={applyPendingToResume}
-                              className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-brand-ink px-4 py-2.5 text-[13px] font-semibold text-brand-on-ink transition-opacity duration-200 hover:opacity-90"
+                              className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-brand-violet px-4 py-2.5 text-[13px] font-semibold text-white transition-opacity duration-200 hover:opacity-90"
                             >
                               <ArrowRight className="h-4 w-4" />
                               {t('profile.cv.applyToInterviewResume')}
@@ -1979,115 +2190,6 @@ function ProfileEditView({
                       )}
                     </div>
                   )}
-                </div>
-
-                {/* Avatar Selection */}
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-[12.5px] font-bold text-brand-ink">{t('profile.chooseAvatar')}</label>
-                  </div>
-                  <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-8">
-                    {/* Default User Icon */}
-                    <button
-                      onClick={() => setAvatarId(null)}
-                      className={`relative flex h-20 items-center justify-center rounded-2xl border transition-colors ${!avatarId
-                          ? 'border-brand-ink bg-brand-card text-brand-ink ring-1 ring-brand-ink'
-                          : 'border-brand-line bg-brand-card opacity-50 hover:border-brand-ink hover:opacity-100'
-                        }`}
-                    >
-                      <User className="h-6 w-6 text-brand-muted" />
-                    </button>
-
-                    {/* Presets */}
-                    {avatars.map((url) => (
-                      <button
-                        key={url}
-                        onClick={() => setAvatarId(url)}
-                        className={`group relative h-20 overflow-hidden rounded-2xl border transition-transform ${avatarId === url
-                            ? 'z-10 scale-[1.05] border-brand-ink ring-1 ring-brand-ink'
-                            : 'border-brand-line opacity-70 grayscale hover:scale-[1.05] hover:opacity-100 hover:grayscale-0'
-                          }`}
-                      >
-                        <img src={url} alt="Avatar" className="w-full h-full object-cover" />
-                        {avatarId === url && (
-                          <div className="absolute right-1 top-1 grid h-[18px] w-[18px] place-items-center rounded-full bg-brand-ink text-brand-on-ink">
-                            <CheckCircle2 className="h-3 w-3" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-
-                    {/* Custom Upload Button */}
-                    <input
-                      type="file"
-                      id="avatar-upload"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0]
-                        if (!file) return
-                        if (file.size > 2 * 1024 * 1024) {
-                          setNote({ type: 'err', text: t('profile.cv.fileTooLarge') })
-                          setTimeout(() => setNote(null), 5000)
-                          return
-                        }
-
-                        setUploadingAvatar(true)
-                        try {
-                          const { data: { user } } = await supabase.auth.getUser()
-                          if (!user) throw new Error('No user')
-
-                          const fileExt = file.name.split('.').pop()
-                          const fileName = `${user.id}-${Date.now()}.${fileExt}`
-                          const filePath = `user_avatars/${fileName}`
-
-                          const { error: uploadError } = await supabase.storage
-                            .from('avatars')
-                            .upload(filePath, file, { upsert: true })
-
-                          if (uploadError) throw uploadError
-
-                          const { data: { publicUrl } } = supabase.storage
-                            .from('avatars')
-                            .getPublicUrl(filePath)
-
-                          setAvatarId(publicUrl)
-                          setNote({ type: 'ok', text: 'Avatar uploaded' })
-                          setTimeout(() => setNote(null), 3000)
-                        } catch (err) {
-                          console.error('Error uploading avatar:', err)
-                          setNote({ type: 'err', text: err?.message || 'Upload failed' })
-                          setTimeout(() => setNote(null), 5000)
-                        } finally {
-                          setUploadingAvatar(false)
-                        }
-                      }}
-                    />
-                    <label
-                      htmlFor="avatar-upload"
-                      className={`relative flex h-20 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed transition-colors ${uploadingAvatar ? 'pointer-events-none opacity-50' : ''} ${(avatarId && !avatars.includes(avatarId))
-                          ? 'border-brand-ink bg-brand-inset'
-                          : 'border-brand-line bg-brand-card hover:border-brand-ink hover:bg-brand-inset'
-                        }`}
-                    >
-                      {uploadingAvatar ? (
-                        <Loader2 className="h-5 w-5 animate-spin text-brand-muted" />
-                      ) : (avatarId && !avatars.includes(avatarId)) ? (
-                        <div className="relative h-full w-full overflow-hidden rounded-2xl">
-                          <img src={avatarId} alt="Custom" className="h-full w-full object-cover" />
-                          <div className="absolute inset-0 flex items-center justify-center bg-brand-ink/40 opacity-0 transition-opacity hover:opacity-100">
-                            <Upload className="h-5 w-5 text-brand-on-ink" />
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          <Plus className="h-5 w-5 text-brand-muted" />
-                          {/* i18next 找不到 key 时会返回 key 字符串（真值），所以 `|| 'Upload'` 永远不生效 */}
-                          <span className="mt-1 text-[11px] text-brand-muted">{t('common.upload')}</span>
-                        </>
-                      )}
-                    </label>
-                  </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-8">

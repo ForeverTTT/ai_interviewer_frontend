@@ -1,8 +1,7 @@
 .flowlab-dashboard {
-  /* Dashboard 由「复盘学长」负责：成长绿是唯一主色，其余角色色只作为微弱环境光。 */
   --brand-paper: 255 250 241;
   --brand-card: 255 255 255;
-  --brand-inset: 246 249 241;
+  --brand-inset: 242 241 237;
   --brand-mist: 232 244 225;
   --brand-ink: 68 67 75;
   --brand-muted: 119 117 130;
@@ -19,178 +18,476 @@
   --brand-shadow: 78 86 72;
   position: relative;
   isolation: isolate;
-  background:
-    radial-gradient(circle at 87% 8%, rgb(184 222 164 / 0.22), transparent 24rem),
-    radial-gradient(circle at 13% 30%, rgb(254 183 201 / 0.11), transparent 21rem),
-    rgb(var(--brand-paper));
   color: rgb(var(--brand-ink));
+  background: transparent;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
 }
 
-.flowlab-dashboard::before {
+.fl-dashboard-coach {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(430px, 1.18fr) minmax(340px, 0.82fr);
+  align-items: end;
+  gap: 20px;
+  min-height: 284px;
+  padding: 8px 10px 0;
+}
+
+.fl-dashboard-coach-dialogue {
+  position: relative;
+  z-index: 3;
+  align-self: center;
+  min-width: 0;
+  padding-left: 10px;
+}
+
+.fl-dashboard-coach-character {
+  position: absolute;
+  inset: auto 0 0 auto;
+  z-index: 1;
+  display: grid;
+  width: min(100%, 510px);
+  height: 292px;
+  place-items: end center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.fl-dashboard-coach-character::before {
   content: "";
   position: absolute;
-  z-index: -1;
-  inset: 0 0 auto;
-  height: 18rem;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.42), transparent);
+  inset: 20% 0 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(184 222 164 / 0.24), transparent 68%);
+}
+
+.fl-dashboard-coach-character img {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  max-height: 292px;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 18px 18px rgb(63 82 58 / 0.12));
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fl-dashboard-coach-message {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  padding: 27px 32px 25px;
+  border: 0;
+  border-radius: 38px 38px 34px 38px / 34px 34px 32px 34px;
+  background: #fff;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.98);
+  filter:
+    drop-shadow(0 18px 18px rgb(68 67 75 / 0.1))
+    drop-shadow(0 5px 5px rgb(68 67 75 / 0.06));
+}
+
+.fl-dashboard-coach-message::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  right: -39px;
+  bottom: 17px;
+  width: 60px;
+  height: 42px;
+  background: inherit;
+  clip-path: polygon(0 7%, 100% 48%, 0 89%);
+}
+
+.fl-dashboard-coach-message > * {
+  position: relative;
+  z-index: 1;
+}
+
+.fl-dashboard-coach-message-main {
+  display: grid;
+  min-width: 0;
+}
+
+.fl-dashboard-coach-message-main.has-countdown {
+  grid-template-columns: minmax(0, 1fr) 154px;
+  align-items: stretch;
+  gap: 23px;
+}
+
+.fl-dashboard-coach-message-copy {
+  min-width: 0;
+}
+
+.fl-dashboard-countdown {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 11px 11px;
+  border: 1px solid rgb(232 201 111 / 0.28);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 50% 26%, rgb(255 252 222 / 0.94), transparent 72%),
+    linear-gradient(155deg, rgb(255 249 219 / 0.92), rgb(250 239 192 / 0.72));
+  box-shadow:
+    0 15px 28px -21px rgb(115 103 61 / 0.38),
+    inset 0 1px 0 rgb(255 255 255 / 0.9);
+}
+
+.fl-dashboard-countdown-label {
+  color: #666263;
+  font-size: 10.5px;
+  font-weight: 720;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.fl-dashboard-countdown-digits {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.fl-dashboard-countdown-tile {
+  position: relative;
+  display: grid;
+  width: 50px;
+  height: 62px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgb(211 190 123 / 0.28);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgb(255 253 232) 0 49.5%, rgb(247 237 196) 50.5% 100%);
+  box-shadow:
+    0 7px 13px -8px rgb(102 91 51 / 0.35),
+    inset 0 1px 0 rgb(255 255 255 / 0.98);
+  color: #46683f;
+  font-size: 37px;
+  font-weight: 820;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  perspective: 180px;
+}
+
+.fl-dashboard-countdown-tile::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: rgb(112 104 77 / 0.19);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.65);
+}
+
+.fl-dashboard-countdown-tile > span {
+  position: relative;
+  z-index: 1;
+  display: block;
+  transform-origin: center bottom;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.58);
+}
+
+.fl-dashboard-countdown-unit {
+  margin-top: 6px;
+  color: #666263;
+  font-size: 10.5px;
+  font-weight: 680;
+}
+
+.fl-dashboard-coach-speech {
+  max-width: 38rem;
+  color: #4b4951;
+  font-size: clamp(15px, 1.3vw, 18px);
+  font-weight: 570;
+  letter-spacing: -0.012em;
+  line-height: 1.72;
+}
+
+.fl-dashboard-coach-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 17px;
+}
+
+.fl-dashboard-coach-actions .fl-dashboard-soft-button {
+  min-height: 40px;
+  margin-top: 0;
+  padding-inline: 14px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.fl-dashboard-coach-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 40px;
+  padding: 0 8px;
+  color: #777480;
+  font-size: 11.5px;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.fl-dashboard-coach-link:hover { color: #4b4951; }
+.fl-dashboard-coach-link:disabled { cursor: wait; opacity: 0.48; }
+
+.fl-dashboard-coach-error {
+  margin-top: 12px;
+  color: rgb(var(--brand-danger));
+  font-size: 11.5px;
+  font-weight: 620;
+}
+
+.fl-dashboard-coach-goal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 18px;
+  padding-top: 15px;
+  border-top: 1px solid rgb(68 67 75 / 0.09);
+  color: #67646e;
+  font-size: 11.5px;
+  font-weight: 620;
+}
+
+.fl-dashboard-coach-goal > svg { color: #638f56; }
+
+.fl-dashboard-coach-goal > span + span::before {
+  content: "·";
+  margin-right: 12px;
+  color: #aaa6ad;
+}
+
+.fl-dashboard-coach-goal > i {
+  flex: 1 0 100%;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ebeae6;
+}
+
+.fl-dashboard-coach-goal > i > b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #8eb581;
+}
+
+.fl-dashboard-coach-history {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  margin: 12px 0 0 28px;
+  padding: 10px 17px;
+  border: 1px solid rgb(68 67 75 / 0.05);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.5);
+  color: #777480;
+  font-size: 11px;
+}
+
+.fl-dashboard-coach-history span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.fl-dashboard-coach-history span + span::before {
+  content: "";
+  width: 1px;
+  height: 15px;
+  margin: 0 13px;
+  background: rgb(68 67 75 / 0.11);
+}
+
+.fl-dashboard-coach-history svg {
+  width: 13px;
+  height: 13px;
+}
+
+.fl-dashboard-coach-history span:first-child svg { color: #638f56; }
+.fl-dashboard-coach-history span:nth-child(2) svg { color: #8885a1; }
+.fl-dashboard-coach-history span:last-child svg { color: #d95788; }
+
+.fl-dashboard-coach-character:hover img {
+  transform: translateY(-3px);
+}
+
+.fl-dashboard-soft-button,
+.fl-dashboard-action,
+.fl-dashboard-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #e1dfda;
+  border-radius: 999px;
+  background: #efeeeb;
+  color: #53515a;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.78);
+  font-weight: 680;
+  transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+}
+
+.fl-dashboard-soft-button {
+  min-height: 44px;
+  margin-top: 24px;
+  padding: 0 18px;
+  font-size: 12.5px;
+  text-decoration: none;
+}
+
+.fl-dashboard-action,
+.fl-dashboard-primary { padding: 10px 18px; }
+
+.fl-dashboard-soft-button:hover,
+.fl-dashboard-action:hover,
+.fl-dashboard-primary:hover {
+  transform: translateY(-2px);
+  border-color: #d7d4ce;
+  background: #e8e7e3;
+}
+
+.fl-dashboard-panel {
+  min-width: 0;
+  min-height: 328px;
+  overflow: hidden;
+  border: 1px solid rgb(68 67 75 / 0.055);
+  border-radius: 28px;
+  background: rgb(255 255 255 / 0.72);
+  box-shadow: 0 18px 46px -38px rgb(68 67 75 / 0.32);
+}
+
+.fl-dashboard-latest {
+  background:
+    radial-gradient(circle at 92% 4%, rgb(184 222 164 / 0.17), transparent 15rem),
+    rgb(255 255 255 / 0.72);
+}
+
+.fl-dashboard-stat-mint { background: #eaf3e5; }
+.fl-dashboard-stat-lilac { background: #eeedf8; }
+.fl-dashboard-stat-cream { background: #f7eed8; }
+.fl-dashboard-stat-pink { background: #fae7ed; }
+
+.fl-dashboard-section-nav {
+  border: 1px solid #e6e3dd;
+  background: #efeeeb;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.72);
+}
+
+.fl-dashboard-tab-active {
+  background: #fff;
+  box-shadow: 0 5px 16px -11px rgb(68 67 75 / 0.38), inset 0 1px 0 rgb(255 255 255);
+}
+
+.flowlab-dashboard .brand-float {
+  border-color: rgb(68 67 75 / 0.07);
+  background: rgb(255 255 255 / 0.74);
+  box-shadow: 0 18px 46px -38px rgb(68 67 75 / 0.32);
+}
+
+.flowlab-dashboard .lk-liquid {
+  border: 1px solid #e6e3dd;
+  background: #efeeeb;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.72);
 }
 
 .dark .flowlab-dashboard {
   --brand-paper: 32 31 36;
   --brand-card: 42 41 47;
   --brand-inset: 49 48 54;
-  --brand-mist: 54 58 52;
   --brand-ink: 247 244 238;
   --brand-muted: 184 180 189;
   --brand-line: 67 65 72;
   --brand-violet: 184 222 164;
-  --brand-glow: 99 143 86;
   --brand-on-ink: 38 37 42;
-  background:
-    radial-gradient(circle at 87% 8%, rgb(99 143 86 / 0.18), transparent 24rem),
-    radial-gradient(circle at 13% 30%, rgb(217 87 136 / 0.09), transparent 21rem),
-    rgb(var(--brand-paper));
+  background: transparent;
 }
 
-.dark .fl-dashboard-overview > div > article:first-child,
-.dark .fl-dashboard-overview > div > article:nth-child(2) {
+.dark .fl-dashboard-coach-message {
+  border-color: rgb(var(--brand-line));
   background: rgb(var(--brand-card));
 }
+.dark .fl-dashboard-countdown {
+  border-color: rgb(184 222 164 / 0.18);
+  background: linear-gradient(155deg, rgb(55 59 48 / 0.96), rgb(47 48 44 / 0.94));
+}
+.dark .fl-dashboard-countdown-label,
+.dark .fl-dashboard-countdown-unit { color: rgb(var(--brand-muted)); }
+.dark .fl-dashboard-countdown-tile {
+  border-color: rgb(184 222 164 / 0.16);
+  background: linear-gradient(180deg, rgb(67 70 60) 0 49.5%, rgb(55 57 51) 50.5% 100%);
+  color: #b8dea4;
+  box-shadow: 0 8px 14px -9px rgb(0 0 0 / 0.5), inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
+.dark .fl-dashboard-panel,
+.dark .fl-dashboard-latest,
+.dark .flowlab-dashboard .brand-float { background: rgb(var(--brand-card) / 0.82); }
+.dark .fl-dashboard-section-nav,
+.dark .flowlab-dashboard .lk-liquid { border-color: rgb(var(--brand-line)); background: rgb(var(--brand-inset)); }
+.dark .fl-dashboard-soft-button,
+.dark .fl-dashboard-action,
+.dark .fl-dashboard-primary { border-color: rgb(var(--brand-line)); background: rgb(var(--brand-inset)); color: rgb(var(--brand-ink)); }
+.dark .fl-dashboard-tab-active { background: rgb(var(--brand-card)); }
 
-.fl-dashboard-header-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 14px;
+@media (max-width: 1100px) {
+  .fl-dashboard-coach { grid-template-columns: minmax(0, 1fr) 350px; gap: 10px; }
+  .fl-dashboard-coach-character { width: 390px; height: 264px; }
+  .fl-dashboard-coach-message-main.has-countdown { grid-template-columns: minmax(0, 1fr) 136px; gap: 16px; }
+  .fl-dashboard-countdown-tile { width: 43px; height: 56px; font-size: 33px; }
 }
 
-.fl-dashboard-mentor-intro {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.fl-dashboard-mentor-intro > span:last-child {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.fl-dashboard-mentor-intro strong {
-  color: #638f56;
-  font-size: 13px;
-  font-weight: 750;
-  line-height: 1.2;
-}
-
-.fl-dashboard-mentor-intro small {
-  color: #85828d;
-  font-size: 10.5px;
-  font-weight: 650;
-  white-space: nowrap;
-}
-
-.fl-dashboard-mentor-portrait {
-  position: relative;
-  display: block;
-  width: 78px;
-  height: 78px;
-  flex: 0 0 78px;
-  overflow: hidden;
-  filter: drop-shadow(0 12px 10px rgb(63 82 58 / 0.14));
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.fl-dashboard-mentor-portrait img {
-  position: absolute;
-  left: -100%;
-  top: -100%;
-  width: 200%;
-  height: 200%;
-  max-width: none;
-  object-fit: contain;
-}
-
-.fl-dashboard-mentor-intro:hover .fl-dashboard-mentor-portrait {
-  transform: translateY(-4px) rotate(1deg);
-}
-
-.fl-dashboard-primary,
-.fl-dashboard-action,
-.fl-dashboard-tab-active {
-  background: #10b48e;
-  color: #fff;
-  box-shadow: 0 12px 26px -13px rgb(16 180 142 / 0.62), inset 0 1px 0 rgb(255 255 255 / 0.28);
-}
-
-.fl-dashboard-primary:hover,
-.fl-dashboard-action:hover {
-  transform: translateY(-2px);
-  background: #0fa783;
-}
-
-.fl-dashboard-overview {
-  border-color: rgb(99 143 86 / 0.16);
-  box-shadow: 0 24px 60px -42px rgb(99 143 86 / 0.42);
-}
-
-.fl-dashboard-overview > div > article:first-child {
-  background:
-    radial-gradient(circle at 12% 12%, rgb(184 222 164 / 0.16), transparent 15rem),
-    rgb(255 255 255);
-}
-
-.fl-dashboard-overview > div > article:nth-child(2) {
-  background:
-    radial-gradient(circle at 90% 8%, rgb(143 219 216 / 0.13), transparent 14rem),
-    rgb(250 251 247);
-}
-
-.flowlab-dashboard .brand-float {
-  border-color: rgb(99 143 86 / 0.13);
-  box-shadow: 0 18px 48px -36px rgb(99 143 86 / 0.42);
-}
-
-.flowlab-dashboard .lk-liquid {
-  border-color: rgb(255 255 255 / 0.78);
-  background: linear-gradient(160deg, rgb(255 255 255 / 0.78), rgb(247 250 243 / 0.62));
-  box-shadow: 0 14px 34px -24px rgb(99 143 86 / 0.42), inset 0 1px 0 rgb(255 255 255 / 0.95);
-}
-
-@media (max-width: 760px) {
-  .fl-dashboard-header-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .fl-dashboard-mentor-intro small {
-    white-space: normal;
-  }
-
-  .fl-dashboard-mentor-portrait {
-    width: 64px;
-    height: 64px;
-    flex-basis: 64px;
+@media (max-width: 900px) {
+  .fl-dashboard-coach { grid-template-columns: 1fr; min-height: 0; }
+  .fl-dashboard-coach-dialogue { padding: 0; }
+  .fl-dashboard-coach-character { position: relative; width: min(100%, 440px); height: 250px; justify-self: center; }
+  .fl-dashboard-coach-message::before {
+    right: 58px;
+    bottom: -30px;
+    width: 44px;
+    height: 32px;
+    transform: rotate(90deg);
   }
 }
 
-@media (max-width: 480px) {
-  .fl-dashboard-header-actions {
-    align-items: flex-end;
-  }
+@media (max-width: 680px) {
+  .flowlab-dashboard { padding-top: 5.25rem; }
+  .fl-dashboard-coach { padding-inline: 0; }
+  .fl-dashboard-coach-character { width: min(100%, 330px); height: 210px; }
+  .fl-dashboard-coach-message { padding: 22px 21px 20px; border-radius: 30px 30px 12px 30px; }
+  .fl-dashboard-coach-message-main.has-countdown { grid-template-columns: 1fr; gap: 18px; }
+  .fl-dashboard-coach-actions { flex-wrap: wrap; gap: 6px; }
+  .fl-dashboard-countdown { width: 100%; min-height: 112px; }
+  .fl-dashboard-countdown-digits { margin-top: 7px; }
+  .fl-dashboard-countdown-tile { width: 46px; height: 54px; }
+  .fl-dashboard-coach-history { width: 100%; margin-left: 0; justify-content: center; }
+  .fl-dashboard-coach-history span + span::before { margin-inline: 8px; }
+  .fl-dashboard-coach-goal > span + span::before { margin-right: 8px; }
+  .fl-dashboard-panel { min-height: 0; }
+}
 
-  .fl-dashboard-mentor-intro small {
-    display: none;
-  }
+@media (max-width: 430px) {
+  .fl-dashboard-coach-history { flex-wrap: wrap; gap: 7px 0; border-radius: 22px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fl-dashboard-mentor-portrait,
+  .fl-dashboard-soft-button,
+  .fl-dashboard-action,
   .fl-dashboard-primary,
-  .fl-dashboard-action {
-    transition: none;
-  }
+  .fl-dashboard-coach-character img { transition: none; }
+  .fl-dashboard-countdown-tile > span { animation: none; transition: none; }
 }

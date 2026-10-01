@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import PageHeader from '../components/brand/PageHeader'
 import { supabase } from '../lib/supabase'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import {
@@ -15,6 +14,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { authenticatedFetch } from '../lib/authenticatedFetch'
 import { createInterviewRequestId } from '../lib/interviewEvents'
 import { normalizeCjkSpacing } from '../lib/textNormalization'
+import './InterviewReportPage.css'
+
+const REVIEW_MENTOR_WRITING = '/brand/flowlab-review-mentor-writing.png'
 
 function normalizeUiCode(code) {
   const c = String(code || '').toLowerCase()
@@ -853,7 +855,7 @@ function ReportSummaryView({ summary, strengths, toImprove, readiness, readiness
 }
 
 function StructuredReportBody({ report, transcript, lineReviewByIndex, t, collections, collectionBusy, taskError, onToggleCollection, onStartTask }) {
-  const [view, setView] = useState('card')
+  const [view, setView] = useState('summary')
   const transcriptQuestions = interviewerQuestionsFromTranscript(transcript)
   const qaReview = Array.isArray(report?.qaReview)
     ? report.qaReview.map(normalizeQaItem).filter(Boolean).map((item, index) => {
@@ -895,15 +897,14 @@ function StructuredReportBody({ report, transcript, lineReviewByIndex, t, collec
   ]
 
   return (
-    <div className="mx-auto max-w-[1080px] space-y-5">
-      <div className="flex flex-col gap-4 border-b border-brand-line pb-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h2 className="font-brand text-[19px] font-semibold tracking-[-0.01em] text-brand-ink">{view === 'summary' ? t('report.summaryAside') : t('report.deckTitle')}</h2>
-          <p className="mt-1.5 max-w-xl text-[12.5px] leading-relaxed text-brand-muted">{view === 'summary' ? t('report.subtitle') : t('report.deckSub')}</p>
-        </div>
-        <div className="flex w-full shrink-0 gap-1 rounded-xl border border-brand-line bg-brand-inset p-1 sm:w-auto" role="tablist">
+    <div className="fl-report-workspace mx-auto max-w-[1120px] space-y-5">
+      <div className="fl-report-viewbar flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-[18px] font-semibold tracking-[-0.02em] text-brand-ink">
+          {view === 'card' ? t('report.tabCards') : view === 'list' ? t('report.tabOverview') : t('report.summaryAside')}
+        </h2>
+        <div className="fl-report-tabs flex w-full shrink-0 gap-1 sm:w-auto" role="tablist">
           {views.map(({ key, label, icon: Icon }) => (
-            <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)} className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-[12px] font-medium transition-colors sm:flex-none ${view === key ? 'bg-brand-card text-brand-ink shadow-sm' : 'text-brand-muted hover:text-brand-ink'}`}>
+            <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)} className={`flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[12px] font-medium transition-colors sm:flex-none ${view === key ? 'bg-brand-card text-brand-ink shadow-sm' : 'text-brand-muted hover:text-brand-ink'}`}>
               <Icon className="h-3.5 w-3.5" />{label}
             </button>
           ))}
@@ -1197,33 +1198,32 @@ export default function InterviewReportPage() {
   }
 
   return (
-    <div className="theme-quiet min-h-screen pb-20 pt-[calc(var(--ui-nav-h)+2.75rem)]">
-      <div className="ui-container max-w-[1400px] space-y-6">
+    <div className="flowlab-report theme-quiet min-h-screen pb-20 pt-[calc(var(--ui-nav-h)+1.5rem)]">
+      <div className="ui-container max-w-[1280px] space-y-5">
         {err && <div className="rounded-2xl border border-brand-danger/30 bg-brand-danger/[0.06] p-4 text-sm font-bold text-brand-danger" role="alert">{err}</div>}
 
-        <article className="space-y-8">
-          <PageHeader
-            className="!mb-0 border-b border-brand-line pb-7"
-            before={(
+        <article className="space-y-6">
+          <header className="fl-report-intro">
+            <div className="fl-report-intro-copy">
               <Link
                 to="/dashboard"
-                className="group mb-5 inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-card/70 px-3 py-1.5 text-[12px] font-medium text-brand-muted backdrop-blur transition-colors hover:border-brand-ink/30 hover:text-brand-ink"
+                className="fl-report-back group"
               >
                 <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
                 {t('report.backDashboard')}
               </Link>
-            )}
-            eyebrow={t('report.docLabel')}
-            title={t('report.title')}
-            subtitle={t('report.subtitle')}
-            actions={(
-              <div className="flex flex-wrap items-center gap-2 text-[12px] text-brand-muted">
-                <span className="lk-chip max-w-[240px] !text-[12px]"><Briefcase className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{interview?.position}</span></span>
-                <span className="lk-chip !text-[12px]"><Globe2 className="h-3.5 w-3.5" />{interview?.language}</span>
-                <span className="lk-chip !text-[12px]"><Clock className="h-3.5 w-3.5" />{interview?.duration} {t('dashboard.durMin')}</span>
+              <p className="fl-report-eyebrow">{t('report.docLabel')}</p>
+              <h1>{t('report.title')}</h1>
+              <div className="fl-report-meta" aria-label={t('report.title')}>
+                <span><Briefcase className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{interview?.position}</span></span>
+                <span><Globe2 className="h-3.5 w-3.5" />{interview?.language}</span>
+                <span><Clock className="h-3.5 w-3.5" />{interview?.duration} {t('dashboard.durMin')}</span>
               </div>
-            )}
-          />
+            </div>
+            <div className="fl-report-intro-character" aria-hidden="true">
+              <img src={REVIEW_MENTOR_WRITING} alt="" />
+            </div>
+          </header>
 
           <div className="min-h-[400px]">
             {reportTranslating ? (
@@ -1370,9 +1370,6 @@ export default function InterviewReportPage() {
           </div>
         </article>
 
-        <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-brand-muted">
-          End of Interview Report
-        </p>
       </div>
     </div>
   )

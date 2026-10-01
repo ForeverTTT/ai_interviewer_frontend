@@ -14,7 +14,9 @@ import {
   MonitorPlay, BadgeCheck, Code2, Scale, Leaf, Search, ChevronRight, Lightbulb,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import PageHeader from '../components/brand/PageHeader'
+import './SetupPage.css'
+
+const INTERVIEW_COACH_WRITING = '/brand/flowlab-interview-coach-writing.png'
 
 function fileToBase64Data(file) {
   return new Promise((resolve, reject) => {
@@ -335,7 +337,7 @@ function SectionCard({ title, subtitle, action, children, className = '', step }
       <header className="mb-5 flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
         <div className="flex min-w-0 items-start gap-3.5">
           {step && (
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-ink font-display text-[14px] font-semibold tabular-nums text-brand-on-ink">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-harbor font-display text-[14px] font-semibold tabular-nums text-brand-on-ink">
               {String(step).padStart(2, '0')}
             </span>
           )}
@@ -392,7 +394,7 @@ function SelectedNote({ children }) {
   if (!children) return null
   return (
     <p className="mt-2.5 flex items-start gap-2 rounded-xl bg-brand-inset px-3.5 py-2.5 text-[12px] leading-relaxed text-brand-muted">
-      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-ochre" aria-hidden="true" />
+      <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-harbor" aria-hidden="true" />
       <span className="min-w-0">{children}</span>
     </p>
   )
@@ -408,8 +410,8 @@ function OptionPill({ selected, disabled, onClick, children }) {
       aria-pressed={selected}
       /* ring 而不是加粗 border：切换时零布局位移 */
       className={`rounded-full border px-4 py-2 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${selected
-        ? 'border-brand-ink bg-brand-ink font-semibold text-brand-on-ink'
-        : 'border-brand-line bg-brand-card text-brand-muted hover:border-brand-ink/30 hover:text-brand-ink'
+        ? 'border-brand-harbor bg-brand-harbor font-semibold text-brand-on-ink'
+        : 'border-brand-line bg-brand-card text-brand-muted hover:border-brand-harbor/35 hover:text-brand-ink'
         }`}
     >
       {children}
@@ -429,8 +431,8 @@ function OptionCard({ selected, onClick, icon: Icon, title, desc }) {
       aria-pressed={selected}
       title={desc}
       className={`flex items-center gap-2.5 rounded-2xl border px-3.5 py-2.5 text-left transition-all ${selected
-        ? 'border-brand-ink bg-brand-ink text-brand-on-ink shadow-lift'
-        : 'border-brand-line bg-brand-card text-brand-ink hover:-translate-y-px hover:border-brand-ink/30'
+        ? 'border-brand-harbor bg-brand-harbor text-brand-on-ink shadow-lift'
+        : 'border-brand-line bg-brand-card text-brand-ink hover:-translate-y-px hover:border-brand-harbor/35'
         }`}
     >
       {Icon && (
@@ -452,11 +454,20 @@ function SummaryRow({ icon: Icon, label, value, muted = false }) {
         <span className="truncate">{label}</span>
       </span>
       <span
-        className={`max-w-[58%] shrink-0 truncate rounded-md px-2 py-1 text-[12px] font-medium ${muted ? 'bg-brand-inset text-brand-muted' : 'bg-brand-inset text-brand-ink'
+        className={`max-w-[58%] shrink-0 truncate rounded-md px-2 py-1 text-[12px] font-medium ${muted ? 'bg-brand-inset text-brand-muted' : 'bg-brand-harbor/10 text-brand-harbor'
           }`}
       >
         {value}
       </span>
+    </div>
+  )
+}
+
+/** 面试教练只负责轻量引导；职位描述面板承载对话，角色本身保持开放陈列。 */
+function InterviewCoachGuide({ name }) {
+  return (
+    <div className="setup-coach-guide">
+      <img className="setup-coach-portrait" src={INTERVIEW_COACH_WRITING} alt={name} />
     </div>
   )
 }
@@ -922,6 +933,15 @@ export default function SetupPage() {
   const durationLabel = isPractice
     ? t('setup.practiceUnlimited')
     : t('setup.durationMinutes', { n: form.duration })
+  const coachMessage = jdAnalysis.status === 'loading'
+    ? t('setup.coachAnalyzing')
+    : jdAnalysis.status === 'success'
+      ? t('setup.coachAnalyzed', { position: form.position.trim() || t('setup.summaryPosition') })
+      : jdAnalysis.status === 'error'
+        ? t('setup.coachAnalysisFailed')
+        : form.jobDescription.trim().length > 0 && form.jobDescription.trim().length < 80
+          ? t('setup.coachNeedsMoreDescription')
+          : t('setup.coachPasteDescription')
 
   const resumeStatusText = profileResumeLoading
     ? t('setup.resumeChecking')
@@ -934,20 +954,16 @@ export default function SetupPage() {
   const updateForm = (patch) => setForm(prev => ({ ...prev, ...patch }))
 
   return (
-    <div className="theme-quiet relative min-h-screen pb-14 pt-[calc(var(--ui-nav-h)+2.75rem)]">
+    <div className="setup-page theme-quiet relative min-h-screen pb-14 pt-[calc(var(--ui-nav-h)+0.75rem)]">
       <div className="ui-container relative z-10">
 
-        <PageHeader
-          title={t('setup.pageTitle')}
-          subtitle={t('setup.pageSub')}
-          actions={(
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-line bg-brand-card/80 px-4 py-2 text-[12.5px] text-brand-muted backdrop-blur">
-              <Zap className="h-3.5 w-3.5 fill-brand-ochre text-brand-ochre" />
-              {t('nav.tokens')}
-              <span className="font-semibold tabular-nums text-brand-ink">{tokens}</span>
-            </span>
-          )}
-        />
+        <div className="mb-5 flex justify-end">
+          <span className="inline-flex items-center gap-2 rounded-full border border-brand-line bg-brand-card/80 px-4 py-2 text-[12.5px] text-brand-muted backdrop-blur">
+            <Zap className="h-3.5 w-3.5 fill-brand-ochre text-brand-ochre" />
+            {t('nav.tokens')}
+            <span className="font-semibold tabular-nums text-brand-ink">{tokens}</span>
+          </span>
+        </div>
 
         {formNotice && (
           <motion.div
@@ -983,13 +999,14 @@ export default function SetupPage() {
           {/* ───────────── 左栏 ───────────── */}
           <div className="min-w-0 space-y-5">
 
-            <SectionCard
-              step={1}
-              title={t('setup.jobDesc')}
-              subtitle={t('setup.jobDescSub')}
-              action={(
-                <div className="flex shrink-0 items-center gap-2">
-                  <div className="relative" ref={historyRef}>
+            <section className="setup-coach-stage" aria-labelledby="setup-job-desc-title">
+              <InterviewCoachGuide name={t('setup.coachName')} />
+
+              <div className="setup-coach-dialog">
+                <header className="setup-coach-dialog-header">
+                  <h2 id="setup-job-desc-title" className="setup-coach-message">{coachMessage}</h2>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <div className="relative" ref={historyRef}>
                     <button
                       type="button"
                       onClick={() => setHistoryOpen(!historyOpen)}
@@ -1084,60 +1101,64 @@ export default function SetupPage() {
                         </motion.div>
                       )}
                     </AnimatePresence>
-                  </div>
+                    </div>
 
                   {/* 一键识别职位信息：force=true，可对同一段 JD 重复触发 */}
-                  <button
-                    type="button"
-                    onClick={() => void analyzeJobDescription(form.jobDescription, true)}
-                    disabled={!canAnalyzeJd || jdAnalyzing}
-                    className="flex items-center gap-1.5 rounded-lg border border-brand-line bg-brand-card px-3 py-1.5 text-[12.5px] font-semibold text-brand-ink transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-45"
-                  >
-                    {jdAnalyzing
-                      ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />{t('setup.jdAnalyzingButton')}</>
-                      : <><Sparkles className="h-3.5 w-3.5" />{t('setup.jdAnalyzeButton')}</>}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => void analyzeJobDescription(form.jobDescription, true)}
+                      disabled={!canAnalyzeJd || jdAnalyzing}
+                      className="flex items-center gap-1.5 rounded-lg border border-brand-line bg-brand-card px-3 py-1.5 text-[12.5px] font-semibold text-brand-ink transition-colors hover:border-brand-ink disabled:cursor-not-allowed disabled:opacity-45"
+                    >
+                      {jdAnalyzing
+                        ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />{t('setup.jdAnalyzingButton')}</>
+                        : t('setup.jdAnalyzeButton')}
+                    </button>
+                  </div>
+                </header>
+
+                <div className="min-w-0">
+                  <div className="relative">
+                    <textarea
+                      id="setup-job-desc"
+                      rows={5}
+                      maxLength={JD_MAX_CHARS}
+                      value={form.jobDescription}
+                      onChange={(e) => {
+                        updateForm({ jobDescription: e.target.value })
+                        if (errors.jobDescription) setErrors(prev => ({ ...prev, jobDescription: '' }))
+                      }}
+                      placeholder={t('setup.placeholder')}
+                      className={`w-full resize-none rounded-xl border bg-brand-inset px-4 py-3.5 pb-9 text-[13.5px] leading-relaxed text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:outline-none focus:ring-4 focus:ring-brand-harbor/10 ${errors.jobDescription ? 'border-brand-danger' : 'border-brand-line focus:border-brand-harbor'
+                        }`}
+                    />
+                    <span className="pointer-events-none absolute bottom-3 right-4 text-[11.5px] tabular-nums text-brand-muted">
+                      {form.jobDescription.length} / {JD_MAX_CHARS}
+                    </span>
+                  </div>
+
+                  {errors.jobDescription && (
+                    <p className="mt-1.5 text-[12px] text-brand-danger">{errors.jobDescription}</p>
+                  )}
+                  {jdAnalysis.status === 'idle' && (
+                    <p className="mt-2 text-[12px] text-brand-muted" title={t('setup.hintDetail')}>
+                      {t('setup.jdAnalysisReady')}
+                    </p>
+                  )}
+                  {jdAnalysis.status !== 'idle' && (
+                    <p className={`mt-1.5 flex items-center gap-1.5 text-[12px] ${jdAnalysis.status === 'error' ? 'text-brand-danger' : jdAnalysis.status === 'success' ? 'text-brand-success' : 'text-brand-muted'
+                      }`}>
+                      {jdAnalyzing
+                        ? <><Loader2 className="h-3 w-3 animate-spin" />{t('setup.jdAnalyzing')}</>
+                        : <><Sparkles className="h-3 w-3" />{jdAnalysis.message}</>}
+                    </p>
+                  )}
                 </div>
-              )}
-            >
-              <div className="relative">
-                <textarea
-                  id="setup-job-desc"
-                  rows={5}
-                  maxLength={JD_MAX_CHARS}
-                  value={form.jobDescription}
-                  onChange={(e) => {
-                    updateForm({ jobDescription: e.target.value })
-                    if (errors.jobDescription) setErrors(prev => ({ ...prev, jobDescription: '' }))
-                  }}
-                  placeholder={t('setup.placeholder')}
-                  className={`w-full resize-none rounded-xl border bg-brand-inset px-4 py-3.5 pb-9 text-[13.5px] leading-relaxed text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:outline-none focus:ring-4 focus:ring-brand-ink/10 ${errors.jobDescription ? 'border-brand-danger' : 'border-brand-line focus:border-brand-ink'
-                    }`}
-                />
-                <span className="pointer-events-none absolute bottom-3 right-4 text-[11.5px] tabular-nums text-brand-muted">
-                  {form.jobDescription.length} / {JD_MAX_CHARS}
-                </span>
               </div>
 
-              {errors.jobDescription && (
-                <p className="mt-1.5 text-[12px] text-brand-danger">{errors.jobDescription}</p>
-              )}
-              {jdAnalysis.status === 'idle' && (
-                <p className="mt-2 text-[12px] text-brand-muted" title={t('setup.hintDetail')}>
-                  {t('setup.jdAnalysisReady')}
-                </p>
-              )}
-              {jdAnalysis.status !== 'idle' && (
-                <p className={`mt-1.5 flex items-center gap-1.5 text-[12px] ${jdAnalysis.status === 'error' ? 'text-brand-danger' : jdAnalysis.status === 'success' ? 'text-brand-success' : 'text-brand-muted'
-                  }`}>
-                  {jdAnalyzing
-                    ? <><Loader2 className="h-3 w-3 animate-spin" />{t('setup.jdAnalyzing')}</>
-                    : <><Sparkles className="h-3 w-3" />{jdAnalysis.message}</>}
-                </p>
-              )}
-            </SectionCard>
+            </section>
 
-            <SectionCard step={2} title={t('setup.sectionInterviewSetup')}>
+            <SectionCard title={t('setup.sectionInterviewSetup')}>
               <div className="divide-y divide-brand-line">
 
                 <SettingRow label={t('setup.trackLabel')}>
@@ -1338,7 +1359,7 @@ export default function SetupPage() {
                         style={{ '--brand-range-fill': `${durationFillPct}%` }}
                       />
                       <span className="shrink-0 text-[11.5px] text-brand-muted">{t('setup.durationMinutes', { n: DURATION_MAX })}</span>
-                      <span className="shrink-0 rounded-full bg-brand-ink px-3 py-1 text-[12.5px] font-semibold tabular-nums text-brand-on-ink">
+                      <span className="shrink-0 rounded-full bg-brand-harbor px-3 py-1 text-[12.5px] font-semibold tabular-nums text-brand-on-ink">
                         {t('setup.durationMinutes', { n: form.duration })}
                       </span>
                     </div>
@@ -1364,11 +1385,10 @@ export default function SetupPage() {
             </SectionCard>
           </div>
 
-          {/* ───────────── 右栏：预览 + 概览 ───────────── */}
+          {/* ───────────── 右栏：原有面试概览 ───────────── */}
           <aside className="xl:sticky xl:top-[calc(var(--ui-nav-h)+1.5rem)] xl:max-h-[calc(100dvh-var(--ui-nav-h)-3rem)] xl:overflow-y-auto">
-            <div className="brand-float rounded-[24px] px-5 py-5">
+            <div className="brand-float setup-summary-card rounded-[24px] px-5 py-5">
               <h2 className="mb-1 flex items-center gap-2.5 font-brand text-[17px] font-semibold tracking-[-0.01em] text-brand-ink">
-                <span className="grid h-7 w-7 place-items-center rounded-full bg-brand-ochre font-display text-[12px] font-semibold text-[#22303D]">03</span>
                 {t('setup.summaryOverview')}
               </h2>
               <div className="divide-y divide-brand-line">
@@ -1438,10 +1458,6 @@ export default function SetupPage() {
                 )}
               </button>
 
-              <p className="mt-2.5 flex items-center justify-center gap-1.5 text-center text-[11.5px] text-brand-muted">
-                <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
-                {t('setup.previewReady')}
-              </p>
             </div>
           </aside>
         </form>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 150" role="img" aria-labelledby="title desc">
+  <title id="title">FlowLab 不卡壳实验室二维主标志</title>
+  <desc id="desc">圆润 FlowLab 字标配白色蛋壳包裹的黄色壳仔符号，并附中文品牌名。</desc>
+  <style>
+    :root { --core:#FFD864; --shell:#FFF8E9; --edge:#E8DDC9; --ink:#26252B; --muted:#777582; }
+    .word { font: 800 76px/1 "Arial Rounded MT Bold", "Trebuchet MS", sans-serif; letter-spacing:-5px; }
+    .cn { font: 700 22px/1 "PingFang SC", "Noto Sans SC", sans-serif; letter-spacing:12px; }
+    .tag { font: 600 12px/1.35 "DM Sans", Arial, sans-serif; letter-spacing:2.8px; }
+  </style>
+  <text class="word" x="16" y="83" fill="var(--ink)">Fl</text>
+  <g transform="translate(112 15) scale(.72)">
+    <g fill="var(--core)">
+      <rect x="76" y="5" width="9" height="22" rx="4.5" transform="rotate(17 80.5 16)"/>
+      <rect x="94" y="17" width="9" height="20" rx="4.5" transform="rotate(46 98.5 27)"/>
+    </g>
+    <path fill="var(--core)" d="M28 57C30 35 45 22 64 22c21 0 37 15 38 38l7 22-18 26H37L19 83l9-26Z"/>
+    <path fill="var(--shell)" stroke="var(--edge)" stroke-width="2.5" d="M29 49C33 26 47 14 65 14c20 0 35 14 38 38-9 5-17-4-25 0-8 4-13 12-23 8-8-3-12-14-20-12-2 1-4 1-6 1Z"/>
+    <path fill="var(--shell)" stroke="var(--edge)" stroke-width="2.5" d="M18 78c9-7 16 5 25 0 9-6 17 8 27 1 9-6 17 5 25 0 6-4 11 1 15 6-4 21-22 34-46 34-25 0-43-14-46-41Z"/>
+    <rect x="48" y="57" width="8" height="16" rx="4" fill="var(--ink)"/>
+    <rect x="72" y="57" width="8" height="16" rx="4" fill="var(--ink)"/>
+  </g>
+  <text class="word" x="195" y="83" fill="var(--ink)">wLab</text>
+  <text class="cn" x="21" y="125" fill="var(--ink)">不卡壳实验室</text>
+  <path stroke="var(--edge)" d="M410 102v30"/>
+  <text class="tag" x="430" y="110" fill="var(--muted)"><tspan x="430">PRACTICE TODAY</tspan><tspan x="430" dy="17">FLOW TOMORROW</tspan></text>
+</svg>

@@ -2,28 +2,18 @@ import { useState, useEffect, useMemo, useRef, forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import PageHeader from '../components/brand/PageHeader'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import './CommunityPages.css'
 import {
   Search, Building2, GraduationCap, Briefcase, MapPin,
   Clock, ChevronDown, ChevronUp, MessageSquareQuote,
-  CheckCircle2, XCircle, Award, Globe2, Loader2, Filter,
+  CheckCircle2, XCircle, Globe2, Loader2,
   Trash2, Plus, X, Send, BrainCircuit, Zap, AlertTriangle
 } from 'lucide-react'
 
-/**
- * 统计卡图标色。必须是完整类名字符串——
- * 之前写的是拼接式类名（text- 加变量 加 -500），这种类名会被生产构建整批 purge 掉，
- * 线上四张卡的图标是没有颜色的。
- */
-const STAT_ICON_CLASS = {
-  total: 'h-4 w-4 text-brand-muted',
-  work: 'h-4 w-4 text-brand-muted',
-  school: 'h-4 w-4 text-brand-muted',
-  offers: 'h-4 w-4 text-brand-muted',
-}
+const COMMUNITY_EGG = '/brand/flowlab-community-egg-avatar.png'
 
 function ResultBadge({ result, t }) {
   if (!result) return null
@@ -212,7 +202,7 @@ const ExperienceCard = forwardRef(function ExperienceCard({ exp, t, user, onDele
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
-      className="brand-float group relative overflow-hidden rounded-[22px] border border-brand-line"
+      className={`experience-card group relative overflow-hidden ${expanded ? 'experience-card--expanded' : ''}`}
     >
       {isOwner && (
         <>
@@ -242,7 +232,7 @@ const ExperienceCard = forwardRef(function ExperienceCard({ exp, t, user, onDele
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="w-full text-left p-6 sm:p-8"
+        className="w-full p-6 text-left sm:p-7"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0 space-y-3">
@@ -266,6 +256,11 @@ const ExperienceCard = forwardRef(function ExperienceCard({ exp, t, user, onDele
               </p>
             </div>
 
+            <div className="experience-author">
+              <img src={COMMUNITY_EGG} alt="" aria-hidden="true" />
+              <span>{isOwner ? '我发布的面经' : (exp.publisher || '匿名荷包蛋')}</span>
+            </div>
+
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12.5px] text-brand-muted">
               {exp.department && (
                 <span className="flex items-center gap-1">
@@ -285,12 +280,6 @@ const ExperienceCard = forwardRef(function ExperienceCard({ exp, t, user, onDele
                 <Globe2 className="w-3.5 h-3.5" />
                 {exp.language}
               </span>
-              {exp.publisher && (
-                <span className="flex items-center gap-1 text-brand-muted">
-                  <Award className="w-3.5 h-3.5" />
-                  {exp.publisher}
-                </span>
-              )}
             </div>
           </div>
 
@@ -801,11 +790,7 @@ export default function ExperiencesPage() {
     const work = experiences.filter(e => e.type === 'work').length
     const school = experiences.filter(e => e.type === 'school').length
     const mine = experiences.filter(e => user && e.user_id === user.id).length
-    const offers = experiences.filter(e => {
-      const r = (e.result || '').toLowerCase()
-      return r.includes('offer') || r.includes('admitted') || r.includes('pass')
-    }).length
-    return { total, work, school, mine, offers }
+    return { total, work, school, mine }
   }, [experiences, user])
 
   const filterTabs = [
@@ -819,34 +804,44 @@ export default function ExperiencesPage() {
   }
 
   return (
-    <div className="theme-quiet min-h-screen pb-16 pt-[calc(var(--ui-nav-h)+2.75rem)]">
-      <div className="ui-container">
-        <PageHeader
-          title={t('exp.title')}
-          subtitle={t('exp.subtitle')}
-          actions={user && (
-            <div className="flex flex-col items-end gap-2">
-              <motion.button
-                initial={{ opacity: 0, scale: 0.94 }}
-                animate={{ opacity: 1, scale: 1 }}
-                onClick={() => setPostModalOpen(true)}
-                className="lk-btn lk-btn-accent lk-btn-lg"
-              >
-                <Plus className="h-5 w-5" />
-                {t('exp.postBtn')}
-              </motion.button>
-              <motion.div
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-card/80 px-3 py-1 text-[11px] font-medium text-brand-muted backdrop-blur"
-              >
-                <Zap className="h-3 w-3 fill-brand-ochre text-brand-ochre" />
-                {t('exp.rewardBadge')}
-              </motion.div>
-            </div>
-          )}
-        />
+    <div className="community-page pb-16 pt-[calc(var(--ui-nav-h)+1.5rem)]">
+      <div className="community-shell">
+        <section className="community-hero">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="community-hero-copy"
+          >
+            <h1 className="community-title">{filter === 'mine' ? '我的面经' : t('exp.title')}</h1>
+            <p className="community-subtitle">
+              {filter === 'mine' ? '整理你分享过的面试经历。' : '看看其他人的真实面试经历，也把自己的经验留给下一位求职者。'}
+            </p>
+            {user && (
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                <button onClick={() => setPostModalOpen(true)} className="lk-btn lk-btn-ghost">
+                  <Plus className="h-4 w-4" />
+                  {t('exp.postBtn')}
+                </button>
+                <span className="inline-flex items-center gap-1.5 text-[12px] text-brand-muted">
+                  <Zap className="h-3.5 w-3.5 text-brand-ochre" />
+                  {t('exp.rewardBadge')}
+                </span>
+              </div>
+            )}
+          </motion.div>
+
+          <div className="community-egg-stage" aria-hidden="true">
+            {filter === 'mine' ? (
+              <img className="community-egg" src={COMMUNITY_EGG} alt="" />
+            ) : (
+              <div className="community-egg-group">
+                <img className="community-egg" src={COMMUNITY_EGG} alt="" />
+                <img className="community-egg" src={COMMUNITY_EGG} alt="" />
+                <img className="community-egg" src={COMMUNITY_EGG} alt="" />
+              </div>
+            )}
+          </div>
+        </section>
 
         {loading ? (
           <div className="flex items-center justify-center py-32">
@@ -859,26 +854,23 @@ export default function ExperiencesPage() {
           </div>
         ) : (
           <>
-            {/* 左：检索与统计（桌面端吸顶）；右：面经列表 */}
-            <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-8">
-              <motion.aside
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="space-y-4 lg:sticky lg:top-[calc(var(--ui-nav-h)+1.5rem)]"
-              >
-                <div className="relative">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.08 }}
+              className="community-toolbar"
+            >
+                <div className="community-search">
                   <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
                   <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder={t('exp.searchPlaceholder')}
-                    className="w-full rounded-full border border-brand-line bg-brand-card py-3 pl-11 pr-4 text-[13.5px] font-medium text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none focus:ring-4 focus:ring-brand-ink/10"
                   />
                 </div>
 
-                <div className="brand-float p-2" role="group">
+                <div className="community-filters" role="group">
                   {filterTabs.map((tab) => (
                     <button
                       key={tab.key}
@@ -890,49 +882,20 @@ export default function ExperiencesPage() {
                         }
                       }}
                       aria-pressed={filter === tab.key}
-                      className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-[13px] font-semibold transition-colors ${
-                        filter === tab.key
-                          ? 'bg-brand-ink text-brand-on-ink'
-                          : 'text-brand-muted hover:bg-brand-inset hover:text-brand-ink'
-                      }`}
+                      className={`community-filter ${filter === tab.key ? 'is-active' : ''}`}
                     >
                       {tab.label}
-                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums ${
-                        filter === tab.key
-                          ? 'bg-brand-on-ink/15 text-brand-on-ink'
-                          : 'bg-brand-inset text-brand-muted'
-                      }`}>
+                      <span className="community-filter-count">
                         {tab.count}
                       </span>
                     </button>
                   ))}
                 </div>
+            </motion.div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { n: stats.total, label: t('exp.filterAll'), icon: Filter, tone: 'total' },
-                    { n: stats.work, label: t('exp.filterWork'), icon: Briefcase, tone: 'work' },
-                    { n: stats.school, label: t('exp.filterSchool'), icon: GraduationCap, tone: 'school' },
-                    { n: stats.offers, label: 'Passed / Offers', icon: Award, tone: 'offers' },
-                  ].map(({ n, label, icon: Icon, tone }) => (
-                    <div
-                      key={label}
-                      className="brand-float space-y-2 rounded-[18px] p-4"
-                    >
-                      <div className="flex items-center justify-between">
-                        {/* 完整类名走映射表：拼接出来的 text-xxx-500 会被生产构建 purge 掉 */}
-                        <Icon className={STAT_ICON_CLASS[tone]} />
-                        <span className="font-display text-[24px] font-semibold tabular-nums text-brand-ink">{n}</span>
-                      </div>
-                      <p className="truncate text-[11.5px] text-brand-muted">{label}</p>
-                    </div>
-                  ))}
-                </div>
-              </motion.aside>
-
-              <div className="min-w-0">
+              <div className="experience-grid min-w-0">
                 {filtered.length === 0 ? (
-                  <div className="brand-float flex flex-col items-center justify-center space-y-4 px-10 py-20 text-center">
+                  <div className="community-empty flex flex-col items-center justify-center space-y-4 px-10 py-20 text-center">
                     <p className="text-[13.5px] font-bold text-brand-muted">{filter === 'mine' ? t('exp.noMyResults') : t('exp.noResults')}</p>
                     {search && (
                        <button
@@ -948,7 +911,7 @@ export default function ExperiencesPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
-                    className="space-y-4"
+                    className="contents"
                   >
                     <AnimatePresence mode="popLayout">
                       {filtered.map((exp) => (
@@ -964,7 +927,6 @@ export default function ExperiencesPage() {
                   </motion.div>
                 )}
               </div>
-            </div>
             <AnimatePresence>
               {postModalOpen && (
                 <PostModal

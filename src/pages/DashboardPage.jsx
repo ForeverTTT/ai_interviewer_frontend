@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import {
-  AlertTriangle, ArrowRight, BarChart3, BriefcaseBusiness, CalendarDays,
-  CheckCircle2, Clock3, FileClock, FileText, Flame, Loader2, PauseCircle,
-  PlayCircle, PlusCircle, Sparkles, Target, Trash2, BookmarkCheck,
-  Flag, Layers, History, RotateCcw, Eye,
+  AlertTriangle, ArrowRight, BarChart3, BriefcaseBusiness,
+  Check, CheckCircle2, Clock3, FileClock, FileText, Flame, Loader2, PauseCircle,
+  PlayCircle, PlusCircle, Target, Trash2, BookmarkCheck,
+  Layers, History, RotateCcw, Eye, SkipForward,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
@@ -14,10 +14,9 @@ import { getBackendBaseUrl } from '../lib/backendBase'
 import { authenticatedFetch } from '../lib/authenticatedFetch'
 import { createInterviewRequestId } from '../lib/interviewEvents'
 import OfferSprintPanel from '../components/OfferSprintPanel'
-import PageHeader from '../components/brand/PageHeader'
 import './DashboardPage.css'
 
-const FLOWLAB_CHARACTER_SHEET = '/brand/flowlab-felt-character-board-v5-role-system.png'
+const REVIEW_MENTOR_WRITING = '/brand/flowlab-review-mentor-writing.png'
 
 const RESUMABLE_STATUSES = new Set(['draft', 'active', 'paused'])
 
@@ -39,14 +38,6 @@ function InlineRichText({ text }) {
       ? <strong key={index} className="rounded-[3px] bg-brand-glow/25 px-0.5 font-semibold text-brand-ink">{match[1]}</strong>
       : part || null
   })
-}
-
-function ReviewMentorPortrait({ className = '' }) {
-  return (
-    <span className={`fl-dashboard-mentor-portrait ${className}`} aria-hidden="true">
-      <img src={FLOWLAB_CHARACTER_SHEET} alt="" />
-    </span>
-  )
 }
 
 function hasReport(interview) {
@@ -164,7 +155,6 @@ function ReviewFlashcards({ collections, t }) {
       </div>
     )
   }
-  const tones = ['from-brand-harbor/[0.16]', 'from-brand-ochre/[0.22]', 'from-brand-sage/[0.24]', 'from-brand-brick/[0.14]']
   return (
     <section className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3 px-1">
@@ -189,12 +179,12 @@ function ReviewFlashcards({ collections, t }) {
                 className="relative h-full w-full text-left"
                 aria-pressed={isFlipped}
               >
-                <span className={`absolute inset-0 flex flex-col rounded-[22px] border border-brand-line bg-gradient-to-br ${tones[index % tones.length]} to-brand-card p-5 shadow-sm [backface-visibility:hidden]`}>
+                <span className="absolute inset-0 flex flex-col rounded-[22px] border border-brand-sage/25 bg-gradient-to-br from-brand-sage/[0.18] via-brand-card to-brand-card p-5 shadow-sm [backface-visibility:hidden]">
                   <span className="flex items-center justify-between">
                     <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-card font-display text-[13px] font-semibold tabular-nums text-brand-ink shadow-sm">Q{index + 1}</span>
                     <BookmarkCheck className="h-4 w-4 text-brand-muted" />
                   </span>
-                  <span className="lk-display mt-4 line-clamp-4 text-[17px] leading-snug">{collection.question_text}</span>
+                  <span className="mt-4 line-clamp-4 font-sans text-[16px] font-medium leading-[1.65] tracking-[-0.01em] text-brand-ink">{collection.question_text}</span>
                   <span className="mt-auto flex items-center justify-between gap-2 pt-3 text-[11.5px] text-brand-muted">
                     <span className="truncate">{collection.position}</span>
                     <span className="flex shrink-0 items-center gap-1 font-medium text-brand-ink"><RotateCcw className="h-3 w-3" />{t('notes.reveal')}</span>
@@ -218,6 +208,7 @@ function ReviewFlashcards({ collections, t }) {
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation()
+  const shouldReduceMotion = useReducedMotion()
   const { user } = useAuth()
   const navigate = useNavigate()
   const [interviews, setInterviews] = useState([])
@@ -229,9 +220,12 @@ export default function DashboardPage() {
   const [deletingId, setDeletingId] = useState(null)
   const [deleteModalError, setDeleteModalError] = useState(null)
   const [taskBusy, setTaskBusy] = useState(false)
-  const [taskError, setTaskError] = useState(false)
-  const [section, setSection] = useState('sprint')
+  const [coachTaskBusy, setCoachTaskBusy] = useState(null)
+  const [coachTaskError, setCoachTaskError] = useState(false)
+  const [section, setSection] = useState('review')
+  const [planEditRequest, setPlanEditRequest] = useState(0)
   const formalFinalizeRequestedRef = useRef(new Set())
+  const sprintPanelRef = useRef(null)
   const localeTag = i18n.language === 'de' ? 'de-DE' : i18n.language === 'en' ? 'en-US' : 'zh-CN'
 
   const closeDeleteModal = useCallback(() => {
@@ -342,6 +336,42 @@ export default function DashboardPage() {
   ), [interviews])
   const latestReport = useMemo(() => interviews.find(interview => hasReport(interview)) || null, [interviews])
   const readiness = growthOverview?.readiness || null
+  const offerSprint = growthOverview?.offerSprint || null
+  const offerPlan = offerSprint?.plan || null
+  const coachReminder = (offerSprint?.reminders || []).find(reminder => reminder.channel === 'in_app') || null
+  const coachRecovery = offerSprint?.recoveryNudge || null
+  const coachTasks = offerSprint?.tasks || []
+  const coachTodayTask = offerSprint?.todayTask || coachTasks.find(task => task.status === 'pending') || null
+  const coachSprint = offerSprint?.sprint || {}
+  const coachProgress = offerSprint?.progress || {}
+  const coachCountdown = coachSprint.interviewDays ?? coachSprint.offerDays ?? null
+  const coachCountdownDigits = coachCountdown !== null && coachCountdown >= 0
+    ? String(coachCountdown).padStart(2, '0').split('')
+    : []
+  const coachWeeklyCurrent = coachProgress.effectiveDays || 0
+  const coachWeeklyTarget = coachProgress.weeklyTargetDays || offerPlan?.weekly_target_days || 5
+  const coachWeeklyPercent = Math.min(100, Math.round((coachWeeklyCurrent / Math.max(1, coachWeeklyTarget)) * 100))
+  const coachMessage = coachReminder
+    ? t('growthSprint.coach.notice', {
+      title: t(`growthSprint.reminders.${coachReminder.reminder_type}.title`),
+      body: t(`growthSprint.reminders.${coachReminder.reminder_type}.body`, { position: offerPlan?.target_position || '' }),
+    })
+    : coachRecovery
+      ? t('growthSprint.coach.notice', {
+        title: t(`growthSprint.recovery.${coachRecovery.type}.title`),
+        body: t(`growthSprint.recovery.${coachRecovery.type}.body`, { count: coachRecovery.remainingDays }),
+      })
+      : coachTodayTask
+        ? t('growthSprint.coach.today', {
+          task: t(`growthSprint.tasks.types.${coachTodayTask.task_type}.title`),
+          minutes: coachTodayTask.estimated_minutes || 10,
+        })
+        : offerPlan
+        ? t('growthSprint.coach.active', {
+          position: offerPlan.target_position,
+          focus: t(`growthSprint.stage.${offerSprint?.sprint?.stage || 'foundation'}`),
+        })
+        : t('growthSprint.coach.empty')
   const readinessScore = readiness?.overallScore ?? (latestReport ? explicitReportScore(latestReport) : null)
   const filteredInterviews = useMemo(() => interviews.filter(interview => {
     if (filter === 'reports') return hasReport(interview) || isGenerating(interview) || interview.status === 'completed'
@@ -372,6 +402,85 @@ export default function DashboardPage() {
     if (action.route) navigate(action.route)
   }
 
+  const openPlanEditor = () => {
+    setPlanEditRequest(request => request + 1)
+    window.requestAnimationFrame(() => sprintPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
+
+  const refreshGrowthOverview = async () => {
+    const response = await authenticatedFetch(`${getBackendBaseUrl()}/api/growth-center/overview`)
+    if (!response.ok) throw new Error('overview failed')
+    setGrowthOverview(await response.json())
+  }
+
+  const updateCoachTask = async status => {
+    if (!coachTodayTask) return
+    setCoachTaskBusy(status)
+    setCoachTaskError(false)
+    try {
+      const response = await authenticatedFetch(`${getBackendBaseUrl()}/api/growth-center/offer-plan/tasks/${coachTodayTask.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      if (!response.ok) throw new Error('task update failed')
+      await refreshGrowthOverview()
+    } catch {
+      setCoachTaskError(true)
+    } finally {
+      setCoachTaskBusy(null)
+    }
+  }
+
+  const dismissCoachReminder = async () => {
+    if (!coachReminder) return
+    setCoachTaskBusy('reminder')
+    setCoachTaskError(false)
+    try {
+      const response = await authenticatedFetch(`${getBackendBaseUrl()}/api/growth-center/offer-plan/reminders/${coachReminder.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'dismissed' }),
+      })
+      if (!response.ok) throw new Error('reminder update failed')
+      await refreshGrowthOverview()
+    } catch {
+      setCoachTaskError(true)
+    } finally {
+      setCoachTaskBusy(null)
+    }
+  }
+
+  const startCoachTask = async () => {
+    if (!coachTodayTask) {
+      openPlanEditor()
+      return
+    }
+    if (['focus_question', 'review_collection'].includes(coachTodayTask.task_type)) {
+      await startRecommendedTask(coachTodayTask)
+      return
+    }
+    if (coachTodayTask.task_type === 'weekly_review') {
+      navigate('/notes')
+      return
+    }
+    if (coachTodayTask.task_type === 'pre_interview_checklist') {
+      await updateCoachTask('completed')
+      return
+    }
+    navigate('/setup', {
+      state: {
+        offerSprintDefaults: {
+          position: offerPlan?.target_position,
+          jobDescription: offerPlan?.target_job_description,
+          interviewerType: offerPlan?.interviewer_type,
+          duration: coachTodayTask.estimated_minutes,
+          mode: coachTodayTask.task_type === 'self_intro' ? 'practice' : 'formal',
+        },
+      },
+    })
+  }
+
   const startRecommendedTask = async (taskOverride = null) => {
     const task = taskOverride || readiness?.nextPracticeTask
     const existingCollectionId = task?.collection_id || task?.collectionId || null
@@ -380,7 +489,7 @@ export default function DashboardPage() {
     const questionIndex = rawQuestionIndex === null || rawQuestionIndex === undefined ? NaN : Number(rawQuestionIndex)
     if (!existingCollectionId && (!sourceInterviewId || !Number.isInteger(questionIndex) || questionIndex < 0)) return
     setTaskBusy(true)
-    setTaskError(false)
+    setCoachTaskError(false)
     try {
       let collectionId = existingCollectionId
       if (!collectionId) {
@@ -402,7 +511,7 @@ export default function DashboardPage() {
       if (!practiceResponse.ok || !practiceBody.interviewId) throw new Error('practice failed')
       navigate(`/interview/${practiceBody.interviewId}`)
     } catch {
-      setTaskError(true)
+      setCoachTaskError(true)
       if (taskOverride) throw new Error('practice creation failed')
     } finally { setTaskBusy(false) }
   }
@@ -414,39 +523,126 @@ export default function DashboardPage() {
   const H2 = 'font-brand text-[17px] font-semibold tracking-[-0.01em] text-brand-ink'
 
   return (
-    <div className="flowlab-dashboard theme-quiet min-h-screen pb-20 pt-[calc(var(--ui-nav-h)+2.75rem)]">
+    <div className="flowlab-dashboard theme-quiet min-h-screen pb-20 pt-[5.5rem]">
       <main className="ui-container max-w-[1400px] space-y-5">
 
-        {/* ───────── 页头 ───────── */}
-        <PageHeader
-          eyebrow={t('dashboard.growth.eyebrow')}
-          title={t('dashboard.growth.title')}
-          subtitle={t('dashboard.growth.subtitle')}
-          actions={(
-            <div className="fl-dashboard-header-actions">
-              <div className="fl-dashboard-mentor-intro">
-                <ReviewMentorPortrait />
-                <span>
-                  <strong>{t('dashboard.growth.mentor.name')}</strong>
-                  <small>{t('dashboard.growth.mentor.role')}</small>
-                </span>
+        {/* ───────── 复盘学长：目标、提醒与日常进度 ───────── */}
+        <motion.section
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+          className="fl-dashboard-coach"
+        >
+          <div className="fl-dashboard-coach-dialogue">
+            <div className="fl-dashboard-coach-message">
+              <div className={`fl-dashboard-coach-message-main ${coachCountdownDigits.length ? 'has-countdown' : ''}`}>
+                <div className="fl-dashboard-coach-message-copy">
+                  <p className="fl-dashboard-coach-speech">{coachMessage}</p>
+                  <div className="fl-dashboard-coach-actions">
+                    <button
+                      type="button"
+                      disabled={taskBusy || Boolean(coachTaskBusy)}
+                      onClick={offerPlan && coachTodayTask ? startCoachTask : openPlanEditor}
+                      className="fl-dashboard-soft-button"
+                    >
+                      {taskBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : offerPlan && coachTodayTask ? <PlayCircle className="h-4 w-4" /> : null}
+                      {t(!offerPlan ? 'growthSprint.coach.setGoal' : coachTodayTask ? 'growthSprint.coach.startToday' : 'growthSprint.coach.adjust')}
+                    </button>
+                    {coachTodayTask && (
+                      <>
+                        <button type="button" disabled={Boolean(coachTaskBusy)} onClick={() => void updateCoachTask('completed')} className="fl-dashboard-coach-link">
+                          {coachTaskBusy === 'completed' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                          {t('growthSprint.tasks.complete')}
+                        </button>
+                        <button type="button" disabled={Boolean(coachTaskBusy)} onClick={() => void updateCoachTask('skipped')} className="fl-dashboard-coach-link">
+                          {coachTaskBusy === 'skipped' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <SkipForward className="h-3.5 w-3.5" />}
+                          {t('growthSprint.tasks.skip')}
+                        </button>
+                      </>
+                    )}
+                    {coachReminder && (
+                      <button type="button" disabled={Boolean(coachTaskBusy)} onClick={() => void dismissCoachReminder()} className="fl-dashboard-coach-link">
+                        {coachTaskBusy === 'reminder' && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                        {t('growthSprint.reminders.dismiss')}
+                      </button>
+                    )}
+                    {offerPlan ? (
+                      coachTodayTask ? (
+                        <button type="button" onClick={openPlanEditor} className="fl-dashboard-coach-link">
+                          {t('growthSprint.coach.adjust')}
+                        </button>
+                      ) : null
+                    ) : (
+                      <Link to="/setup" className="fl-dashboard-coach-link">
+                        <PlusCircle className="h-4 w-4" />{t('growthSprint.coach.practiceFirst')}
+                      </Link>
+                    )}
+                  </div>
+                </div>
+                {coachCountdownDigits.length > 0 && (
+                  <div className="fl-dashboard-countdown" aria-label={t('growthSprint.coach.daysLeft', { count: coachCountdown })}>
+                    <span className="fl-dashboard-countdown-label">{t('growthSprint.coach.countdownLabel')}</span>
+                    <span className="fl-dashboard-countdown-digits" aria-hidden="true">
+                      {coachCountdownDigits.map((digit, index) => (
+                        <span className="fl-dashboard-countdown-tile" key={`${index}-${digit}`}>
+                          <motion.span
+                            initial={shouldReduceMotion ? false : { rotateX: -78, opacity: 0 }}
+                            animate={{ rotateX: 0, opacity: 1 }}
+                            transition={{ duration: shouldReduceMotion ? 0 : 0.48, delay: shouldReduceMotion ? 0 : index * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                          >
+                            {digit}
+                          </motion.span>
+                        </span>
+                      ))}
+                    </span>
+                    <span className="fl-dashboard-countdown-unit">{t('growthSprint.coach.dayUnit')}</span>
+                  </div>
+                )}
               </div>
-              <Link to="/setup" className="lk-btn fl-dashboard-primary">
-                <PlusCircle className="h-4 w-4" />{t('dashboard.newInterview')}
-              </Link>
+              {offerPlan && (
+                <div className="fl-dashboard-coach-goal">
+                  <Target className="h-4 w-4" />
+                  <span>{t('growthSprint.coach.goal', { position: offerPlan.target_position })}</span>
+                  <span>{t('growthSprint.coach.weekly', { current: coachWeeklyCurrent, target: coachWeeklyTarget })}</span>
+                  {coachProgress.total > 0 && <span>{t('growthSprint.progress.title')} {coachProgress.completed || 0} / {coachProgress.total}</span>}
+                  <i aria-hidden="true"><b style={{ width: `${coachWeeklyPercent}%` }} /></i>
+                </div>
+              )}
+              {coachTaskError && <p className="fl-dashboard-coach-error">{t('growthSprint.errors.task')}</p>}
             </div>
-          )}
-          className="!mb-3"
-        />
+            <div className="fl-dashboard-coach-history" aria-label={t('dashboard.growth.overview')}>
+              <span><BarChart3 />{t('growthSprint.coach.historyCount', { count: metrics.effectiveCount })}</span>
+              <span><Clock3 />{formatEffectiveDuration(metrics.totalSeconds, t)}</span>
+              <span><Flame />{t('dashboard.growth.rhythm.streak', { count: metrics.streak })}</span>
+            </div>
+          </div>
+          <div className="fl-dashboard-coach-character">
+            <img src={REVIEW_MENTOR_WRITING} alt={t('dashboard.growth.mentor.name')} />
+          </div>
+        </motion.section>
 
-        {/* ───────── 主概览：准备度、最近结果、训练节奏合成一个视觉主体 ───────── */}
+        <div ref={sprintPanelRef} className="scroll-mt-24">
+          <OfferSprintPanel
+            offerSprint={offerSprint}
+            practiceStats={{
+              count: metrics.effectiveCount,
+              duration: formatEffectiveDuration(metrics.totalSeconds, t),
+            }}
+            onOverview={setGrowthOverview}
+            onStartTask={startRecommendedTask}
+            editingRequest={planEditRequest}
+            coachOwnsPrompts
+          />
+        </div>
+
+        {/* ───────── 主概览：开放式的两栏内容，不再套一层大边框 ───────── */}
         <motion.section
           initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
           aria-label={t('dashboard.growth.overview')}
-          className="fl-dashboard-overview overflow-hidden rounded-[26px] border border-brand-line bg-brand-card"
+          className="fl-dashboard-overview"
         >
-          <div className="grid lg:grid-cols-12">
-            <article className="px-6 py-6 sm:px-8 sm:py-7 lg:col-span-7">
+          <div className="grid gap-4 lg:grid-cols-12">
+            <article className="fl-dashboard-panel px-6 py-6 sm:px-8 sm:py-7 lg:col-span-7">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <p className={`flex items-center gap-2 ${EYEBROW}`}><Target className="h-3.5 w-3.5" />{t('dashboard.growth.readiness.title')}</p>
@@ -500,7 +696,7 @@ export default function DashboardPage() {
             </article>
 
             {/* 最近结果是全页唯一的顶部报告入口，避免与“查看报告依据”重复。 */}
-            <article className="border-t border-brand-line bg-brand-inset/55 px-6 py-6 sm:px-8 sm:py-7 lg:col-span-5 lg:border-l lg:border-t-0">
+            <article className="fl-dashboard-panel fl-dashboard-latest px-6 py-6 sm:px-8 sm:py-7 lg:col-span-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className={EYEBROW}>{t('dashboard.growth.latest.eyebrow')}</p>
@@ -545,19 +741,12 @@ export default function DashboardPage() {
             </article>
           </div>
 
-          <div className="grid divide-y divide-brand-line border-t border-brand-line bg-brand-card sm:grid-cols-4 sm:divide-x sm:divide-y-0">
-            <div className="px-6 py-4"><div className="flex items-center gap-2 text-[11px] text-brand-muted"><BarChart3 className="h-3.5 w-3.5" />{t('dashboard.growth.practice.title')}</div><p className="mt-1 text-[19px] font-semibold tabular-nums text-brand-ink">{metrics.effectiveCount}<span className="ml-1 text-[11.5px] font-normal text-brand-muted">{t('dashboard.growth.practice.count')}</span></p></div>
-            <div className="px-6 py-4"><div className="flex items-center gap-2 text-[11px] text-brand-muted"><Clock3 className="h-3.5 w-3.5" />{t('dashboard.growth.practice.title')}</div><p className="mt-1 text-[15px] font-semibold text-brand-ink">{formatEffectiveDuration(metrics.totalSeconds, t)}</p></div>
-            <div className="px-6 py-4"><div className="flex items-center gap-2 text-[11px] text-brand-muted"><CalendarDays className="h-3.5 w-3.5" />{t('dashboard.growth.rhythm.title')}</div><p className="mt-1 text-[19px] font-semibold tabular-nums text-brand-ink">{metrics.weeklyDays}<span className="ml-1 text-[11.5px] font-normal text-brand-muted">/ 5 {t('dashboard.growth.rhythm.weeklyDays')}</span></p></div>
-            <div className="px-6 py-4"><div className="flex items-center gap-2 text-[11px] text-brand-muted"><Flame className="h-3.5 w-3.5" />{t('dashboard.growth.rhythm.title')}</div><p className="mt-1 text-[15px] font-semibold text-brand-ink">{t('dashboard.growth.rhythm.streak', { count: metrics.streak })}</p></div>
-          </div>
         </motion.section>
 
-        {/* ───────── 下半区：冲刺计划 / 复习闪卡 / 面试记录，用一组玻璃分段控件切换，页面不再一路堆叠 ───────── */}
+        {/* ───────── 下半区：只保留复习闪卡与面试记录；冲刺计划由顶部复盘学长统一管理 ───────── */}
         <div className="flex justify-center pt-2">
-          <div className="lk-liquid inline-flex max-w-full gap-1 overflow-x-auto rounded-full p-1.5 scrollbar-hide" role="tablist" aria-label={t('dashboard.growth.title')}>
+          <div className="fl-dashboard-section-nav inline-flex max-w-full gap-1 overflow-x-auto rounded-full p-1.5 scrollbar-hide" role="tablist" aria-label={t('dashboard.growth.title')}>
             {[
-              { key: 'sprint', label: t('growthSprint.eyebrow'), icon: Flag },
               { key: 'review', label: t('dashboard.growth.collections.title'), icon: Layers, count: growthOverview?.recentCollections?.length || 0 },
               { key: 'history', label: t('dashboard.growth.history.title'), icon: History, count: interviews.length },
             ].map(tab => {
@@ -570,7 +759,7 @@ export default function DashboardPage() {
                   role="tab"
                   aria-selected={active}
                   onClick={() => setSection(tab.key)}
-                  className={`relative flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-semibold transition-colors ${active ? 'text-brand-on-ink' : 'text-brand-muted hover:text-brand-ink'}`}
+                  className={`relative flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-semibold transition-colors ${active ? 'text-brand-ink' : 'text-brand-muted hover:text-brand-ink'}`}
                 >
                   {active && <motion.span layoutId="dashboard-section-pill" className="fl-dashboard-tab-active absolute inset-0 rounded-full" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
                   <Icon className="relative h-4 w-4" />
@@ -591,66 +780,6 @@ export default function DashboardPage() {
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
             className="space-y-5"
           >
-            {section === 'sprint' && (
-              <>
-                <OfferSprintPanel
-                  offerSprint={growthOverview?.offerSprint}
-                  practiceStats={{
-                    count: metrics.effectiveCount,
-                    duration: formatEffectiveDuration(metrics.totalSeconds, t),
-                  }}
-                  onOverview={setGrowthOverview}
-                  onStartTask={startRecommendedTask}
-                />
-
-        {/* ───────── 推荐任务（没有冲刺计划时才出现）───────── */}
-                {!growthOverview?.offerSprint?.plan && readiness?.nextPracticeTask && (
-                  <section className="grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-                    <article className={`${CARD} px-6 py-6`}>
-                      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="min-w-0 max-w-3xl">
-                          <p className={EYEBROW}>{t('dashboard.growth.task.eyebrow')}</p>
-                          <h2 className={`mt-2 ${H2}`}>{readiness.nextPracticeTask.title || readiness.nextPracticeTask.questionText}</h2>
-                          <p className="mt-2 text-[13px] leading-relaxed text-brand-ink">{readiness.nextPracticeTask.reason}</p>
-                          <p className="mt-2 text-[12px] text-brand-muted">{t('dashboard.growth.task.minutes', { count: readiness.nextPracticeTask.estimatedMinutes || 8 })}</p>
-                          {taskError && (
-                            <p className="mt-3 rounded-lg border border-brand-danger/30 bg-brand-danger/[0.06] px-3 py-2 text-[12px] font-medium text-brand-danger">
-                              {t('dashboard.growth.task.failed')}
-                            </p>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          disabled={taskBusy || readiness.nextPracticeTask.questionIndex === null || readiness.nextPracticeTask.questionIndex === undefined || !Number.isInteger(Number(readiness.nextPracticeTask.questionIndex))}
-                          onClick={() => void startRecommendedTask()}
-                          className="fl-dashboard-action inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-3 text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-40"
-                        >
-                          {taskBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
-                          {t('dashboard.growth.task.start')}
-                        </button>
-                      </div>
-                    </article>
-
-                    <article className={`${CARD} flex flex-col justify-center px-6 py-6`}>
-                      <p className={EYEBROW}>{t('dashboard.growth.task.weekly')}</p>
-                      <p className="mt-2 text-[24px] font-semibold tabular-nums text-brand-ink">
-                        {t('dashboard.growth.task.weeklyCount', { count: readiness.weeklyTasks?.length || 1 })}
-                      </p>
-                      <div className="mt-3 space-y-1.5">
-                        {(readiness.weeklyTasks || [readiness.nextPracticeTask]).slice(0, 5).map((task, index) => (
-                          <p key={task.id || index} className="line-clamp-1 text-[12.5px] text-brand-ink">
-                            <span className="mr-2 tabular-nums text-brand-muted">{index + 1}.</span>{task.title || task.questionText}
-                          </p>
-                        ))}
-                      </div>
-                      <p className="mt-3 text-[12px] leading-relaxed text-brand-muted">{t('dashboard.growth.task.weeklyBody')}</p>
-                    </article>
-                  </section>
-                )}
-
-              </>
-            )}
-
             {section === 'review' && (
               <ReviewFlashcards collections={growthOverview?.recentCollections || []} t={t} />
             )}

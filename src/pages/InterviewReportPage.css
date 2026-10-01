@@ -1,0 +1,185 @@
+.flowlab-report {
+  --brand-paper: 255 250 241;
+  --brand-card: 255 255 255;
+  --brand-inset: 244 244 239;
+  --brand-mist: 232 244 225;
+  --brand-ink: 68 67 75;
+  --brand-muted: 119 117 130;
+  --brand-line: 229 229 220;
+  --brand-violet: 99 143 86;
+  --brand-glow: 184 222 164;
+  --brand-success: 99 143 86;
+  --brand-danger: 201 83 98;
+  --brand-on-ink: 255 255 255;
+  position: relative;
+  isolation: isolate;
+  color: rgb(var(--brand-ink));
+  background: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+.fl-report-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  align-items: end;
+  width: min(100%, 1120px);
+  min-height: 238px;
+  margin: 0 auto;
+  padding: 0 18px;
+}
+
+.fl-report-intro-copy {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  min-width: 0;
+  padding-top: 8px;
+}
+
+.fl-report-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 25px;
+  color: #777480;
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.fl-report-back:hover { color: #4b4951; }
+
+.fl-report-eyebrow {
+  margin-bottom: 9px;
+  color: #638f56;
+  font-size: 10.5px;
+  font-weight: 720;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.fl-report-intro h1 {
+  color: #4b4951;
+  font-size: clamp(31px, 3.4vw, 46px);
+  font-weight: 730;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.fl-report-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.fl-report-meta > span {
+  display: inline-flex;
+  max-width: 280px;
+  min-height: 32px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  border: 1px solid rgb(68 67 75 / 0.09);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.66);
+  color: #777480;
+  font-size: 11.5px;
+  font-weight: 620;
+}
+
+.fl-report-intro-character {
+  position: relative;
+  display: grid;
+  height: 238px;
+  place-items: end center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.fl-report-intro-character::before {
+  content: "";
+  position: absolute;
+  inset: 15% 0 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(184 222 164 / 0.3), transparent 67%);
+}
+
+.fl-report-intro-character img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: min(100%, 342px);
+  max-height: 242px;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 18px 18px rgb(63 82 58 / 0.13));
+}
+
+.fl-report-workspace {
+  padding: 0 8px;
+}
+
+.fl-report-viewbar {
+  min-height: 64px;
+  padding: 8px 2px 12px;
+  border-bottom: 1px solid rgb(99 143 86 / 0.14);
+}
+
+.fl-report-tabs {
+  padding: 4px;
+  border: 1px solid rgb(68 67 75 / 0.08);
+  border-radius: 999px;
+  background: rgb(239 238 235 / 0.9);
+}
+
+.flowlab-report .brand-float,
+.flowlab-report .fl-report-workspace > div:last-child > div > div,
+.flowlab-report .fl-report-workspace section > .overflow-hidden {
+  border-color: rgb(99 143 86 / 0.13);
+}
+
+.flowlab-report .brand-float {
+  background: rgb(255 255 255 / 0.88);
+  box-shadow: 0 14px 34px rgb(68 67 75 / 0.055);
+}
+
+.flowlab-report button.bg-brand-ink,
+.flowlab-report a.bg-brand-ink {
+  background: #4f5058;
+}
+
+@media (max-width: 760px) {
+  .fl-report-intro {
+    grid-template-columns: minmax(0, 1fr) 148px;
+    min-height: 190px;
+    padding-inline: 4px;
+  }
+
+  .fl-report-intro-character {
+    height: 190px;
+  }
+
+  .fl-report-intro-character img {
+    width: 190px;
+    max-width: none;
+    transform: translateX(10px);
+  }
+
+  .fl-report-back { margin-bottom: 18px; }
+  .fl-report-meta > span:first-child { max-width: 210px; }
+  .fl-report-viewbar { align-items: stretch; }
+}
+
+@media (max-width: 520px) {
+  .fl-report-intro {
+    grid-template-columns: 1fr 112px;
+  }
+
+  .fl-report-intro h1 { font-size: 30px; }
+  .fl-report-eyebrow { display: none; }
+  .fl-report-meta > span:nth-child(2) { display: none; }
+  .fl-report-tabs { overflow-x: auto; }
+  .fl-report-tabs button { white-space: nowrap; }
+}

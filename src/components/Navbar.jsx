@@ -9,6 +9,8 @@ import { useTheme } from '../context/ThemeContext'
 import { useAccountStatus } from '../hooks/useAccountStatus'
 import { Menu, X, Zap, ChevronDown, LogOut, LayoutDashboard, UserCircle, Briefcase, BookOpen, FilePenLine, StickyNote, ArrowRight } from 'lucide-react'
 
+const DEFAULT_USER_AVATAR = '/brand/flowlab-community-egg-avatar.png'
+
 /** 品牌标志 + 字标，顶栏和页脚共用 */
 export function BrandLockup({ size = 'md' }) {
   const { isDark } = useTheme()
@@ -106,12 +108,10 @@ export default function Navbar() {
   }
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || ''
-  const initial = user?.user_metadata?.full_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'
-
   const Avatar = ({ size = 'h-8 w-8' }) => (
     <span className="relative shrink-0">
-      <span className={`${size} grid place-items-center overflow-hidden rounded-full bg-brand-ink text-xs font-bold text-brand-on-ink ring-2 ring-brand-card`}>
-        {avatarSrc ? <img src={avatarSrc} alt="Avatar" className="h-full w-full object-cover" /> : initial}
+      <span className={`${size} grid place-items-center overflow-hidden rounded-full bg-[#fff7e7] ring-2 ring-brand-card`}>
+        <img src={avatarSrc || DEFAULT_USER_AVATAR} alt="Avatar" className={`h-full w-full ${avatarSrc ? 'object-cover' : 'object-contain p-0.5'}`} />
       </span>
       <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-brand-card ${jobStatus === 'seeking' ? 'bg-brand-success' : 'bg-brand-line'}`} />
     </span>

@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  Home, LayoutDashboard, Mic, StickyNote, FilePenLine, UserCircle, Compass,
+  LayoutDashboard, Mic, StickyNote, FilePenLine, UserCircle, Compass,
   BookOpen, BookMarked, Zap, LogOut, Briefcase, PanelLeftClose, PanelLeftOpen,
   Menu, X, ChevronRight, Mail,
 } from 'lucide-react'
@@ -11,7 +11,6 @@ import { useAuth } from '../../hooks/useAuth'
 import { useAccountStatus } from '../../hooks/useAccountStatus'
 import LanguageSwitcher from '../LanguageSwitcher'
 import { AppThemeToggle } from '../ThemeToggle'
-import PageAtmosphere from '../brand/PageAtmosphere'
 
 /**
  * 站内工作台外壳（登录后的页面）。
@@ -25,12 +24,27 @@ import PageAtmosphere from '../brand/PageAtmosphere'
  */
 
 const COLLAPSE_KEY = 'landit_sidebar_collapsed'
+const DEFAULT_USER_AVATAR = '/brand/flowlab-community-egg-avatar.png'
+const BRAND_WORDMARK = '/brand/flowlab-wordmark-icon-o-v1.png'
+const BRAND_ICON = '/brand/flowlab-shell-base-icon-v1.png'
 
 function workspaceRole(pathname) {
   if (pathname === '/dashboard' || pathname === '/notes' || /^\/interview\/[^/]+\/report$/.test(pathname)) return 'review'
-  if (pathname === '/resume-tailor') return 'resume'
+  if (pathname === '/gallup' || pathname === '/experiences') return 'community'
+  if (pathname === '/resume-tailor' || pathname === '/profile' || pathname === '/profile/edit') return 'resume'
   if (pathname === '/setup') return 'coach'
   return 'practice'
+}
+
+function workspaceSurface(pathname, search) {
+  if (pathname === '/dashboard') return 'dashboard'
+  if (pathname === '/notes') return 'notes'
+  if (/^\/interview\/[^/]+\/report$/.test(pathname)) return 'report'
+  if (pathname === '/gallup') return 'gallup'
+  if (pathname === '/experiences') {
+    return new URLSearchParams(search).get('mine') === 'true' ? 'my-experiences' : 'experiences'
+  }
+  return 'default'
 }
 
 function readCollapsed() {
@@ -48,27 +62,26 @@ function useNavGroups() {
       id: 'practice',
       label: t('nav.groupPractice'),
       items: [
-        { to: '/', label: t('nav.home'), icon: Home },
-        { to: '/dashboard', label: t('nav.history'), icon: LayoutDashboard },
-        { to: '/setup', label: t('nav.startInterview'), icon: Mic },
-        { to: '/notes', label: t('nav.notes'), icon: StickyNote },
+        { to: '/setup', label: t('nav.startInterview'), icon: Mic, dot: 'bg-[#33466D]' },
+        { to: '/dashboard', label: t('nav.history'), icon: LayoutDashboard, dot: 'bg-[#638F56]' },
+        { to: '/notes', label: t('nav.notes'), icon: StickyNote, dot: 'bg-[#638F56]' },
       ],
     },
     {
       id: 'materials',
       label: t('nav.groupMaterials'),
       items: [
-        { to: '/resume-tailor', label: t('nav.resumeTailor'), icon: FilePenLine },
-        { to: '/profile', label: t('nav.profile'), icon: UserCircle },
-        { to: '/gallup', label: t('nav.gallup'), icon: Compass },
+        { to: '/profile', label: t('nav.profile'), icon: UserCircle, dot: 'bg-[#D95788]' },
+        { to: '/resume-tailor', label: t('nav.resumeTailor'), icon: FilePenLine, dot: 'bg-[#D95788]' },
       ],
     },
     {
       id: 'community',
       label: t('nav.groupCommunity'),
       items: [
-        { to: '/experiences', label: t('nav.experiences'), icon: BookOpen },
-        { to: '/experiences?mine=true', label: t('nav.myExperiences'), icon: BookMarked },
+        { to: '/gallup', label: t('nav.gallup'), icon: Compass, dot: 'bg-[#DDAA46]' },
+        { to: '/experiences', label: t('nav.experiences'), icon: BookOpen, dot: 'bg-[#DDAA46]' },
+        { to: '/experiences?mine=true', label: t('nav.myExperiences'), icon: BookMarked, dot: 'bg-[#DDAA46]' },
       ],
     },
   ], [t])
@@ -85,11 +98,11 @@ function isItemActive(item, location) {
   return path === item.to
 }
 
-function Avatar({ src, initial, seeking, size = 'h-9 w-9' }) {
+function Avatar({ src, seeking, size = 'h-9 w-9' }) {
   return (
     <span className="relative shrink-0">
-      <span className={`${size} grid place-items-center overflow-hidden rounded-full bg-brand-ink text-[12px] font-bold text-brand-on-ink ring-2 ring-white/70 dark:ring-white/10`}>
-        {src ? <img src={src} alt="Avatar" className="h-full w-full object-cover" /> : initial}
+      <span className={`${size} grid place-items-center overflow-hidden rounded-full bg-[#fff7e7] ring-2 ring-white/70 dark:ring-white/10`}>
+        <img src={src || DEFAULT_USER_AVATAR} alt="Avatar" className={`h-full w-full ${src ? 'object-cover' : 'object-contain p-0.5'}`} />
       </span>
       <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-brand-card ${seeking ? 'bg-brand-success' : 'bg-brand-line'}`} />
     </span>
@@ -106,7 +119,6 @@ function SidebarContent({ collapsed, onToggleCollapse, onNavigate, account, vari
   const { jobStatus, avatarSrc, tokens, toggleJobStatus } = account
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || ''
-  const initial = user?.user_metadata?.full_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'
   const seeking = jobStatus === 'seeking'
 
   const handleSignOut = async () => {
@@ -119,14 +131,13 @@ function SidebarContent({ collapsed, onToggleCollapse, onNavigate, account, vari
     <div className="flex h-full flex-col">
       {/* 品牌 + 折叠 */}
       <div className={`flex items-center ${collapsed ? 'flex-col gap-3 px-2 pt-5' : 'justify-between px-5 pt-5'}`}>
-        <Link to="/" onClick={onNavigate} className="group flex items-center gap-2.5" aria-label="FlowLab 不卡壳实验室">
-          <span className="flowlab-shell-mark" aria-hidden="true">⌣</span>
-          {!collapsed && (
-            <span className="flex flex-col leading-none text-brand-ink">
-              <strong className="text-[13px] font-bold tracking-[-0.02em]">不卡壳实验室</strong>
-              <small className="mt-1 text-[8px] font-bold tracking-[0.17em] text-brand-muted">FLOWLAB</small>
-            </span>
-          )}
+        <Link to="/dashboard" onClick={onNavigate} className="group flex items-center gap-2.5" aria-label="FlowLab 不卡壳实验室">
+          <img
+            src={collapsed ? BRAND_ICON : BRAND_WORDMARK}
+            alt=""
+            aria-hidden="true"
+            className={collapsed ? 'flowlab-sidebar-brand-icon' : 'flowlab-sidebar-brand-wordmark'}
+          />
         </Link>
         {variant === 'desktop' && (
           <button
@@ -164,14 +175,14 @@ function SidebarContent({ collapsed, onToggleCollapse, onNavigate, account, vari
                       {active && (
                         <motion.span
                           layoutId={`sidebar-active-${variant}`}
-                          className="lk-liquid-pill absolute inset-0 rounded-2xl"
+                          className="flowlab-sidebar-active absolute inset-0 rounded-2xl"
                           transition={{ type: 'spring', stiffness: 420, damping: 36 }}
                         />
                       )}
                       {!active && <span className="absolute inset-0 rounded-2xl bg-white/0 transition-colors group-hover/nav:bg-white/35 dark:group-hover/nav:bg-white/[0.06]" />}
                       <Icon className={`relative h-[18px] w-[18px] shrink-0 ${active ? 'text-brand-ink' : ''}`} strokeWidth={active ? 2.2 : 1.9} />
                       {!collapsed && <span className="relative truncate">{item.label}</span>}
-                      {!collapsed && active && <span className="relative ml-auto h-1.5 w-1.5 rounded-full bg-brand-ochre" aria-hidden="true" />}
+                      {!collapsed && active && <span className={`relative ml-auto h-1.5 w-1.5 rounded-full ${item.dot}`} aria-hidden="true" />}
                     </Link>
                   </li>
                 )
@@ -189,20 +200,17 @@ function SidebarContent({ collapsed, onToggleCollapse, onNavigate, account, vari
             {tokens}
           </Link>
         ) : (
-          <div className="relative overflow-hidden rounded-[20px] bg-brand-ink px-4 py-3.5 text-brand-on-ink">
-            <div aria-hidden="true" className="absolute -right-6 -top-8 h-24 w-24 rounded-full bg-[radial-gradient(circle,rgb(232_168_50/0.55),transparent_70%)]" />
-            <div className="relative flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-[11.5px] opacity-75">
-                <Zap className="h-3.5 w-3.5 fill-brand-ochre text-brand-ochre" />
-                {t('nav.tokens')}
-              </span>
-              <span className="font-display text-[20px] font-semibold tabular-nums">{tokens}</span>
-            </div>
-            <Link to="/profile" onClick={onNavigate} className="relative mt-2.5 flex items-center justify-between rounded-xl bg-white/10 px-3 py-2 text-[12px] font-medium transition-colors hover:bg-white/15 dark:bg-black/10">
-              {t('nav.energyCta')}
-              <ChevronRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
+          <Link
+            to="/profile"
+            onClick={onNavigate}
+            title={t('nav.energyCta')}
+            className="flowlab-energy-card flex h-11 items-center gap-2.5 rounded-2xl px-3.5 text-brand-ink transition-colors hover:border-brand-ink/15"
+          >
+            <Zap className="h-3.5 w-3.5 shrink-0 fill-brand-lime text-brand-lime" />
+            <span className="text-[11.5px] text-brand-muted">{t('nav.tokens')}</span>
+            <span className="ml-auto text-[14px] font-semibold tabular-nums">{tokens}</span>
+            <ChevronRight className="h-3.5 w-3.5 text-brand-muted" />
+          </Link>
         )}
       </div>
 
@@ -211,7 +219,7 @@ function SidebarContent({ collapsed, onToggleCollapse, onNavigate, account, vari
         {collapsed ? (
           <div className="flex flex-col items-center gap-2">
             <button type="button" onClick={toggleJobStatus} title={seeking ? t('profile.statusSeeking') : t('profile.statusHired')}>
-              <Avatar src={avatarSrc} initial={initial} seeking={seeking} />
+              <Avatar src={avatarSrc} seeking={seeking} />
             </button>
             <button type="button" onClick={handleSignOut} title={t('nav.signOut')} className="grid h-9 w-9 place-items-center rounded-xl text-brand-danger transition-colors hover:bg-brand-danger/10">
               <LogOut className="h-4 w-4" />
@@ -220,7 +228,7 @@ function SidebarContent({ collapsed, onToggleCollapse, onNavigate, account, vari
         ) : (
           <>
             <div className="flex items-center gap-3 px-2">
-              <Avatar src={avatarSrc} initial={initial} seeking={seeking} />
+              <Avatar src={avatarSrc} seeking={seeking} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[13px] font-semibold text-brand-ink">{displayName}</p>
                 <p className="truncate text-[11px] text-brand-muted">{user?.email}</p>
@@ -271,6 +279,7 @@ export default function AppShell({ children }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const crumb = useCurrentLabel()
   const role = workspaceRole(location.pathname)
+  const surface = workspaceSurface(location.pathname, location.search)
 
   useEffect(() => {
     try { localStorage.setItem(COLLAPSE_KEY, collapsed ? '1' : '0') } catch { /* ignore */ }
@@ -289,29 +298,25 @@ export default function AppShell({ children }) {
 
   return (
     <div
-      className={`flowlab-app-shell flowlab-shell-${role} relative min-h-screen bg-brand-paper`}
+      className={`flowlab-app-shell flowlab-shell-${role} flowlab-surface-${surface} relative min-h-screen bg-brand-paper`}
       style={{ '--ui-nav-h': '4.25rem', '--app-sidebar-w': `${sidebarW}px` }}
     >
-      {/* 登录后工作台使用 FlowLab 的马卡龙弥散光，不再沿用旧 LandIt 港口图片。 */}
-      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="flowlab-shell-mesh flowlab-shell-mesh-a" />
-        <div className="flowlab-shell-mesh flowlab-shell-mesh-b" />
-        <div className="absolute inset-0 bg-brand-paper/45 dark:bg-brand-paper/65" />
-      </div>
+      {/* 每页的弥散光铺满整个视口，侧栏作为玻璃层浮在同一张背景上。 */}
+      <div aria-hidden="true" className="flowlab-shell-atmosphere pointer-events-none fixed inset-0 z-0" />
 
       {/* 桌面端侧栏 */}
       <motion.aside
         initial={false}
         animate={{ width: sidebarW }}
         transition={{ type: 'spring', stiffness: 300, damping: 34 }}
-        className="lk-liquid fixed bottom-3 left-3 top-3 z-40 hidden overflow-hidden rounded-[28px] lg:block"
+        className="flowlab-sidebar fixed bottom-3 left-3 top-3 z-40 hidden overflow-hidden rounded-[28px] lg:block"
       >
         <SidebarContent collapsed={collapsed} onToggleCollapse={() => setCollapsed(v => !v)} account={account} />
       </motion.aside>
 
       {/* 顶栏：面包屑 + 语言 / 主题；移动端带菜单按钮 */}
       <header
-        className="fixed right-3 top-3 z-30 flex h-14 items-center justify-between gap-3 rounded-[20px] pl-3 pr-2 transition-[left] duration-300 lk-liquid left-3 lg:left-[calc(var(--app-sidebar-w)+1.5rem)]"
+        className="fixed right-5 top-3 z-30 flex h-14 items-center justify-between gap-3 pl-3 pr-2 transition-[left] duration-300 left-3 lg:left-[calc(var(--app-sidebar-w)+2rem)]"
       >
         <div className="flex min-w-0 items-center gap-2">
           <button
@@ -322,8 +327,8 @@ export default function AppShell({ children }) {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <nav className="flex min-w-0 items-center gap-1.5 text-[13px]" aria-label="Breadcrumb">
-            <Link to="/" className="hidden shrink-0 font-semibold text-brand-muted transition-colors hover:text-brand-ink sm:inline">FlowLab</Link>
+          <nav className="flex min-w-0 items-center gap-1.5 text-[13px] lg:hidden" aria-label="Breadcrumb">
+            <Link to="/dashboard" className="hidden shrink-0 font-semibold text-brand-muted transition-colors hover:text-brand-ink sm:inline">FlowLab</Link>
             {crumb.parent && (
               <>
                 <ChevronRight className="hidden h-3.5 w-3.5 shrink-0 text-brand-muted/60 sm:block" />
@@ -364,7 +369,7 @@ export default function AppShell({ children }) {
               onClick={() => setDrawerOpen(false)}
             />
             <motion.aside
-              className="lk-liquid fixed bottom-3 left-3 top-3 z-50 w-[min(300px,calc(100vw-1.5rem))] overflow-hidden rounded-[28px] lg:hidden"
+              className="flowlab-sidebar fixed bottom-3 left-3 top-3 z-50 w-[min(300px,calc(100vw-1.5rem))] overflow-hidden rounded-[28px] lg:hidden"
               initial={{ x: '-110%' }}
               animate={{ x: 0 }}
               exit={{ x: '-110%' }}
@@ -386,8 +391,7 @@ export default function AppShell({ children }) {
 
       {/* 内容纸面 */}
       <div className="relative z-10 transition-[padding] duration-300 lg:py-3 lg:pl-[calc(var(--app-sidebar-w)+1.5rem)] lg:pr-3">
-        <div className="relative min-h-[100dvh] overflow-clip bg-brand-paper shadow-[0_0_0_1px_rgb(255_255_255/0.6)] lg:min-h-[calc(100dvh-1.5rem)] lg:rounded-[28px] dark:shadow-[0_0_0_1px_rgb(255_255_255/0.06)]">
-          <PageAtmosphere variant="flowlab" />
+        <div className="relative min-h-[100dvh] lg:min-h-[calc(100dvh-1.5rem)]">
           <main className="relative z-10">{children}</main>
           <AppFooter />
         </div>

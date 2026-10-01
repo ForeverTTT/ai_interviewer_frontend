@@ -1,49 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/landit-icon-light.svg" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/brand/flowlab-shell-favicon-64.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/brand/flowlab-shell-app-icon-192.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="AI模拟面试平台，专为赴德实习求职者设计" />
-    <title>LandIt - AI德国面试训练营</title>
+    <meta name="theme-color" content="#F5F6F2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0E141A" media="(prefers-color-scheme: dark)" />
+    <meta name="description" content="不卡壳实验室 FlowLab — 为毕业生打造的 AI 面试、简历与求职成长平台" />
+    <title>不卡壳实验室 FlowLab — 面试不再卡壳</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Source+Serif+4:opsz,wght@8..60,600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,400..800&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;600;700&display=swap" rel="stylesheet">
     <script>
       (function () {
         try {
-          var path = (location.pathname || '/').replace(/\/+$/, '') || '/'
-          var onInterview = path === '/interview'
-          var app = localStorage.getItem('interviewde_app_theme')
-          var inv = localStorage.getItem('interviewde_interview_theme')
-          var dark = onInterview ? inv !== 'light' : app === 'dark'
+          // 与 ThemeContext 的存储键保持一致，避免深色用户首帧闪白
+          var dark = localStorage.getItem('interviewde_theme') === 'dark'
           document.documentElement.classList.toggle('dark', dark)
           document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
         } catch (e) { /* ignore */ }
       })()
     </script>
-  <style>[style*="opacity"]{opacity:1 !important}</style>
-  <script type="module" crossorigin src="/assets/index-BafeNpWU.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-B0Z9INg1.js">
-  <link rel="modulepreload" crossorigin href="/assets/createLucideIcon-B07tG6zs.js">
-  <link rel="modulepreload" crossorigin href="/assets/check-ClB8gLNP.js">
-  <link rel="modulepreload" crossorigin href="/assets/chevron-down-zgahzgNG.js">
-  <link rel="modulepreload" crossorigin href="/assets/earth-CF9X7Mev.js">
-  <link rel="modulepreload" crossorigin href="/assets/ThemeToggle-ycQ_nv3h.js">
-  <link rel="modulepreload" crossorigin href="/assets/brain-circuit-CIAr9DEp.js">
-  <link rel="modulepreload" crossorigin href="/assets/useAuth-C9b9kR4X.js">
-  <link rel="modulepreload" crossorigin href="/assets/book-open-CltL1CGS.js">
-  <link rel="modulepreload" crossorigin href="/assets/briefcase-klACrux-.js">
-  <link rel="modulepreload" crossorigin href="/assets/x-DLzX5fHq.js">
-  <link rel="modulepreload" crossorigin href="/assets/backendBase-B9kndIes.js">
-  <link rel="modulepreload" crossorigin href="/assets/authenticatedFetch-COzUvTDM.js">
-  <link rel="modulepreload" crossorigin href="/assets/Navbar-ChiIazdQ.js">
-  <link rel="modulepreload" crossorigin href="/assets/mail-6et4V_Bf.js">
-  <link rel="modulepreload" crossorigin href="/assets/shield-check-Bzw96r_x.js">
-  <link rel="modulepreload" crossorigin href="/assets/proxy-lDj7rSMs.js">
-  <link rel="modulepreload" crossorigin href="/assets/AnimatePresence-BT3qT6g6.js">
-  <link rel="stylesheet" crossorigin href="/assets/index-C-YM8iFJ.css">
-</head>
+    <script type="module" crossorigin src="/assets/index-DRMaQi6b.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-B0Z9INg1.js">
+    <link rel="modulepreload" crossorigin href="/assets/createLucideIcon-B07tG6zs.js">
+    <link rel="modulepreload" crossorigin href="/assets/proxy-iOfCyg2X.js">
+    <link rel="modulepreload" crossorigin href="/assets/AnimatePresence-XxYjwUCm.js">
+    <link rel="modulepreload" crossorigin href="/assets/ThemeToggle-BTbLIggL.js">
+    <link rel="modulepreload" crossorigin href="/assets/useAuth-C9b9kR4X.js">
+    <link rel="modulepreload" crossorigin href="/assets/arrow-right-Br2NKFGJ.js">
+    <link rel="modulepreload" crossorigin href="/assets/book-open-CltL1CGS.js">
+    <link rel="modulepreload" crossorigin href="/assets/briefcase-klACrux-.js">
+    <link rel="modulepreload" crossorigin href="/assets/chevron-down-zgahzgNG.js">
+    <link rel="modulepreload" crossorigin href="/assets/chevron-right-ykafmLc0.js">
+    <link rel="modulepreload" crossorigin href="/assets/earth-CF9X7Mev.js">
+    <link rel="modulepreload" crossorigin href="/assets/mail-6et4V_Bf.js">
+    <link rel="modulepreload" crossorigin href="/assets/mic-B8NVizA-.js">
+    <link rel="modulepreload" crossorigin href="/assets/x-DLzX5fHq.js">
+    <link rel="modulepreload" crossorigin href="/assets/zap-CPjbUF86.js">
+    <link rel="modulepreload" crossorigin href="/assets/check-ClB8gLNP.js">
+    <link rel="modulepreload" crossorigin href="/assets/LanguageSwitcher-72V0R7Wq.js">
+    <link rel="modulepreload" crossorigin href="/assets/backendBase-B9kndIes.js">
+    <link rel="modulepreload" crossorigin href="/assets/authenticatedFetch-COzUvTDM.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-eAAar03h.css">
+  </head>
   <body>
     <div id="root"></div>
   </body>

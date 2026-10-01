@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -53,7 +53,7 @@ function taskTone(type) {
   return 'brick'
 }
 
-export default function OfferSprintPanel({ offerSprint, practiceStats, onOverview, onStartTask }) {
+export default function OfferSprintPanel({ offerSprint, practiceStats, onOverview, onStartTask, editingRequest = 0, coachOwnsPrompts = false }) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const plan = offerSprint?.plan || null
@@ -63,8 +63,16 @@ export default function OfferSprintPanel({ offerSprint, practiceStats, onOvervie
   const [taskBusy, setTaskBusy] = useState(null)
   const [error, setError] = useState('')
   const [premiumOpen, setPremiumOpen] = useState(false)
+  const handledEditingRequest = useRef(0)
 
   useEffect(() => { if (!editing) setDraft(formFromPlan(plan)) }, [editing, plan])
+
+  useEffect(() => {
+    if (!editingRequest || handledEditingRequest.current === editingRequest) return
+    handledEditingRequest.current = editingRequest
+    setDraft(formFromPlan(plan))
+    setEditing(true)
+  }, [editingRequest, plan])
 
   const refreshOverview = async () => {
     const response = await authenticatedFetch(`${getBackendBaseUrl()}/api/growth-center/overview`)
@@ -200,6 +208,9 @@ export default function OfferSprintPanel({ offerSprint, practiceStats, onOvervie
   const FIELD = 'w-full rounded-xl border border-brand-line bg-brand-inset px-4 py-2.5 text-[13.5px] text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none focus:ring-4 focus:ring-brand-ink/10'
   const LABEL = 'block text-[12.5px] font-semibold text-brand-ink'
 
+  // Dashboard 上的计划概览与任务操作全部交给复盘学长；这里只保留创建/编辑表单。
+  if (coachOwnsPrompts && !editing) return null
+
   /* ───────── 还没有冲刺计划 ───────── */
   if (!plan && !editing) {
     return (
@@ -320,7 +331,7 @@ export default function OfferSprintPanel({ offerSprint, practiceStats, onOvervie
   return (
     <section className="space-y-4" aria-labelledby="offer-sprint-title">
 
-      {inAppReminders.map(reminder => (
+      {!coachOwnsPrompts && inAppReminders.map(reminder => (
         <div key={reminder.id} className={`${CARD} flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between`}>
           <div className="flex min-w-0 gap-3">
             <BellRing className="mt-0.5 h-4 w-4 shrink-0 text-brand-ochre" />
@@ -333,7 +344,7 @@ export default function OfferSprintPanel({ offerSprint, practiceStats, onOvervie
         </div>
       ))}
 
-      {offerSprint.recoveryNudge && (
+      {!coachOwnsPrompts && offerSprint.recoveryNudge && (
         <div className={`${CARD} flex items-start gap-3 px-5 py-4`}>
           <RotateCcw className="mt-0.5 h-4 w-4 shrink-0 text-brand-harbor" />
           <div className="min-w-0">

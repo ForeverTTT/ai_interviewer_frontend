@@ -12,11 +12,21 @@ import PracticeInterviewPanel from '../components/PracticeInterviewPanel'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import { InterviewThemeToggle } from '../components/ThemeToggle'
 import {
-  Clock, Globe2, ArrowLeft, AlertCircle,
+  Globe2, ArrowLeft, AlertCircle,
   Play, ChevronDown, ChevronUp,
   Loader2, Video, VideoOff, Mic, FileText,
 } from 'lucide-react'
+import './InterviewPage.css'
 
+const CHARACTER_SHEET = '/brand/flowlab-felt-character-board-v5-role-system.png'
+
+function VoicePartnerPortrait() {
+  return (
+    <div className="interview-voice-partner" aria-hidden="true">
+      <img src={CHARACTER_SHEET} alt="" />
+    </div>
+  )
+}
 
 function useCountdown(minutes) {
   const totalSeconds = Math.max(60, Number(minutes || 10) * 60)
@@ -617,7 +627,7 @@ export default function InterviewPage() {
   }
 
   return (
-    <div style={{ height: '100dvh' }} className="theme-quiet relative flex flex-col overflow-hidden bg-brand-paper text-brand-ink">
+    <div style={{ height: '100dvh' }} className="flowlab-app-shell flowlab-shell-practice interview-room-page theme-quiet relative flex flex-col overflow-hidden bg-brand-paper text-brand-ink">
 
       {finalizeError && (
         <div className="z-[60] flex-shrink-0 border-b border-brand-danger/30 bg-brand-danger/[0.08] px-5 py-2.5 text-[13px] text-brand-ink">
@@ -630,52 +640,17 @@ export default function InterviewPage() {
 
       {/* ── Top Bar ── */}
       {chatPhase === 'idle' && (
-        <nav className="lk-liquid z-10 mx-3 mt-3 flex flex-shrink-0 items-center justify-between rounded-[22px] px-4 py-3 sm:px-5">
-        <div className="flex items-center gap-6">
-          <Link to="/setup" className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-line bg-brand-card/70 text-brand-muted transition-colors hover:border-brand-ink/40 hover:text-brand-ink">
+        <nav className="z-10 mx-4 mt-4 flex flex-shrink-0 items-center justify-between sm:mx-6">
+          <Link to="/setup" className="interview-back-button inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[12.5px] font-semibold text-brand-ink transition-all hover:-translate-y-0.5">
             <ArrowLeft className="w-4 h-4" />
+            <span>{t('interview.back')}</span>
           </Link>
-          
-          <div className="hidden md:flex flex-col">
-            <span className="mb-1 text-[11px] leading-none text-brand-muted">{t('interview.role')}</span>
-            <h1 className="lk-display max-w-[320px] truncate text-xl leading-none">
-              {position}
-            </h1>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          {chatPhase === 'live' && (
-            <div className="lk-liquid flex items-center gap-4 rounded-full px-4 py-2">
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-brand-success" />
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-brand-success">{t('interview.live')}</span>
-              </div>
-              <div className="h-4 w-px bg-brand-line" />
-              <div className="flex items-center gap-2 font-mono text-sm font-bold tabular-nums text-brand-ink">
-                <Clock className="h-3.5 w-3.5 text-brand-muted" />
-                <span className={timer.isCritical ? 'text-brand-danger' : timer.isWarning ? 'text-brand-ochre' : ''}>
-                  {timer.display}
-                </span>
-              </div>
-            </div>
-          )}
 
           <div className="flex items-center gap-2">
             <InterviewThemeToggle className="scale-90" />
             <LanguageSwitcher className="scale-90" />
-            
-            {chatPhase === 'live' && (
-              <button
-                onClick={() => setShowEndModal(true)}
-                className="lk-btn lk-btn-primary ml-2 !px-5 !py-2 !text-[12px]"
-              >
-                {t('interview.end')}
-              </button>
-            )}
           </div>
-        </div>
-      </nav>
+        </nav>
       )}
 
       {chatPhase === 'live' && mode === 'formal' && (
@@ -694,23 +669,23 @@ export default function InterviewPage() {
         {/* Right panel - Main Interaction View */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
           {chatPhase === 'idle' ? (
-            <div className="flex-1 overflow-y-auto p-6 lg:p-10">
+            <div className="interview-lobby flex-1 overflow-y-auto p-5 lg:p-8">
               <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col justify-center">
 
-                <header className="mb-8 text-center">
-                  <h2 className="lk-display text-[34px] leading-tight sm:text-[44px]">
-                    {t('interview.lobbyTitle')}
-                  </h2>
-                  <p className="mx-auto mt-3 max-w-2xl text-[14.5px] leading-relaxed text-brand-muted">
-                    {t('interview.lobbySub')}
-                  </p>
+                <header className="interview-lobby-intro">
+                  <VoicePartnerPortrait />
+                  <div className="interview-lobby-bubble">
+                    <span>{t('interview.voicePartnerName')}</span>
+                    <h2>{t('interview.lobbyTitle')}</h2>
+                    <p>{t('interview.lobbySub')}</p>
+                  </div>
                 </header>
 
                 {/* 两栏等高：预览与信息卡对齐，不会一高一低 */}
-                <div className="grid items-stretch gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+                <div className="interview-lobby-grid grid items-stretch gap-5 lg:grid-cols-[1.08fr_0.92fr]">
 
                   {/* ── 摄像头预览（仿 Google Meet：控制键浮在画面底部）── */}
-                  <div className="relative min-h-[360px] overflow-hidden rounded-[28px] border border-brand-line bg-gradient-to-br from-brand-mist to-brand-inset">
+                  <div className="interview-camera-stage relative min-h-[360px] overflow-hidden rounded-[30px]">
                     <video
                       ref={lobbyPreviewRef}
                       className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${lobbyCameraOn && cameraStream ? 'opacity-100' : 'opacity-0'}`}
@@ -719,7 +694,7 @@ export default function InterviewPage() {
 
                     {!lobbyCameraOn && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-8 text-center">
-                        <div className="grid h-14 w-14 place-items-center rounded-full bg-brand-card text-brand-muted">
+                        <div className="interview-camera-off-icon grid h-14 w-14 place-items-center rounded-full text-brand-violet">
                           <VideoOff className="h-6 w-6" />
                         </div>
                         <p className="text-[13px] text-brand-muted">{t('interview.lobbyPreviewOff')}</p>
@@ -734,7 +709,7 @@ export default function InterviewPage() {
                     )}
 
                     {/* 控制条常驻在画面底部；药丸自带底色，开/关摄像头两种情况下都清晰 */}
-                    <div className="lk-liquid absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-wrap items-center justify-center gap-2 rounded-full p-1.5">
+                    <div className="interview-media-controls absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-wrap items-center justify-center gap-2 rounded-full p-1.5">
                       <button
                         onClick={() => { setCameraError(null); setLobbyCameraOn(v => !v) }}
                         className={`flex items-center gap-2 rounded-full border px-4 py-2 text-[12.5px] font-bold backdrop-blur transition-colors ${lobbyCameraOn
@@ -773,17 +748,14 @@ export default function InterviewPage() {
                   </div>
 
                   {/* ── 信息卡：原左栏元信息 + 提示 + 进入按钮合并为一张 ── */}
-                  <div className="brand-float flex flex-col rounded-[28px] p-7">
-                    <p className="lk-eyebrow">{t('meta.title')}</p>
-                    <h3 className="mt-2 font-brand text-[21px] font-semibold leading-tight tracking-tight text-brand-ink">
+                  <div className="interview-lobby-card flex flex-col rounded-[30px] p-7">
+                    <p className="interview-lobby-kicker">{t('interview.sessionSummary')}</p>
+                    <h3 className="mt-2 text-[21px] font-semibold leading-tight tracking-tight text-brand-ink">
                       {t('interview.instructionTitle', { position })}
                     </h3>
-                    <p className="mt-2 text-[13px] leading-relaxed text-brand-muted">
-                      {t('interview.instructionSub')}
-                    </p>
 
                     {/* 面试参数（原左侧栏的内容，不再重复展示职位名） */}
-                    <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 border-t border-brand-line pt-5">
+                    <div className="interview-lobby-meta mt-5 grid grid-cols-2 gap-3">
                       <div>
                         <span className="text-[11px] text-brand-muted">{t('interview.lang')}</span>
                         <p className="mt-0.5 text-[13px] font-bold text-brand-ink">{language}</p>
@@ -813,19 +785,15 @@ export default function InterviewPage() {
                     </div>
 
                     {/* 提示（原左侧栏的独立卡片，合并进来后移动端也能看到） */}
-                    <div className="mt-5 border-t border-brand-line pt-5">
+                    <div className="interview-lobby-tips mt-5">
                       <div className="mb-3 flex items-center gap-2">
-                        <div className="h-4 w-1 rounded-full bg-brand-ochre" />
                         <span className="text-[12.5px] font-semibold text-brand-ink">{t('interview.tipsTitle')}</span>
-                        <AlertCircle className="ml-auto h-4 w-4 text-brand-muted" />
                       </div>
-                      <ul className="space-y-2.5 text-[12.5px] leading-relaxed text-brand-muted">
-                        {['tip1', 'tip2', 'tip3'].map((key, i) => (
+                      <ul className="space-y-2 text-[12.5px] leading-relaxed text-brand-muted">
+                        {['tip1', 'tip2', 'tip3'].map((key) => (
                           <li key={key} className="flex items-start gap-3">
-                            <span className="grid h-5 w-5 flex-shrink-0 place-items-center rounded-full border border-brand-ink text-[10px] font-bold text-brand-ink">
-                              {String(i + 1).padStart(2, '0')}
-                            </span>
-                            <span>{t(`interview.${key}`)}</span>
+                            <span className="mt-[7px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-violet" />
+                            <span>{String(t(`interview.${key}`)).replace(/^•\s*/, '')}</span>
                           </li>
                         ))}
                       </ul>
@@ -835,18 +803,18 @@ export default function InterviewPage() {
                     <div className="mt-auto pt-6">
                       <button
                         onClick={handleStart}
-                        className="group flex w-full items-center justify-between rounded-[22px] bg-brand-ink p-5 text-brand-on-ink shadow-lift transition-all duration-300 hover:-translate-y-0.5"
+                        className="interview-join-button group flex w-full items-center justify-between rounded-[22px] p-5 transition-all duration-300 hover:-translate-y-0.5"
                       >
                         <span className="space-y-1 text-left">
                           <span className="flex items-center gap-2 text-[11px] font-medium opacity-70">
-                            <span className="h-1.5 w-1.5 rounded-full bg-brand-on-ink" />
+                            <span className="h-1.5 w-1.5 rounded-full bg-brand-violet" />
                             {t('interview.readyToStart')}
                           </span>
                           <span className="block font-brand text-[20px] font-semibold leading-none tracking-tight">
                             {t('interview.joinInterviewBtn')}
                           </span>
                         </span>
-                        <span className="grid h-12 w-12 place-items-center rounded-full bg-brand-ochre text-[#22303D] transition-transform duration-300 group-hover:scale-110">
+                        <span className="grid h-12 w-12 place-items-center rounded-full bg-brand-violet text-brand-on-ink transition-transform duration-300 group-hover:scale-110">
                           <Play className="h-5 w-5 translate-x-0.5 fill-current" />
                         </span>
                       </button>

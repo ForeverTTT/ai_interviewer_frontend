@@ -1,0 +1,248 @@
+.resume-tailor-page {
+  --brand-violet: 217 87 136;
+  --brand-glow: 254 183 201;
+  --brand-success: 217 87 136;
+  --resume-pink: rgb(var(--brand-violet));
+  --resume-pink-soft: rgb(254 235 242);
+  --resume-pink-line: rgb(242 200 216);
+  --resume-cream: rgb(255 250 244);
+  background:
+    radial-gradient(circle at 91% 8%, rgba(254, 183, 201, 0.18), transparent 27rem),
+    radial-gradient(circle at 13% 42%, rgba(247, 117, 169, 0.07), transparent 30rem),
+    rgb(var(--brand-bg));
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+.resume-tailor-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+  gap: 30px;
+  align-items: center;
+  margin-bottom: 30px;
+  overflow: visible;
+}
+
+.resume-tailor-hero-copy {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+}
+
+.resume-tailor-hero h1 {
+  margin: 0;
+  color: rgb(var(--brand-ink));
+  font-size: clamp(28px, 2.4vw, 38px);
+  font-weight: 720;
+  line-height: 1.16;
+  letter-spacing: -0.045em;
+}
+
+.resume-tailor-coach-panel {
+  padding: 27px;
+  border: 1px solid rgba(217, 87, 136, 0.14);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 20px 52px rgba(83, 58, 67, 0.07);
+  backdrop-filter: blur(12px);
+}
+
+.resume-tailor-coach-panel::after {
+  position: absolute;
+  top: 78px;
+  right: -18px;
+  width: 36px;
+  height: 36px;
+  border-top: 1px solid rgba(217, 87, 136, 0.12);
+  border-right: 1px solid rgba(217, 87, 136, 0.12);
+  background: rgba(255, 255, 255, 0.84);
+  content: '';
+  transform: rotate(45deg);
+}
+
+.resume-tailor-coach-prompt {
+  max-width: 760px;
+  margin: 0 0 22px;
+  color: rgb(var(--brand-ink));
+  font-size: clamp(17px, 1.5vw, 21px) !important;
+  font-weight: 650 !important;
+  line-height: 1.55 !important;
+  letter-spacing: -0.015em !important;
+}
+
+.resume-tailor-coach-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(180px, 0.5fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.resume-tailor-hero-visual {
+  position: relative;
+  min-height: 440px;
+}
+
+.resume-tailor-hero-visual img {
+  position: absolute;
+  z-index: 1;
+  right: -12px;
+  top: 50%;
+  width: min(100%, 390px);
+  max-height: 410px;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 22px 22px rgba(84, 53, 65, 0.12));
+  transform: translateY(-50%);
+}
+
+.resume-tailor-hero-glow {
+  position: absolute;
+  top: 50%;
+  right: 2%;
+  width: 360px;
+  height: 270px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(254, 183, 201, 0.3), rgba(254, 235, 242, 0.09) 58%, transparent 73%);
+  filter: blur(10px);
+  transform: translateY(-50%);
+}
+
+.resume-tailor-output-tabs {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(83, 78, 86, 0.1);
+}
+
+.resume-tailor-output-tabs button {
+  position: relative;
+  padding: 11px 2px 13px;
+  color: rgb(var(--brand-muted));
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.resume-tailor-output-tabs button::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: rgb(var(--brand-violet));
+  content: '';
+  opacity: 0;
+  transform: scaleX(0.55);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.resume-tailor-output-tabs button.is-active {
+  color: rgb(var(--brand-ink));
+}
+
+.resume-tailor-output-tabs button.is-active::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.resume-tailor-output-panel {
+  min-height: 500px;
+}
+
+.resume-tailor-panel {
+  border: 1px solid rgba(217, 87, 136, 0.14);
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 18px 50px rgba(83, 58, 67, 0.075);
+  backdrop-filter: blur(12px);
+}
+
+.resume-tailor-input-panel {
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.93), rgba(255, 248, 251, 0.9));
+}
+
+.resume-tailor-base-resume {
+  border-color: rgba(217, 87, 136, 0.18);
+  background: linear-gradient(135deg, rgba(254, 235, 242, 0.72), rgba(255, 250, 244, 0.94));
+}
+
+.resume-tailor-primary-button {
+  color: white;
+  background: rgb(var(--brand-violet));
+  box-shadow: 0 9px 22px rgba(217, 87, 136, 0.19);
+}
+
+.resume-tailor-primary-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgb(199 72 120);
+  box-shadow: 0 12px 26px rgba(217, 87, 136, 0.24);
+}
+
+.resume-tailor-secondary-button {
+  border-color: rgba(217, 87, 136, 0.18);
+  color: rgb(var(--brand-ink));
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.resume-tailor-secondary-button:hover:not(:disabled) {
+  border-color: rgba(217, 87, 136, 0.48);
+  color: rgb(var(--brand-violet));
+  background: rgba(254, 235, 242, 0.46);
+}
+
+.resume-tailor-page textarea,
+.resume-tailor-page input,
+.resume-tailor-page button {
+  font-family: inherit;
+}
+
+@media (max-width: 900px) {
+  .resume-tailor-hero {
+    grid-template-columns: minmax(0, 1fr) 250px;
+    gap: 18px;
+  }
+
+  .resume-tailor-coach-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resume-tailor-hero-visual {
+    min-height: 390px;
+  }
+
+  .resume-tailor-hero-visual img {
+    max-height: 330px;
+  }
+}
+
+@media (max-width: 680px) {
+  .resume-tailor-hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    margin-bottom: 20px;
+  }
+
+  .resume-tailor-hero-copy {
+    padding: 22px;
+  }
+
+  .resume-tailor-hero h1 {
+    font-size: 30px;
+  }
+
+  .resume-tailor-hero-visual {
+    grid-row: 1;
+    min-height: 220px;
+  }
+
+  .resume-tailor-hero-visual img {
+    right: 50%;
+    width: 320px;
+    max-height: 230px;
+    transform: translate(50%, -50%);
+  }
+
+  .resume-tailor-coach-panel::after {
+    display: none;
+  }
+}

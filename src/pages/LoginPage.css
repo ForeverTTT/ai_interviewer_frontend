@@ -8,9 +8,12 @@
   --login-teal:#10b48e;
   min-height:100svh;
   display:grid;
-  grid-template-columns:minmax(0,1.15fr) minmax(430px,.85fr);
+  grid-template-columns:minmax(520px,1.05fr) minmax(390px,.95fr);
+  align-items:stretch;
+  gap:clamp(38px,6vw,110px);
+  padding:28px clamp(30px,5vw,86px);
   overflow:hidden;
-  background:var(--login-paper);
+  background:radial-gradient(circle at 9% 14%,rgba(254,183,201,.38),transparent 30%),radial-gradient(circle at 84% 13%,rgba(143,219,216,.38),transparent 32%),radial-gradient(circle at 62% 88%,rgba(255,214,100,.15),transparent 28%),var(--login-paper);
   color:var(--login-ink);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
 }
@@ -20,28 +23,21 @@
 .fl-login-team-panel {
   position:relative;
   isolation:isolate;
-  min-height:100svh;
-  overflow:hidden;
+  min-height:calc(100svh - 56px);
+  overflow:visible;
   display:flex;
   flex-direction:column;
-  padding:42px 48px 24px;
-  background:radial-gradient(circle at 9% 10%,rgba(254,183,201,.42),transparent 32%),radial-gradient(circle at 90% 18%,rgba(143,219,216,.46),transparent 35%),var(--login-paper);
+  padding:18px 0 0;
+  background:transparent;
 }
 
 .fl-login-mesh { position:absolute; z-index:-1; border-radius:50%; filter:blur(12px); pointer-events:none; }
 .fl-login-mesh-pink { width:310px; height:310px; left:-120px; bottom:12%; background:rgba(247,117,169,.13); }
 .fl-login-mesh-aqua { width:360px; height:360px; right:-150px; bottom:-90px; background:rgba(143,219,216,.22); }
 
-.fl-login-brand { width:max-content; display:flex; align-items:center; gap:11px; color:inherit; text-decoration:none; }
-.fl-login-brand-mark { width:42px; height:42px; display:grid; place-items:center; border-radius:50%; background:#f9edd1; color:#45516c; font-size:24px; font-weight:900; transform:rotate(-7deg); }
-.fl-login-brand > span:last-child { display:flex; flex-direction:column; }
-.fl-login-brand strong { font-size:14px; font-weight:650; letter-spacing:-.01em; }
-.fl-login-brand small { margin-top:3px; color:#8a8792; font-size:8px; font-weight:850; letter-spacing:.18em; text-transform:uppercase; }
-
-.fl-login-team-copy { width:min(560px,88%); margin:clamp(60px,9vh,100px) auto 0; text-align:center; }
-.fl-login-team-copy > span { display:block; width:100%; color:#8e8a96; font-size:10px; font-weight:850; letter-spacing:.17em; text-align:center; text-transform:uppercase; }
-.fl-login-team-copy h1 { margin:15px 0 0; font-size:clamp(40px,4.2vw,58px); font-weight:700; letter-spacing:-.035em; line-height:1.08; }
-.fl-login-team-copy p { max-width:500px; margin:20px auto 0; color:var(--login-muted); font-size:14px; line-height:1.75; }
+.fl-login-brand { width:max-content; display:flex; align-items:center; color:inherit; text-decoration:none; }
+.fl-login-brand-center { margin:clamp(105px,17vh,170px) auto 0; }
+.fl-login-brand-wordmark { display:block; width:min(330px,42vw); height:auto; object-fit:contain; filter:drop-shadow(0 14px 20px rgba(32,31,36,.08)); transform-origin:42% 62%; will-change:transform,filter; }
 
 .fl-login-team-row { position:relative; width:min(780px,100%); margin:auto auto clamp(42px,5vh,62px); display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); align-items:end; gap:0; }
 .fl-login-team-row::after { content:""; position:absolute; z-index:-1; left:5%; right:5%; bottom:23px; height:48px; border-radius:50%; background:rgba(84,83,98,.08); filter:blur(16px); }
@@ -54,13 +50,13 @@
 .fl-login-mascot-bottom-right img { left:-100%; top:-100%; }
 .fl-login-team-member:hover .fl-login-mascot-crop { transform:translateY(-7px) scale(1.025); }
 
-.fl-login-form-panel { position:relative; min-height:100svh; display:flex; flex-direction:column; padding:30px clamp(28px,4vw,64px); background:rgba(255,255,255,.62); border-left:1px solid rgba(68,67,75,.06); }
+.fl-login-form-panel { position:relative; min-height:calc(100svh - 56px); display:flex; flex-direction:column; padding:4px 0 20px; background:transparent; border:0; }
 .fl-login-tools { display:flex; align-items:center; justify-content:space-between; gap:16px; }
 .fl-login-tools > div { display:flex; align-items:center; gap:6px; }
 .fl-login-back { display:inline-flex; align-items:center; gap:7px; color:#777582; text-decoration:none; font-size:12px; font-weight:700; transition:color .2s ease,transform .2s ease; }
 .fl-login-back:hover { color:var(--login-ink); transform:translateX(-2px); }
 
-.fl-login-card { width:min(410px,100%); margin:auto; padding:36px 0 46px; }
+.fl-login-card { width:min(440px,100%); margin:auto; padding:42px 38px 36px; border:1px solid rgba(255,255,255,.82); border-radius:32px; background:rgba(255,255,255,.68); box-shadow:0 30px 70px rgba(62,67,82,.1),inset 0 1px 0 rgba(255,255,255,.85); backdrop-filter:blur(20px); }
 .fl-login-card > p:not(.fl-login-error):not(.fl-login-terms) { max-width:340px; margin:0 auto; color:var(--login-muted); font-size:14px; line-height:1.7; text-align:center; }
 .fl-login-options { margin-top:36px; display:grid; gap:13px; }
 .fl-login-option { width:100%; min-height:62px; display:flex; align-items:center; justify-content:space-between; gap:18px; padding:0 20px; border:1px solid rgba(68,67,75,.1); border-radius:20px; background:#fff; color:var(--login-ink); box-shadow:0 12px 30px rgba(55,60,75,.06); cursor:pointer; font:inherit; font-size:13.5px; font-weight:650; transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease; }
@@ -77,32 +73,27 @@
 .fl-login-terms { margin:28px 0 0; padding-top:22px; border-top:1px solid rgba(68,67,75,.09); color:#92909a; font-size:10.5px; line-height:1.65; text-align:center; }
 
 @media (max-width: 980px) {
-  .fl-login-page { grid-template-columns:1fr; overflow:visible; }
+  .fl-login-page { grid-template-columns:1fr; gap:0; padding:0; overflow:visible; }
   .fl-login-team-panel { min-height:auto; padding:28px 24px 12px; }
-  .fl-login-team-copy { margin:36px auto 0; }
-  .fl-login-team-copy h1 { font-size:clamp(35px,7vw,48px); }
-  .fl-login-team-copy p { font-size:13px; }
+  .fl-login-brand-center { margin:32px auto 0; }
+  .fl-login-brand-wordmark { width:min(260px,54vw); }
   .fl-login-team-row { width:min(680px,100%); margin:18px auto 0; }
   .fl-login-mascot-crop { width:110%; }
-  .fl-login-form-panel { min-height:auto; padding:24px 24px 48px; border-left:0; }
+  .fl-login-form-panel { min-height:auto; padding:24px 24px 48px; }
   .fl-login-tools { position:absolute; z-index:5; top:28px; right:24px; }
   .fl-login-back { display:none; }
-  .fl-login-card { margin:24px auto 0; padding:42px 0 20px; }
+  .fl-login-card { margin:24px auto 0; padding:36px 30px 30px; }
 }
 
 @media (max-width: 560px) {
   .fl-login-team-panel { padding:20px 14px 2px; }
-  .fl-login-brand-mark { width:36px; height:36px; font-size:20px; }
-  .fl-login-brand strong { font-size:12px; }
-  .fl-login-team-copy { margin-top:34px; }
-  .fl-login-team-copy > span { font-size:8px; }
-  .fl-login-team-copy h1 { margin-top:11px; font-size:34px; }
-  .fl-login-team-copy p { display:none; }
+  .fl-login-brand-center { margin-top:20px; }
+  .fl-login-brand-wordmark { width:min(210px,58vw); }
   .fl-login-team-row { width:calc(100% + 12px); margin:13px 0 0 -6px; }
   .fl-login-mascot-crop { width:119%; }
   .fl-login-form-panel { padding:16px 20px 38px; }
   .fl-login-tools { top:18px; right:14px; }
-  .fl-login-card { margin-top:6px; padding-top:38px; }
+  .fl-login-card { margin-top:6px; padding:32px 20px 26px; border-radius:26px; }
   .fl-login-card > p:not(.fl-login-error):not(.fl-login-terms) { font-size:13.5px; }
   .fl-login-options { margin-top:28px; }
   .fl-login-option { min-height:58px; border-radius:18px; font-size:13px; }

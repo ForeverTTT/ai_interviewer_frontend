@@ -52,7 +52,7 @@ function LinkedInIcon() {
 }
 
 export default function LoginPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { user, loading, signInWithGoogle, signInWithLinkedIn, signInLocal } = useAuth()
   const [loginError, setLoginError] = useState('')
   const [localBusy, setLocalBusy] = useState(false)
@@ -62,8 +62,8 @@ export default function LoginPage() {
   const from = location.state?.from?.pathname || '/setup'
 
   useEffect(() => {
-    document.title = '登录 FlowLab — 不卡壳实验室'
-  }, [])
+    document.title = t('login.metaTitle')
+  }, [i18n.resolvedLanguage, t])
 
   useEffect(() => {
     if (!loading && user) navigate(from, { replace: true })
@@ -75,7 +75,7 @@ export default function LoginPage() {
       await signInWithGoogle()
     } catch (error) {
       console.error('Google login error:', error)
-      setLoginError(error?.message || 'Google 登录暂时不可用')
+      setLoginError(error?.message || t('login.googleUnavailable'))
     }
   }
 
@@ -85,7 +85,7 @@ export default function LoginPage() {
       await signInWithLinkedIn()
     } catch (error) {
       console.error('LinkedIn login error:', error)
-      setLoginError(error?.message || 'LinkedIn 登录暂时不可用')
+      setLoginError(error?.message || t('login.linkedinUnavailable'))
     }
   }
 
@@ -96,7 +96,7 @@ export default function LoginPage() {
       await signInLocal()
     } catch (error) {
       console.error('Local login error:', error)
-      setLoginError(error?.message || 'Local login failed')
+      setLoginError(error?.message || t('login.localUnavailable'))
     } finally {
       setLocalBusy(false)
     }
@@ -104,20 +104,17 @@ export default function LoginPage() {
 
   return (
     <main className="fl-login-page">
-      <section className="fl-login-team-panel" aria-label="壳仔教练团队">
+      <section className="fl-login-team-panel" aria-label={t('login.teamAria')}>
         <div className="fl-login-mesh fl-login-mesh-pink" aria-hidden="true" />
         <div className="fl-login-mesh fl-login-mesh-aqua" aria-hidden="true" />
 
-        <Link to="/" className="fl-login-brand" aria-label="返回不卡壳实验室首页">
-          <span className="fl-login-brand-mark" aria-hidden="true">◡</span>
-          <span><strong>不卡壳实验室</strong><small>FlowLab</small></span>
+        <Link to="/" className="fl-login-brand fl-login-brand-center" aria-label={t('login.homeAria')}>
+          <img
+            className="fl-login-brand-wordmark"
+            src="/brand/flowlab-wordmark-icon-o-v1.png"
+            alt="FlowLab"
+          />
         </Link>
-
-        <motion.div className="fl-login-team-copy" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}>
-          <span>Meet your FlowLab crew</span>
-          <h1>壳仔小队，<br />都在等你。</h1>
-          <p>从准备简历到开口练习，再到逐题复盘，四位壳仔陪你把每一次卡壳慢慢练顺。</p>
-        </motion.div>
 
         <div className="fl-login-team-row">
           {SHELL_TEAM.map((member, index) => <TeamMascot key={member.id} member={member} index={index} />)}
@@ -126,17 +123,17 @@ export default function LoginPage() {
 
       <section className="fl-login-form-panel">
         <div className="fl-login-tools">
-          <Link to="/" className="fl-login-back"><ArrowLeft size={16} /> 返回首页</Link>
+          <Link to="/" className="fl-login-back"><ArrowLeft size={16} /> {t('login.back')}</Link>
           <div><LanguageSwitcher /><AppThemeToggle /></div>
         </div>
 
         <motion.div className="fl-login-card" initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}>
-          <p>选择一种方式登录，和壳仔继续你的求职练习。</p>
+          <p>{t('login.intro')}</p>
 
           <div className="fl-login-options">
             {isLocalSupabase ? (
               <button type="button" onClick={handleLocalLogin} disabled={localBusy} className="fl-login-option fl-login-option-local">
-                <span><span className="fl-login-local-icon">F</span>{localBusy ? '正在进入本地账号…' : '使用本地账号继续'}</span>
+                <span><span className="fl-login-local-icon">F</span>{localBusy ? t('login.localLoading') : t('login.localContinue')}</span>
                 <ArrowRight size={18} />
               </button>
             ) : (

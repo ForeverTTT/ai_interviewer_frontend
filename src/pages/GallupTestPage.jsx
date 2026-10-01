@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ChevronRight,
@@ -12,7 +12,6 @@ import {
   Lightbulb,
   ArrowRight,
   AlertTriangle,
-  Gem,
   CheckCircle,
   Dna,
   Frown,
@@ -23,16 +22,15 @@ import {
   Sparkles,
   X
 } from 'lucide-react'
-import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
-import Navbar from '../components/Navbar'
 import GallupReport from '../components/GallupReport'
-import heroBg from '../assets/background.jpg'
+import './CommunityPages.css'
 
 import { getBackendBaseUrl } from '../lib/backendBase'
 import { authenticatedFetch } from '../lib/authenticatedFetch'
 
 const API_URL = getBackendBaseUrl()
+const COMMUNITY_EGG = '/brand/flowlab-community-egg-avatar.png'
 
 /**
  * 四大领域各配一个色，全部写成完整类名（拼接类名会被生产构建 purge 掉）。
@@ -47,9 +45,6 @@ const DOMAIN_TONES = {
 
 export default function GallupTestPage() {
   const { t, i18n } = useTranslation()
-  const navigate = useNavigate()
-  const { user } = useAuth()
-
   const [step, setStep] = useState('intro') // intro | quiz | loading | report
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState({})
@@ -278,7 +273,7 @@ export default function GallupTestPage() {
 
   if (step === 'report' && results) {
     return (
-      <div className="min-h-screen bg-brand-paper">
+      <div className="community-page">
         <GallupReport results={results} onRetake={() => {
           setAnswers({}); setResults(null); setCurrentIndex(0); setStep('intro');
           saveToBackend({}, null, false);
@@ -289,7 +284,8 @@ export default function GallupTestPage() {
 
   if (step === 'loading') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center space-y-5 bg-brand-paper px-6 text-center">
+      <div className="community-page flex min-h-screen flex-col items-center justify-center space-y-5 px-6 text-center">
+        <img className="community-egg !w-[150px]" src={COMMUNITY_EGG} alt="" aria-hidden="true" />
         <Sparkles className="w-12 h-12 text-brand-violet animate-pulse" />
         <h2 className="font-brand text-[22px] font-semibold tracking-tight text-brand-ink">{t('gallup.loading')}</h2>
         <p className="text-[12.5px] text-brand-muted">Fetching and assembling your structured dimension analysis...</p>
@@ -298,51 +294,38 @@ export default function GallupTestPage() {
   }
 
   return (
-    <div className="theme-quiet min-h-screen pb-14 pt-[calc(var(--ui-nav-h)+2.75rem)]">
-      <div className="ui-container relative z-10 max-w-4xl font-chinese-modern">
+    <div className="community-page pb-14 pt-[calc(var(--ui-nav-h)+1.5rem)]">
+      <div className="community-shell relative z-10">
         <AnimatePresence mode="wait">
           {step === 'intro' && (
-            <motion.div key="intro" initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.8 }} className="text-center py-8 md:py-12">
-               <motion.div
-                 initial={{ opacity: 0, scale: 0.8 }}
-                 animate={{ opacity: 1, scale: 1 }}
-                 className="lk-liquid mb-8 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[12.5px] font-semibold text-brand-ink"
-               >
-                <Gem className="h-3.5 w-3.5 text-brand-ochre" /> Strategic Discovery
-              </motion.div>
+            <motion.div key="intro" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.55 }} className="gallup-intro">
+              <div className="community-hero-copy">
+                <h1 className="community-title">{t('gallup.title')}</h1>
+                <p className="community-subtitle">{t('gallup.subtitle')}</p>
 
-              <h1 className="lk-display mb-5 text-[36px] leading-tight sm:text-[46px]">
-                {t('gallup.title')}
-              </h1>
-
-              <p className="mx-auto mb-12 max-w-2xl text-[15px] leading-relaxed text-brand-muted">
-                {t('gallup.subtitle')}
-              </p>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+              <div className="gallup-domains">
                 {['executing', 'influencing', 'relationship', 'strategic'].map((key, i) => (
                   <motion.div
                     key={key}
-                    initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-                    className={`brand-float group rounded-[22px] bg-gradient-to-b ${DOMAIN_TONES[key].card} to-brand-card p-6 transition-transform hover:-translate-y-1`}
+                    initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
+                    className="gallup-domain-chip"
                   >
-                    <div className={`w-12 h-12 mx-auto rounded-xl border flex items-center justify-center mb-3 transition-transform group-hover:rotate-6 ${DOMAIN_TONES[key].chip}`}>
+                    <div className={`grid h-7 w-7 place-items-center rounded-full border ${DOMAIN_TONES[key].chip}`}>
                       {key === 'executing' ? <Target className={`w-5 h-5 ${DOMAIN_TONES.executing.icon}`} /> :
                        key === 'influencing' ? <Zap className={`w-5 h-5 ${DOMAIN_TONES.influencing.icon}`} /> :
                        key === 'relationship' ? <Users className={`w-5 h-5 ${DOMAIN_TONES.relationship.icon}`} /> :
                        <Lightbulb className={`w-5 h-5 ${DOMAIN_TONES.strategic.icon}`} />}
                     </div>
-                    <div className="text-[13px] font-semibold leading-tight text-brand-ink">{t(`gallup.domains_info.${key}.name`).split(' (')[0]}</div>
+                    <span>{t(`gallup.domains_info.${key}.name`).split(' (')[0]}</span>
                   </motion.div>
                 ))}
               </div>
 
-              <div className="mb-10 flex flex-col items-center gap-2.5">
-                {/* 主 CTA：荧光黄绿底 + 黑字黑框 */}
+              <div className="flex flex-col items-start gap-2.5">
                 <button
                   onClick={() => setStep('quiz')}
                   disabled={tokens < 100}
-                  className="lk-btn lk-btn-accent lk-btn-lg group"
+                  className="lk-btn lk-btn-ghost lk-btn-lg group"
                 >
                   <span>{progress > 0 ? t('gallup.resumeBtn') : t('gallup.startBtn')}</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -356,12 +339,17 @@ export default function GallupTestPage() {
                   </Link>
                 )}
               </div>
+              </div>
+
+              <div className="community-egg-stage">
+                <img className="community-egg" src={COMMUNITY_EGG} alt="荷包蛋用户形象" />
+              </div>
             </motion.div>
           )}
 
           {step === 'quiz' && (
-            <motion.div key="quiz" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.6, ease: "anticipate" }} className="py-6">
-                <div className="brand-float relative overflow-hidden rounded-[28px]">
+            <motion.div key="quiz" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.6, ease: "anticipate" }} className="mx-auto max-w-4xl py-6">
+                <div className="experience-card relative overflow-hidden rounded-[28px]">
                 {/* Visual Progress Header */}
                 <div className="px-6 pt-6 pb-5 sm:px-8 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3.5">

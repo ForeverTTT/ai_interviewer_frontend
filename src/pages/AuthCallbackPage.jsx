@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import harborScene from '../assets/background.jpg'
 import { supabase } from '../lib/supabase'
-import { BrainCircuit, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react'
+import './AuthCallbackPage.css'
+
+const CALLBACK_MASCOT = '/brand/flowlab-logo-imagegen-felt-v1.png'
 
 export default function AuthCallbackPage() {
   const { t } = useTranslation()
@@ -121,51 +123,66 @@ export default function AuthCallbackPage() {
   }, [navigate, t])
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-paper px-4">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-cover opacity-[0.35] blur-[60px] saturate-[1.3]" style={{ backgroundImage: `url(${harborScene})` }} />
-      <div className="lk-liquid relative z-[1] flex w-full max-w-sm flex-col items-center gap-5 rounded-[28px] px-8 py-10 text-center">
-        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-lift ${
-          status === 'error'   ? 'bg-brand-danger' :
-          status === 'success' ? 'bg-brand-success' :
-          'bg-brand-ink'
-        }`}>
-          {status === 'error' && <AlertCircle className="w-9 h-9 text-white" />}
-          {status === 'success' && <CheckCircle2 className="w-9 h-9 text-white" />}
-          {status === 'loading' && <BrainCircuit className="w-9 h-9 text-brand-on-ink" />}
+    <div className={`fl-auth-callback fl-auth-callback-${status}`}>
+      <div className="fl-auth-orb fl-auth-orb-pink" aria-hidden="true" />
+      <div className="fl-auth-orb fl-auth-orb-aqua" aria-hidden="true" />
+
+      <Link to="/" className="fl-auth-brand" aria-label="FlowLab 不卡壳实验室">
+        <img
+          className="fl-auth-brand-wordmark"
+          src="/brand/flowlab-wordmark-icon-o-v1.png"
+          alt="FlowLab"
+        />
+      </Link>
+
+      <main className="fl-auth-stage" aria-live="polite">
+        <div className="fl-auth-mascot-wrap" aria-hidden="true">
+          <span className="fl-auth-mascot-glow" />
+          <img src={CALLBACK_MASCOT} alt="" />
+          {status === 'success' && (
+            <span className="fl-auth-state-icon fl-auth-state-success"><CheckCircle2 /></span>
+          )}
+          {status === 'error' && (
+            <span className="fl-auth-state-icon fl-auth-state-error"><AlertCircle /></span>
+          )}
         </div>
 
         {status === 'loading' && (
-          <>
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-line border-t-brand-ink" />
-            <p className="font-bold text-brand-ink">{t('auth.loading')}</p>
-            <p className="text-[13px] text-brand-muted">{t('auth.wait')}</p>
-          </>
+          <div className="fl-auth-copy">
+            <p>{t('auth.loading')}</p>
+            <span>{t('auth.wait')}</span>
+            <div className="fl-auth-dots" aria-hidden="true"><i /><i /><i /></div>
+          </div>
         )}
 
         {status === 'success' && (
-          <p className="font-bold text-brand-success">{t('auth.success')}</p>
+          <div className="fl-auth-copy fl-auth-copy-success">
+            <p>{t('auth.success')}</p>
+            <div className="fl-auth-progress" aria-hidden="true"><span /></div>
+          </div>
         )}
 
         {status === 'error' && (
-          <>
-            <p className="whitespace-pre-line text-[15px] font-bold text-brand-danger">{errorMsg}</p>
-            <p className="text-[13px] text-brand-muted">{t('auth.backSoon')}</p>
+          <div className="fl-auth-error-panel">
+            <p>{errorMsg}</p>
+            <span>{t('auth.backSoon')}</span>
             <button
               onClick={() => navigate('/login', { replace: true })}
-              className="lk-btn lk-btn-primary mt-2"
+              className="fl-auth-back-button"
             >
+              <ArrowLeft />
               {t('auth.backNow')}
             </button>
 
             {debugInfo && (
-              <details className="mt-4 text-left w-full">
-                <summary className="cursor-pointer text-[12px] text-brand-muted transition-colors hover:text-brand-ink">{t('auth.debug')}</summary>
-                <pre className="mt-2 whitespace-pre-wrap break-all rounded-lg bg-brand-inset p-3 text-[12px] text-brand-muted">{debugInfo}</pre>
+              <details className="fl-auth-debug">
+                <summary>{t('auth.debug')}</summary>
+                <pre>{debugInfo}</pre>
               </details>
             )}
-          </>
+          </div>
         )}
-      </div>
+      </main>
     </div>
   )
 }

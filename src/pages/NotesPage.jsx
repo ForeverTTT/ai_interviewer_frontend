@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -6,12 +6,14 @@ import {
   ArrowLeft, Bookmark, BookmarkCheck, CalendarDays, CheckCircle2,
   ChevronLeft, ChevronRight, ExternalLink, Eye, EyeOff, Layers, LayoutList,
   Loader2, MessageSquareText, Pin, PlayCircle,
-  RotateCcw, Search, Tag, Trash2,
+  RotateCcw, Search, SlidersHorizontal, Tag, Trash2,
 } from 'lucide-react'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import { authenticatedFetch } from '../lib/authenticatedFetch'
 import { createInterviewRequestId } from '../lib/interviewEvents'
-import PageHeader from '../components/brand/PageHeader'
+import './NotesPage.css'
+
+const REVIEW_MENTOR_WRITING = '/brand/flowlab-review-mentor-writing.png'
 
 const SOURCE_OPTIONS = ['', 'practice', 'report']
 const INTERVIEWER_OPTIONS = ['', 'mixed', 'technical', 'hr']
@@ -53,6 +55,7 @@ export default function NotesPage() {
   const [mode, setMode] = useState('card')
   const [cardIndex, setCardIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
+  const studyRef = useRef(null)
 
   useEffect(() => { document.title = `${t('notes.title')} · ${t('meta.title')}` }, [t])
 
@@ -145,12 +148,24 @@ export default function NotesPage() {
 
   const total = filtered.length
   const current = filtered[Math.min(cardIndex, Math.max(total - 1, 0))] || null
+  const uiLanguage = i18n.language === 'de' ? 'de' : i18n.language === 'en' ? 'en' : 'zh'
+  const localCopy = {
+    zh: { openCard: '复习这题', report: '查看本场报告', practice: '返回原练习' },
+    en: { openCard: 'Review this card', report: 'View interview report', practice: 'Open original practice' },
+    de: { openCard: 'Diese Karte üben', report: 'Interviewbericht öffnen', practice: 'Originalübung öffnen' },
+  }[uiLanguage]
   const goCard = (delta) => {
     setCardIndex(prev => {
       const next = Math.min(Math.max(prev + delta, 0), total - 1)
       if (next !== prev) setRevealed(false)
       return next
     })
+  }
+  const openCard = (index) => {
+    setCardIndex(index)
+    setRevealed(false)
+    setMode('card')
+    requestAnimationFrame(() => studyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
 
   /** 一张卡的元信息条：来源 / 岗位 / 待复习 / 置顶 */
@@ -160,7 +175,7 @@ export default function NotesPage() {
         <span className="rounded-full border border-brand-line bg-brand-inset px-2.5 py-0.5 text-[10.5px] font-medium text-brand-muted">
           {t(`notes.source.${collection.source}`)}
         </span>
-        <span className="rounded-full border border-brand-line bg-brand-inset px-2.5 py-0.5 text-[10.5px] font-medium text-brand-muted">
+        <span className="max-w-[min(55vw,560px)] truncate rounded-full border border-brand-line bg-brand-inset px-2.5 py-0.5 text-[10.5px] font-medium text-brand-muted" title={collection.position || t('notes.unknownPosition')}>
           {collection.position || t('notes.unknownPosition')}
         </span>
         {collection.review_status === 'to_review' && (
@@ -249,7 +264,7 @@ export default function NotesPage() {
         </button>
         {collection.interview_id && (
           <Link to={`/interview/${collection.interview_id}/${collection.source === 'report' ? 'report' : ''}`.replace(/\/$/, '')} className={BTN_LINE}>
-            <ExternalLink className="h-3.5 w-3.5" />{t('notes.openOrigin')}
+            <ExternalLink className="h-3.5 w-3.5" />{collection.source === 'report' ? localCopy.report : localCopy.practice}
           </Link>
         )}
         <span className="ml-auto flex items-center gap-2">
@@ -267,47 +282,54 @@ export default function NotesPage() {
   }
 
   return (
-    <div className="theme-quiet min-h-screen pb-20 pt-[calc(var(--ui-nav-h)+2.75rem)]">
-      <main className="ui-container max-w-[1400px] space-y-5">
+    <div className="flowlab-notes theme-quiet min-h-screen pb-20 pt-[5.5rem]">
+      <main className="ui-container max-w-[1320px] space-y-5">
 
-        <PageHeader
-          before={(
-            <Link to="/dashboard" className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-brand-line bg-brand-card/70 px-3 py-1.5 text-[12px] font-medium text-brand-muted backdrop-blur transition-colors hover:border-brand-ink/30 hover:text-brand-ink">
+        <motion.section
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="fl-notes-intro"
+          aria-label={t('notes.title')}
+        >
+          <div className="fl-notes-intro-copy">
+            <Link to="/dashboard" className="fl-notes-back">
               <ArrowLeft className="h-3.5 w-3.5" />{t('notes.back')}
             </Link>
-          )}
-          eyebrow={t('notes.eyebrow')}
-          title={t('notes.title')}
-          subtitle={t('notes.subtitle')}
-          className="!mb-3"
-          actions={(
-            <>
-              <div className="flex items-baseline gap-1.5 rounded-full border border-brand-line bg-brand-card px-4 py-2">
-                <Bookmark className="h-3.5 w-3.5 self-center text-brand-ochre" />
-                <span className="text-[18px] font-semibold tabular-nums text-brand-ink">{filtered.length}</span>
-                <span className="text-[11.5px] text-brand-muted">{t('notes.cards')}</span>
+            <div className="fl-notes-title-row">
+              <div>
+                <h1>{t('nav.notes')}</h1>
+                <p><Bookmark className="h-3.5 w-3.5" />{filtered.length} {t('notes.cards')}</p>
               </div>
-              <div className="flex gap-1 rounded-full border border-brand-line bg-brand-inset p-1">
+              <div className="fl-notes-view-switch" role="group" aria-label={t('notes.title')}>
                 {[{ k: 'card', label: t('notes.cardView'), Icon: Layers }, { k: 'list', label: t('notes.listView'), Icon: LayoutList }].map(m => (
                   <button
                     key={m.k} type="button" onClick={() => setMode(m.k)} aria-pressed={mode === m.k}
                     aria-label={m.label} title={m.label}
-                    className={`grid h-8 w-10 place-items-center rounded-full transition-colors ${mode === m.k ? 'bg-brand-card text-brand-ink shadow-sm' : 'text-brand-muted hover:text-brand-ink'}`}
                   >
                     <m.Icon className="h-4 w-4" />
                   </button>
                 ))}
               </div>
-            </>
-          )}
-        />
+            </div>
+          </div>
+          <div className="fl-notes-intro-character">
+            <img src={REVIEW_MENTOR_WRITING} alt="复盘学长" />
+          </div>
+        </motion.section>
 
-        <section className={`${CARD} space-y-3 px-5 py-4`} aria-label={t('notes.filters')}>
-          <label className="relative block">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
-            <input value={query} onChange={event => { setQuery(event.target.value); setCardIndex(0); setRevealed(false) }} placeholder={t('notes.search')} className={`${FIELD} py-3 pl-11`} />
-          </label>
-          <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="fl-notes-search" aria-label={t('notes.filters')}>
+          <div className="fl-notes-search-row">
+            <label className="relative min-w-0 flex-1">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
+              <input value={query} onChange={event => { setQuery(event.target.value); setCardIndex(0); setRevealed(false) }} placeholder={t('notes.search')} className={`${FIELD} py-3 pl-11`} />
+            </label>
+            <details className="fl-notes-filter-disclosure">
+              <summary>
+                <SlidersHorizontal className="h-4 w-4" />
+                <span>{t('notes.filters')}</span>
+              </summary>
+              <div className="fl-notes-filter-popover grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
             <select value={position} onChange={e => { setPosition(e.target.value); setCardIndex(0) }} className={FIELD}>
               <option value="">{t('notes.allPositions')}</option>
               {positions.map(value => <option key={value} value={value}>{value}</option>)}
@@ -336,6 +358,8 @@ export default function NotesPage() {
             <button type="button" onClick={() => { resetFilters(); setCardIndex(0); setRevealed(false) }} className={BTN_LINE}>
               <RotateCcw className="h-3.5 w-3.5" />{t('notes.reset')}
             </button>
+              </div>
+            </details>
           </div>
         </section>
 
@@ -353,7 +377,7 @@ export default function NotesPage() {
           </section>
         ) : mode === 'card' ? (
           /* ───────── 闪卡：一次一题，翻面看答案 ───────── */
-          <section className={`${CARD} overflow-hidden`}>
+          <section ref={studyRef} className={`${CARD} fl-notes-study-card scroll-mt-24 overflow-hidden`}>
             <div className="flex items-center justify-between gap-3 border-b border-brand-line bg-brand-inset px-5 py-3.5">
               <CardMeta collection={current} />
               <div className="flex shrink-0 items-center gap-2">
@@ -369,54 +393,79 @@ export default function NotesPage() {
               </div>
             </div>
 
-            <div className="space-y-5 px-6 py-6">
-              {/* 闪卡：正面是题目，揭晓答案时整张卡在 3D 空间里翻到背面 */}
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={current.id}
-                  initial={{ opacity: 0, x: 24 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -24 }}
-                  transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                  className="lk-perspective"
-                >
+            <div className="fl-notes-study-grid">
+              <div className="fl-notes-question-pane">
+                {/* 闪卡：正面是题目，揭晓答案时整张卡在 3D 空间里翻到背面 */}
+                <AnimatePresence mode="wait" initial={false}>
                   <motion.div
-                    animate={{ rotateY: revealed ? 180 : 0 }}
-                    transition={{ type: 'spring', stiffness: 120, damping: 18 }}
-                    style={{ transformStyle: 'preserve-3d' }}
-                    className="relative grid"
+                    key={current.id}
+                    initial={{ opacity: 0, x: 24 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -24 }}
+                    transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                    className="lk-perspective"
                   >
-                    <div className="flex min-h-[200px] flex-col justify-center rounded-[20px] border border-brand-line bg-gradient-to-br from-brand-inset to-brand-card px-7 py-8 [backface-visibility:hidden] [grid-area:1/1]">
-                      <span className="lk-eyebrow">Q · {cardIndex + 1}</span>
-                      <h2 className="lk-display mt-4 text-[22px] leading-snug sm:text-[26px]">{current.question_text}</h2>
-                    </div>
-                    <div className="rounded-[20px] border border-brand-ink/15 bg-brand-card px-7 py-7 [backface-visibility:hidden] [grid-area:1/1] [transform:rotateY(180deg)]">
-                      <p className="mb-4 line-clamp-2 text-[12.5px] font-medium text-brand-muted">{current.question_text}</p>
-                      {revealed && <CardAnswer collection={current} />}
-                    </div>
+                    <motion.div
+                      animate={{ rotateY: revealed ? 180 : 0 }}
+                      transition={{ type: 'spring', stiffness: 120, damping: 18 }}
+                      style={{ transformStyle: 'preserve-3d' }}
+                      className="relative grid"
+                    >
+                      <div className="fl-notes-question-face flex flex-col justify-center rounded-[20px] border border-brand-line bg-gradient-to-br from-brand-inset to-brand-card px-7 py-8 [backface-visibility:hidden] [grid-area:1/1]">
+                        <span className="lk-eyebrow">Q · {cardIndex + 1}</span>
+                        <h2 className="mt-4 text-[21px] font-semibold leading-snug tracking-[-0.025em] text-brand-ink sm:text-[24px]">{current.question_text}</h2>
+                      </div>
+                      <div className="fl-notes-question-face rounded-[20px] border border-brand-ink/15 bg-brand-card px-7 py-7 [backface-visibility:hidden] [grid-area:1/1] [transform:rotateY(180deg)]">
+                        <p className="mb-4 line-clamp-2 text-[12.5px] font-medium text-brand-muted">{current.question_text}</p>
+                        {revealed && <CardAnswer collection={current} />}
+                      </div>
+                    </motion.div>
                   </motion.div>
-                </motion.div>
-              </AnimatePresence>
+                </AnimatePresence>
 
-              <button type="button" onClick={() => setRevealed(v => !v)} className={`${BTN_INK} w-full py-3`}>
-                {revealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                {t(revealed ? 'notes.hide' : 'notes.reveal')}
-              </button>
+                <button type="button" onClick={() => setRevealed(v => !v)} className={`${BTN_INK} w-full py-3`}>
+                  {revealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {t(revealed ? 'notes.hide' : 'notes.reveal')}
+                </button>
+                <CardActions collection={current} />
+              </div>
 
-              <CardNote collection={current} />
-              <CardActions collection={current} />
+              <aside className="fl-notes-notebook">
+                {CardNote({ collection: current })}
+              </aside>
             </div>
           </section>
         ) : (
-          /* ───────── 列表：全部展开，配合上面的筛选器 ───────── */
-          <section className="grid gap-5 lg:grid-cols-2">
-            {filtered.map(collection => (
-              <article key={collection.id} className={`${CARD} flex flex-col gap-5 px-6 py-5`}>
-                <CardMeta collection={collection} />
-                <h2 className="text-[16px] font-semibold leading-relaxed text-brand-ink">{collection.question_text}</h2>
-                <CardAnswer collection={collection} />
-                <CardNote collection={collection} />
-                <div className="mt-auto"><CardActions collection={collection} /></div>
+          /* ───────── 题库目录：只浏览与选择，编辑和练习都进入单卡 ───────── */
+          <section ref={studyRef} className="fl-notes-library-list">
+            {filtered.map((collection, index) => (
+              <article key={collection.id} className="fl-notes-library-row">
+                <div className="fl-notes-library-index">{String(index + 1).padStart(2, '0')}</div>
+                <button type="button" onClick={() => openCard(index)} className="fl-notes-library-main">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span>{t(`notes.source.${collection.source}`)}</span>
+                    <span className="max-w-[420px] truncate" title={collection.position || t('notes.unknownPosition')}>{collection.position || t('notes.unknownPosition')}</span>
+                    {collection.review_status === 'to_review' && <span className="is-review">{t('notes.review.to_review')}</span>}
+                  </div>
+                  <h2>{collection.question_text}</h2>
+                  {(collection.tags || []).length > 0 && (
+                    <p>{collection.tags.slice(0, 4).map(value => `#${value}`).join('  ')}</p>
+                  )}
+                </button>
+                <div className="fl-notes-library-actions">
+                  <button type="button" onClick={() => openCard(index)} className="fl-notes-library-open">
+                    <Eye className="h-3.5 w-3.5" />{localCopy.openCard}
+                  </button>
+                  <button
+                    type="button" disabled={busyId === collection.id}
+                    onClick={() => void patchCollection(collection.id, { isPinned: !collection.is_pinned })}
+                    className={collection.is_pinned ? 'is-pinned' : ''}
+                    aria-label={t('notes.pin')}
+                  >
+                    <Pin className="h-4 w-4" fill={collection.is_pinned ? 'currentColor' : 'none'} />
+                  </button>
+                  <span>{new Date(collection.updated_at).toLocaleDateString(localeTag)}</span>
+                </div>
               </article>
             ))}
           </section>

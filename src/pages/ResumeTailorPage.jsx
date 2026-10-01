@@ -3,23 +3,25 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   AlertCircle, Check, Copy, Download, FileText, Loader2,
-  Save, Sparkles, Upload, WandSparkles,
+  Sparkles, Upload, WandSparkles,
 } from 'lucide-react'
 import { getBackendBaseUrl } from '../lib/backendBase'
 import { authenticatedFetch } from '../lib/authenticatedFetch'
 import { exportPdf, exportWord } from '../lib/documentExport'
 import { parseJobDescription } from '../lib/jobDescriptionParser'
-import PageHeader from '../components/brand/PageHeader'
+import './ResumeTailorPage.css'
+
+const RESUME_TAILOR_WORKING = '/brand/flowlab-resume-tailor-working.png'
 
 /** 输入控件共用的一套品牌样式；写成常量避免每处手抄一遍长串类名 */
-const FIELD_BASE = 'w-full rounded-xl border border-brand-line bg-brand-inset text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-ink focus:outline-none focus:ring-4 focus:ring-brand-ink/10'
+const FIELD_BASE = 'w-full rounded-xl border border-brand-line bg-brand-inset text-brand-ink transition-colors placeholder:text-brand-muted/70 focus:border-brand-violet focus:outline-none focus:ring-4 focus:ring-brand-violet/10'
 const INPUT_CLASS = `${FIELD_BASE} px-4 py-3 text-[13.5px] font-medium`
 const TEXTAREA_CLASS = `${FIELD_BASE} resize-none px-4 py-3.5 text-[13.5px] leading-relaxed`
 /** 次级按钮：白底 + 描边，hover 转黑框 */
-const SECONDARY_BUTTON = 'inline-flex items-center justify-center gap-2 rounded-full border border-brand-line bg-brand-card px-3.5 py-2 text-[12.5px] font-medium text-brand-ink transition-colors hover:border-brand-ink/40 disabled:cursor-not-allowed disabled:opacity-60'
+const SECONDARY_BUTTON = 'resume-tailor-secondary-button inline-flex items-center justify-center gap-2 rounded-full border px-3.5 py-2 text-[12.5px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60'
 /** 主 CTA：墨色实心。徽标压在按钮里，用半透明的 on-ink 而不是实心块，避免黑上叠黑 */
-const PRIMARY_CTA = 'lk-btn lk-btn-primary !text-[13.5px]'
-const CTA_BADGE = 'rounded-full bg-brand-on-ink/15 px-2 py-0.5 text-[11px] font-medium'
+const PRIMARY_CTA = 'resume-tailor-primary-button inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[13.5px] font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50'
+const CTA_BADGE = 'rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-medium'
 
 function fileToBase64Data(file) {
   return new Promise((resolve, reject) => {
@@ -31,20 +33,6 @@ function fileToBase64Data(file) {
     reader.onerror = () => reject(new Error('read failed'))
     reader.readAsDataURL(file)
   })
-}
-
-/** 区块小标题：序号 + 标题，替代原来的全大写微标签 */
-/** 步骤标题：序号圆章与开始面试页一致，整站的「流程」读起来是同一种语言 */
-function StepHeading({ step, title, hint }) {
-  return (
-    <div className="flex min-w-0 items-start gap-3.5">
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-ink font-display text-[14px] font-semibold tabular-nums text-brand-on-ink">{step}</span>
-      <div className="min-w-0">
-        <h2 className="pt-1 font-brand text-[17px] font-semibold tracking-[-0.01em] text-brand-ink">{title}</h2>
-        {hint && <p className="mt-1.5 text-[12.5px] leading-relaxed text-brand-muted">{hint}</p>}
-      </div>
-    </div>
-  )
 }
 
 function ResultActions({ title, text, fileName, t }) {
@@ -89,7 +77,7 @@ export default function ResumeTailorPage() {
   const [improvements, setImprovements] = useState([])
   const [letter, setLetter] = useState('')
   const [letterLoading, setLetterLoading] = useState(false)
-  const [saving, setSaving] = useState(false)
+  const [activeOutput, setActiveOutput] = useState('resume')
   const [notice, setNotice] = useState(null)
 
   useEffect(() => {
@@ -132,11 +120,14 @@ export default function ResumeTailorPage() {
     return () => window.clearTimeout(timer)
   }, [jobDescription])
 
-  const saveResume = async (value, successText) => {
+  const saveResume = async (value, successText, cvProfile = null) => {
     const res = await authenticatedFetch(`${backendUrl}/api/profile`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ resumeText: value }),
+      body: JSON.stringify({
+        resumeText: value,
+        ...(cvProfile ? { profileJson: { cvProfile } } : {}),
+      }),
     })
     const body = await res.json().catch(() => ({}))
     if (!res.ok) throw new Error(body.error || 'save')
@@ -167,7 +158,20 @@ export default function ResumeTailorPage() {
       })
       const body = await res.json().catch(() => ({}))
       if (!res.ok || !body.text) throw Object.assign(new Error(body.error || 'parse'), { code: body.code || (res.status === 413 ? 'PDF_TOO_LARGE' : 'PDF_UNREADABLE') })
-      await saveResume(body.text, t('resumeTailor.uploadSaved'))
+      const clean = body.text.replace(/[●•⚫🌑⦿★■◾▪]/g, '').trim()
+      let cvProfile = null
+      try {
+        const extractRes = await authenticatedFetch(`${backendUrl}/api/profile/extract-cv`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ resumeText: clean }),
+        })
+        const extracted = await extractRes.json().catch(() => ({}))
+        if (extractRes.ok && extracted.cvProfile) cvProfile = extracted.cvProfile
+      } catch {
+        // The base resume is still useful if structured recognition is temporarily unavailable.
+      }
+      await saveResume(clean, t(cvProfile ? 'resumeTailor.uploadSavedFilled' : 'resumeTailor.uploadSaved'), cvProfile)
     } catch (error) {
       const messageKey = {
         PDF_TOO_LARGE: 'pdfTooLarge',
@@ -211,18 +215,6 @@ export default function ResumeTailorPage() {
     }
   }
 
-  const persistTailoredResume = async () => {
-    if (!tailoredResume.trim()) return
-    setSaving(true)
-    try {
-      await saveResume(tailoredResume, t('resumeTailor.saveSuccess'))
-    } catch {
-      setNotice({ type: 'error', text: t('resumeTailor.saveError') })
-    } finally {
-      setSaving(false)
-    }
-  }
-
   const generateLetter = async () => {
     if (!resumeText.trim() || jobDescription.trim().length < 50 || !position.trim()) {
       setNotice({ type: 'error', text: t('resumeTailor.missingInput') })
@@ -257,39 +249,19 @@ export default function ResumeTailorPage() {
   const chip = 'rounded-full border px-3 py-1.5 text-[12px] font-medium'
 
   return (
-    <div className="theme-quiet min-h-screen pb-24 pt-[calc(var(--ui-nav-h)+2.75rem)]">
+    <div className="resume-tailor-page theme-quiet min-h-screen pb-24 pt-[calc(var(--ui-nav-h)+2.25rem)]">
       <div className="ui-container">
-        <PageHeader
-          eyebrow={t('resumeTailor.badge')}
-          title={t('resumeTailor.title')}
-          subtitle={t('resumeTailor.subtitle')}
-        />
+        <header className="resume-tailor-hero">
+          <div className="resume-tailor-hero-copy resume-tailor-coach-panel">
+            <h1 className="resume-tailor-coach-prompt">{t('resumeTailor.coachPrompt')}</h1>
 
-        {notice && (
-          <div className={`mb-6 flex items-center gap-3 rounded-xl border px-4 py-3 text-[13px] font-medium ${notice.type === 'success' ? 'border-brand-success/30 bg-brand-success/[0.06] text-brand-success' : 'border-brand-danger/30 bg-brand-danger/[0.06] text-brand-danger'}`}>
-            {notice.type === 'success' ? <Check className="h-4 w-4 shrink-0" /> : <AlertCircle className="h-4 w-4 shrink-0" />}{notice.text}
-          </div>
-        )}
-
-        <div className="grid gap-5 lg:grid-cols-12">
-
-          {/* ───────── 左栏：输入（01 基础简历 + 02 岗位描述）。
-              这栏只是信息录入，右栏的产出才是页面主体，所以宽度压到 4/12 ───────── */}
-          <section className="lg:col-span-4">
-            <div className="brand-float space-y-5 rounded-[24px] px-6 py-6">
-
-              {/* 01 基础简历。
-                  原来这里是个约 200px 高的虚线上传框，但它实际只承载「一行状态 + 一个按钮」，
-                  占的地方远超它的信息量。压成一条横排，省下的高度全给下面的岗位描述。 */}
-              <div className="flex items-center gap-3.5 rounded-xl border border-brand-line bg-brand-inset px-4 py-3">
+            <div className="resume-tailor-base-resume rounded-xl border px-4 py-3">
+              <div className="flex items-center gap-3.5">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-brand-line bg-brand-card text-brand-muted">
                   {resumeLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="grid h-5 w-5 place-items-center rounded-full bg-brand-ink font-display text-[10px] font-semibold tabular-nums text-brand-on-ink">01</span>
-                    <h2 className="truncate font-brand text-[14px] font-semibold text-brand-ink">{t('resumeTailor.baseResume')}</h2>
-                  </div>
+                  <h2 className="truncate text-[14px] font-semibold text-brand-ink">{t('resumeTailor.baseResume')}</h2>
                   <p className="mt-0.5 flex items-center gap-1.5 truncate text-[12px] text-brand-muted">
                     {resumeText && <Check className="h-3.5 w-3.5 shrink-0 text-brand-success" />}
                     <span className="truncate">
@@ -302,50 +274,68 @@ export default function ResumeTailorPage() {
                   </p>
                 </div>
                 <input ref={fileRef} type="file" accept="application/pdf" className="hidden" onChange={uploadResume} />
-                {resumeText ? (
-                  <Link to="/profile/edit" className={`${SECONDARY_BUTTON} shrink-0`}>{t('resumeTailor.editProfile')}</Link>
-                ) : (
-                  <button type="button" disabled={uploading || resumeLoading} onClick={() => fileRef.current?.click()} className={`${SECONDARY_BUTTON} shrink-0`}>
-                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}{t('resumeTailor.uploadPdf')}
-                  </button>
+                {resumeText && (
+                  <Link to="/profile/edit" state={{ returnTo: '/resume-tailor' }} className={`${SECONDARY_BUTTON} shrink-0`}>{t('resumeTailor.editProfile')}</Link>
                 )}
               </div>
-
-              {/* 02 岗位描述 */}
-              <div className="space-y-4 border-t border-brand-line pt-5">
-                <StepHeading step="02" title={t('resumeTailor.jobDescription')} />
-                <textarea value={jobDescription} onChange={(event) => { setJobDescription(event.target.value); setAnalysisStatus('idle') }} rows={16} className={TEXTAREA_CLASS} placeholder={t('resumeTailor.jdPlaceholder')} />
-                <div className="flex items-center justify-between gap-3 text-[12px]">
-                  <span className={analysisStatus === 'error' ? 'text-brand-danger' : analysisStatus === 'success' ? 'text-brand-success' : 'text-brand-muted'}>
-                    {analysisStatus === 'loading' ? t('resumeTailor.detecting') : analysisStatus === 'success' ? t('resumeTailor.detected') : analysisStatus === 'error' ? t('resumeTailor.detectError') : t('resumeTailor.autoDetect')}
-                  </span>
-                  <button type="button" onClick={() => void analyzeJd(true)} disabled={analysisStatus === 'loading' || jobDescription.trim().length < 50} className="shrink-0 font-semibold text-brand-ink transition-opacity hover:underline disabled:cursor-not-allowed disabled:opacity-40">{t('resumeTailor.detectAgain')}</button>
+              {!resumeLoading && !resumeText && (
+                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-brand-violet/10 pt-3">
+                  <button type="button" disabled={uploading} onClick={() => fileRef.current?.click()} className={SECONDARY_BUTTON}>
+                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}{t('resumeTailor.uploadExisting')}
+                  </button>
+                  <Link to="/profile/edit" state={{ returnTo: '/resume-tailor' }} className={PRIMARY_CTA}>{t('resumeTailor.buildResume')}</Link>
                 </div>
+              )}
+            </div>
+
+            <div className="resume-tailor-coach-grid">
+              <label className="block min-w-0 space-y-2">
+                <span className="block text-[13px] font-semibold text-brand-ink">{t('resumeTailor.jobDescription')}</span>
+                <textarea value={jobDescription} onChange={(event) => { setJobDescription(event.target.value); setAnalysisStatus('idle') }} rows={7} className={TEXTAREA_CLASS} placeholder={t('resumeTailor.jdPlaceholder')} />
+                <span className={`flex items-center justify-between gap-3 text-[11.5px] ${analysisStatus === 'error' ? 'text-brand-danger' : analysisStatus === 'success' ? 'text-brand-success' : 'text-brand-muted'}`}>
+                  <span>{analysisStatus === 'loading' ? t('resumeTailor.detecting') : analysisStatus === 'success' ? t('resumeTailor.detected') : analysisStatus === 'error' ? t('resumeTailor.detectError') : t('resumeTailor.autoDetect')}</span>
+                  <button type="button" onClick={() => void analyzeJd(true)} disabled={analysisStatus === 'loading' || jobDescription.trim().length < 50} className="shrink-0 font-semibold text-brand-violet hover:underline disabled:cursor-not-allowed disabled:opacity-40">{t('resumeTailor.detectAgain')}</button>
+                </span>
+              </label>
+              <div className="space-y-4">
                 <label className="block space-y-2"><span className="block text-[12.5px] font-semibold text-brand-ink">{t('resumeTailor.position')}</span><input value={position} onChange={event => setPosition(event.target.value)} className={INPUT_CLASS} placeholder={t('resumeTailor.positionPlaceholder')} /></label>
-                <div className="grid grid-cols-3 gap-2">
-                  {['Same as resume', 'English', 'Deutsch'].map(value => <button key={value} type="button" onClick={() => setLanguage(value)} className={`rounded-lg border px-3 py-2.5 text-[12.5px] font-medium transition-colors ${language === value ? 'border-brand-ink bg-brand-card font-semibold text-brand-ink ring-1 ring-brand-ink' : 'border-brand-line bg-brand-card text-brand-muted hover:border-brand-muted/50'}`}>{t(`resumeTailor.lang${value === 'Same as resume' ? 'Auto' : value}`)}</button>)}
+                <div className="grid gap-2">
+                  {['Same as resume', 'English', 'Deutsch'].map(value => <button key={value} type="button" onClick={() => setLanguage(value)} className={`rounded-lg border px-3 py-2.5 text-[12.5px] font-medium transition-colors ${language === value ? 'border-brand-violet bg-brand-violet/[0.08] font-semibold text-brand-violet ring-1 ring-brand-violet/30' : 'border-brand-line bg-brand-card text-brand-muted hover:border-brand-violet/40'}`}>{t(`resumeTailor.lang${value === 'Same as resume' ? 'Auto' : value}`)}</button>)}
                 </div>
               </div>
             </div>
-          </section>
+          </div>
+          <div className="resume-tailor-hero-visual" aria-hidden="true">
+            <div className="resume-tailor-hero-glow" />
+            <img src={RESUME_TAILOR_WORKING} alt="" />
+          </div>
+        </header>
 
-          {/* ───────── 右栏：产出（03 定制简历 + 04 动机信）───────── */}
-          <section className="space-y-5 lg:col-span-8">
-            <div className="brand-float space-y-5 rounded-[24px] px-6 py-6">
+        {notice && (
+          <div className={`mb-6 flex items-center gap-3 rounded-xl border px-4 py-3 text-[13px] font-medium ${notice.type === 'success' ? 'border-brand-success/30 bg-brand-success/[0.06] text-brand-success' : 'border-brand-danger/30 bg-brand-danger/[0.06] text-brand-danger'}`}>
+            {notice.type === 'success' ? <Check className="h-4 w-4 shrink-0" /> : <AlertCircle className="h-4 w-4 shrink-0" />}{notice.text}
+          </div>
+        )}
+
+        <div className="resume-tailor-output-tabs" role="tablist" aria-label={t('resumeTailor.outputTabsLabel')}>
+          <button type="button" role="tab" aria-selected={activeOutput === 'resume'} className={activeOutput === 'resume' ? 'is-active' : ''} onClick={() => setActiveOutput('resume')}>{t('resumeTailor.tailoredResume')}</button>
+          <button type="button" role="tab" aria-selected={activeOutput === 'letter'} className={activeOutput === 'letter' ? 'is-active' : ''} onClick={() => setActiveOutput('letter')}>{t('resumeTailor.letterTitle')}</button>
+        </div>
+
+        <section className="resume-tailor-panel resume-tailor-output-panel space-y-5 rounded-[24px] px-7 py-7">
+          {activeOutput === 'resume' ? (
+            <>
               <div className="flex flex-wrap items-start justify-between gap-4">
-                <StepHeading step="03" title={t('resumeTailor.tailoredResume')} hint={t('resumeTailor.tailoredHint')} />
+                <div><h2 className="text-[18px] font-semibold text-brand-ink">{t('resumeTailor.tailoredResume')}</h2><p className="mt-1 text-[12.5px] text-brand-muted">{t('resumeTailor.tailoredHint')}</p></div>
                 <button type="button" disabled={tailoring || !resumeText || jobDescription.trim().length < 50} onClick={tailorResume} className={PRIMARY_CTA}>
                   {tailoring ? <Loader2 className="h-4 w-4 animate-spin" /> : <WandSparkles className="h-4 w-4" />}{tailoring ? t('resumeTailor.tailoring') : t('resumeTailor.tailorButton')} <span className={CTA_BADGE}>−100</span>
                 </button>
               </div>
               {tailoredResume ? (
                 <>
-                  <textarea value={tailoredResume} onChange={event => setTailoredResume(event.target.value)} rows={24} className={`${TEXTAREA_CLASS} font-mono text-[12px]`} />
+                  <textarea value={tailoredResume} onChange={event => setTailoredResume(event.target.value)} rows={28} className={`${TEXTAREA_CLASS} text-[13px]`} />
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <ResultActions title={`${position} - Tailored Resume`} text={tailoredResume} fileName={`${position || 'tailored'}-resume`} t={t} />
-                    <button type="button" disabled={saving} onClick={persistTailoredResume} className="lk-btn lk-btn-accent !px-4 !text-[12.5px]">
-                      {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{t('resumeTailor.saveAsProfile')}
-                    </button>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="rounded-xl border border-brand-success/30 bg-brand-success/[0.06] p-5"><h3 className="text-[13px] font-semibold text-brand-success">{t('resumeTailor.matched')}</h3><div className="mt-3 flex flex-wrap gap-2">{matchedKeywords.map(item => <span key={item} className={`${chip} border-brand-success/40 text-brand-success`}>{item}</span>)}</div></div>
@@ -354,20 +344,20 @@ export default function ResumeTailorPage() {
                   </div>
                   {improvements.length > 0 && <div className="rounded-xl border border-brand-line bg-brand-inset p-5"><h3 className="text-[13px] font-semibold text-brand-ink">{t('resumeTailor.changes')}</h3><ul className="mt-3 space-y-2 text-[13px] leading-relaxed text-brand-muted">{improvements.map(item => <li key={item} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-success" />{item}</li>)}</ul></div>}
                 </>
-              ) : <div className="flex min-h-72 flex-col items-center justify-center rounded-xl border border-dashed border-brand-line bg-brand-inset text-center"><Sparkles className="h-7 w-7 text-brand-muted" /><p className="mt-3 max-w-sm text-[13px] text-brand-muted">{t('resumeTailor.emptyTailored')}</p></div>}
-            </div>
-
-            <div className="brand-float space-y-5 rounded-[24px] px-6 py-6">
+              ) : <div className="flex min-h-80 flex-col items-center justify-center rounded-xl border border-dashed border-brand-line bg-brand-inset text-center"><Sparkles className="h-7 w-7 text-brand-muted" /><p className="mt-3 max-w-sm text-[13px] text-brand-muted">{t('resumeTailor.emptyTailored')}</p></div>}
+            </>
+          ) : (
+            <>
               <div className="flex flex-wrap items-start justify-between gap-4">
-                <StepHeading step="04" title={t('resumeTailor.letterTitle')} hint={t('resumeTailor.letterHint')} />
+                <div><h2 className="text-[18px] font-semibold text-brand-ink">{t('resumeTailor.letterTitle')}</h2><p className="mt-1 text-[12.5px] text-brand-muted">{t('resumeTailor.letterHint')}</p></div>
                 <button type="button" disabled={letterLoading || !resumeText || !position || jobDescription.trim().length < 50} onClick={generateLetter} className={PRIMARY_CTA}>
                   {letterLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}{letterLoading ? t('resumeTailor.generatingLetter') : t('resumeTailor.generateLetter')} <span className={CTA_BADGE}>−100</span>
                 </button>
               </div>
-              {letter ? <><textarea value={letter} onChange={event => setLetter(event.target.value)} rows={18} className={TEXTAREA_CLASS} /><ResultActions title={`${position} - Motivation Letter`} text={letter} fileName={`${position || 'motivation'}-letter`} t={t} /></> : <div className="flex min-h-44 items-center justify-center rounded-xl border border-dashed border-brand-line bg-brand-inset px-6 text-center text-[13px] text-brand-muted">{t('resumeTailor.emptyLetter')}</div>}
-            </div>
-          </section>
-        </div>
+              {letter ? <><textarea value={letter} onChange={event => setLetter(event.target.value)} rows={24} className={TEXTAREA_CLASS} /><ResultActions title={`${position} - Motivation Letter`} text={letter} fileName={`${position || 'motivation'}-letter`} t={t} /></> : <div className="flex min-h-80 items-center justify-center rounded-xl border border-dashed border-brand-line bg-brand-inset px-6 text-center text-[13px] text-brand-muted">{t('resumeTailor.emptyLetter')}</div>}
+            </>
+          )}
+        </section>
       </div>
     </div>
   )

@@ -1,0 +1,328 @@
+.community-page {
+  --community-yellow: #e0ad4f;
+  --community-yellow-soft: #f8edcf;
+  --community-blue-soft: #eaf2f5;
+  --community-pink-soft: #f8e8e8;
+  min-height: 100vh;
+  color: rgb(var(--brand-ink));
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: transparent;
+}
+
+.community-shell {
+  width: min(1180px, calc(100% - 40px));
+  margin-inline: auto;
+}
+
+.community-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 380px);
+  align-items: center;
+  min-height: 300px;
+  gap: 36px;
+  padding: 28px 14px 22px;
+}
+
+.community-hero-copy {
+  max-width: 660px;
+}
+
+.community-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: #8f6a23;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.community-title {
+  margin: 0;
+  color: #45434b;
+  font-family: "Yuanti SC", "STHupo", "HanziPen SC", "Hannotate SC", "Arial Rounded MT Bold", "PingFang SC", sans-serif;
+  font-size: clamp(32px, 3.8vw, 48px);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  text-shadow: 0 6px 18px rgba(32, 31, 36, 0.055);
+}
+
+.community-subtitle {
+  max-width: 600px;
+  margin: 16px 0 0;
+  color: #7c7984;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.community-egg-stage {
+  position: relative;
+  min-height: 240px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.community-egg-stage::before {
+  content: "";
+  position: absolute;
+  inset: 25% 5% 3%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(248, 220, 155, 0.3), rgba(248, 220, 155, 0));
+  filter: blur(7px);
+}
+
+.community-egg {
+  position: relative;
+  z-index: 1;
+  width: min(240px, 72%);
+  height: auto;
+  filter: drop-shadow(0 18px 18px rgba(80, 65, 42, 0.12));
+}
+
+.community-egg-group {
+  position: relative;
+  width: 330px;
+  height: 238px;
+}
+
+.community-egg-group .community-egg {
+  position: absolute;
+  width: 190px;
+  bottom: 0;
+}
+
+.community-egg-group .community-egg:nth-child(1) {
+  left: 0;
+  width: 158px;
+  transform: rotate(-7deg);
+  opacity: 0.88;
+}
+
+.community-egg-group .community-egg:nth-child(2) {
+  left: 87px;
+  z-index: 3;
+}
+
+.community-egg-group .community-egg:nth-child(3) {
+  right: -4px;
+  width: 158px;
+  transform: rotate(7deg);
+  opacity: 0.88;
+}
+
+.community-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.community-search {
+  position: relative;
+  flex: 1;
+}
+
+.community-search input {
+  width: 100%;
+  min-height: 50px;
+  border: 1px solid rgb(var(--brand-line));
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  padding: 0 20px 0 48px;
+  color: rgb(var(--brand-ink));
+  font-size: 14px;
+  outline: none;
+  box-shadow: 0 10px 34px rgba(68, 63, 53, 0.05);
+}
+
+.community-search input:focus {
+  border-color: rgba(83, 81, 89, 0.55);
+  box-shadow: 0 0 0 4px rgba(83, 81, 89, 0.06);
+}
+
+.community-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.community-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid rgb(var(--brand-line));
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 0 15px;
+  color: rgb(var(--brand-muted));
+  font-size: 13px;
+  font-weight: 650;
+  transition: 160ms ease;
+}
+
+.community-filter:hover,
+.community-filter.is-active {
+  border-color: rgba(83, 81, 89, 0.34);
+  background: #f1f0ed;
+  color: rgb(var(--brand-ink));
+}
+
+.community-filter-count {
+  display: grid;
+  min-width: 21px;
+  height: 21px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(69, 67, 75, 0.07);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.experience-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 18px;
+}
+
+.experience-card {
+  border: 1px solid rgba(218, 214, 205, 0.88);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 16px 44px rgba(74, 67, 55, 0.06);
+}
+
+.experience-card--expanded {
+  grid-column: 1 / -1;
+}
+
+.experience-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #85818a;
+  font-size: 12px;
+}
+
+.experience-author img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 5px rgba(80, 65, 42, 0.1));
+}
+
+.community-empty {
+  grid-column: 1 / -1;
+  border: 1px dashed rgba(218, 214, 205, 0.95);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.gallup-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: center;
+  gap: 30px;
+  min-height: 540px;
+}
+
+.gallup-domains {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 26px 0 32px;
+}
+
+.gallup-domain-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(218, 214, 205, 0.88);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 9px 13px;
+  color: #615e67;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.gallup-report-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  align-items: center;
+  gap: 24px;
+  min-height: 210px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgb(var(--brand-line));
+}
+
+.gallup-report-hero .community-egg {
+  width: 180px;
+  justify-self: end;
+}
+
+@media (max-width: 900px) {
+  .community-hero,
+  .gallup-intro {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .community-hero-copy,
+  .community-subtitle {
+    margin-inline: auto;
+  }
+
+  .community-egg-stage {
+    min-height: 190px;
+  }
+
+  .community-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .community-filters {
+    justify-content: center;
+  }
+
+  .experience-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .community-shell {
+    width: min(100% - 24px, 1180px);
+  }
+
+  .community-hero {
+    min-height: auto;
+    padding-top: 12px;
+  }
+
+  .community-title {
+    font-size: 32px;
+  }
+
+  .community-egg-group {
+    width: 280px;
+    height: 190px;
+    transform: scale(0.86);
+  }
+
+  .gallup-report-hero {
+    grid-template-columns: 1fr;
+    padding-top: 16px;
+    text-align: center;
+  }
+
+  .gallup-report-hero .community-egg {
+    justify-self: center;
+  }
+}

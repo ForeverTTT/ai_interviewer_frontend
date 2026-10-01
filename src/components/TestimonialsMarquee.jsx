@@ -3,15 +3,7 @@ import { Star } from 'lucide-react'
 import { SectionHead, Reveal } from './brand/BrandKit'
 import Marquee from './brand/Marquee'
 
-/* 头像底色轮流取插画的墙面色 */
-const AVATAR_TONES = [
-  'bg-brand-harbor text-white',
-  'bg-brand-ochre text-[#22303D]',
-  'bg-brand-sage text-[#1B2A37]',
-  'bg-brand-brick text-white',
-  'bg-brand-ink text-brand-on-ink',
-  'bg-brand-sky text-[#22303D]',
-]
+const DEFAULT_USER_AVATAR = '/brand/flowlab-community-egg-avatar.png'
 
 function TestimonialCard({ index }) {
   const { t } = useTranslation()
@@ -34,8 +26,8 @@ function TestimonialCard({ index }) {
       </div>
 
       <figcaption className="relative mt-7 flex items-center gap-3.5 border-t border-brand-line pt-5">
-        <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-full font-display text-[15px] font-semibold ${AVATAR_TONES[(index - 1) % AVATAR_TONES.length]}`}>
-          {t(`landing.testimonial${index}Initial`)}
+        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-brand-line bg-[#FFF6D8]">
+          <img className="h-full w-full object-contain p-0.5" src={DEFAULT_USER_AVATAR} alt="" aria-hidden="true" />
         </div>
         <div className="min-w-0">
           <p className="truncate text-[13.5px] font-semibold text-brand-ink">

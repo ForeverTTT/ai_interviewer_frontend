@@ -7,6 +7,66 @@
     "en": "English",
     "de": "Deutsch"
   },
+  "landingV2": {
+    "metaTitle": "FlowLab — Interviewtraining ohne Blackout",
+    "hero": {
+      "lead": "Keine auswendig gelernten Standardantworten und kein Interview als Prüfung. Das FlowLab-Team begleitet dich vom Lebenslauf über Probeinterviews bis zur Frage-für-Frage-Auswertung – für Antworten, die wirklich nach dir klingen.",
+      "primary": "Mit FlowLab üben",
+      "secondary": "So funktioniert es",
+      "proofLabel": "Produktvorteile",
+      "proof": { "jd": "Auf deine JD zugeschnitten", "voice": "Englische & deutsche Sprachpraxis", "review": "Fragen mit Lernkarten auswerten" },
+      "stickerAlt": "FlowLab Interviewtraining"
+    },
+    "crew": {
+      "eyebrow": "Lerne das FlowLab-Team kennen",
+      "title": "Das Shell-Team",
+      "subtitle": "Für jeden Hänger der passende FlowLab-Coach.",
+      "copy": "Komplexe KI wird zu vier Coaches mit eigener Persönlichkeit. Du musst keine Tools verstehen – wähle einfach die Hilfe, die du gerade brauchst.",
+      "cardAria": "Mit {{role}} üben: {{label}}",
+      "roles": {
+        "coach": { "role": "Interview-Coach", "label": "Individuelle Nachfragen" },
+        "practice": { "role": "Übungspartner", "label": "Sprachsimulation" },
+        "resume": { "role": "Lebenslauf-Coach", "label": "Lebenslauf optimieren" },
+        "review": { "role": "Review-Mentor", "label": "Fragen auswerten" }
+      }
+    },
+    "journey": {
+      "titleLine1": "Von der Vorbereitung bis zum Review:",
+      "titleLine2": "FlowLab begleitet jede Runde.",
+      "stickerAlt": "FlowLab-Coach beim Üben am Laptop",
+      "steps": {
+        "resume": { "mentor": "Lebenslauf-Coach", "kicker": "Mit dem Ziel beginnen", "title": "JD einfügen und Lebenslauf mitbringen", "copy": "Zuerst verstehen wir die Stelle und deine Erfahrung. Dann wählen wir aus, was sich in dieser Runde wirklich zu üben lohnt." },
+        "coach": { "mentor": "Interview-Coach", "kicker": "Jetzt laut aussprechen", "title": "Eine Runde mit dem KI-Interviewer", "copy": "Echte Sprache, direkte Nachfragen sowie Übungen auf Englisch oder Deutsch machen Gedanken zu natürlichen Antworten." },
+        "review": { "mentor": "Review-Mentor", "kicker": "Feedback wirklich trainieren", "title": "Jede Frage mit Lernkarten auswerten", "copy": "Vergleiche Antwort, Lösungsansätze und nächste Schritte, damit du sie in der nächsten Runde direkt anwenden kannst." }
+      }
+    },
+    "community": {
+      "title": "Interview-Erfahrungen aus der FlowLab-Community",
+      "copy": "Teile Fragen, Antworten und Erkenntnisse anonym. Es gibt nicht die eine perfekte Antwort – aber viele echte Erfahrungen, von denen alle lernen können.",
+      "stickerAlt": "Guter Fortschritt",
+      "avatarAlt": "Anonymes FlowLab-Mitglied",
+      "member": "Mitglied {{id}}",
+      "cta": "Zur Interview-Community",
+      "carouselLabel": "Karussell mit Interview-Erfahrungen",
+      "previous": "Vorheriger Beitrag",
+      "next": "Nächster Beitrag",
+      "goTo": "Beitrag {{index}} anzeigen",
+      "posts": {
+        "032": { "meta": "München · Produktpraktikum", "tag": "Erste Runde", "title": "Der Interviewer fragte immer wieder: Woher weißt du, dass dieses Feature wirklich funktioniert?", "copy": "Später verstand ich: Es ging nicht um eine Musterantwort, sondern darum, wie ich Kennzahlen definiere und Annahmen überprüfe.", "saves": "18 gespeichert", "replies": "7 Diskussionen" },
+        "117": { "meta": "Berlin · Softwareentwicklung", "tag": "Technisch", "title": "Bei technischen Abwägungen habe ich endlich nicht nur meinen Tech-Stack aufgezählt.", "copy": "Diesmal erklärte ich zuerst die Einschränkungen und danach die Entscheidung. Dadurch wurde die ganze Antwort viel klarer.", "saves": "26 gespeichert", "replies": "11 Diskussionen" },
+        "208": { "meta": "Hamburg · Marketingpraktikum", "tag": "HR-Runde", "title": "„Warum wir?“ kann mit der eigenen Erfahrung beginnen.", "copy": "Ich habe aufgehört, das Unternehmensprofil nachzusprechen, und meine Wendepunkte mit den Anforderungen der Stelle verbunden. Das klang viel natürlicher.", "saves": "14 gespeichert", "replies": "5 Diskussionen" },
+        "284": { "meta": "Köln · Datenpraktikum", "tag": "Technisch", "title": "Bei der Frage nach Data Leakage habe ich den ganzen Validierungsprozess erklärt.", "copy": "Ich ging Datenaufteilung, Zeitfenster und Feature-Erstellung der Reihe nach durch. So war sofort klar, dass ich wirklich validiert hatte.", "saves": "21 gespeichert", "replies": "9 Diskussionen" },
+        "351": { "meta": "Frankfurt · Finanzpraktikum", "tag": "Case-Runde", "title": "Bei einer großen Prognoseabweichung muss man das Modell nicht um jeden Preis verteidigen.", "copy": "Die Abweichung anerkennen und dann Annahmen, externe Veränderungen und den nächsten Test erklären wirkte glaubwürdiger als eine perfekte Antwort.", "saves": "31 gespeichert", "replies": "13 Diskussionen" },
+        "426": { "meta": "Stuttgart · Maschinenbau-Werkstudent", "tag": "Deutsch", "title": "Als ich die Frage nicht verstand, habe ich endlich zuerst nachgefragt.", "copy": "Um eine andere Formulierung zu bitten war kein Minuspunkt. Nach der Klärung war meine Antwort sogar besser strukturiert.", "saves": "17 gespeichert", "replies": "6 Diskussionen" }
+      }
+    },
+    "closing": { "aria": "FlowLab starten", "stickerAlt": "Du schaffst das", "cta": "Erste Runde kostenlos starten" },
+    "footer": {
+      "quickNav": "Schnellnavigation", "home": "Startseite", "start": "Training starten", "growth": "Fortschritt", "profile": "Profil",
+      "about": "Über FlowLab", "languages": "Interviews auf Englisch und Deutsch", "roles": "Praktikum / Werkstudent / Berufseinstieg", "companion": "Mit FlowLab üben · mit jeder Runde wachsen",
+      "copyright": "© 2026 FlowLab. Alle Rechte vorbehalten.", "tagline": "Vom Campus in den Beruf – sprechen ohne Blackout."
+    }
+  },
   "nav": {
     "home": "Startseite",
     "startInterview": "Interview starten",
@@ -33,6 +93,9 @@
     "energyCta": "Mehr Energie erhalten"
   },
   "resumeTailor": {
+    "pageTitle": "Lebenslauf optimieren",
+    "coachPrompt": "Gib mir deinen Lebenslauf und die Ziel-Stellenbeschreibung, dann erstelle ich einen gezielten Lebenslauf und ein Anschreiben.",
+    "outputTabsLabel": "Ergebnisse der Lebenslaufoptimierung",
     "badge": "Arbeitsbereich für gezielte Bewerbungen",
     "title": "Lebenslauf gezielt auf die Stelle ausrichten",
     "subtitle": "Gespeicherten Profil-Lebenslauf verwenden, JD-Schlüsselwörter erkennen, Formulierungen ohne erfundene Erfahrung verbessern und ein passendes Anschreiben erstellen.",
@@ -43,12 +106,15 @@
     "resumeChars": "{{n}} Zeichen geladen",
     "noResume": "Im Profil ist noch kein Lebenslauf gespeichert",
     "uploadPdf": "PDF hochladen und speichern",
+    "uploadExisting": "Lebenslauf hochladen",
+    "buildResume": "Lebenslauf erstellen",
     "pdfOnly": "Bitte eine PDF-Datei auswählen.",
     "pdfTooLarge": "Die PDF ist größer als 12 MB. Bitte komprimieren und erneut hochladen.",
     "pdfNoText": "Diese PDF enthält keine auswählbare Textebene. Bitte OCR ausführen oder als durchsuchbare PDF exportieren.",
     "pdfPasswordProtected": "Diese PDF ist verschlüsselt oder passwortgeschützt. Bitte den Schutz entfernen und erneut hochladen.",
     "pdfInvalid": "Die Datei ist keine gültige PDF oder beschädigt. Bitte erneut exportieren und hochladen.",
     "uploadSaved": "Lebenslauf wurde ausgelesen und im Profil gespeichert.",
+    "uploadSavedFilled": "Lebenslauf gespeichert und Profildaten automatisch ausgefüllt.",
     "uploadError": "Die PDF konnte nicht gelesen oder gespeichert werden. Bitte andere Datei versuchen.",
     "loadError": "Der Profil-Lebenslauf konnte nicht geladen werden. Bitte aktualisieren.",
     "jobDescription": "Ziel-Stellenbeschreibung",
@@ -276,7 +342,16 @@
     "sub": "Von deutschen Top-Firmen und Tech-Leadern (symbolisch)"
   },
   "login": {
+    "metaTitle": "Bei FlowLab anmelden",
     "back": "Zurück",
+    "teamAria": "FlowLab Coach-Team",
+    "homeAria": "Zurück zur FlowLab-Startseite",
+    "intro": "Wähle eine Anmeldeoption und übe mit deinem FlowLab-Buddy weiter.",
+    "localContinue": "Mit lokalem Konto fortfahren",
+    "localLoading": "Lokales Konto wird geöffnet…",
+    "localUnavailable": "Die lokale Anmeldung ist derzeit nicht verfügbar",
+    "googleUnavailable": "Die Google-Anmeldung ist derzeit nicht verfügbar",
+    "linkedinUnavailable": "Die LinkedIn-Anmeldung ist derzeit nicht verfügbar",
     "welcome": "Willkommen bei LandIt",
     "subtitle": "Anmelden für KI-gestütztes Training",
     "google": "Login mit Google",
@@ -462,6 +537,12 @@
     "pageSub": "Nenne uns deine Zielposition — die KI baut Fragen und Ablauf darum herum.",
     "jobDescSub": "Stellenbeschreibung einfügen, damit die KI die Fragen genauer zuschneidet",
     "summaryOverview": "Übersicht",
+    "coachName": "INTERVIEW-COACH",
+    "coachPasteDescription": "Füge die Stellenbeschreibung hier ein. Ich erkenne zuerst Zielposition, Beschäftigungsart und Kategorie.",
+    "coachNeedsMoreDescription": "Füge noch etwas mehr Text ein, damit ich die Stellendaten zuverlässig erkenne.",
+    "coachAnalyzing": "Ich erkenne gerade die Stellendaten…",
+    "coachAnalyzed": "Ich habe {{position}} erkannt. Beschäftigungsart und Kategorie sind ebenfalls ausgefüllt und bleiben anpassbar.",
+    "coachAnalysisFailed": "Diesmal konnte ich die Angaben nicht erkennen. Ergänze die Beschreibung oder fülle die Einstellungen unten aus.",
     "previewReady": "Dein KI-Interviewer ist bereit, wann immer du es bist",
     "privacyTitle": "Datenschutz & Sicherheit",
     "privacyBody": "Deine Interviews bleiben privat, werden nie für Modelltraining genutzt, und du kannst jeden Eintrag jederzeit löschen.",
@@ -562,7 +643,7 @@
     "sub": "Erfahrungen und Skills ausfüllen; gespeicherte Daten generieren Text für die KI-Interviews. PDF-Upload zum Auto-Fill möglich.",
     "backDash": "Zum Dashboard",
     "loading": "Lädt...",
-    "uploadPdf": "PDF Upload & Auslesen",
+    "uploadPdf": "PDF hochladen und erkennen",
     "aiFill": "KI in Formular füllen",
     "sectionImport": "Download/Import",
     "sectionImportSub": "PDF hochladen, um Text auszulesen, dann 'KI Fill' (Benötigt GEMINI_API_KEY).",
@@ -664,11 +745,13 @@
     "parsedOk": "ca. {{n}} Zeichen extrahiert.",
     "parseErr": "Parsing fehlgeschlagen.",
     "footerHint": "Daten bilden Text-Lebenslauf für die KI.",
-    "coachTitle": "KI Lebenslauf-Coaching",
+    "coachTitle": "KI-Lebenslaufanalyse",
+    "coachBrief": "Prüft Struktur, Wirkung und ATS-Passung.",
     "coachSub": "Verfeinern Sie Erfahrung mit STAR. Suggestions zu Vollständigkeit.",
     "coachTargetRole": "Zielrolle (Optional)",
     "coachTargetPh": "z.B. Backend Werkstudent Deutschland",
     "coachRun": "Diagnose-Bericht erstellen",
+    "coachRegenerate": "Erneut analysieren",
     "coachRunning": "Diagnosebericht wird erstellt...",
     "coachFallbackHint": "Nutzt aktuellen Text (min 80 Zeichen).",
     "coachErr": "Diagnose fehlgeschlagen.",
@@ -710,6 +793,22 @@
     "coachEditHint": "Edit-Modus für Re-gen oder Rollen-Änderung.",
     "editProfile": "Daten bearbeiten",
     "editHint": "Strukturierte Daten aktualisieren — für Interviews wichtig.",
+    "masterTitle": "Profil",
+    "masterViewNav": "Profilansichten",
+    "masterReady": "Basis-Lebenslauf bereit",
+    "masterMissing": "Noch kein Basis-Lebenslauf",
+    "masterUpdated": "Aktualisiert {{time}}",
+    "masterEdit": "Daten bearbeiten",
+    "masterCreate": "Basis-Lebenslauf erstellen",
+    "masterContinue": "Lebenslauf gezielt optimieren",
+    "masterEmptyTitle": "Noch kein Basis-Lebenslauf",
+    "masterEmptyBody": "PDF hochladen oder Abschnitte ausfüllen.",
+    "masterFacts": "Lebenslaufdaten",
+    "masterResumeText": "Basis-Lebenslauf",
+    "masterViewFull": "Vollständigen Text ansehen",
+    "masterEditHint": "PDF hochladen oder Abschnitte ausfüllen.",
+    "masterSave": "Basis-Lebenslauf speichern",
+    "masterSaveReturn": "Speichern und zurück",
     "cancelEdit": "Abbrechen",
     "securityNotice": "Profil-Verschlüsselung · Injektionsschutz aktiv",
     "securityTip": "Ihr Lebenslauf und Ihre Profildaten werden per End-to-End-Verschlüsselung übertragen. Unsere Filter schützen Ihre Privatsphäre.",
@@ -721,13 +820,13 @@
     "cv": {
       "pageSub": "Daten füllen; PDF Upload zur Review. 'Final Resume' ist Interview-Kontext.",
       "fileTooLarge": "Datei zu groß (max. 2MB)",
-      "structuredTitle": "Strukturierte Daten",
-      "structuredHint": "Extract → Import/Fill.",
+      "structuredTitle": "Vorhandenen Lebenslauf importieren",
+      "structuredHint": "PDF hochladen und Felder unten ausfüllen lassen.",
       "viewExtracted": "Text ansehen",
-      "applyToInterviewResume": "In Resume übernehmen",
-      "applyToInterviewResumeHint": "Dies wird mit dem im Interview verwendeten Lebenslauf synchronisiert. Der KI-Interviewer stellt gezieltere Fragen basierend auf Ihrem Lebenslauf.",
+      "applyToInterviewResume": "Als Basislebenslauf verwenden",
+      "applyToInterviewResumeHint": "Den extrahierten Text als Basislebenslauf im Konto speichern.",
       "applySuccess": "Erfolgreich importiert",
-      "extractBtn": "KI Fill",
+      "extractBtn": "Erneut erkennen",
       "extracting": "Analyse...",
       "extractOk": "Gefüllt. Bitte prüfen.",
       "extractErr": "KI Fill failed.",
@@ -788,9 +887,9 @@
       "phLangLevel": "Level",
       "phAwardTitle": "Titel",
       "phIssuer": "Aussteller",
-      "rawResumeTitle": "Final Resume (Mock)",
-      "rawResumeHint": "KI nutzt diesen Text. PDF Import möglich.",
-      "saveFooter": "Speichern fixiert Daten für KI-Context."
+      "rawResumeTitle": "Basislebenslauf (eingeklappt)",
+      "rawResumeHint": "Vollständigen Lebenslauf einfügen oder aus dem PDF-Import übernehmen.",
+      "saveFooter": "Speichern legt diesen Text als Basislebenslauf fest."
     }
   },
   "dashboard": {
@@ -1177,6 +1276,7 @@
     }
   },
   "interview": {
+    "back": "Zurück",
     "candidateLabel": "Kandidat:in",
     "live": "Live Interview",
     "end": "Ende",
@@ -1188,16 +1288,18 @@
     "dur": "Dauer",
     "promptTitle": "System Prompt",
     "copyPrompt": "Kopieren",
-    "tipsTitle": "💡 Tipps",
-    "tip1": "• KI liest Antworten vor",
-    "tip2": "• Enter zum Senden",
-    "tip3": "• Audio-Toggle unten (Lautsprecher)",
+    "tipsTitle": "Vor dem Start",
+    "tip1": "Die KI liest jede Frage vor; antworte in deinem Tempo",
+    "tip2": "Drücke Enter, wenn du fertig gesprochen hast",
+    "tip3": "Die Sprachausgabe lässt sich unten jederzeit ausschalten",
     "readyTitle": "Bereit?",
     "readySub": "Die KI startet die Session.",
     "readyMeta": "{{lang}} Session · {{n}} Min",
     "startBtn": "Beitreten",
-    "lobbyTitle": "Warteraum",
-    "lobbySub": "Kamera & Mikro prüfen. Ihr Video erscheint im Pip-Fenster.",
+    "voicePartnerName": "Übungspartner",
+    "lobbyTitle": "Kurz durchatmen. Wir stellen alles entspannt ein.",
+    "lobbySub": "Die Kamera ist optional. Prüfe kurz das Mikrofon, dann helfe ich dir beim ersten Satz.",
+    "sessionSummary": "Diese Übung",
     "lobbyPreviewOff": "Kamera Aus",
     "lobbyPreviewHint": "Kamera für Vorschau erlauben.",
     "lobbyEnableCamera": "An",
@@ -1495,11 +1597,12 @@
     "show": "Anzeigen",
     "hide": "Ausblenden",
     "cookie": {
-      "title": "🍪 Cookie- & Privatsphäre-Einstellungen",
+      "title": "Cookie- & Privatsphäre-Einstellungen",
       "desc": "Wir verwenden Cookies für ein besseres Erlebnis. Mit der weiteren Nutzung stimmen Sie unserer Datenschutzrichtlinie zu.",
       "accept": "Alle akzeptieren",
       "settings": "Einstellungen",
-      "decline": "Ablehnen"
+      "decline": "Ablehnen",
+      "close": "Cookie-Hinweis schließen"
     },
     "insufficientTokens": "Nicht genügend Energie",
     "insufficientTokensDesc": "Diese Aktion kostet {{cost}} Energie. Ihr aktuelles Guthaben reicht nicht aus. Bitte laden Sie Energie im Profil auf oder teilen Sie Erfahrungen.",
@@ -1706,6 +1809,22 @@
     "listView": "Listenansicht"
   },
   "growthSprint": {
+    "coach": {
+      "empty": "Noch kein Plan? Kein Problem. Nenne mir Zielposition und Zeitrahmen, dann mache ich daraus Übungen, mit denen du diese Woche starten kannst.",
+      "active": "Wir arbeiten auf „{{position}}“ hin. {{focus}}.",
+      "notice": "{{title}}: {{body}}",
+      "today": "Heute zuerst nur diese Aufgabe: {{task}}. Etwa {{minutes}} Minuten, danach helfe ich dir bei der Auswertung.",
+      "setGoal": "Ziel mit dem Coach setzen",
+      "startToday": "Heutige Übung starten",
+      "adjust": "Plan anpassen",
+      "practiceFirst": "Erst einmal üben",
+      "goal": "Ziel: Offer als {{position}}",
+      "daysLeft": "Noch {{count}} Tage",
+      "countdownLabel": "Bis zum Zieldatum",
+      "dayUnit": "Tage",
+      "weekly": "Diese Woche {{current}} / {{target}} Tage",
+      "historyCount": "{{count}} effektive Übungen"
+    },
     "summary": {
       "practice": "Bisher {{count}} effektive Einheiten · insgesamt {{duration}}"
     },
