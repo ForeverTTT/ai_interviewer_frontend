@@ -9,7 +9,21 @@ import harborScene from '../../assets/background.jpg'
  */
 const FADE = 'linear-gradient(to bottom, black 0%, rgb(0 0 0 / 0.85) 30%, rgb(0 0 0 / 0.35) 62%, transparent 100%)'
 
-export default function PageAtmosphere() {
+export default function PageAtmosphere({ variant = 'harbor' }) {
+  if (variant === 'flowlab') {
+    return (
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[520px] overflow-hidden"
+        style={{ maskImage: FADE, WebkitMaskImage: FADE }}
+      >
+        <div className="absolute -left-20 -top-28 h-[360px] w-[360px] rounded-full bg-brand-glow/20 blur-[70px]" />
+        <div className="absolute -right-16 -top-24 h-[360px] w-[360px] rounded-full bg-[#FEB7C9]/20 blur-[72px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-brand-paper/55 to-brand-paper/95" />
+      </div>
+    )
+  }
+
   return (
     <div
       aria-hidden="true"

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "LandIt - AI-Powered Interview Training for Germany"
+    "title": "FlowLab - AI Interview Practice for Your Next Role"
   },
   "lang": {
     "zh": "中文",
@@ -96,7 +96,7 @@
     "loginRegister": "Login/Register",
     "supportLang": "German & English Support",
     "roles": "Covers Werkstudent / Praktikum",
-    "copyright": "© 2025 LandIt. All rights reserved.",
+    "copyright": "© 2026 FlowLab. All rights reserved.",
     "powered": "AI Powered · Next-Gen Models & Voice · Built for Talents in Germany"
   },
   "landing": {
@@ -920,6 +920,10 @@
       "eyebrow": "Offer preparation action hub",
       "title": "Growth Center",
       "subtitle": "Every effective practice session moves you closer to your offer. Review the latest result, then continue the work that matters most.",
+      "mentor": {
+        "name": "Review Mentor",
+        "role": "Turn every insight into your next improvement"
+      },
       "overview": "Growth overview",
       "loadFailed": "Growth data could not be loaded. Refresh and try again.",
       "minutes": "{{count}} min effective training",

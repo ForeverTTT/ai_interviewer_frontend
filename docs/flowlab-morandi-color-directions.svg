@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1080" role="img" aria-labelledby="title desc">
+  <title id="title">FlowLab 新莫兰迪配色方向</title>
+  <desc id="desc">四套低饱和、年轻且适合求职产品的莫兰迪品牌色卡。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#20252D"/><stop offset="1" stop-color="#2C2A31"/></linearGradient>
+    <linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#566783"/><stop offset=".34" stop-color="#B7B1C8"/><stop offset=".68" stop-color="#91A69E"/><stop offset="1" stop-color="#D6B764"/></linearGradient>
+    <linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4F6D68"/><stop offset=".36" stop-color="#A8B8A4"/><stop offset=".7" stop-color="#D6A58C"/><stop offset="1" stop-color="#DCCB83"/></linearGradient>
+    <linearGradient id="c" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6A5F78"/><stop offset=".38" stop-color="#A99BB1"/><stop offset=".7" stop-color="#CEA29F"/><stop offset="1" stop-color="#9AA9B8"/></linearGradient>
+    <linearGradient id="d" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5F747B"/><stop offset=".38" stop-color="#9EB5B1"/><stop offset=".72" stop-color="#BD8C73"/><stop offset="1" stop-color="#D7C18C"/></linearGradient>
+    <style>
+      .s{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC",sans-serif}.t{font-size:52px;font-weight:760;fill:#FAF8F2}.sub{font-size:22px;fill:#C4C1BD}.ct{font-size:30px;font-weight:730;fill:#FAF8F2}.cp{font-size:18px;fill:#C8C5C2}.h{font-size:15px;font-weight:650}.l{font-size:15px;fill:#BDBAB7}.tag{font-size:15px;font-weight:700;fill:#273142}
+    </style>
+  </defs>
+  <rect width="1600" height="1080" fill="url(#bg)"/>
+  <text x="72" y="90" class="s t">FlowLab · 新莫兰迪色彩方向</text>
+  <text x="72" y="128" class="s sub">低饱和负责松弛与可信；壳仔、3D 和动效负责年轻与记忆点。</text>
+
+  <g transform="translate(72 180)">
+    <rect width="700" height="388" rx="42" fill="#353741"/>
+    <rect x="24" y="24" width="652" height="116" rx="28" fill="url(#a)"/>
+    <rect x="40" y="40" width="106" height="34" rx="17" fill="#F8F3EA" fill-opacity=".9"/><text x="60" y="63" class="s tag">首选方案</text>
+    <text x="32" y="188" class="s ct">A · 雾蓝蛋黄</text><text x="32" y="218" class="s cp">专业感来自雾蓝，破壳记忆由低饱和蛋黄保留，最适合长期产品界面。</text>
+    <g transform="translate(32 254)">
+      <rect width="92" height="72" rx="20" fill="#566783"/><text x="14" y="44" class="s h" fill="#FFF">#566783</text><text x="13" y="94" class="s l">主色</text>
+      <rect x="104" width="92" height="72" rx="20" fill="#D6B764"/><text x="118" y="44" class="s h" fill="#273142">#D6B764</text><text x="117" y="94" class="s l">蛋黄</text>
+      <rect x="208" width="92" height="72" rx="20" fill="#91A69E"/><text x="222" y="44" class="s h" fill="#273142">#91A69E</text><text x="221" y="94" class="s l">鼠尾草</text>
+      <rect x="312" width="92" height="72" rx="20" fill="#B7B1C8"/><text x="326" y="44" class="s h" fill="#273142">#B7B1C8</text><text x="325" y="94" class="s l">灰紫</text>
+      <rect x="416" width="92" height="72" rx="20" fill="#F5EFE6"/><text x="430" y="44" class="s h" fill="#273142">#F5EFE6</text><text x="429" y="94" class="s l">蛋壳</text>
+      <rect x="520" width="92" height="72" rx="20" fill="#273142"/><text x="534" y="44" class="s h" fill="#FFF">#273142</text><text x="533" y="94" class="s l">墨色</text>
+    </g>
+  </g>
+
+  <g transform="translate(828 180)">
+    <rect width="700" height="388" rx="42" fill="#353741"/>
+    <rect x="24" y="24" width="652" height="116" rx="28" fill="url(#b)"/>
+    <text x="32" y="188" class="s ct">B · 鼠尾草杏仁</text><text x="32" y="218" class="s cp">温暖、自然、很有成长感；适合强调陪伴，但技术感会比 A 更弱。</text>
+    <g transform="translate(32 254)">
+      <rect width="92" height="72" rx="20" fill="#4F6D68"/><text x="14" y="44" class="s h" fill="#FFF">#4F6D68</text><text x="13" y="94" class="s l">主色</text>
+      <rect x="104" width="92" height="72" rx="20" fill="#A8B8A4"/><text x="118" y="44" class="s h" fill="#283634">#A8B8A4</text><text x="117" y="94" class="s l">鼠尾草</text>
+      <rect x="208" width="92" height="72" rx="20" fill="#D6A58C"/><text x="222" y="44" class="s h" fill="#283634">#D6A58C</text><text x="221" y="94" class="s l">杏仁</text>
+      <rect x="312" width="92" height="72" rx="20" fill="#DCCB83"/><text x="326" y="44" class="s h" fill="#283634">#DCCB83</text><text x="325" y="94" class="s l">麦黄</text>
+      <rect x="416" width="92" height="72" rx="20" fill="#F4F1E8"/><text x="430" y="44" class="s h" fill="#283634">#F4F1E8</text><text x="429" y="94" class="s l">背景</text>
+      <rect x="520" width="92" height="72" rx="20" fill="#283634"/><text x="534" y="44" class="s h" fill="#FFF">#283634</text><text x="533" y="94" class="s l">墨色</text>
+    </g>
+  </g>
+
+  <g transform="translate(72 616)">
+    <rect width="700" height="388" rx="42" fill="#353741"/>
+    <rect x="24" y="24" width="652" height="116" rx="28" fill="url(#c)"/>
+    <text x="32" y="188" class="s ct">C · 豆沙莓雾</text><text x="32" y="218" class="s cp">更柔软、更情绪化，适合表达陪练与安慰；要避免像美妆或心理咨询产品。</text>
+    <g transform="translate(32 254)">
+      <rect width="92" height="72" rx="20" fill="#6A5F78"/><text x="14" y="44" class="s h" fill="#FFF">#6A5F78</text><text x="13" y="94" class="s l">主色</text>
+      <rect x="104" width="92" height="72" rx="20" fill="#A99BB1"/><text x="118" y="44" class="s h" fill="#302A36">#A99BB1</text><text x="117" y="94" class="s l">灰紫</text>
+      <rect x="208" width="92" height="72" rx="20" fill="#CEA29F"/><text x="222" y="44" class="s h" fill="#302A36">#CEA29F</text><text x="221" y="94" class="s l">豆沙</text>
+      <rect x="312" width="92" height="72" rx="20" fill="#9AA9B8"/><text x="326" y="44" class="s h" fill="#302A36">#9AA9B8</text><text x="325" y="94" class="s l">雾蓝</text>
+      <rect x="416" width="92" height="72" rx="20" fill="#F7F1F2"/><text x="430" y="44" class="s h" fill="#302A36">#F7F1F2</text><text x="429" y="94" class="s l">背景</text>
+      <rect x="520" width="92" height="72" rx="20" fill="#302A36"/><text x="534" y="44" class="s h" fill="#FFF">#302A36</text><text x="533" y="94" class="s l">墨色</text>
+    </g>
+  </g>
+
+  <g transform="translate(828 616)">
+    <rect width="700" height="388" rx="42" fill="#353741"/>
+    <rect x="24" y="24" width="652" height="116" rx="28" fill="url(#d)"/>
+    <text x="32" y="188" class="s ct">D · 陶土海盐</text><text x="32" y="218" class="s cp">质感最成熟，适合高级 3D 与材质表达；对大学生而言可能略显安静。</text>
+    <g transform="translate(32 254)">
+      <rect width="92" height="72" rx="20" fill="#5F747B"/><text x="14" y="44" class="s h" fill="#FFF">#5F747B</text><text x="13" y="94" class="s l">主色</text>
+      <rect x="104" width="92" height="72" rx="20" fill="#BD8C73"/><text x="118" y="44" class="s h" fill="#2D3739">#BD8C73</text><text x="117" y="94" class="s l">陶土</text>
+      <rect x="208" width="92" height="72" rx="20" fill="#9EB5B1"/><text x="222" y="44" class="s h" fill="#2D3739">#9EB5B1</text><text x="221" y="94" class="s l">海盐</text>
+      <rect x="312" width="92" height="72" rx="20" fill="#D7C18C"/><text x="326" y="44" class="s h" fill="#2D3739">#D7C18C</text><text x="325" y="94" class="s l">麦穗</text>
+      <rect x="416" width="92" height="72" rx="20" fill="#F5F0E8"/><text x="430" y="44" class="s h" fill="#2D3739">#F5F0E8</text><text x="429" y="94" class="s l">背景</text>
+      <rect x="520" width="92" height="72" rx="20" fill="#2D3739"/><text x="534" y="44" class="s h" fill="#FFF">#2D3739</text><text x="533" y="94" class="s l">墨色</text>
+    </g>
+  </g>
+</svg>

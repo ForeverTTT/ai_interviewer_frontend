@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">FlowLab Primary Logo — Hatch Sprout</title>
+  <desc id="desc">A young sprout flows upward from a newly opened eggshell, representing graduates growing confidently into society.</desc>
+  <style>
+    :root {
+      --shell-light: #DDE2FC;
+      --shell-mid: #B4BEF0;
+      --growth: #F8B84E;
+    }
+  </style>
+
+  <path fill="var(--shell-light)" d="M105 211c15-82 70-132 140-132 60 0 109 36 132 97l-48 27-43-28-45 29-46-28-43 27-47 8Z" transform="translate(-10 -14)"/>
+
+  <path fill="none" stroke="var(--growth)" stroke-linecap="round" stroke-width="27" d="M254 337c-4-45 10-80 42-103"/>
+  <path fill="var(--growth)" d="M290 249c-30 1-48-15-51-42 29-3 49 13 51 42Z"/>
+  <path fill="var(--growth)" d="M298 240c4-30 20-47 49-47 1 28-16 45-49 47Z"/>
+
+  <path fill="var(--shell-mid)" d="m94 292 61-42 51 36 52-38 52 38 52-36 56 41c-8 96-73 159-160 159S103 387 94 292Z"/>
+</svg>

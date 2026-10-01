@@ -1,0 +1,196 @@
+.flowlab-dashboard {
+  /* Dashboard 由「复盘学长」负责：成长绿是唯一主色，其余角色色只作为微弱环境光。 */
+  --brand-paper: 255 250 241;
+  --brand-card: 255 255 255;
+  --brand-inset: 246 249 241;
+  --brand-mist: 232 244 225;
+  --brand-ink: 68 67 75;
+  --brand-muted: 119 117 130;
+  --brand-line: 231 229 220;
+  --brand-deep: 68 67 75;
+  --brand-violet: 99 143 86;
+  --brand-glow: 184 222 164;
+  --brand-lime: 247 117 169;
+  --brand-sky: 232 234 251;
+  --brand-coral: 217 87 136;
+  --brand-success: 99 143 86;
+  --brand-danger: 201 83 98;
+  --brand-on-ink: 255 255 255;
+  --brand-shadow: 78 86 72;
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 87% 8%, rgb(184 222 164 / 0.22), transparent 24rem),
+    radial-gradient(circle at 13% 30%, rgb(254 183 201 / 0.11), transparent 21rem),
+    rgb(var(--brand-paper));
+  color: rgb(var(--brand-ink));
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+.flowlab-dashboard::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 auto;
+  height: 18rem;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.42), transparent);
+}
+
+.dark .flowlab-dashboard {
+  --brand-paper: 32 31 36;
+  --brand-card: 42 41 47;
+  --brand-inset: 49 48 54;
+  --brand-mist: 54 58 52;
+  --brand-ink: 247 244 238;
+  --brand-muted: 184 180 189;
+  --brand-line: 67 65 72;
+  --brand-violet: 184 222 164;
+  --brand-glow: 99 143 86;
+  --brand-on-ink: 38 37 42;
+  background:
+    radial-gradient(circle at 87% 8%, rgb(99 143 86 / 0.18), transparent 24rem),
+    radial-gradient(circle at 13% 30%, rgb(217 87 136 / 0.09), transparent 21rem),
+    rgb(var(--brand-paper));
+}
+
+.dark .fl-dashboard-overview > div > article:first-child,
+.dark .fl-dashboard-overview > div > article:nth-child(2) {
+  background: rgb(var(--brand-card));
+}
+
+.fl-dashboard-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+.fl-dashboard-mentor-intro {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.fl-dashboard-mentor-intro > span:last-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.fl-dashboard-mentor-intro strong {
+  color: #638f56;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.fl-dashboard-mentor-intro small {
+  color: #85828d;
+  font-size: 10.5px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.fl-dashboard-mentor-portrait {
+  position: relative;
+  display: block;
+  width: 78px;
+  height: 78px;
+  flex: 0 0 78px;
+  overflow: hidden;
+  filter: drop-shadow(0 12px 10px rgb(63 82 58 / 0.14));
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fl-dashboard-mentor-portrait img {
+  position: absolute;
+  left: -100%;
+  top: -100%;
+  width: 200%;
+  height: 200%;
+  max-width: none;
+  object-fit: contain;
+}
+
+.fl-dashboard-mentor-intro:hover .fl-dashboard-mentor-portrait {
+  transform: translateY(-4px) rotate(1deg);
+}
+
+.fl-dashboard-primary,
+.fl-dashboard-action,
+.fl-dashboard-tab-active {
+  background: #10b48e;
+  color: #fff;
+  box-shadow: 0 12px 26px -13px rgb(16 180 142 / 0.62), inset 0 1px 0 rgb(255 255 255 / 0.28);
+}
+
+.fl-dashboard-primary:hover,
+.fl-dashboard-action:hover {
+  transform: translateY(-2px);
+  background: #0fa783;
+}
+
+.fl-dashboard-overview {
+  border-color: rgb(99 143 86 / 0.16);
+  box-shadow: 0 24px 60px -42px rgb(99 143 86 / 0.42);
+}
+
+.fl-dashboard-overview > div > article:first-child {
+  background:
+    radial-gradient(circle at 12% 12%, rgb(184 222 164 / 0.16), transparent 15rem),
+    rgb(255 255 255);
+}
+
+.fl-dashboard-overview > div > article:nth-child(2) {
+  background:
+    radial-gradient(circle at 90% 8%, rgb(143 219 216 / 0.13), transparent 14rem),
+    rgb(250 251 247);
+}
+
+.flowlab-dashboard .brand-float {
+  border-color: rgb(99 143 86 / 0.13);
+  box-shadow: 0 18px 48px -36px rgb(99 143 86 / 0.42);
+}
+
+.flowlab-dashboard .lk-liquid {
+  border-color: rgb(255 255 255 / 0.78);
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.78), rgb(247 250 243 / 0.62));
+  box-shadow: 0 14px 34px -24px rgb(99 143 86 / 0.42), inset 0 1px 0 rgb(255 255 255 / 0.95);
+}
+
+@media (max-width: 760px) {
+  .fl-dashboard-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .fl-dashboard-mentor-intro small {
+    white-space: normal;
+  }
+
+  .fl-dashboard-mentor-portrait {
+    width: 64px;
+    height: 64px;
+    flex-basis: 64px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fl-dashboard-header-actions {
+    align-items: flex-end;
+  }
+
+  .fl-dashboard-mentor-intro small {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fl-dashboard-mentor-portrait,
+  .fl-dashboard-primary,
+  .fl-dashboard-action {
+    transition: none;
+  }
+}

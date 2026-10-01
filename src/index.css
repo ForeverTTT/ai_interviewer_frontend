@@ -130,6 +130,92 @@
 }
 
 @layer components {
+  /* 登录后的工作台：布局保持不变，仅用角色色区分不同能力所属的壳仔教练。 */
+  .flowlab-app-shell {
+    --brand-paper: 255 250 241;
+    --brand-card: 255 255 255;
+    --brand-inset: 247 246 241;
+    --brand-mist: 238 244 237;
+    --brand-ink: 68 67 75;
+    --brand-muted: 119 117 130;
+    --brand-line: 231 229 220;
+    --brand-deep: 68 67 75;
+    --brand-on-ink: 255 255 255;
+    --brand-shadow: 67 69 78;
+    --brand-lime: 247 117 169;
+    --brand-coral: 217 87 136;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+
+  .flowlab-shell-review {
+    --brand-violet: 99 143 86;
+    --brand-glow: 184 222 164;
+    --brand-success: 99 143 86;
+  }
+
+  .flowlab-shell-resume {
+    --brand-violet: 217 87 136;
+    --brand-glow: 254 183 201;
+    --brand-success: 217 87 136;
+  }
+
+  .flowlab-shell-coach {
+    --brand-violet: 51 70 109;
+    --brand-glow: 151 164 196;
+    --brand-success: 51 70 109;
+  }
+
+  .flowlab-shell-practice {
+    --brand-violet: 114 124 175;
+    --brand-glow: 196 202 240;
+    --brand-success: 16 180 142;
+  }
+
+  .dark .flowlab-app-shell {
+    --brand-paper: 32 31 36;
+    --brand-card: 42 41 47;
+    --brand-inset: 49 48 54;
+    --brand-mist: 54 56 53;
+    --brand-ink: 247 244 238;
+    --brand-muted: 184 180 189;
+    --brand-line: 67 65 72;
+    --brand-on-ink: 38 37 42;
+    --brand-shadow: 0 0 0;
+  }
+
+  .flowlab-shell-mark {
+    @apply grid h-9 w-9 shrink-0 place-items-center rounded-full text-[21px] font-black transition-transform duration-500 ease-out-soft;
+    background: #f9edd1;
+    color: rgb(var(--brand-violet));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.7);
+    transform: rotate(-7deg);
+  }
+
+  .group:hover .flowlab-shell-mark {
+    transform: rotate(2deg) translateY(-2px);
+  }
+
+  .flowlab-shell-mesh {
+    @apply absolute rounded-full blur-[75px];
+    opacity: 0.5;
+  }
+
+  .flowlab-shell-mesh-a {
+    left: -10rem;
+    top: -9rem;
+    width: 32rem;
+    height: 32rem;
+    background: rgb(var(--brand-glow) / 0.62);
+  }
+
+  .flowlab-shell-mesh-b {
+    bottom: -12rem;
+    right: -9rem;
+    width: 36rem;
+    height: 36rem;
+    background: rgb(254 183 201 / 0.42);
+  }
+
   /** 内容区容器：窄屏铺满，宽屏在 --ui-max-w 处收口 */
   .ui-container {
     @apply mx-auto w-full px-4 sm:px-6 lg:px-8;

@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1080" role="img" aria-labelledby="title desc">
+  <title id="title">FlowLab 品牌色彩方向</title>
+  <desc id="desc">四套面向年轻求职者的品牌色彩方案，包含主色、强调色、背景色和文字色。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#11121D"/>
+      <stop offset="1" stop-color="#1B1B2C"/>
+    </linearGradient>
+    <linearGradient id="mesh-a" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4D56D8"/>
+      <stop offset="0.34" stop-color="#C7C4FF"/>
+      <stop offset="0.67" stop-color="#66DFC7"/>
+      <stop offset="1" stop-color="#FFC84A"/>
+    </linearGradient>
+    <linearGradient id="mesh-b" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0F5D5E"/>
+      <stop offset="0.38" stop-color="#7AA7FF"/>
+      <stop offset="0.7" stop-color="#8EF2C0"/>
+      <stop offset="1" stop-color="#FFD45C"/>
+    </linearGradient>
+    <linearGradient id="mesh-c" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5B3FD4"/>
+      <stop offset="0.4" stop-color="#F4A8E3"/>
+      <stop offset="0.72" stop-color="#FF7A74"/>
+      <stop offset="1" stop-color="#E6FF73"/>
+    </linearGradient>
+    <linearGradient id="mesh-d" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3155C6"/>
+      <stop offset="0.38" stop-color="#6ED8FF"/>
+      <stop offset="0.72" stop-color="#FFB28A"/>
+      <stop offset="1" stop-color="#FFE27A"/>
+    </linearGradient>
+    <style>
+      .sans{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC",sans-serif}
+      .title{font-size:52px;font-weight:750;fill:#FFF}
+      .subtitle{font-size:22px;fill:#AEB0C5}
+      .card-title{font-size:30px;font-weight:720;fill:#FFF}
+      .card-copy{font-size:18px;fill:#BFC1D1}
+      .tag{font-size:15px;font-weight:650;letter-spacing:.08em;fill:#141627}
+      .hex-light{font-size:15px;font-weight:650;fill:#FFF}
+      .hex-dark{font-size:15px;font-weight:650;fill:#18213A}
+      .label{font-size:15px;fill:#AEB0C5}
+    </style>
+  </defs>
+
+  <rect width="1600" height="1080" fill="url(#bg)"/>
+  <text x="72" y="90" class="sans title">FlowLab 色彩方向</text>
+  <text x="72" y="128" class="sans subtitle">年轻，但不是玩具；有情绪，但不牺牲面试产品的可信度。</text>
+
+  <g id="palette-a">
+    <rect x="72" y="180" width="700" height="388" rx="42" fill="#202137"/>
+    <rect x="96" y="204" width="652" height="116" rx="28" fill="url(#mesh-a)"/>
+    <rect x="112" y="220" width="106" height="34" rx="17" fill="#FFF" fill-opacity=".78"/>
+    <text x="132" y="243" class="sans tag">首选方案</text>
+    <text x="104" y="368" class="sans card-title">A · 破壳电光</text>
+    <text x="104" y="398" class="sans card-copy">钴蓝建立信任，蛋黄黄记住“破壳”，薄荷绿负责年轻与成长。</text>
+    <g transform="translate(104 434)">
+      <rect width="92" height="72" rx="20" fill="#4D56D8"/><text x="13" y="94" class="sans label">主色</text><text x="14" y="44" class="sans hex-light">#4D56D8</text>
+      <rect x="104" width="92" height="72" rx="20" fill="#FFC84A"/><text x="117" y="94" class="sans label">蛋黄</text><text x="118" y="44" class="sans hex-dark">#FFC84A</text>
+      <rect x="208" width="92" height="72" rx="20" fill="#66DFC7"/><text x="221" y="94" class="sans label">薄荷</text><text x="222" y="44" class="sans hex-dark">#66DFC7</text>
+      <rect x="312" width="92" height="72" rx="20" fill="#C7C4FF"/><text x="325" y="94" class="sans label">雾紫</text><text x="326" y="44" class="sans hex-dark">#C7C4FF</text>
+      <rect x="416" width="92" height="72" rx="20" fill="#FFF8EC"/><text x="429" y="94" class="sans label">蛋壳</text><text x="430" y="44" class="sans hex-dark">#FFF8EC</text>
+      <rect x="520" width="92" height="72" rx="20" fill="#18213A"/><text x="533" y="94" class="sans label">墨色</text><text x="534" y="44" class="sans hex-light">#18213A</text>
+    </g>
+  </g>
+
+  <g id="palette-b">
+    <rect x="828" y="180" width="700" height="388" rx="42" fill="#202137"/>
+    <rect x="852" y="204" width="652" height="116" rx="28" fill="url(#mesh-b)"/>
+    <text x="860" y="368" class="sans card-title">B · 新芽深海</text>
+    <text x="860" y="398" class="sans card-copy">更独特、更像成长产品；稳重来自深青，活力由嫩芽绿与黄色承担。</text>
+    <g transform="translate(860 434)">
+      <rect width="92" height="72" rx="20" fill="#0F5D5E"/><text x="13" y="94" class="sans label">主色</text><text x="14" y="44" class="sans hex-light">#0F5D5E</text>
+      <rect x="104" width="92" height="72" rx="20" fill="#8EF2C0"/><text x="117" y="94" class="sans label">新芽</text><text x="118" y="44" class="sans hex-dark">#8EF2C0</text>
+      <rect x="208" width="92" height="72" rx="20" fill="#FFD45C"/><text x="221" y="94" class="sans label">阳光</text><text x="222" y="44" class="sans hex-dark">#FFD45C</text>
+      <rect x="312" width="92" height="72" rx="20" fill="#7AA7FF"/><text x="325" y="94" class="sans label">雾蓝</text><text x="326" y="44" class="sans hex-dark">#7AA7FF</text>
+      <rect x="416" width="92" height="72" rx="20" fill="#F3FBF8"/><text x="429" y="94" class="sans label">背景</text><text x="430" y="44" class="sans hex-dark">#F3FBF8</text>
+      <rect x="520" width="92" height="72" rx="20" fill="#102B2B"/><text x="533" y="94" class="sans label">墨色</text><text x="534" y="44" class="sans hex-light">#102B2B</text>
+    </g>
+  </g>
+
+  <g id="palette-c">
+    <rect x="72" y="616" width="700" height="388" rx="42" fill="#202137"/>
+    <rect x="96" y="640" width="652" height="116" rx="28" fill="url(#mesh-c)"/>
+    <text x="104" y="804" class="sans card-title">C · 珊瑚紫汽水</text>
+    <text x="104" y="834" class="sans card-copy">最社交、最有传播感，适合活动与社区；长期产品使用要克制粉色面积。</text>
+    <g transform="translate(104 870)">
+      <rect width="92" height="72" rx="20" fill="#5B3FD4"/><text x="13" y="94" class="sans label">主色</text><text x="14" y="44" class="sans hex-light">#5B3FD4</text>
+      <rect x="104" width="92" height="72" rx="20" fill="#FF7A74"/><text x="117" y="94" class="sans label">珊瑚</text><text x="118" y="44" class="sans hex-dark">#FF7A74</text>
+      <rect x="208" width="92" height="72" rx="20" fill="#F4A8E3"/><text x="221" y="94" class="sans label">粉雾</text><text x="222" y="44" class="sans hex-dark">#F4A8E3</text>
+      <rect x="312" width="92" height="72" rx="20" fill="#E6FF73"/><text x="325" y="94" class="sans label">青柠</text><text x="326" y="44" class="sans hex-dark">#E6FF73</text>
+      <rect x="416" width="92" height="72" rx="20" fill="#FFF7FB"/><text x="429" y="94" class="sans label">背景</text><text x="430" y="44" class="sans hex-dark">#FFF7FB</text>
+      <rect x="520" width="92" height="72" rx="20" fill="#251A46"/><text x="533" y="94" class="sans label">墨色</text><text x="534" y="44" class="sans hex-light">#251A46</text>
+    </g>
+  </g>
+
+  <g id="palette-d">
+    <rect x="828" y="616" width="700" height="388" rx="42" fill="#202137"/>
+    <rect x="852" y="640" width="652" height="116" rx="28" fill="url(#mesh-d)"/>
+    <text x="860" y="804" class="sans card-title">D · 晨光蓝桃</text>
+    <text x="860" y="834" class="sans card-copy">最容易被接受的年轻专业感；可信但不冷，适合快速改造现有产品。</text>
+    <g transform="translate(860 870)">
+      <rect width="92" height="72" rx="20" fill="#3155C6"/><text x="13" y="94" class="sans label">主色</text><text x="14" y="44" class="sans hex-light">#3155C6</text>
+      <rect x="104" width="92" height="72" rx="20" fill="#6ED8FF"/><text x="117" y="94" class="sans label">天空</text><text x="118" y="44" class="sans hex-dark">#6ED8FF</text>
+      <rect x="208" width="92" height="72" rx="20" fill="#FFB28A"/><text x="221" y="94" class="sans label">蜜桃</text><text x="222" y="44" class="sans hex-dark">#FFB28A</text>
+      <rect x="312" width="92" height="72" rx="20" fill="#FFE27A"/><text x="325" y="94" class="sans label">奶油</text><text x="326" y="44" class="sans hex-dark">#FFE27A</text>
+      <rect x="416" width="92" height="72" rx="20" fill="#F5F7FF"/><text x="429" y="94" class="sans label">背景</text><text x="430" y="44" class="sans hex-dark">#F5F7FF</text>
+      <rect x="520" width="92" height="72" rx="20" fill="#16213B"/><text x="533" y="94" class="sans label">墨色</text><text x="534" y="44" class="sans hex-light">#16213B</text>
+    </g>
+  </g>
+</svg>

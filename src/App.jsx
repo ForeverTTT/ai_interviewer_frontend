@@ -38,11 +38,11 @@ function PageFallback() {
  * 站内通用外壳：浮动顶栏 + 页面内容 + 页脚。
  * atmosphere：内页顶部铺一层淡淡的港口插画；首页自己有整幅主视觉，所以关掉。
  */
-function Layout({ children, hideFooter = false, atmosphere = true }) {
+function Layout({ children, hideFooter = false, hideNavbar = false, atmosphere = true }) {
   return (
     <div className="relative min-h-screen bg-brand-paper">
       {atmosphere && <PageAtmosphere />}
-      <Navbar />
+      {!hideNavbar && <Navbar />}
       <main className="relative z-10 min-h-[calc(100dvh-var(--ui-nav-h))]">{children}</main>
       {!hideFooter && <Footer />}
     </div>
@@ -78,7 +78,7 @@ export default function App() {
         <Routes>
           <Route element={<AppThemeShell />}>
           <Route path="/" element={
-            <Layout atmosphere={false}>
+            <Layout atmosphere={false} hideNavbar hideFooter>
               <LandingPage />
             </Layout>
           } />

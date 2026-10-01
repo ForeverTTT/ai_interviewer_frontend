@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="flowlab-sprout-title flowlab-sprout-desc">
+  <title id="flowlab-sprout-title">FlowLab 破壳嫩芽 Bot</title>
+  <desc id="flowlab-sprout-desc">一颗长出双叶的嫩芽 Bot 从浅紫色蛋壳中破壳而出</desc>
+
+  <!-- Left leaf -->
+  <path
+    fill="#70C9C4"
+    d="M249 128c-29-3-58-19-73-42-13-20-8-44 11-55 20-11 45-3 58 18 13 21 15 52 4 79Z"
+  />
+
+  <!-- Right leaf -->
+  <path
+    fill="#4FB2AE"
+    d="M263 125c2-31 19-61 43-76 20-12 44-6 54 14 10 20 1 44-20 57-22 13-50 15-77 5Z"
+  />
+
+  <!-- Soft stem joining the leaves to the seed body -->
+  <path
+    fill="#FCC648"
+    d="M241 166c8-31 10-57 6-82l22-3c7 28 5 58-4 89l-24-4Z"
+  />
+
+  <!-- Seed-shaped bot body -->
+  <path
+    fill="#FCC648"
+    d="M256 139c64 0 108 43 108 108 0 70-44 116-108 116s-108-46-108-116c0-65 44-108 108-108Z"
+  />
+
+  <!-- Rounded side sprouts act as small hands -->
+  <path
+    fill="#EFB338"
+    d="M157 230c-28-3-48 13-49 36-1 24 20 42 48 39 13-20 14-52 1-75Z"
+  />
+  <path
+    fill="#EFB338"
+    d="M355 230c28-3 48 13 49 36 1 24-20 42-48 39-13-20-14-52-1-75Z"
+  />
+
+  <!-- Minimal bot face -->
+  <rect x="213" y="211" width="16" height="35" rx="8" fill="#2B2644"/>
+  <rect x="283" y="211" width="16" height="35" rx="8" fill="#2B2644"/>
+  <path
+    fill="none"
+    stroke="#2B2644"
+    stroke-width="12"
+    stroke-linecap="round"
+    d="M230 278c15 14 37 14 52 0"
+  />
+
+  <!-- Shared FlowLab broken-shell silhouette -->
+  <path
+    fill="#A7AEDF"
+    d="M72 300l67 33 53-49 65 54 65-53 50 44 68-32c-5 101-81 168-184 168S77 397 72 300Z"
+  />
+</svg>

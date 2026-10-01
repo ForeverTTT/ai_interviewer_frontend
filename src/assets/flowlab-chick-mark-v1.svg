@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="flowlab-chick-title flowlab-chick-desc">
+  <title id="flowlab-chick-title">FlowLab 破壳小鸡标志</title>
+  <desc id="flowlab-chick-desc">一只圆润的黄色小鸡从浅紫色蛋壳中破壳而出</desc>
+
+  <!-- Two soft droplet feathers keep the liquid DNA without looking 3D -->
+  <path
+    fill="#FCC648"
+    d="M249 97c-23-9-35-32-26-52 8-18 30-23 46-12 18 12 21 37 9 58-11-1-20 1-29 6Z"
+  />
+  <path
+    fill="#FCC648"
+    d="M279 90c0-21 12-39 30-41 17-2 30 12 27 29-3 16-18 27-36 27-6-7-13-12-21-15Z"
+  />
+
+  <!-- Main chick body -->
+  <path
+    fill="#FCC648"
+    d="M267 94c76-10 140 43 152 119 12 75-28 137-94 157-76 23-155-11-185-78-26-58-11-122 35-165 24-22 56-31 92-33Z"
+  />
+
+  <!-- Wing stays inside the body so the outer silhouette remains compact -->
+  <path
+    fill="#EFB338"
+    d="M178 201c32-17 68-7 84 21 8 14 9 31 3 47-17-19-44-25-65-12-17 10-25 27-23 45-22-13-33-35-28-59 4-19 14-33 29-42Z"
+  />
+
+  <!-- Minimal seed-shaped eyes -->
+  <rect x="290" y="162" width="15" height="32" rx="7.5" fill="#2B2644"/>
+  <rect x="332" y="158" width="15" height="32" rx="7.5" fill="#2B2644"/>
+
+  <!-- A short pill-shaped beak sits flush with the cheek; no pointed triangle -->
+  <rect x="382" y="190" width="34" height="24" rx="12" fill="#F18A6C"/>
+
+  <!-- Broken shell: one bold, scalable silhouette with a rounded bowl -->
+  <path
+    fill="#A7AEDF"
+    d="M72 299l67 33 53-49 65 54 65-53 50 44 68-32c-5 101-81 169-184 169S77 397 72 299Z"
+  />
+</svg>

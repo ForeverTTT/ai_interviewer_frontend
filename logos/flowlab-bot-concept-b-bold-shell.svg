@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">FlowLab Bot Logo — Bold Shell Mark</title>
+  <desc id="desc">A compact high-contrast broken shell face designed for app icons and small sizes.</desc>
+  <style>
+    :root {
+      --slate: #566783;
+      --yolk: #D6B764;
+      --light: #F8F3EA;
+    }
+  </style>
+
+  <path id="inner-core" fill="var(--yolk)" d="M118 232c3-74 54-135 123-143 45-5 75 11 97 45 15 23 34 32 58 28 6 19 9 40 8 64l-56 45H157z"/>
+  <path id="shell-body" fill="var(--slate)" d="M73 226c18 1 33 9 48 25 22 24 45 27 69 8 29-23 55-21 80 7 18 20 38 23 61 7 27-20 52-16 76 13 8 10 18 18 30 22-5 96-72 155-181 155-114 0-181-65-181-163 0-25-1-49-2-74z"/>
+  <g id="face" fill="var(--light)">
+    <rect x="166" y="291" width="39" height="68" rx="19.5"/>
+    <rect x="307" y="291" width="39" height="68" rx="19.5"/>
+    <path d="M178 375c8-9 21-9 31-2 15 12 31 18 47 18s32-6 47-18c10-7 23-7 31 2 8 10 6 24-4 32-21 17-46 26-74 26s-53-9-74-26c-10-8-12-22-4-32z"/>
+  </g>
+</svg>

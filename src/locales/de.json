@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "LandIt - KI-gestütztes Interview-Training für Deutschland"
+    "title": "FlowLab - KI-gestütztes Interviewtraining"
   },
   "lang": {
     "zh": "中文",
@@ -96,7 +96,7 @@
     "loginRegister": "Login/Registrierung",
     "supportLang": "Deutsch & Englisch Support",
     "roles": "Für Werkstudenten / Praktika",
-    "copyright": "© 2025 LandIt. Alle Rechte vorbehalten.",
+    "copyright": "© 2026 FlowLab. Alle Rechte vorbehalten.",
     "powered": "KI-getrieben · Modernste Modelle & Stimme · Gebaut für Talente in Deutschland"
   },
   "landing": {
@@ -910,6 +910,10 @@
       "eyebrow": "Aktionszentrum für die Offer-Vorbereitung",
       "title": "Wachstumszentrum",
       "subtitle": "Jede wirksame Übung bringt Sie Ihrem Offer näher. Prüfen Sie das letzte Ergebnis und setzen Sie dann die wichtigste Übung fort.",
+      "mentor": {
+        "name": "Review-Mentor",
+        "role": "Aus Feedback wird der nächste konkrete Fortschritt"
+      },
       "overview": "Wachstumsübersicht",
       "loadFailed": "Wachstumsdaten konnten nicht geladen werden. Bitte aktualisieren Sie die Seite.",
       "minutes": "{{count}} Min. wirksames Training",

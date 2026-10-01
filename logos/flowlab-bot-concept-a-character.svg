@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">FlowLab Bot Logo — Character Mark</title>
+  <desc id="desc">A simplified smiling broken eggshell mascot with a warm golden inner core.</desc>
+  <style>
+    :root {
+      --shell: #F5EFE6;
+      --yolk: #D6B764;
+      --ink: #273142;
+    }
+  </style>
+
+  <!-- Inner core sits behind the shell rim. -->
+  <path id="inner-core" fill="var(--yolk)" d="M108 220c8-53 47-91 96-91 28 0 44 14 60 29 12 11 22 13 37 2 18-13 37-18 56-12 28 9 46 34 51 72l-54 35H148z"/>
+
+  <!-- The four broad waves are the permanent broken-shell signature. -->
+  <path id="shell-body" fill="var(--shell)" d="M76 226c0-21 2-41 7-60 19 2 36 12 53 29 23 24 47 27 72 7 29-23 57-21 83 8 19 22 40 24 65 7 27-20 53-17 78 12l3 4v74c0 86-70 149-181 149S76 393 76 307z"/>
+
+  <g id="face" fill="var(--ink)">
+    <rect x="170" y="265" width="40" height="72" rx="20"/>
+    <rect x="302" y="265" width="40" height="72" rx="20"/>
+    <path d="M181 362c8-9 20-9 30-2 16 13 31 19 45 19s29-6 45-19c10-7 22-7 30 2 8 10 6 24-4 32-21 17-45 26-71 26s-50-9-71-26c-10-8-12-22-4-32z"/>
+  </g>
+</svg>

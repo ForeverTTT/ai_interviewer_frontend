@@ -15,6 +15,9 @@ import { authenticatedFetch } from '../lib/authenticatedFetch'
 import { createInterviewRequestId } from '../lib/interviewEvents'
 import OfferSprintPanel from '../components/OfferSprintPanel'
 import PageHeader from '../components/brand/PageHeader'
+import './DashboardPage.css'
+
+const FLOWLAB_CHARACTER_SHEET = '/brand/flowlab-felt-character-board-v5-role-system.png'
 
 const RESUMABLE_STATUSES = new Set(['draft', 'active', 'paused'])
 
@@ -36,6 +39,14 @@ function InlineRichText({ text }) {
       ? <strong key={index} className="rounded-[3px] bg-brand-glow/25 px-0.5 font-semibold text-brand-ink">{match[1]}</strong>
       : part || null
   })
+}
+
+function ReviewMentorPortrait({ className = '' }) {
+  return (
+    <span className={`fl-dashboard-mentor-portrait ${className}`} aria-hidden="true">
+      <img src={FLOWLAB_CHARACTER_SHEET} alt="" />
+    </span>
+  )
 }
 
 function hasReport(interview) {
@@ -403,7 +414,7 @@ export default function DashboardPage() {
   const H2 = 'font-brand text-[17px] font-semibold tracking-[-0.01em] text-brand-ink'
 
   return (
-    <div className="theme-quiet min-h-screen pb-20 pt-[calc(var(--ui-nav-h)+2.75rem)]">
+    <div className="flowlab-dashboard theme-quiet min-h-screen pb-20 pt-[calc(var(--ui-nav-h)+2.75rem)]">
       <main className="ui-container max-w-[1400px] space-y-5">
 
         {/* ───────── 页头 ───────── */}
@@ -412,9 +423,18 @@ export default function DashboardPage() {
           title={t('dashboard.growth.title')}
           subtitle={t('dashboard.growth.subtitle')}
           actions={(
-            <Link to="/setup" className="lk-btn lk-btn-primary">
-              <PlusCircle className="h-4 w-4" />{t('dashboard.newInterview')}
-            </Link>
+            <div className="fl-dashboard-header-actions">
+              <div className="fl-dashboard-mentor-intro">
+                <ReviewMentorPortrait />
+                <span>
+                  <strong>{t('dashboard.growth.mentor.name')}</strong>
+                  <small>{t('dashboard.growth.mentor.role')}</small>
+                </span>
+              </div>
+              <Link to="/setup" className="lk-btn fl-dashboard-primary">
+                <PlusCircle className="h-4 w-4" />{t('dashboard.newInterview')}
+              </Link>
+            </div>
           )}
           className="!mb-3"
         />
@@ -423,7 +443,7 @@ export default function DashboardPage() {
         <motion.section
           initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
           aria-label={t('dashboard.growth.overview')}
-          className="overflow-hidden rounded-[26px] border border-brand-line bg-brand-card"
+          className="fl-dashboard-overview overflow-hidden rounded-[26px] border border-brand-line bg-brand-card"
         >
           <div className="grid lg:grid-cols-12">
             <article className="px-6 py-6 sm:px-8 sm:py-7 lg:col-span-7">
@@ -501,7 +521,7 @@ export default function DashboardPage() {
                     <h3 className="text-[15px] font-semibold text-brand-ink">{t('dashboard.growth.latest.emptyTitle')}</h3>
                     <p className="mt-2 text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.latest.emptyBody')}</p>
                   </div>
-                  <Link to="/setup" className="inline-flex w-fit items-center gap-2 rounded-xl bg-brand-ink px-5 py-2.5 text-[12.5px] font-semibold text-brand-on-ink hover:opacity-90">{t('dashboard.growth.startBaseline')}<ArrowRight className="h-3.5 w-3.5" /></Link>
+                  <Link to="/setup" className="fl-dashboard-action inline-flex w-fit items-center gap-2 rounded-xl px-5 py-2.5 text-[12.5px] font-semibold">{t('dashboard.growth.startBaseline')}<ArrowRight className="h-3.5 w-3.5" /></Link>
                 </div>
               ) : isGenerating(latestReviewCandidate) ? (
                 <div className="mt-6 flex gap-3" role="status">
@@ -515,10 +535,10 @@ export default function DashboardPage() {
                     <p className="mt-4 text-[15px] font-medium leading-relaxed text-brand-ink"><InlineRichText text={reportSummary(latestReviewCandidate) || t('dashboard.growth.latest.reportReadyBody')} /></p>
                     {reportStrength(latestReviewCandidate) && <p className="mt-3 flex items-start gap-2 text-[12.5px] leading-relaxed text-brand-muted"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-success" /><span><InlineRichText text={reportStrength(latestReviewCandidate)} /></span></p>}
                   </div>
-                  <Link to={`/interview/${latestReviewCandidate.id}/report`} className="inline-flex w-fit items-center gap-2 rounded-xl bg-brand-ink px-5 py-2.5 text-[12.5px] font-semibold text-brand-on-ink hover:opacity-90">{t('dashboard.growth.viewReport')}<ArrowRight className="h-3.5 w-3.5" /></Link>
+                  <Link to={`/interview/${latestReviewCandidate.id}/report`} className="fl-dashboard-action inline-flex w-fit items-center gap-2 rounded-xl px-5 py-2.5 text-[12.5px] font-semibold">{t('dashboard.growth.viewReport')}<ArrowRight className="h-3.5 w-3.5" /></Link>
                 </div>
               ) : isResumable(latestReviewCandidate) ? (
-                <div className="mt-6 flex min-h-44 flex-col justify-between gap-5"><div><h3 className="text-[14px] font-semibold text-brand-ink">{t('dashboard.growth.latest.unfinishedTitle')}</h3><p className="mt-2 text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.latest.unfinishedBody', { position: latestReviewCandidate.position })}</p></div><Link to={`/interview/${latestReviewCandidate.id}`} className="inline-flex w-fit items-center gap-2 rounded-xl bg-brand-ink px-5 py-2.5 text-[12.5px] font-semibold text-brand-on-ink hover:opacity-90">{t('dashboard.growth.continuePractice')}<ArrowRight className="h-3.5 w-3.5" /></Link></div>
+                <div className="mt-6 flex min-h-44 flex-col justify-between gap-5"><div><h3 className="text-[14px] font-semibold text-brand-ink">{t('dashboard.growth.latest.unfinishedTitle')}</h3><p className="mt-2 text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.latest.unfinishedBody', { position: latestReviewCandidate.position })}</p></div><Link to={`/interview/${latestReviewCandidate.id}`} className="fl-dashboard-action inline-flex w-fit items-center gap-2 rounded-xl px-5 py-2.5 text-[12.5px] font-semibold">{t('dashboard.growth.continuePractice')}<ArrowRight className="h-3.5 w-3.5" /></Link></div>
               ) : (
                 <div className="mt-6 flex min-h-44 flex-col justify-between gap-5"><div><h3 className="text-[14px] font-semibold text-brand-ink">{t('dashboard.growth.latest.noReportTitle')}</h3><p className="mt-2 text-[12.5px] leading-relaxed text-brand-muted">{t('dashboard.growth.latest.noReportBody')}</p></div><Link to={`/interview/${latestReviewCandidate.id}/report`} className="inline-flex w-fit items-center gap-2 rounded-xl border border-brand-line bg-brand-card px-5 py-2.5 text-[12.5px] font-semibold text-brand-ink hover:border-brand-ink">{t('dashboard.growth.checkReportStatus')}<ArrowRight className="h-3.5 w-3.5" /></Link></div>
               )}
@@ -552,7 +572,7 @@ export default function DashboardPage() {
                   onClick={() => setSection(tab.key)}
                   className={`relative flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-semibold transition-colors ${active ? 'text-brand-on-ink' : 'text-brand-muted hover:text-brand-ink'}`}
                 >
-                  {active && <motion.span layoutId="dashboard-section-pill" className="absolute inset-0 rounded-full bg-brand-ink" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
+                  {active && <motion.span layoutId="dashboard-section-pill" className="fl-dashboard-tab-active absolute inset-0 rounded-full" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
                   <Icon className="relative h-4 w-4" />
                   <span className="relative">{tab.label}</span>
                   {tab.count > 0 && <span className={`relative rounded-full px-1.5 text-[11px] tabular-nums ${active ? 'bg-white/15 dark:bg-black/15' : 'bg-brand-inset'}`}>{tab.count}</span>}
@@ -603,7 +623,7 @@ export default function DashboardPage() {
                           type="button"
                           disabled={taskBusy || readiness.nextPracticeTask.questionIndex === null || readiness.nextPracticeTask.questionIndex === undefined || !Number.isInteger(Number(readiness.nextPracticeTask.questionIndex))}
                           onClick={() => void startRecommendedTask()}
-                          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-ink px-5 py-3 text-[13px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90 disabled:opacity-40"
+                          className="fl-dashboard-action inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-3 text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-40"
                         >
                           {taskBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <PlayCircle className="h-4 w-4" />}
                           {t('dashboard.growth.task.start')}
@@ -671,7 +691,7 @@ export default function DashboardPage() {
                         </p>
                       </div>
                       {filter === 'all' && (
-                        <Link to="/setup" className="inline-flex items-center gap-2 rounded-xl bg-brand-ink px-5 py-2.5 text-[12.5px] font-semibold text-brand-on-ink transition-opacity hover:opacity-90">
+                        <Link to="/setup" className="fl-dashboard-action inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-[12.5px] font-semibold transition-opacity hover:opacity-90">
                           {t('dashboard.growth.startBaseline')} <ArrowRight className="h-3.5 w-3.5" />
                         </Link>
                       )}

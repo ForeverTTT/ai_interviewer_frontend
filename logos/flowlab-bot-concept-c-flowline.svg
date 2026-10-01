@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">FlowLab Bot Logo — Flowline Mark</title>
+  <desc id="desc">A minimal egg outline whose flowing golden crack becomes the mascot's inner core.</desc>
+  <style>
+    :root {
+      --ink: #273142;
+      --yolk: #D6B764;
+    }
+  </style>
+
+  <path id="egg-outline" fill="none" stroke="var(--ink)" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" d="M256 66c91 0 151 91 151 207 0 105-57 173-151 173S105 378 105 273C105 157 165 66 256 66z"/>
+
+  <!-- One continuous rising flow doubles as the broken-shell opening. -->
+  <path id="flow-crack" fill="none" stroke="var(--yolk)" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" d="M82 219c28-1 46 9 63 28 20 22 42 24 65 6 28-22 54-20 78 7 19 21 39 23 62 6 27-20 50-15 80 18"/>
+
+  <g id="face" fill="var(--ink)">
+    <rect x="174" y="288" width="34" height="63" rx="17"/>
+    <rect x="304" y="288" width="34" height="63" rx="17"/>
+    <path d="M185 370c8-8 19-8 28-1 14 11 28 16 43 16s29-5 43-16c9-7 20-7 28 1 8 9 7 22-3 30-20 16-42 24-68 24s-48-8-68-24c-10-8-11-21-3-30z"/>
+  </g>
+</svg>

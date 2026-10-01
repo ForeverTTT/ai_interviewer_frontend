@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="flowlab-shell-title flowlab-shell-desc">
+  <title id="flowlab-shell-title">FlowLab 破壳 Bot</title>
+  <desc id="flowlab-shell-desc">一个上半片弹起、裂缝露出黄色内核的蛋壳形象</desc>
+
+  <!-- The warm core is revealed only through the opening between both shell pieces. -->
+  <circle cx="260" cy="257" r="74" fill="#FCC648"/>
+
+  <!-- Lifted top shell: the bottom edge repeats the shared FlowLab crack rhythm. -->
+  <path
+    fill="#C7CEFC"
+    d="M104 225c11-98 74-162 156-162s145 64 156 161l-42 20-55-30-57 33-56-32-54 30-48-20Z"
+  />
+
+  <!-- Main shell body -->
+  <path
+    fill="#A7AEDF"
+    d="M92 287l59-35 55 34 56-35 57 35 55-32 54 33c-4 99-72 163-168 163S96 386 92 287Z"
+  />
+
+  <!-- Minimal bot face -->
+  <rect x="216" y="305" width="16" height="35" rx="8" fill="#2B2644"/>
+  <rect x="288" y="305" width="16" height="35" rx="8" fill="#2B2644"/>
+  <path
+    fill="none"
+    stroke="#2B2644"
+    stroke-width="12"
+    stroke-linecap="round"
+    d="M231 371c16 14 42 14 58 0"
+  />
+
+  <!-- Two soft motion drops suggest the shell has just popped open. -->
+  <path
+    fill="#70C9C4"
+    d="M421 147c16-13 36-12 46 1 10 14 5 33-11 44-14-8-28-25-35-45Z"
+  />
+  <path
+    fill="#91C6CC"
+    d="M445 210c13-5 26 1 30 13 4 13-4 25-18 28-8-11-12-26-12-41Z"
+  />
+</svg>

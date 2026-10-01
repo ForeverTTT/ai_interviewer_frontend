@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "LandIt - AI 赋能德国面试训练"
+    "title": "FlowLab 不卡壳实验室 - AI 求职陪练"
   },
   "lang": {
     "zh": "中文",
@@ -96,7 +96,7 @@
     "loginRegister": "登录/注册",
     "supportLang": "支持德语 & 英语面试",
     "roles": "覆盖 Werkstudent / Praktikum",
-    "copyright": "© 2025 LandIt. All rights reserved.",
+    "copyright": "© 2026 不卡壳实验室 FlowLab",
     "powered": "AI 赋能 · 前沿大模型与语音 · 为赴德人才而生"
   },
   "landing": {
@@ -924,6 +924,10 @@
       "eyebrow": "Offer 准备行动中心",
       "title": "成长中心",
       "subtitle": "每一次有效练习，都离你的 Offer 更近一步。先看清最近结果，再继续最值得完成的训练。",
+      "mentor": {
+        "name": "复盘学长",
+        "role": "陪你把反馈练成下一次的底气"
+      },
       "overview": "成长概览",
       "loadFailed": "成长数据加载失败，请刷新页面后重试。",
       "minutes": "{{count}} 分钟有效训练",

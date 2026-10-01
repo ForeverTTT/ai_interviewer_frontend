@@ -9,11 +9,9 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useAccountStatus } from '../../hooks/useAccountStatus'
-import { useTheme } from '../../context/ThemeContext'
 import LanguageSwitcher from '../LanguageSwitcher'
 import { AppThemeToggle } from '../ThemeToggle'
 import PageAtmosphere from '../brand/PageAtmosphere'
-import harborScene from '../../assets/background.jpg'
 
 /**
  * 站内工作台外壳（登录后的页面）。
@@ -27,6 +25,13 @@ import harborScene from '../../assets/background.jpg'
  */
 
 const COLLAPSE_KEY = 'landit_sidebar_collapsed'
+
+function workspaceRole(pathname) {
+  if (pathname === '/dashboard' || pathname === '/notes' || /^\/interview\/[^/]+\/report$/.test(pathname)) return 'review'
+  if (pathname === '/resume-tailor') return 'resume'
+  if (pathname === '/setup') return 'coach'
+  return 'practice'
+}
 
 function readCollapsed() {
   try {
@@ -95,7 +100,6 @@ function Avatar({ src, initial, seeking, size = 'h-9 w-9' }) {
 function SidebarContent({ collapsed, onToggleCollapse, onNavigate, account, variant = 'desktop' }) {
   const { t } = useTranslation()
   const { user, signOut } = useAuth()
-  const { isDark } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
   const groups = useNavGroups()
@@ -115,15 +119,12 @@ function SidebarContent({ collapsed, onToggleCollapse, onNavigate, account, vari
     <div className="flex h-full flex-col">
       {/* 品牌 + 折叠 */}
       <div className={`flex items-center ${collapsed ? 'flex-col gap-3 px-2 pt-5' : 'justify-between px-5 pt-5'}`}>
-        <Link to="/" onClick={onNavigate} className="group flex items-center gap-2.5" aria-label="LandIt">
-          <img
-            src={isDark ? '/landit-icon-dark.svg' : '/landit-icon-light.svg'}
-            alt="LandIt Logo"
-            className="h-9 w-9 shrink-0 rounded-[10px] transition-transform duration-500 ease-out-soft group-hover:-rotate-6"
-          />
+        <Link to="/" onClick={onNavigate} className="group flex items-center gap-2.5" aria-label="FlowLab 不卡壳实验室">
+          <span className="flowlab-shell-mark" aria-hidden="true">⌣</span>
           {!collapsed && (
-            <span className="font-brand text-[19px] font-bold leading-none tracking-[-0.02em] text-brand-ink">
-              Land<span className="italic text-brand-ochre">It</span>
+            <span className="flex flex-col leading-none text-brand-ink">
+              <strong className="text-[13px] font-bold tracking-[-0.02em]">不卡壳实验室</strong>
+              <small className="mt-1 text-[8px] font-bold tracking-[0.17em] text-brand-muted">FLOWLAB</small>
             </span>
           )}
         </Link>
@@ -269,6 +270,7 @@ export default function AppShell({ children }) {
   const [collapsed, setCollapsed] = useState(readCollapsed)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const crumb = useCurrentLabel()
+  const role = workspaceRole(location.pathname)
 
   useEffect(() => {
     try { localStorage.setItem(COLLAPSE_KEY, collapsed ? '1' : '0') } catch { /* ignore */ }
@@ -287,16 +289,14 @@ export default function AppShell({ children }) {
 
   return (
     <div
-      className="relative min-h-screen bg-brand-paper"
+      className={`flowlab-app-shell flowlab-shell-${role} relative min-h-screen bg-brand-paper`}
       style={{ '--ui-nav-h': '4.25rem', '--app-sidebar-w': `${sidebarW}px` }}
     >
-      {/* 背景：高斯模糊的港口插画，只在侧栏和纸面四周露出来，让玻璃有东西可以「透」 */}
+      {/* 登录后工作台使用 FlowLab 的马卡龙弥散光，不再沿用旧 LandIt 港口图片。 */}
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div
-          className="absolute -inset-20 bg-cover opacity-[0.55] blur-[70px] saturate-[1.35] dark:opacity-[0.28]"
-          style={{ backgroundImage: `url(${harborScene})`, backgroundPosition: 'center' }}
-        />
-        <div className="absolute inset-0 bg-brand-paper/40 dark:bg-brand-paper/55" />
+        <div className="flowlab-shell-mesh flowlab-shell-mesh-a" />
+        <div className="flowlab-shell-mesh flowlab-shell-mesh-b" />
+        <div className="absolute inset-0 bg-brand-paper/45 dark:bg-brand-paper/65" />
       </div>
 
       {/* 桌面端侧栏 */}
@@ -323,7 +323,7 @@ export default function AppShell({ children }) {
             <Menu className="h-5 w-5" />
           </button>
           <nav className="flex min-w-0 items-center gap-1.5 text-[13px]" aria-label="Breadcrumb">
-            <Link to="/" className="hidden shrink-0 font-semibold text-brand-muted transition-colors hover:text-brand-ink sm:inline">LandIt</Link>
+            <Link to="/" className="hidden shrink-0 font-semibold text-brand-muted transition-colors hover:text-brand-ink sm:inline">FlowLab</Link>
             {crumb.parent && (
               <>
                 <ChevronRight className="hidden h-3.5 w-3.5 shrink-0 text-brand-muted/60 sm:block" />
@@ -387,7 +387,7 @@ export default function AppShell({ children }) {
       {/* 内容纸面 */}
       <div className="relative z-10 transition-[padding] duration-300 lg:py-3 lg:pl-[calc(var(--app-sidebar-w)+1.5rem)] lg:pr-3">
         <div className="relative min-h-[100dvh] overflow-clip bg-brand-paper shadow-[0_0_0_1px_rgb(255_255_255/0.6)] lg:min-h-[calc(100dvh-1.5rem)] lg:rounded-[28px] dark:shadow-[0_0_0_1px_rgb(255_255_255/0.06)]">
-          <PageAtmosphere />
+          <PageAtmosphere variant="flowlab" />
           <main className="relative z-10">{children}</main>
           <AppFooter />
         </div>
@@ -405,9 +405,7 @@ function AppFooter() {
         <span>{t('footer.copyright')}</span>
         <span className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
           <span>{t('footer.supportLang')}</span>
-          <a href="mailto:support@landit.app" className="flex items-center gap-1.5 transition-colors hover:text-brand-ink">
-            <Mail className="h-3.5 w-3.5" />support@landit.app
-          </a>
+          <span className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" />FlowLab · 不卡壳实验室</span>
         </span>
       </div>
     </footer>

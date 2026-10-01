@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">FlowLab Eggshell Character Logo</title>
+  <desc id="desc">An editable flat-vector eggshell character with a lifted cap, warm yellow core, two eyes, and a gentle smile.</desc>
+
+  <g id="upper-shell-underside">
+    <path fill="#FFC84A" d="M119 224C132 126 191 72 268 72c75 0 132 54 143 147-19 28-42 37-66 21-38-26-72 25-111-2-36-25-68 21-102-5l-13-9Z"/>
+  </g>
+
+  <g id="upper-shell">
+    <path fill="#FFF3DC" d="M111 208C126 116 185 63 261 63c75 0 133 53 145 141-18 25-40 33-63 18-39-25-74 25-113-1-36-24-69 21-103-3l-16-10Z"/>
+  </g>
+
+  <g id="inner-core">
+    <path fill="#FFC84A" d="M102 276c34-30 69 9 106-13 40-24 75 25 114 1 35-22 69 10 91 31l-12 62H116l-14-81Z"/>
+  </g>
+
+  <g id="lower-shell">
+    <path fill="#FFF3DC" d="M91 292c37-35 77 14 118-12 41-27 78 29 118 2 35-24 70 6 94 30-10 89-73 147-165 147S101 397 91 292Z"/>
+    <path fill="#F3E3C5" opacity=".65" d="M111 364c30 53 81 79 145 79 65 0 117-27 146-81-23 63-75 97-146 97-69 0-122-34-145-95Z"/>
+  </g>
+
+  <g id="face">
+    <rect width="18" height="39" x="205" y="321" fill="#24324A" rx="9"/>
+    <rect width="18" height="39" x="289" y="321" fill="#24324A" rx="9"/>
+    <path fill="none" stroke="#24324A" stroke-linecap="round" stroke-width="13" d="M219 386c21 18 53 18 74 0"/>
+  </g>
+</svg>
